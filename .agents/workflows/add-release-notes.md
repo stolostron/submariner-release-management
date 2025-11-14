@@ -2,7 +2,9 @@
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2), after Step 11, during QE testing process
 
-**Goal:** Find CVEs (automatic) and notable bugs/features (manual), add to stage release YAML. QE verifies both code and release notes together.
+## Process
+
+Find CVEs (automatic) and notable bugs/features (manual), add to stage release YAML. QE verifies both code and release notes together.
 
 **Note:** Prod release (Step 13) will copy these QE-verified notes from stage.
 
@@ -13,7 +15,7 @@
 - For 0.21.0, 0.21.1, 0.21.2 → all use `affectedVersion = "ACM 2.14.0"`
 - For 0.20.0, 0.20.1, 0.20.2 → all use `affectedVersion = "ACM 2.13.0"`
 
-## Jira CLI Setup (User Must Complete)
+### Jira CLI Setup (User Must Complete)
 
 **These steps must be done by the user before Claude can query Jira:**
 
@@ -34,7 +36,7 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
 
 **IMPORTANT for Claude:** Each Bash tool invocation is independent. Always prefix jira commands with `source ~/.zshrc &&` to load JIRA_API_TOKEN.
 
-## Workflow
+### Workflow
 
 1. **Claude queries CVEs** (Security label)
    - Extract CVE labels and components
@@ -90,7 +92,7 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
 
 10. **Claude commits stage YAML** with release notes
 
-## Part 1: CVEs (Automatic - ALL go in release)
+### Part 1: CVEs (Automatic - ALL go in release)
 
 **CVEs are what the release closes - all must be included.**
 
@@ -133,7 +135,7 @@ Mapping rules (replace `-0-X` with your version suffix):
 - `releaseNotes.issues.fixed[]` (with issue key)
 - `releaseNotes.cves[]` (with CVE key and component)
 
-## Part 2: Other Issues (Manual Selection)
+### Part 2: Other Issues (Manual Selection)
 
 **Other issues are manually managed - user picks what's release-note worthy.**
 
@@ -153,7 +155,7 @@ source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner 
 
 **User reviews and selects** notable issues (Blockers, Major features, etc.) to include in `releaseNotes.issues.fixed[]`
 
-## MCP Servers (Future)
+### MCP Servers (Future)
 
 **Not currently functional** with production Jira (issues.redhat.com). Official Atlassian MCP only works with UAT (incomplete/stale data).
 
@@ -163,3 +165,7 @@ source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner 
 - Alternatives: <https://github.com/redhat-community-ai-tools/jira-mcp>, <https://github.com/redhat-community-ai-tools/jira-mcp>-snowflake
 
 **Status:** Check #forum-mcp Slack for production availability updates.
+
+## Done When
+
+**TODO:** Add verification that release notes added to stage YAML and committed.

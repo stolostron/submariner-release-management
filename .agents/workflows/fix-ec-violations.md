@@ -2,6 +2,8 @@
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2). Components mostly handled in step 3 for Y-stream, FBC needs checking for both.
 
+## Process
+
 Ensure all Konflux builds pass Enterprise Contract validation before cutting releases.
 
 **Component repos** (all in <https://github.com/submariner-io>):
@@ -22,3 +24,23 @@ Ensure all Konflux builds pass Enterprise Contract validation before cutting rel
 **TODO:** Add similar workflows to other component repos.
 
 **TODO:** Add FBC EC violation fixing workflow.
+
+## Done When
+
+- Component builds pass Enterprise Contract validation (requires `oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/`):
+
+  ```bash
+  oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp | grep "^submariner-0" | tail -5
+  # Pick recent component snapshot, then check EC test status:
+  oc get snapshot <snapshot-name> -n submariner-tenant -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}' | jq '.[] | select(.scenario | contains("enterprise-contract")) | {scenario, status}'
+  # Should show: "status": "TestPassed" for enterprise-contract scenario
+  ```
+
+- FBC builds pass validation tests:
+
+  ```bash
+  oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp | grep "^submariner-fbc" | tail -5
+  # Pick recent FBC snapshot, then check test status:
+  oc get snapshot <snapshot-name> -n submariner-tenant -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}' | jq '.[] | {scenario, status}'
+  # Should show: "status": "TestPassed" for standard and operator scenarios
+  ```

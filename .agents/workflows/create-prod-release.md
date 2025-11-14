@@ -2,11 +2,11 @@
 
 **When:** After QE approval (following Step 12)
 
-**Goal:** Deploy tested code with QE-verified release notes to production.
+## Process
 
----
+Deploy tested code with QE-verified release notes to production.
 
-## Workflow
+### Workflow
 
 1. **Read verified stage YAML**
    - Stage YAML already has verified release notes from Step 12
@@ -27,3 +27,7 @@
 4. **Commit prod YAML**
    - Commit prod YAML after successful deployment
    - Documents what was released to production
+
+## Done When
+
+**TODO:** Add verification commands for completed prod release.

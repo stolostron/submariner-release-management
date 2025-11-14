@@ -2,6 +2,8 @@
 
 **When:** Y-stream only (0.20 → 0.21), after branch creation
 
+## Process
+
 Bot generates default `.tekton/` configs for new branches that need customization and EC violation fixes.
 
 **Repos with components** (all in <https://github.com/submariner-io>):
@@ -15,3 +17,15 @@ Bot generates default `.tekton/` configs for new branches that need customizatio
 **Local:** `~/go/src/submariner-io/`
 
 **Workflow:** Each repo's `.agents/workflows/konflux-branch-setup.md`
+
+## Done When
+
+- All repos have `.tekton/` directory with config files on `release-0.X` branch:
+
+  ```bash
+  for repo in submariner-operator submariner lighthouse shipyard subctl; do
+    echo -n "$repo: "
+    gh api "repos/submariner-io/$repo/contents/.tekton?ref=release-0.X" --jq 'length' 2>&1 | grep -E '^[0-9]+$' || echo "missing"
+  done
+  # Should show file count for each repo (not "missing")
+  ```
