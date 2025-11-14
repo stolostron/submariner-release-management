@@ -1,8 +1,8 @@
-## Create Downstream Stage Release
+# Create Downstream Stage Release
 
 Create basic ReleasePlanAdmission YAML for stage release (without release notes).
 
-**Repo:** https://github.com/dfarrell07/submariner-release-management (this repo)
+**Repo:** <https://github.com/dfarrell07/submariner-release-management> (this repo)
 **Local:** `~/konflux/submariner-release-management`
 
 ---

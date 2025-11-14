@@ -1,4 +1,4 @@
-## Create and Deploy Production Release
+# Create and Deploy Production Release
 
 **When:** After QE approval (following Step 12)
 

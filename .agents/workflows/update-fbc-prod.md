@@ -1,10 +1,10 @@
-## Update FBC with Prod Release
+# Update FBC with Prod Release
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2), after prod release completes
 
 Add bundle to File-Based Catalog.
 
-**Repo:** https://github.com/stolostron/submariner-operator-fbc
+**Repo:** <https://github.com/stolostron/submariner-operator-fbc>
 **Local:** `~/konflux/submariner-operator-fbc`
 
 **Workflow:** README.md in that repo (`make add-bundle`)

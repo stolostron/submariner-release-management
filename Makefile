@@ -1,18 +1,19 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images apply watch
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown apply watch
 
 .DEFAULT_GOAL := help
 
 help:
 	@echo "Available targets:"
-	@echo "  make test            - Run local validations (no cluster access needed)"
-	@echo "  make test-remote     - Run all validations including cluster checks and bundle images (requires oc login)"
-	@echo "  make apply FILE=...  - Validate and apply release YAML to cluster (requires oc login)"
-	@echo "  make watch NAME=...  - Watch release status (requires oc login)"
-	@echo "  make validate-yaml   - YAML syntax only"
-	@echo "  make validate-fields - Release CRD fields only"
-	@echo "  make validate-data   - Data formats only"
+	@echo "  make test              - Run local validations (no cluster access needed)"
+	@echo "  make test-remote       - Run all validations including cluster checks and bundle images (requires oc login)"
+	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
+	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
+	@echo "  make validate-yaml     - YAML syntax only"
+	@echo "  make validate-fields   - Release CRD fields only"
+	@echo "  make validate-data     - Data formats only"
+	@echo "  make validate-markdown - Markdown linting (docs)"
 
-test: validate-yaml validate-fields validate-data
+test: validate-yaml validate-fields validate-data validate-markdown
 
 test-remote: test validate-references validate-bundle-images
 
@@ -30,6 +31,9 @@ validate-fields:
 
 validate-data:
 	./scripts/validate-release-data.sh
+
+validate-markdown:
+	npx markdownlint-cli2 ".agents/workflows/*.md" "*.md"
 
 apply: test-remote
 	@test -n "$(FILE)" || (echo "ERROR: FILE parameter required. Usage: make apply FILE=releases/0.20/stage/..." && exit 1)

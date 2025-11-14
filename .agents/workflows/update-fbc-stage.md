@@ -1,10 +1,10 @@
-## Update FBC with Stage Release
+# Update FBC with Stage Release
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2), after stage release completes
 
 Add bundle to File-Based Catalog.
 
-**Repo:** https://github.com/stolostron/submariner-operator-fbc
+**Repo:** <https://github.com/stolostron/submariner-operator-fbc>
 **Local:** `~/konflux/submariner-operator-fbc`
 
 **Workflow:** README.md in that repo (`make add-bundle`)
