@@ -1,10 +1,10 @@
-# Update FBC with Stage Release
+# Update FBC Catalog
 
-**When:** After stage release completes (Step 8)
+**When:** After stage release completes (Step 10)
 
 ## Process
 
-**TODO:** Update catalog in FBC repo (`~/konflux/submariner-operator-fbc`) with bundle from Step 8.
+**TODO:** Update catalog in FBC repo (`~/konflux/submariner-operator-fbc`) with bundle from completed stage release.
 
 See FBC repo for detailed catalog editing workflow (to be documented).
 
@@ -22,4 +22,4 @@ oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotatio
 # Both must show: TestPassed
 ```
 
-Record snapshot names for all OCP versions - needed for Step 10.
+Record snapshot names for all OCP versions - needed for Step 12.

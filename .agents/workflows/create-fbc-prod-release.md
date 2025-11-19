@@ -1,6 +1,6 @@
-# Create FBC Prod Release
+# Create FBC Prod Releases
 
-**When:** After QE approval (following Step 12)
+**When:** After QE approval (Step 14 complete)
 
 ## Process
 
@@ -18,8 +18,8 @@ cp releases/fbc/4-XX/stage/submariner-fbc-4-XX-stage-YYYYMMDD-01.yaml \
    releases/fbc/4-XX/prod/submariner-fbc-4-XX-prod-YYYYMMDD-01.yaml
 
 # Edit: change only these 2 fields
-#   metadata.name: stage-YYYYMMDD-01 → prod-YYYYMMDD-01
-#   spec.releasePlan: stage-4-XX → prod-4-XX
+#   metadata.name: submariner-fbc-4-XX-stage-YYYYMMDD-01 → submariner-fbc-4-XX-prod-YYYYMMDD-01
+#   spec.releasePlan: submariner-fbc-release-plan-stage-4-XX → submariner-fbc-release-plan-prod-4-XX
 # Keep spec.snapshot identical
 ```
 
@@ -30,28 +30,13 @@ git add releases/fbc/
 git commit -s -m "Add FBC prod releases"
 ```
 
-User reviews commit, then pushes:
-
-```bash
-git push
-```
-
-## Apply to Cluster
-
-Agent provides user with commands for each created YAML file:
-
-```bash
-make test-remote FILE=releases/fbc/4-XX/prod/submariner-fbc-4-XX-prod-YYYYMMDD-01.yaml
-make apply FILE=releases/fbc/4-XX/prod/submariner-fbc-4-XX-prod-YYYYMMDD-01.yaml
-make watch NAME=submariner-fbc-4-XX-prod-YYYYMMDD-01
-```
+User reviews commit, then pushes.
 
 ## Done When
 
-```bash
-# Check cluster
-oc get releases -n submariner-tenant | grep "fbc.*prod" | sort
+FBC prod YAMLs created, committed, and pushed. Ready for Step 18 to apply to cluster.
 
-# Check files (expect: 4-16 through 4-20)
-ls -1 releases/fbc/*/prod/*.yaml
+```bash
+# Verify files pushed to remote (expect: 4-16 through 4-20)
+git ls-tree -r --name-only origin/main releases/fbc/*/prod/*.yaml
 ```

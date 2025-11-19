@@ -28,30 +28,46 @@
 
 @.agents/workflows/update-bundle-shas.md
 
-## 8. Create Downstream Stage Release
+## 8. Create Component Stage Release
 
 @.agents/workflows/create-release.md
 
-## 9. Update FBC with Stage Release
-
-@.agents/workflows/update-fbc-stage.md
-
-## 10. Create FBC Stage Release
-
-@.agents/workflows/create-fbc-stage-release.md
-
-## 11. Share Stage Releases with QE
-
-@.agents/workflows/share-with-qe.md
-
-## 12. Add or Verify Release Notes
+## 9. Add Release Notes
 
 @.agents/workflows/add-release-notes.md
 
-## 13. Create Downstream Prod Release
+## 10. Apply Component Stage Release
+
+@.agents/workflows/apply-component-release.md
+
+## 11. Update FBC Catalog
+
+@.agents/workflows/update-fbc-stage.md
+
+## 12. Create FBC Stage Releases
+
+@.agents/workflows/create-fbc-stage-release.md
+
+## 13. Apply FBC Stage Releases
+
+@.agents/workflows/apply-fbc-releases.md
+
+## 14. Share Stage FBC with QE
+
+@.agents/workflows/share-with-qe.md
+
+## 15. Create Component Prod Release
 
 @.agents/workflows/create-prod-release.md
 
-## 14. Create FBC Prod Release
+## 16. Apply Component Prod Release
+
+@.agents/workflows/apply-component-release.md
+
+## 17. Create FBC Prod Releases
 
 @.agents/workflows/create-fbc-prod-release.md
+
+## 18. Apply FBC Prod Releases
+
+@.agents/workflows/apply-fbc-releases.md

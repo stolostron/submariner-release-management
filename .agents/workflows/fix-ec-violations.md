@@ -1,6 +1,6 @@
 # Update Tekton Tasks and Resolve EC Violations
 
-**When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2). Components mostly handled in step 3 for Y-stream, FBC needs checking for both.
+**When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2). Components mostly handled in Step 3 for Y-stream, FBC needs checking for both.
 
 ## Process
 

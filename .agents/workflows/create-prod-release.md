@@ -1,10 +1,10 @@
-# Create and Deploy Production Release
+# Create Component Prod Release
 
-**When:** After QE approval (following Step 12)
+**When:** After QE approval (following Step 14)
 
 ## Process
 
-Deploy tested code with QE-verified release notes to production.
+Create prod YAML with QE-verified release notes.
 
 ### Workflow
 
@@ -19,15 +19,16 @@ Deploy tested code with QE-verified release notes to production.
    - Keep `spec.data.releaseNotes` the same (verified notes from stage)
    - Save to `releases/0.X/prod/submariner-0-X-Y-prod-*.yaml`
 
-3. **Apply prod release**
-   - `make test-remote FILE=releases/0.X/prod/...yaml`
-   - `make apply FILE=releases/0.X/prod/...yaml`
-   - `make watch NAME=submariner-0-X-Y-prod-...`
-
-4. **Commit prod YAML**
-   - Commit prod YAML after successful deployment
-   - Documents what was released to production
+3. **Commit prod YAML**
+   - Commit prod YAML
+   - User reviews and pushes
+   - Documents what will be released to production
 
 ## Done When
 
-**TODO:** Add verification commands for completed prod release.
+Prod YAML created, committed, and pushed. Ready for Step 16 to apply to cluster.
+
+```bash
+# Verify file pushed to remote
+git ls-tree -r --name-only HEAD releases/0.X/prod/submariner-0-X-Y-prod-*.yaml
+```

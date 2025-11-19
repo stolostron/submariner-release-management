@@ -1,17 +1,17 @@
-# Create Downstream Stage Release
+# Create Component Stage Release
 
 **When:** After bundle SHAs updated (Step 7)
 
 ## Process
 
-Create ReleasePlanAdmission YAML for stage release with complete release notes.
+Create basic Release CR YAML for stage release (without release notes).
 
 **Repo:** <https://github.com/dfarrell07/submariner-release-management> (this repo)
 **Local:** `~/konflux/submariner-release-management`
 
 **Output:** `releases/0.X/stage/`
 
-**Note:** Prod release (Step 13) copies these QE-verified notes from stage
+**Note:** Release notes added in Step 9, applied in Step 10, then prod (Step 15) copies complete stage YAML
 
 ### Finding Snapshots
 
@@ -27,24 +27,25 @@ Look for snapshots where all tests show `"status": "TestPassed"`.
 ### Creating Release YAML
 
 1. Copy existing stage YAML
-2. Update `metadata.name`, `spec.snapshot` (use `TODO` if not ready), and `spec.data.releaseNotes`
-3. `make test-remote` then `make apply FILE=...`
-4. `make watch NAME=...`
+2. Update `metadata.name` and `spec.snapshot`
+3. Remove `spec.data.releaseNotes` section (if present from copied YAML)
+4. Commit and push base stage YAML
 
-### Requirements
+**Next:** Proceed to Step 9 to add release notes
 
-- Advisory types: RHSA (security, must have ≥1 CVE), RHBA (bug fix), RHEA (enhancement)
-- Component names must have version suffix: `lighthouse-coredns-0-20`
-- Issue IDs:
-  - Jira: `PROJECT-12345` (source: `issues.redhat.com`)
-  - Bugzilla: `1234567` (source: `bugzilla.redhat.com`)
+**Important:** Don't apply yet - Step 10 will apply after notes are added.
 
 ### Validation
 
-Releases: `make test` | `make test-remote` (requires cluster)
+Releases: `make test` (local validation only)
 
 Markdown: `npx markdownlint-cli2 "**/*.md"`
 
 ## Done When
 
-**TODO:** Add verification commands for completed stage release.
+Base stage YAML created, committed, and pushed. Step 9 will add notes and commit again, then Step 10 will apply.
+
+```bash
+# Verify file pushed to remote
+git ls-tree -r --name-only HEAD releases/0.X/stage/submariner-0-X-Y-stage-*.yaml
+```

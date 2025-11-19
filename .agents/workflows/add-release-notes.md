@@ -1,12 +1,10 @@
-# Add or Verify Release Notes
+# Add Release Notes
 
-**When:** After Step 11, during QE testing process
+**When:** After creating stage release (Step 8)
 
 ## Process
 
-Add complete release notes to stage YAML (if not already present) or verify existing notes. QE verifies both code and release notes together.
-
-**Note:** Release notes can be added in Step 8 (when creating stage) or Step 12 (during QE testing). This workflow documents how to create them.
+Add complete release notes to stage YAML. QE verifies both code and release notes together.
 
 **Submariner ↔ ACM versions:** 0.X → 2.(X-7) (e.g., 0.20 → 2.13, 0.21 → 2.14)
 
@@ -57,13 +55,13 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
    - Rationale: Issues already fixed/noted shouldn't appear in subsequent releases
 
 4. **Claude checks downstream release dates** at <https://catalog.redhat.com/en/software/containers/rhacm2/submariner-rhel9-operator/65bd4446f4d2cf102701785a/history>
-   - For Z-stream (0.21.2): Find previous 0.21.x release date (use as timeframe start in Step 5)
+   - For Z-stream (0.21.2): Find previous 0.21.x release date (use as timeframe start in workflow step 5)
    - For Y-stream (0.21.0): No previous 0.21.x exists, skip timeframe filtering
    - Timeframe only applies to non-CVE issues (CVEs included regardless of date)
 
 5. **Claude presents filtered results**
    - Run Part 1 (CVEs) and Part 2 (other issues) queries
-   - Exclude issues from Step 3 existing list
+   - Exclude issues from workflow step 3 existing list
    - Show CVEs with component mapping (all included)
    - Show other issues with dates, note timeframe (e.g., "Since v0.21.0 on Aug 14")
 
@@ -115,16 +113,20 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
    ```
 
 9. **Claude adds releaseNotes to stage YAML**
+
    - Read stage YAML from releases/0.X/stage/
    - Add spec.data.releaseNotes section, show for review
 
-10. **Claude commits stage YAML** with release notes
+10. **Claude commits stage YAML**
+
+- Commit with release notes
+- User reviews and pushes
 
 ### Part 1: CVEs (Automatic - ALL go in release)
 
 **CVEs are what the release closes - all must be included.**
 
-**Note:** Filter query results to exclude issues already listed in Step 3 (existing releases).
+**Note:** Filter query results to exclude issues already listed in workflow step 3 (existing releases).
 
 **Note:** Adjust versions for your release. First, find existing fixVersion values:
 
@@ -187,7 +189,7 @@ Mapping rules (replace `-0-X` with your version suffix):
 
 **Other issues are manually managed - user picks what's release-note worthy.**
 
-**Note:** Filter query results to exclude issues already listed in Step 3 (existing releases).
+**Note:** Filter query results to exclude issues already listed in workflow step 3 (existing releases).
 
 **Note:** Adjust versions for your release (same as Part 1):
 
@@ -229,4 +231,9 @@ source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner 
 
 ## Done When
 
-**TODO:** Add verification that release notes added to stage YAML and committed.
+Stage YAML with complete release notes committed and pushed. Ready for Step 10 to apply to cluster.
+
+```bash
+# Verify file pushed to remote
+git ls-tree -r --name-only HEAD releases/0.X/stage/submariner-0-X-Y-stage-*.yaml
+```
