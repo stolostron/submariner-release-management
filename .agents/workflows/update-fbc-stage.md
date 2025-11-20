@@ -1,12 +1,14 @@
-# Update FBC Catalog
+# Update FBC Catalog with Stage Bundle
 
 **When:** After stage release completes (Step 10)
 
 ## Process
 
-**TODO:** Update catalog in FBC repo (`~/konflux/submariner-operator-fbc`) with bundle from completed stage release.
+Update catalog in FBC repo with bundle from completed stage release.
 
-See FBC repo for detailed catalog editing workflow (to be documented).
+**Repo:** `~/konflux/submariner-operator-fbc`
+
+**Workflow:** Follow `CLAUDE.md` in FBC repo → `.agents/workflows/update-catalog.md`
 
 ## Done When
 
