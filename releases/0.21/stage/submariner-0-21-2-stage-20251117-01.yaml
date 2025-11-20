@@ -14,12 +14,10 @@ spec:
       type: RHSA
       issues:
         fixed:
-          # CVE Issues (7):
+          # CVE Issues (6):
           - id: ACM-21728
             source: issues.redhat.com
           - id: ACM-21732
-            source: issues.redhat.com
-          - id: ACM-24534
             source: issues.redhat.com
           - id: ACM-25149
             source: issues.redhat.com
@@ -35,15 +33,6 @@ spec:
           - id: ACM-25262
             source: issues.redhat.com
       cves:
-        # CVE-2025-47907 (ACM-24534): FIXED
-        #   PR: https://github.com/stolostron/submariner-addon/pull/2503
-        #   Test: curl -s https://raw.githubusercontent.com/stolostron/
-        #     submariner-addon/release-2.14/Dockerfile.konflux |
-        #     grep -oP 'golang-builder:v\K[0-9.]+'
-        #   Output: 1.24.6
-        #   Required: >= 1.24.6
-        - key: CVE-2025-47907
-          component: submariner-addon-0-21
         # CVE-2025-47950 (ACM-21728, ACM-21732): FIXED
         #   Test: git show 0d8d097:coredns/go.mod | grep 'coredns/coredns'
         #   Output: github.com/coredns/coredns v1.12.4
