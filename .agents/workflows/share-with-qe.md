@@ -115,6 +115,18 @@ done
 
 Replace `0.X.Y` with actual version. Copy the output and share with QE.
 
+### Verify Index Images (Optional)
+
+**TODO:** Implement verification that all 5 index images contain the expected Submariner 0.X.Y bundle SHA.
+
+**What to verify:**
+
+- Extract bundle SHA from prod release YAML files
+- Check each of 5 index images contains that bundle SHA
+- Verify bundle version matches expected release (0.X.Y)
+
+**Why optional:** QE testing will catch issues if bundle missing/wrong. This verification adds confidence but isn't blocking.
+
 ### Share with QE
 
 **Communication:** Jira ticket OR Slack notification with the message generated above.
