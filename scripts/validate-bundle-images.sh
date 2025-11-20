@@ -19,6 +19,13 @@ validate_file() {
     exit 1
   fi
 
+  # Check if this is an FBC release (which don't have operator bundles to validate)
+  release_plan=$(yq '.spec.releasePlan' "$file")
+  is_fbc_release=false
+  if [[ "$release_plan" =~ fbc ]]; then
+    is_fbc_release=true
+  fi
+
   # Get snapshot from cluster
   if ! snapshot_json=$(oc get snapshot "$snapshot" -n "$namespace" -o json 2>/dev/null); then
     echo "ERROR: Failed to get snapshot '$snapshot' from namespace '$namespace'"
@@ -38,7 +45,11 @@ validate_file() {
   bundle_image=$(echo "$snapshot_json" | jq -r '.spec.components[] | select(.name | (contains("bundle") and (contains("fbc") | not))) | .containerImage' | head -1)
 
   if [[ -z "$bundle_image" || "$bundle_image" == "null" ]]; then
-    echo "WARNING: No operator bundle component found in snapshot"
+    if [[ "$is_fbc_release" == "true" ]]; then
+      echo "  ✓ FBC release (no operator bundle to validate)"
+    else
+      echo "WARNING: No operator bundle component found in snapshot"
+    fi
     rm -rf "$tmpdir"
     return
   fi

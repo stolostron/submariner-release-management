@@ -7,6 +7,15 @@ validate_file() {
   local file=$1
   echo "Validating data formats in $file..."
 
+  # Check if this is an FBC release (which omit releaseNotes, inherited from ReleasePlan)
+  # FBC releasePlans contain "fbc" in the name (e.g., submariner-fbc-release-plan-stage-4-16)
+  release_plan=$(yq '.spec.releasePlan' "$file")
+  if [[ "$release_plan" =~ fbc ]]; then
+    echo "  ✓ FBC release (releaseNotes inherited from ReleasePlan, skipping data validation)"
+    echo "✓ $file"
+    return 0
+  fi
+
   # Get advisory type
   advisory_type=$(yq '.spec.data.releaseNotes.type' "$file")
   if [[ -z "$advisory_type" || "$advisory_type" == "null" ]]; then

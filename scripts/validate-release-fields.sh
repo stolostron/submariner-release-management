@@ -71,71 +71,86 @@ validate_file() {
   fi
   echo "  ✓ spec.releasePlan: $release_plan"
 
-  # Required: releaseNotes.type must be RHSA, RHBA, or RHEA
-  advisory_type=$(yq '.spec.data.releaseNotes.type' "$file")
-  if [[ -z "$advisory_type" || "$advisory_type" == "null" ]]; then
-    echo "ERROR: releaseNotes.type is missing"
-    exit 1
+  # Check if this is an FBC release (which omit releaseNotes, inherited from ReleasePlan)
+  # FBC releasePlans contain "fbc" in the name (e.g., submariner-fbc-release-plan-stage-4-16)
+  is_fbc_release=false
+  if [[ "$release_plan" =~ fbc ]]; then
+    is_fbc_release=true
   fi
-  if [[ ! "$advisory_type" =~ ^(RHSA|RHBA|RHEA)$ ]]; then
-    echo "ERROR: Invalid type '$advisory_type' (must be RHSA, RHBA, or RHEA)"
-    exit 1
-  fi
-  echo "  ✓ releaseNotes.type: $advisory_type"
 
-  # If CVEs exist, validate structure
-  if yq -e '.spec.data.releaseNotes.cves' "$file" &>/dev/null; then
-    cve_type=$(yq '.spec.data.releaseNotes.cves | type' "$file")
-    if [[ "$cve_type" != "!!seq" ]]; then
-      echo "ERROR: CVEs must be an array, got $cve_type"
+  # For component releases: releaseNotes.type must be RHSA, RHBA, or RHEA
+  # For FBC releases: releaseNotes optional (inherited from ReleasePlan)
+  if [[ "$is_fbc_release" == "false" ]]; then
+    advisory_type=$(yq '.spec.data.releaseNotes.type' "$file")
+    if [[ -z "$advisory_type" || "$advisory_type" == "null" ]]; then
+      echo "ERROR: releaseNotes.type is missing"
       exit 1
     fi
-
-    cve_count=$(yq '.spec.data.releaseNotes.cves | length' "$file")
-    for i in $(seq 0 $((cve_count - 1))); do
-      has_key=$(yq ".spec.data.releaseNotes.cves[$i] | has(\"key\")" "$file")
-      if [[ "$has_key" != "true" ]]; then
-        echo "ERROR: CVE at index $i missing 'key' field"
-        exit 1
-      fi
-      has_component=$(yq ".spec.data.releaseNotes.cves[$i] | has(\"component\")" "$file")
-      if [[ "$has_component" != "true" ]]; then
-        echo "ERROR: CVE at index $i missing 'component' field"
-        exit 1
-      fi
-    done
-    if [[ $cve_count -eq 0 ]]; then
-      echo "  ✓ CVEs: empty array (valid)"
-    else
-      echo "  ✓ CVEs: $cve_count found with required fields"
-    fi
-  fi
-
-  # If issues exist, validate structure
-  if yq -e '.spec.data.releaseNotes.issues.fixed' "$file" &>/dev/null; then
-    issue_type=$(yq '.spec.data.releaseNotes.issues.fixed | type' "$file")
-    if [[ "$issue_type" != "!!seq" ]]; then
-      echo "ERROR: Issues must be an array, got $issue_type"
+    if [[ ! "$advisory_type" =~ ^(RHSA|RHBA|RHEA)$ ]]; then
+      echo "ERROR: Invalid type '$advisory_type' (must be RHSA, RHBA, or RHEA)"
       exit 1
     fi
+    echo "  ✓ releaseNotes.type: $advisory_type"
+  else
+    echo "  ✓ FBC release (releaseNotes inherited from ReleasePlan)"
+  fi
 
-    issue_count=$(yq '.spec.data.releaseNotes.issues.fixed | length' "$file")
-    for i in $(seq 0 $((issue_count - 1))); do
-      has_id=$(yq ".spec.data.releaseNotes.issues.fixed[$i] | has(\"id\")" "$file")
-      if [[ "$has_id" != "true" ]]; then
-        echo "ERROR: Issue at index $i missing 'id' field"
+  # Skip releaseNotes validation for FBC releases (inherited from ReleasePlan)
+  if [[ "$is_fbc_release" == "false" ]]; then
+    # If CVEs exist, validate structure
+    if yq -e '.spec.data.releaseNotes.cves' "$file" &>/dev/null; then
+      cve_type=$(yq '.spec.data.releaseNotes.cves | type' "$file")
+      if [[ "$cve_type" != "!!seq" ]]; then
+        echo "ERROR: CVEs must be an array, got $cve_type"
         exit 1
       fi
-      has_source=$(yq ".spec.data.releaseNotes.issues.fixed[$i] | has(\"source\")" "$file")
-      if [[ "$has_source" != "true" ]]; then
-        echo "ERROR: Issue at index $i missing 'source' field"
+
+      cve_count=$(yq '.spec.data.releaseNotes.cves | length' "$file")
+      for i in $(seq 0 $((cve_count - 1))); do
+        has_key=$(yq ".spec.data.releaseNotes.cves[$i] | has(\"key\")" "$file")
+        if [[ "$has_key" != "true" ]]; then
+          echo "ERROR: CVE at index $i missing 'key' field"
+          exit 1
+        fi
+        has_component=$(yq ".spec.data.releaseNotes.cves[$i] | has(\"component\")" "$file")
+        if [[ "$has_component" != "true" ]]; then
+          echo "ERROR: CVE at index $i missing 'component' field"
+          exit 1
+        fi
+      done
+      if [[ $cve_count -eq 0 ]]; then
+        echo "  ✓ CVEs: empty array (valid)"
+      else
+        echo "  ✓ CVEs: $cve_count found with required fields"
+      fi
+    fi
+
+    # If issues exist, validate structure
+    if yq -e '.spec.data.releaseNotes.issues.fixed' "$file" &>/dev/null; then
+      issue_type=$(yq '.spec.data.releaseNotes.issues.fixed | type' "$file")
+      if [[ "$issue_type" != "!!seq" ]]; then
+        echo "ERROR: Issues must be an array, got $issue_type"
         exit 1
       fi
-    done
-    if [[ $issue_count -eq 0 ]]; then
-      echo "  ✓ Issues: empty array (valid)"
-    else
-      echo "  ✓ Issues: $issue_count found with required fields"
+
+      issue_count=$(yq '.spec.data.releaseNotes.issues.fixed | length' "$file")
+      for i in $(seq 0 $((issue_count - 1))); do
+        has_id=$(yq ".spec.data.releaseNotes.issues.fixed[$i] | has(\"id\")" "$file")
+        if [[ "$has_id" != "true" ]]; then
+          echo "ERROR: Issue at index $i missing 'id' field"
+          exit 1
+        fi
+        has_source=$(yq ".spec.data.releaseNotes.issues.fixed[$i] | has(\"source\")" "$file")
+        if [[ "$has_source" != "true" ]]; then
+          echo "ERROR: Issue at index $i missing 'source' field"
+          exit 1
+        fi
+      done
+      if [[ $issue_count -eq 0 ]]; then
+        echo "  ✓ Issues: empty array (valid)"
+      else
+        echo "  ✓ Issues: $issue_count found with required fields"
+      fi
     fi
   fi
 
