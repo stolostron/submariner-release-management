@@ -40,6 +40,10 @@
 
 @.agents/workflows/apply-component-release.md
 
+## 10b. Check Component Stage Release Build
+
+@.agents/workflows/check-component-release.md
+
 ## 11. Update FBC Catalog
 
 @.agents/workflows/update-fbc-stage.md
@@ -51,6 +55,10 @@
 ## 13. Apply FBC Stage Releases
 
 @.agents/workflows/apply-fbc-releases.md
+
+## 13b. Check FBC Stage Release Builds
+
+@.agents/workflows/check-fbc-releases.md
 
 ## 14. Share Stage FBC with QE
 
@@ -64,6 +72,10 @@
 
 @.agents/workflows/apply-component-release.md
 
+## 16b. Check Component Prod Release Build
+
+@.agents/workflows/check-component-release.md
+
 ## 17. Create FBC Prod Releases
 
 @.agents/workflows/create-fbc-prod-release.md
@@ -71,3 +83,7 @@
 ## 18. Apply FBC Prod Releases
 
 @.agents/workflows/apply-fbc-releases.md
+
+## 18b. Check FBC Prod Release Builds
+
+@.agents/workflows/check-fbc-releases.md
