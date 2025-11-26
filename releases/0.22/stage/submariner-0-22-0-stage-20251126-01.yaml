@@ -9,3 +9,33 @@ metadata:
 spec:
   releasePlan: submariner-release-plan-stage-0-22
   snapshot: submariner-0-22-8n7gb
+  data:
+    releaseNotes:
+      type: RHSA
+      issues:
+        fixed:
+          # CVE Issues (4):
+          - id: ACM-25150
+            source: issues.redhat.com
+          - id: ACM-25154
+            source: issues.redhat.com
+          - id: ACM-25167
+            source: issues.redhat.com
+          - id: ACM-25171
+            source: issues.redhat.com
+          # Non-CVE Issues (2):
+          - id: ACM-23596
+            source: issues.redhat.com
+          - id: ACM-24225
+            source: issues.redhat.com
+      cves:
+        # CVE-2025-59530 (ACM-25150, ACM-25154, ACM-25167, ACM-25171):
+        # FIXED
+        #   Test: curl -sf https://raw.githubusercontent.com/submariner-io/
+        #         lighthouse/release-0.22/coredns/go.mod | grep quic-go
+        #   Output: github.com/quic-go/quic-go v0.55.0
+        #   Required: quic-go >= v0.54.1
+        - key: CVE-2025-59530
+          component: lighthouse-agent-0-22
+        - key: CVE-2025-59530
+          component: lighthouse-coredns-0-22
