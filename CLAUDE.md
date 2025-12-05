@@ -24,6 +24,10 @@
 
 @.agents/workflows/scan-cves.md
 
+## 5b. Update Component Version Labels (Z-stream only)
+
+@.agents/workflows/update-version-labels.md
+
 ## 6. Cut Upstream Release
 
 @.agents/workflows/cut-upstream-release.md
