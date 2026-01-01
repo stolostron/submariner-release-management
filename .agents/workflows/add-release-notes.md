@@ -22,7 +22,11 @@ Add complete release notes to stage YAML. QE verifies both code and release note
 3. Add token to shell config (e.g., `~/.zshrc`): `export JIRA_API_TOKEN="your-token"`
 4. Reload shell: `source ~/.zshrc`
 5. Initialize:
-   `jira init --installation local --auth-type bearer --server https://issues.redhat.com --login rhn-support-tiwillia --project ACM --board none`
+
+   ```bash
+   jira init --installation local --auth-type bearer --server https://issues.redhat.com \
+     --login rhn-support-tiwillia --project ACM --board none
+   ```
 
 **Claude: Test if setup works with:**
 
