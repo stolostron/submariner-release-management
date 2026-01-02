@@ -24,8 +24,9 @@ Add complete release notes to stage YAML. QE verifies both code and release note
 5. Initialize:
 
    ```bash
-   jira init --installation local --auth-type bearer --server https://issues.redhat.com \
-     --login rhn-support-tiwillia --project ACM --board none
+   jira init --installation local --auth-type bearer \
+     --server https://issues.redhat.com --login rhn-support-tiwillia \
+     --project ACM --board none
    ```
 
 **Claude: Test if setup works with:**

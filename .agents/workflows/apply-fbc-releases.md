@@ -4,7 +4,7 @@
 
 ## Process
 
-Apply all FBC YAMLs to cluster (one per OCP version: 4-16 through 4-20).
+Apply all FBC YAMLs to cluster (one per OCP version: 4-16 through 4-21).
 
 **Repo:** `~/konflux/submariner-release-management`
 
@@ -34,6 +34,6 @@ All FBC releases running and completed successfully.
 # Verify all releases on cluster
 oc get releases -n submariner-tenant | grep -E "fbc.*(stage|prod)" | sort
 
-# Verify files in repo (expect: 5 at Step 13 stage, 10 at Step 18 after prod added)
+# Verify files in repo (expect: 6 at Step 13 stage, 12 at Step 18 after prod added)
 git ls-tree -r --name-only origin/main releases/fbc/ | grep -E "(stage|prod)" | wc -l
 ```

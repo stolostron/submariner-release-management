@@ -20,6 +20,6 @@ Update FBC catalog templates to use prod registry.redhat.io bundle URLs instead 
 
 ## Done When
 
-- Template file updated with registry.redhat.io URLs (renders to 5 OCP catalogs)
+- Template file updated with registry.redhat.io URLs (renders to 6 OCP catalogs)
 - `make build-catalog` verified working
 - Changes committed and pushed to FBC repo

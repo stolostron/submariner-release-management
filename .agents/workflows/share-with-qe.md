@@ -14,7 +14,7 @@ Agent extracts catalog URLs for all OCP versions from stage snapshots:
 
 ```bash
 echo "=== FBC Stage Catalog URLs for QE ==="
-for VERSION in 16 17 18 19 20; do
+for VERSION in 16 17 18 19 20 21; do
   STAGE_YAML=$(ls releases/fbc/4-$VERSION/stage/*.yaml | tail -1)
   SNAPSHOT=$(awk '/^  snapshot:/ {print $2}' "$STAGE_YAML")
   CATALOG=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant \
@@ -23,7 +23,7 @@ for VERSION in 16 17 18 19 20; do
 done
 ```
 
-Example output (5 catalog URLs):
+Example output (6 catalog URLs):
 
 ```text
 OCP 4.16: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-16@sha256:...
@@ -31,6 +31,7 @@ OCP 4.17: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-17@sh
 OCP 4.18: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-18@sha256:...
 OCP 4.19: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-19@sha256:...
 OCP 4.20: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-20@sha256:...
+OCP 4.21: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-21@sha256:...
 ```
 
 ### Verify Stage Catalog Content
@@ -38,8 +39,8 @@ OCP 4.20: quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-20@sh
 Verify one catalog contains the expected bundle version:
 
 ```bash
-# Pick one catalog to verify (e.g., 4-20)
-CATALOG="quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-20@sha256:..."
+# Pick one catalog to verify (e.g., 4-21)
+CATALOG="quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-4-21@sha256:..."
 
 # Extract and list bundles
 TMPDIR=$(mktemp -d)
@@ -62,7 +63,7 @@ rm -rf $TMPDIR
 Create ticket with:
 
 - **Summary:** "Submariner 0.X.Y FBC Stage Ready for Testing"
-- **Description:** Include all 5 catalog URLs
+- **Description:** Include all 6 catalog URLs
 - **Installation:** Point to FBC installation docs (CatalogSource creation)
 
 **Key concept:** Catalog contains operator bundle with registry.redhat.io URLs. ImageDigestMirrors in
@@ -78,11 +79,11 @@ cluster redirect to quay.io for actual image pulls.
 
 ## Share Prod FBC with QE
 
-**When:** When all 5 FBC prod releases show Succeeded status
+**When:** When all 6 FBC prod releases show Succeeded status
 
 ### Check Release Status
 
-Verify all 5 FBC prod releases completed:
+Verify all 6 FBC prod releases completed:
 
 ```bash
 oc get releases -n submariner-tenant --no-headers | \
@@ -99,7 +100,7 @@ Extract index URLs and format message for QE:
 ```bash
 echo "Submariner 0.X.Y Prod FBC Released"
 echo ""
-for VERSION in 16 17 18 19 20; do
+for VERSION in 16 17 18 19 20 21; do
   RELEASE=$(oc get releases -n submariner-tenant --no-headers | \
     grep "submariner-fbc-4-$VERSION-prod.*Succeeded" | tail -1 | awk '{print $1}')
 
@@ -117,12 +118,12 @@ Replace `0.X.Y` with actual version. Copy the output and share with QE.
 
 ### Verify Index Images (Optional)
 
-**TODO:** Implement verification that all 5 index images contain the expected Submariner 0.X.Y bundle SHA.
+**TODO:** Implement verification that all 6 index images contain the expected Submariner 0.X.Y bundle SHA.
 
 **What to verify:**
 
 - Extract bundle SHA from prod release YAML files
-- Check each of 5 index images contains that bundle SHA
+- Check each of 6 index images contains that bundle SHA
 - Verify bundle version matches expected release (0.X.Y)
 
 **Why optional:** QE testing will catch issues if bundle missing/wrong. This verification adds confidence but isn't blocking.
@@ -135,6 +136,6 @@ Replace `0.X.Y` with actual version. Copy the output and share with QE.
 
 ### Prod Done When
 
-- All 5 FBC prod releases succeeded
+- All 6 FBC prod releases succeeded
 - QE message shared with index URLs
 - **Submariner 0.X.Y production release COMPLETE**
