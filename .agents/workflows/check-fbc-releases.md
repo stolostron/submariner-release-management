@@ -4,13 +4,13 @@
 
 ## Process
 
-Monitor FBC release pipeline executions for all OCP versions (4-16 through 4-20) and verify successful completion.
+Monitor FBC release pipeline executions for all OCP versions (4-16 through 4-21) and verify successful completion.
 
 ## Check Build Status
 
 ```bash
 # Check all FBC stage releases (replace 'stage' with 'prod' for Step 18)
-for VERSION in 16 17 18 19 20; do
+for VERSION in 16 17 18 19 20 21; do
   RELEASE=$(oc get release -n submariner-tenant --no-headers | grep "submariner-fbc-4-$VERSION-stage" | tail -1 | awk '{print $1}')
   [ -z "$RELEASE" ] && { echo "4-$VERSION: Not applied"; continue; }
 
@@ -130,7 +130,7 @@ After apply, agent returns to **Check Build Status** section to verify retry suc
 
 ## Done When
 
-- All 5 FBC release pipelines completed successfully (4-16 through 4-20)
+- All 6 FBC release pipelines completed successfully (4-16 through 4-21)
 - Index images published to target registries
 - Catalogs updated in indices
 - Ready for next step

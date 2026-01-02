@@ -33,19 +33,19 @@ Find recent passing FBC snapshots (built automatically after Step 11):
 # Verify FBC snapshots (built after catalog update) are ready for release
 echo "=== FBC Snapshot Verification ==="
 
-# First verify all 5 GitHub catalogs have the same bundle SHA (catalog consistency)
+# First verify all 6 GitHub catalogs have the same bundle SHA (catalog consistency)
 echo "Verifying GitHub catalog consistency..."
-BUNDLE_SHAS=$(for VERSION in 16 17 18 19 20; do
+BUNDLE_SHAS=$(for VERSION in 16 17 18 19 20 21; do
   curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-$VERSION/bundles/bundle-v0.X.Y.yaml" | grep "^image:" | head -1 | grep -oP 'sha256:\K[a-f0-9]+'
 done | sort -u)
 SHA_COUNT=$(echo "$BUNDLE_SHAS" | grep -c . || echo 0)
-[ "$SHA_COUNT" != "1" ] && { echo "✗ ERROR: FBC catalogs have $SHA_COUNT unique bundle SHAs (expected 1 across all 5 OCP versions)"; exit 1; }
+[ "$SHA_COUNT" != "1" ] && { echo "✗ ERROR: FBC catalogs have $SHA_COUNT unique bundle SHAs (expected 1 across all 6 OCP versions)"; exit 1; }
 EXPECTED_BUNDLE_SHA="$BUNDLE_SHAS"
-echo "✓ Bundle SHA consistent across all 5 GitHub catalogs: ${EXPECTED_BUNDLE_SHA:0:12}"
+echo "✓ Bundle SHA consistent across all 6 GitHub catalogs: ${EXPECTED_BUNDLE_SHA:0:12}"
 
-# Verify snapshot for each OCP version (4-16 through 4-20)
+# Verify snapshot for each OCP version (4-16 through 4-21)
 FAILED=0
-for VERSION in 16 17 18 19 20; do
+for VERSION in 16 17 18 19 20 21; do
   SNAPSHOT=$(oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp | grep "^submariner-fbc-4-$VERSION" | tail -1 | awk '{print $1}')
   [ -z "$SNAPSHOT" ] && { echo "4-$VERSION: ✗ No snapshot found"; ((FAILED++)); continue; }
 
@@ -77,10 +77,10 @@ for VERSION in 16 17 18 19 20; do
 done
 
 [ $FAILED -gt 0 ] && { echo "✗ $FAILED snapshot(s) failed verification"; exit 1; }
-echo "✓ All 5 FBC snapshots ready for release"
+echo "✓ All 6 FBC snapshots ready for release"
 ```
 
-Agent creates YAML for each OCP version (4-16 through 4-20) with passing snapshot:
+Agent creates YAML for each OCP version (4-16 through 4-21) with passing snapshot:
 
 ```yaml
 ---
@@ -96,7 +96,7 @@ spec:
   snapshot: submariner-fbc-4-XX-xxxxx  # From snapshot verification above
 ```
 
-Replace `4-XX` with OCP version (4-16, 4-17, 4-18, 4-19, 4-20), `YYYYMMDD` with today's date,
+Replace `4-XX` with OCP version (4-16, 4-17, 4-18, 4-19, 4-20, 4-21), `YYYYMMDD` with today's date,
 `xxxxx` with verified snapshot name for that version (from verification output above).
 
 Save to: `releases/fbc/4-XX/stage/submariner-fbc-4-XX-stage-YYYYMMDD-01.yaml`
@@ -111,8 +111,8 @@ cluster). Ensures complete chain: operator repo → registry bundle → GitHub c
 OP_CSV=$(curl -sf https://raw.githubusercontent.com/submariner-io/submariner-operator/release-0.X/bundle/manifests/submariner.clusterserviceversion.yaml)
 [ -z "$OP_CSV" ] && { echo "✗ ERROR: Failed to fetch operator CSV from GitHub"; exit 1; }
 
-# Fetch FBC bundle (using 4-20 as representative - Section 1 verified all 5 catalogs identical)
-FBC_BUNDLE=$(curl -sf https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-20/bundles/bundle-v0.X.Y.yaml)
+# Fetch FBC bundle (using 4-21 as representative - Section 1 verified all 6 catalogs identical)
+FBC_BUNDLE=$(curl -sf https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-21/bundles/bundle-v0.X.Y.yaml)
 [ -z "$FBC_BUNDLE" ] && { echo "✗ ERROR: Failed to fetch FBC bundle from GitHub"; exit 1; }
 
 # Get bundle image from component snapshot (bundle not in registry.redhat.io until Step 13 prod release)
@@ -134,14 +134,14 @@ REG_CSV=$(cat "$TMPDIR/submariner.clusterserviceversion.yaml")
 
 # 2. Get FBC snapshots (extract from YAMLs created in Section 1 - verify what we're releasing!)
 SNAPSHOTS=()
-for VERSION in 16 17 18 19 20; do
+for VERSION in 16 17 18 19 20 21; do
   YAML_FILE=$(ls releases/fbc/4-$VERSION/stage/*.yaml 2>/dev/null | tail -1)
   [ -z "$YAML_FILE" ] && { echo "✗ ERROR: No stage YAML found for 4-$VERSION"; exit 1; }
   SNAPSHOT=$(awk '/^  snapshot:/ {print $2}' "$YAML_FILE")
   [ -z "$SNAPSHOT" ] && { echo "✗ ERROR: No snapshot in YAML $YAML_FILE"; exit 1; }
   SNAPSHOTS+=("$SNAPSHOT")
 done
-[ ${#SNAPSHOTS[@]} != 5 ] && { echo "✗ ERROR: Expected 5 FBC snapshots, found ${#SNAPSHOTS[@]}"; exit 1; }
+[ ${#SNAPSHOTS[@]} != 6 ] && { echo "✗ ERROR: Expected 6 FBC snapshots, found ${#SNAPSHOTS[@]}"; exit 1; }
 
 # 3. Pre-fetch bundle YAMLs from all snapshots (avoid re-fetching same YAML 7 times per snapshot)
 declare -A SNAPSHOT_BUNDLES
@@ -151,8 +151,8 @@ for SNAPSHOT in "${SNAPSHOTS[@]}"; do
   [ -z "${SNAPSHOT_BUNDLES[$SNAPSHOT]}" ] && { echo "✗ ERROR: Failed to extract bundle from snapshot $SNAPSHOT"; exit 1; }
 done
 
-# 4. Verify component SHAs (7 components × 4 sources + all 5 snapshots)
-echo "=== Verifying component SHAs across 4 sources (+ all 5 snapshots) ==="
+# 4. Verify component SHAs (7 components × 4 sources + all 6 snapshots)
+echo "=== Verifying component SHAs across 4 sources (+ all 6 snapshots) ==="
 MISMATCH=0
 for COMP in submariner-operator submariner-gateway submariner-globalnet submariner-route-agent lighthouse-agent lighthouse-coredns nettest; do
   case $COMP in submariner-route-agent) CSV=submariner-routeagent;; lighthouse-*|nettest) CSV=submariner-$COMP;; *) CSV=$COMP;; esac
@@ -167,7 +167,7 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
     ((MISMATCH++)); continue
   }
 
-  # Verify all 5 FBC snapshots have same SHA as operator repo (using pre-fetched bundles)
+  # Verify all 6 FBC snapshots have same SHA as operator repo (using pre-fetched bundles)
   SNAP_MISMATCH=0
   for SNAPSHOT in "${SNAPSHOTS[@]}"; do
     SNAP_SHA=$(echo "${SNAPSHOT_BUNDLES[$SNAPSHOT]}" | awk '/relatedImages:/,/schema:/' | grep -B1 "name: $CSV" | grep -oP 'sha256:\K[a-f0-9]+')
@@ -195,11 +195,11 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
     continue
   fi
 
-  echo "$COMP: ✓ ${OP_SHA:0:12} (verified across all 4 sources + all 5 snapshots)"
+  echo "$COMP: ✓ ${OP_SHA:0:12} (verified across all 4 sources + all 6 snapshots)"
 done
 
 [ $MISMATCH -gt 0 ] && { echo "✗ $MISMATCH component(s) failed"; exit 1; }
-echo "✓ All 7 components verified across 4 sources + all 5 snapshots"
+echo "✓ All 7 components verified across 4 sources + all 6 snapshots"
 ```
 
 If SHAs don't match, **STOP** - Step 8, Step 11, or snapshot builds incomplete/incorrect.
@@ -218,6 +218,6 @@ User reviews commit, then pushes.
 FBC stage YAMLs created, committed, and pushed. Ready for Step 13 to apply to cluster.
 
 ```bash
-# Verify files pushed to remote (expect: 4-16 through 4-20)
+# Verify files pushed to remote (expect: 4-16 through 4-21)
 git ls-tree -r --name-only origin/main releases/fbc/*/stage/*.yaml
 ```

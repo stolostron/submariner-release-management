@@ -14,7 +14,7 @@ stage and prod (bundle is mirrored). Catalog update to registry.redhat.io URL ha
 
 ## Creating Prod YAMLs
 
-Agent creates prod YAML for each OCP version (4-16 through 4-20):
+Agent creates prod YAML for each OCP version (4-16 through 4-21):
 
 ```bash
 # Copy from stage
@@ -41,6 +41,6 @@ User reviews commit, then pushes.
 FBC prod YAMLs created, committed, and pushed. Ready for Step 18 to apply to cluster.
 
 ```bash
-# Verify files pushed to remote (expect: 4-16 through 4-20)
+# Verify files pushed to remote (expect: 4-16 through 4-21)
 git ls-tree -r --name-only origin/main releases/fbc/*/prod/*.yaml
 ```
