@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown apply watch
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint apply watch
 
 .DEFAULT_GOAL := help
 
@@ -12,8 +12,9 @@ help:
 	@echo "  make validate-fields   - Release CRD fields only"
 	@echo "  make validate-data     - Data formats only"
 	@echo "  make validate-markdown - Markdown linting (docs)"
+	@echo "  make gitlint           - Commit message linting"
 
-test: validate-yaml validate-fields validate-data validate-markdown
+test: validate-yaml validate-fields validate-data validate-markdown gitlint
 
 test-remote: test validate-references validate-bundle-images
 
@@ -34,6 +35,9 @@ validate-data:
 
 validate-markdown:
 	npx markdownlint-cli2 ".agents/workflows/*.md" "*.md"
+
+gitlint:
+	gitlint --commits origin/main..HEAD
 
 apply: test-remote
 	@test -n "$(FILE)" || (echo "ERROR: FILE parameter required. Usage: make apply FILE=releases/0.20/stage/..." && exit 1)

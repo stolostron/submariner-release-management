@@ -1,0 +1,23 @@
+---
+name: Commit Message Lint
+
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions: {}
+
+jobs:
+  gitlint:
+    name: Commit Message(s)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitlint
+        run: pip install gitlint
+      - name: Run gitlint
+        run: make gitlint
