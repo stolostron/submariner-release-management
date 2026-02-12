@@ -1,3 +1,12 @@
+---
+name: learn-release
+description: Teach the 20-step Submariner release process including Y-stream setup, build validation, stage/prod releases, and FBC catalog management. Use when user asks about release steps, workflows, Konflux concepts, or "how do we release Submariner?"
+version: 1.0.0
+argument-hint: "[overview|step N|all]"
+user-invocable: true
+allowed-tools: Read, Grep, Glob
+---
+
 # Learn Submariner Release Process
 
 Teach users about the Submariner release process. Use $ARGUMENTS to determine what to explain.
@@ -142,7 +151,7 @@ Each step's workflow is in `.agents/workflows/<step-name>.md`. When it says "fol
 
 | Repo | Local | Docs | Purpose |
 | ---- | ----- | ---- | ------- |
-| [This repo](https://github.com/dfarrell07/submariner-release-management) | `~/konflux/submariner-release-management` | `.agents/workflows/` (main) | Release orchestration |
+| [This repo](https://github.com/stolostron/submariner-release-management) | `~/konflux/submariner-release-management` | `.agents/workflows/` (main) | Release orchestration |
 | [submariner-io/releases](https://github.com/submariner-io/releases) | `~/go/src/submariner-io/releases` | `README.md` (devel) | Branch creation, tags |
 | [submariner-io/submariner-operator](https://github.com/submariner-io/submariner-operator) | `~/go/src/submariner-io/submariner-operator` | `.agents/workflows/` (devel) | Operator + bundle |
 | [submariner-io/submariner](https://github.com/submariner-io/submariner) | `~/go/src/submariner-io/submariner` | `.agents/workflows/` (devel) | Gateway, globalnet, route-agent |

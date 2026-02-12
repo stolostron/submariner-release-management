@@ -1,0 +1,19 @@
+{
+  "name": "submariner-release",
+  "owner": {
+    "name": "Daniel Farrell",
+    "url": "https://github.com/dfarrell07"
+  },
+  "plugins": [
+    {
+      "name": "release-management",
+      "source": {
+        "source": "github",
+        "repo": "stolostron/submariner-release-management",
+        "ref": "main"
+      },
+      "description": "Submariner release management skills and workflows",
+      "version": "1.0.0"
+    }
+  ]
+}

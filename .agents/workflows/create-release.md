@@ -6,7 +6,7 @@
 
 Create basic Release CR YAML for stage release (without release notes).
 
-**Repo:** <https://github.com/dfarrell07/submariner-release-management> (this repo)
+**Repo:** <https://github.com/stolostron/submariner-release-management> (this repo)
 **Local:** `~/konflux/submariner-release-management`
 
 **Output:** `releases/0.X/stage/`
