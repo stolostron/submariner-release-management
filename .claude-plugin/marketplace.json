@@ -8,9 +8,8 @@
     {
       "name": "release-management",
       "source": {
-        "source": "github",
-        "repo": "stolostron/submariner-release-management",
-        "ref": "main"
+        "source": "local",
+        "path": "."
       },
       "description": "Submariner release management skills and workflows",
       "version": "1.0.0"
