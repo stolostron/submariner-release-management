@@ -1,0 +1,13 @@
+{
+  "name": "release-management",
+  "description": "Submariner release management skills and workflows",
+  "version": "1.0.0",
+  "author": {
+    "name": "Daniel Farrell",
+    "email": "dfarrell@redhat.com"
+  },
+  "homepage": "https://github.com/stolostron/submariner-release-management",
+  "repository": "https://github.com/stolostron/submariner-release-management",
+  "license": "Apache-2.0",
+  "keywords": ["submariner", "release", "konflux", "workflow"]
+}

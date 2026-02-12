@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "submariner-release": {
+      "source": {
+        "source": "github",
+        "repo": "stolostron/submariner-release-management",
+        "ref": "main"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "release-management@submariner-release": true
+  }
+}

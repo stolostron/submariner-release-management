@@ -24,9 +24,16 @@ make apply FILE=releases/0.20/stage/submariner-0-20-2-stage-20250930-01.yaml
 make watch NAME=submariner-0-20-2-stage-20250930-01
 ```
 
-## Claude Commands
+## Claude Skills
 
-| Command          | Purpose                                      | Example                   |
-|------------------|----------------------------------------------|---------------------------|
-| `/learn-release` | Learn the 20-step release workflow           | `/learn-release overview` |
-| `/release-ls`    | Check release status (requires `oc login`)   | `/release-ls 0.22.0`      |
+```bash
+/plugin marketplace add submariner-release https://github.com/stolostron/submariner-release-management
+/plugin install release-management@submariner-release
+```
+
+| Command          | Purpose                          |
+|------------------|----------------------------------|
+| `/learn-release` | Learn 20-step release workflow   |
+| `/release-ls`    | Check release status             |
+
+See [.claude/SKILLS.md](.claude/SKILLS.md).
