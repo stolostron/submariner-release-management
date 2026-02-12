@@ -39,7 +39,7 @@ validate_file() {
 
   # Create temp directory
   tmpdir=$(mktemp -d)
-  trap "rm -rf $tmpdir" EXIT
+  trap 'rm -rf "$tmpdir"' EXIT
 
   # Find operator bundle component (exclude FBC)
   bundle_image=$(echo "$snapshot_json" | jq -r '.spec.components[] | select(.name | (contains("bundle") and (contains("fbc") | not))) | .containerImage' | head -1)

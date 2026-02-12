@@ -1,6 +1,10 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint apply watch
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch
 
 .DEFAULT_GOAL := help
+
+# Shellcheck configuration
+SHELLCHECK_ARGS += $(shell [ ! -d scripts ] || find scripts -type f -exec awk 'FNR == 1 && /sh$$/ { print FILENAME }' {} +)
+export SHELLCHECK_ARGS
 
 help:
 	@echo "Available targets:"
@@ -13,8 +17,9 @@ help:
 	@echo "  make validate-data     - Data formats only"
 	@echo "  make validate-markdown - Markdown linting (docs)"
 	@echo "  make gitlint           - Commit message linting"
+	@echo "  make shellcheck        - Shell script linting"
 
-test: validate-yaml validate-fields validate-data validate-markdown gitlint
+test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
 test-remote: test validate-references validate-bundle-images
 
@@ -38,6 +43,13 @@ validate-markdown:
 
 gitlint:
 	gitlint --commits origin/main..HEAD
+
+shellcheck:
+ifneq (,$(SHELLCHECK_ARGS))
+	shellcheck -S warning $(SHELLCHECK_ARGS)
+else
+	@echo 'No shell scripts found to check.'
+endif
 
 apply: test-remote
 	@test -n "$(FILE)" || (echo "ERROR: FILE parameter required. Usage: make apply FILE=releases/0.20/stage/..." && exit 1)

@@ -1,0 +1,3 @@
+# SC2154: Referenced but not assigned - disabled for global variables
+# Standard Submariner pattern (not currently needed, but included for consistency)
+disable=SC2154
