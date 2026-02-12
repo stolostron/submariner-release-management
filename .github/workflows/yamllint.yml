@@ -7,6 +7,8 @@ name: YAML Lint
       - main
   pull_request:
 
+permissions: {}
+
 jobs:
   yamllint:
     runs-on: ubuntu-latest

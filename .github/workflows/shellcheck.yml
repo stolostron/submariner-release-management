@@ -7,8 +7,7 @@ name: Shellcheck
       - main
   pull_request:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   shellcheck:
