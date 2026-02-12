@@ -39,7 +39,7 @@ validate-data:
 	./scripts/validate-release-data.sh
 
 validate-markdown:
-	npx markdownlint-cli2 ".agents/workflows/*.md" "*.md"
+	npx markdownlint-cli2 "**/*.md"
 
 gitlint:
 	gitlint --commits origin/main..HEAD
