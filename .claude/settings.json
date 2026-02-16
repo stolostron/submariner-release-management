@@ -2,8 +2,8 @@
   "extraKnownMarketplaces": {
     "submariner-release": {
       "source": {
-        "source": "directory",
-        "path": "/home/dfarrell07/konflux/submariner-release-management"
+        "source": "git",
+        "url": "https://github.com/stolostron/submariner-release-management.git"
       }
     }
   },

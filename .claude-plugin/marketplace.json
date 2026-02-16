@@ -7,12 +7,14 @@
   "plugins": [
     {
       "name": "release-management",
-      "source": {
-        "source": "local",
-        "path": "."
-      },
       "description": "Submariner release management skills and workflows",
-      "version": "1.0.0"
+      "author": {
+        "name": "Daniel Farrell",
+        "email": "dfarrell@redhat.com"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/stolostron/submariner-release-management"
     }
   ]
 }

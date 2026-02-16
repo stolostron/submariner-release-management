@@ -1,10 +1,11 @@
 {
   "name": "release-management",
-  "description": "Submariner release management skills and workflows",
   "version": "1.0.0",
+  "description": "Submariner release management skills and workflows",
   "author": {
     "name": "Daniel Farrell",
-    "email": "dfarrell@redhat.com"
+    "email": "dfarrell@redhat.com",
+    "url": "https://github.com/dfarrell07"
   },
   "homepage": "https://github.com/stolostron/submariner-release-management",
   "repository": "https://github.com/stolostron/submariner-release-management",
