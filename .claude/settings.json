@@ -1,4 +1,8 @@
 {
+  "enabledPlugins": {
+    "release-management@submariner-release": true,
+    "shipyard@submariner": true
+  },
   "extraKnownMarketplaces": {
     "submariner-release": {
       "source": {
@@ -6,8 +10,5 @@
         "url": "https://github.com/stolostron/submariner-release-management.git"
       }
     }
-  },
-  "enabledPlugins": {
-    "release-management@submariner-release": true
   }
 }
