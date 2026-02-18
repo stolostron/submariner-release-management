@@ -24,19 +24,19 @@ test: validate-yaml validate-fields validate-data validate-markdown gitlint shel
 test-remote: test validate-references validate-bundle-images
 
 validate-references:
-	./scripts/validate-release-references.sh
+	./scripts/validate-release-references.sh $(FILE)
 
 validate-bundle-images:
-	./scripts/validate-bundle-images.sh
+	./scripts/validate-bundle-images.sh $(FILE)
 
 validate-yaml:
 	yamllint .
 
 validate-fields:
-	./scripts/validate-release-fields.sh
+	./scripts/validate-release-fields.sh $(FILE)
 
 validate-data:
-	./scripts/validate-release-data.sh
+	./scripts/validate-release-data.sh $(FILE)
 
 validate-markdown:
 	npx markdownlint-cli2 "**/*.md"

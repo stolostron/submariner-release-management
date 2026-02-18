@@ -179,11 +179,23 @@ validate_file() {
   rm -rf "$tmpdir"
 }
 
-# Main
-find releases -name '*.yaml' -type f -print0 | \
-  while IFS= read -r -d '' file; do
-    validate_file "$file"
-  done
-
-echo ""
-echo "All bundle image validations passed"
+# Main - support both single-file and all-files modes
+if [[ $# -gt 0 && -n "$1" ]]; then
+  # Single file mode - validate the provided file
+  file="$1"
+  if [[ ! -f "$file" ]]; then
+    echo "ERROR: File '$file' not found"
+    exit 1
+  fi
+  validate_file "$file"
+  echo ""
+  echo "File validation passed"
+else
+  # All files mode - find and validate all release YAMLs
+  find releases -name '*.yaml' -type f -print0 | \
+    while IFS= read -r -d '' file; do
+      validate_file "$file"
+    done
+  echo ""
+  echo "All bundle image validations passed"
+fi
