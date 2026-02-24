@@ -85,7 +85,7 @@ Submariner releases 9 container images through Konflux to Red Hat's registry. Th
 
 | Step | What happens | Y/Z |
 | ---- | ------------ | --- |
-| 1 | Create `release-0.X` branches across all upstream repos | Y |
+| 1 | Create `release-0.Y` branches across all upstream repos | Y |
 | 2 | Add Konflux components, ReleasePlans, and RPAs in konflux-release-data | Y |
 | 3 | Customize bot-generated Tekton configs, set version labels | Y |
 | 3b | Update bundle SHAs from component builds, set up bundle pipeline | Y |
@@ -116,7 +116,7 @@ Submariner releases 9 container images through Konflux to Red Hat's registry. Th
 
 | Step | Details |
 | ---- | ------- |
-| 1 | Use releases repo tooling to create `release-0.X` branches across 9 upstream repos. |
+| 1 | Use releases repo tooling to create `release-0.Y` branches across 9 upstream repos. |
 | 2 | Add overlays (app, 9 components, ReleasePlans) and RPAs in konflux-release-data. ArgoCD syncs; triggers bot PRs. |
 | 3 | Customize Tekton configs: hermetic builds (Go mods, RPM lockfiles), multi-arch, SBOM. Version labels. 8 components, 5 repos. |
 | 3b | Two parts: (1) update bundle CSV with component SHAs from snapshot, (2) set up bundle Tekton pipeline. Components must build first. |
