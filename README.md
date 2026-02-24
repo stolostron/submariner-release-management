@@ -31,9 +31,10 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 /plugin install release-management@submariner-release
 ```
 
-| Command          | Purpose                          |
-|------------------|----------------------------------|
-| `/learn-release` | Learn 20-step release workflow   |
-| `/release-ls`    | Check release status             |
+| Command                  | Purpose                                   |
+|--------------------------|-------------------------------------------|
+| `/learn-release`         | Learn 20-step release workflow            |
+| `/release-ls`            | Check release status                      |
+| `/configure-downstream`  | Create Konflux app for new version        |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).

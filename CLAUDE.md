@@ -6,7 +6,9 @@
 
 ## 2. Configure Downstream (Y-stream only)
 
-@.agents/workflows/configure-downstream.md
+@/configure-downstream
+
+**Alternative:** @.agents/workflows/configure-downstream.md (manual workflow)
 
 ## 3. Fix Tekton Config PRs - Components (Y-stream only)
 
