@@ -26,6 +26,16 @@ Configure Konflux for new Submariner version (Y-stream releases)
 /configure-downstream 0.23.0  # Extracts major.minor
 ```
 
+## /add-team-member
+
+Add user to Submariner Konflux team RBAC
+
+```bash
+/add-team-member alice maintainer
+/add-team-member bob admin
+/add-team-member charlie  # Defaults to contributor (read-only)
+```
+
 ## Installation
 
 ### .claude/settings.json
