@@ -36,5 +36,6 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 | `/learn-release`         | Learn 20-step release workflow            |
 | `/release-ls`            | Check release status                      |
 | `/configure-downstream`  | Create Konflux app for new version        |
+| `/add-team-member`       | Add user to Submariner Konflux RBAC       |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).
