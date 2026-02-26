@@ -20,7 +20,9 @@
 
 ## 4. Update Tekton Tasks and Resolve EC Violations
 
-@.agents/workflows/fix-ec-violations.md
+@/konflux-ci-fix
+
+**Alternative:** @.agents/workflows/fix-ec-violations.md (manual workflow)
 
 ## 5. Scan for CVEs
 
