@@ -37,5 +37,6 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 | `/release-ls`            | Check release status                      |
 | `/configure-downstream`  | Create Konflux app for new version        |
 | `/add-team-member`       | Add user to Submariner Konflux RBAC       |
+| `/konflux-ci-fix`        | Fix Konflux CI Enterprise Contract issues |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).

@@ -36,6 +36,18 @@ Add user to Submariner Konflux team RBAC
 /add-team-member charlie  # Defaults to contributor (read-only)
 ```
 
+## /konflux-ci-fix
+
+Diagnose and fix Konflux CI Enterprise Contract violations
+
+```bash
+/konflux-ci-fix                                    # Current repo, current branch
+/konflux-ci-fix 0.21                               # Current repo, specified branch
+/konflux-ci-fix PR-1234                            # Current repo, specific PR
+/konflux-ci-fix ../submariner-operator             # Specified repo, current branch
+/konflux-ci-fix release-0.21 ../submariner-operator # Both specified (order-independent)
+```
+
 ## Installation
 
 ### .claude/settings.json
