@@ -21,12 +21,13 @@ Configures Konflux CI/CD for a new Submariner minor version (Y-stream releases).
 **What it does:**
 
 - Auto-detects previous version from existing overlays
+- Creates feature branch (subm-configure-v0.23) from main
 - Creates 3 commits with 49 total files:
   - Commit 1: 26 YAML overlay files
   - Commit 2: 22 auto-generated Kustomize manifests
   - Commit 3: 2 ReleasePlanAdmission files (stage + prod)
 - Verifies all changes before committing
-- Stops user before push for review
+- Outputs push command and MR instructions
 
 **Arguments:** $ARGUMENTS
 
@@ -49,20 +50,30 @@ test -f "tenants-config/build-single.sh" || {
   exit 1
 }
 
+# Must be on main branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+  echo "❌ Error: Must be on main branch to start"
+  echo "   Current branch: $CURRENT_BRANCH"
+  echo "   Run: git checkout main"
+  exit 1
+fi
+
 # Check git status
 git diff-index --quiet HEAD -- 2>/dev/null || {
-  echo "❌ Error: Working tree has uncommitted changes"
+  echo "❌ Error: Working tree has uncommitted changes on main"
   echo "   Commit or stash changes before running this skill"
   git status --short
   exit 1
 }
 
-# Require main branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-if [ "$CURRENT_BRANCH" != "main" ]; then
-  echo "❌ Error: Must be on main branch"
-  echo "   Current branch: $CURRENT_BRANCH"
-  echo "   Run: git checkout main"
+# Fetch latest from origin (non-fatal if fails - uses cached refs)
+git fetch origin main 2>/dev/null || echo "⚠️  git fetch failed - working with cached remote state"
+
+# Check if main is up to date with origin/main
+if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+  echo "❌ Error: Local main is not up to date with origin/main"
+  echo "   Run: git pull origin main"
   exit 1
 fi
 
@@ -119,6 +130,34 @@ fi
 echo "✓ Version detection:"
 echo "  Previous: ${PREV} (ACM ${PREV_ACM})"
 echo "  New:      ${NEW} (ACM ${NEW_ACM})"
+echo ""
+
+# ━━━ FEATURE BRANCH CREATION ━━━
+
+BRANCH="subm-configure-v${NEW//-/.}"
+
+# Check if branch exists on remote (MUST NOT exist)
+if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+  echo "❌ Error: Branch $BRANCH already exists on remote"
+  echo "   Delete it first: git push origin --delete $BRANCH"
+  echo "   Then re-run this skill"
+  exit 1
+fi
+
+# Check if branch exists locally (auto-delete if safe)
+if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  echo "⚠️  Local branch $BRANCH exists - deleting and recreating"
+  git branch -D "$BRANCH" >/dev/null 2>&1
+fi
+
+# Create branch from current HEAD (verified clean main)
+git checkout -b "$BRANCH" || {
+  echo "❌ Error: Failed to create branch $BRANCH"
+  exit 1
+}
+
+echo "✓ Created feature branch: $BRANCH"
+echo "  (All commits will be made on this branch)"
 echo ""
 
 # ━━━ COMMIT 1: CREATE OVERLAY STRUCTURE (26 files) ━━━
@@ -250,13 +289,21 @@ echo "   - 26 overlay files created"
 echo "   - 22 auto-generated manifests built"
 echo "   - 2 RPA files configured"
 echo "   - Total: 49 files added"
+echo "   - Branch: $BRANCH (currently checked out)"
 echo ""
-echo "📋 Review commits:"
-echo "   git log --oneline -3"
+echo "📋 Review changes:"
+echo "   git log --oneline -3                    # View commit messages"
+echo "   git diff main...$BRANCH --stat          # View file changes summary"
+echo "   git diff main...$BRANCH                 # View full diff"
 echo ""
 echo "🚀 Next steps:"
-echo "   1. Review the 3 commits above"
-echo "   2. Push to remote: git push"
-echo "   3. Wait for ArgoCD to deploy ReleasePlans to cluster (~5-10 min)"
-echo "   4. Verify: oc get releaseplans -n submariner-tenant | grep -E \"stage-${NEW}|prod-${NEW}\""
+echo "   1. Review the commits above"
+echo "   2. Push: git push origin $BRANCH"
+echo "   3. Create MR in GitLab UI (auto-opens after push)"
+echo "   4. After merge, wait for ArgoCD deploy (~5-10 min)"
+echo "   5. Verify: oc get releaseplans -n submariner-tenant | grep -E \"stage-${NEW}|prod-${NEW}\""
+echo ""
+echo "💡 If you need to start over:"
+echo "   git checkout main"
+echo "   git branch -D $BRANCH"
 ```
