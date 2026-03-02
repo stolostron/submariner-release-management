@@ -1,7 +1,7 @@
 ---
 name: konflux-ci-fix
 description: Diagnose and fix Konflux CI failures in Submariner repositories. Supports PR-based and branch-based execution. Arguments are optional and order-independent.
-version: 1.0.0
+version: 1.1.0
 argument-hint: "[branch|PR-###] [repo]"
 user-invocable: true
 allowed-tools: Bash, Read, Edit, Grep, Glob
@@ -12,7 +12,7 @@ context: fork
 
 Diagnose and fix Konflux CI failures by updating Tekton task references to latest versions.
 
-**Usage:**
+**Usage from a component repository:**
 
 - `/konflux-ci-fix` - current repo, current branch
 - `/konflux-ci-fix 0.21` - current repo, specified branch (short form)
@@ -21,10 +21,20 @@ Diagnose and fix Konflux CI failures by updating Tekton task references to lates
 - `/konflux-ci-fix release-0.21 ../submariner-operator` - both specified (order doesn't matter)
 - `/konflux-ci-fix PR-1234 ../lighthouse` - PR and repo (order doesn't matter)
 
+**Usage from submariner-release-management:**
+
+- `/konflux-ci-fix operator` - use shortcut for submariner-operator
+- `/konflux-ci-fix lighthouse 0.21` - shortcut with branch
+- `/konflux-ci-fix PR-1234 subctl` - shortcut with PR number
+- `/konflux-ci-fix ~/go/src/submariner-io/submariner` - full path
+- `/konflux-ci-fix ../../go/src/submariner-io/shipyard` - relative path
+
+**Shortcuts:** `operator` (submariner-operator), `submariner`, `lighthouse`, `shipyard`, `subctl`
+
 **Arguments** (both optional, order-independent):
 
 - `branch|PR-###`: Branch name (e.g., `0.21`, `release-0.21`) or PR number (e.g., `PR-1234`, `pr-1234`)
-- `repo`: Path to repository (starts with `/`, `./`, `../`, `~/`, or is existing directory)
+- `repo`: Repository shortcut, full path, or relative path
 
 ---
 
@@ -149,6 +159,42 @@ for arg in "$ARG1" "$ARG2"; do
       fi
       REPO="$arg"
       ;;
+    # Repository shortcuts for common Submariner component repos
+    operator|submariner-operator)
+      if [ -n "$REPO" ]; then
+        echo "ERROR: Multiple repositories specified"
+        exit 1
+      fi
+      REPO="$HOME/go/src/submariner-io/submariner-operator"
+      ;;
+    submariner)
+      if [ -n "$REPO" ]; then
+        echo "ERROR: Multiple repositories specified"
+        exit 1
+      fi
+      REPO="$HOME/go/src/submariner-io/submariner"
+      ;;
+    lighthouse)
+      if [ -n "$REPO" ]; then
+        echo "ERROR: Multiple repositories specified"
+        exit 1
+      fi
+      REPO="$HOME/go/src/submariner-io/lighthouse"
+      ;;
+    shipyard)
+      if [ -n "$REPO" ]; then
+        echo "ERROR: Multiple repositories specified"
+        exit 1
+      fi
+      REPO="$HOME/go/src/submariner-io/shipyard"
+      ;;
+    subctl)
+      if [ -n "$REPO" ]; then
+        echo "ERROR: Multiple repositories specified"
+        exit 1
+      fi
+      REPO="$HOME/go/src/submariner-io/subctl"
+      ;;
     *)
       if [ -d "$arg" ]; then
         if [ -n "$REPO" ]; then
@@ -171,6 +217,17 @@ REPO="${REPO:-.}"
 
 if [ ! -d "$REPO" ]; then
   echo "ERROR: Repository not found: $REPO"
+  echo ""
+  # Check if it looks like a shortcut was used
+  if [[ "$REPO" == *"/go/src/submariner-io/"* ]]; then
+    SHORTCUT=$(basename "$REPO")
+    echo "The '$SHORTCUT' shortcut expects repos at: ~/go/src/submariner-io/"
+    echo "Your repos may be in a different location."
+    echo ""
+    echo "Solutions:"
+    echo "  1. Use full path: /konflux-ci-fix /path/to/your/$SHORTCUT"
+    echo "  2. Clone repos to: ~/go/src/submariner-io/"
+  fi
   exit 1
 fi
 
@@ -242,11 +299,14 @@ if ! git ls-tree -d "origin/$BASE_BRANCH" .tekton &>/dev/null; then
     echo "ERROR: This skill must target a component repository, not release-management"
     echo ""
     echo "Usage from release-management:"
-    echo "  /konflux-ci-fix ~/go/src/submariner-io/submariner-operator"
-    echo "  /konflux-ci-fix ~/go/src/submariner-io/lighthouse 0.21"
-    echo "  /konflux-ci-fix PR-1234 ~/go/src/submariner-io/subctl"
+    echo "  /konflux-ci-fix operator              # Short form"
+    echo "  /konflux-ci-fix lighthouse 0.21       # Short form with branch"
+    echo "  /konflux-ci-fix PR-1234 subctl        # Short form with PR"
     echo ""
-    echo "Component repos: submariner-operator, submariner, lighthouse, shipyard, subctl"
+    echo "Or use full paths:"
+    echo "  /konflux-ci-fix ~/go/src/submariner-io/submariner-operator"
+    echo ""
+    echo "Shortcuts: operator, submariner, lighthouse, shipyard, subctl"
     exit 1
   fi
   echo "ERROR: No .tekton directory found on $BASE_BRANCH"
