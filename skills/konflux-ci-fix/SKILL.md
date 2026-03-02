@@ -237,6 +237,18 @@ fi
 
 # Verify .tekton directory exists on target branch
 if ! git ls-tree -d "origin/$BASE_BRANCH" .tekton &>/dev/null; then
+  REPO_NAME=$(basename "$(pwd)")
+  if [ "$REPO_NAME" = "submariner-release-management" ]; then
+    echo "ERROR: This skill must target a component repository, not release-management"
+    echo ""
+    echo "Usage from release-management:"
+    echo "  /konflux-ci-fix ~/go/src/submariner-io/submariner-operator"
+    echo "  /konflux-ci-fix ~/go/src/submariner-io/lighthouse 0.21"
+    echo "  /konflux-ci-fix PR-1234 ~/go/src/submariner-io/subctl"
+    echo ""
+    echo "Component repos: submariner-operator, submariner, lighthouse, shipyard, subctl"
+    exit 1
+  fi
   echo "ERROR: No .tekton directory found on $BASE_BRANCH"
   echo "This branch doesn't appear to have Konflux CI configured."
   echo ""
