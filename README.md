@@ -11,6 +11,10 @@ oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/
 # Show available commands
 make
 
+# Create FBC releases (requires cluster login)
+make create-fbc-releases VERSION=0.22.1              # Stage (default)
+make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
+
 # Validate locally (no cluster access needed)
 make test
 
@@ -39,5 +43,6 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 | `/add-team-member`         | Add user to Submariner Konflux RBAC            |
 | `/konflux-ci-fix`          | Fix Konflux CI Enterprise Contract issues      |
 | `/konflux-component-setup` | Automate Konflux component setup on new branch |
+| `/create-fbc-release`      | Create FBC releases for all OCP versions       |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).

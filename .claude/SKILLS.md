@@ -102,6 +102,51 @@ Handles 8 components across 5 repos. Runs 12 automated setup steps and creates p
 
 **After running:** Review commits, validate YAML, push to remote, wait for build (~15-30 min)
 
+## /create-fbc-release
+
+Create FBC releases for all OCP versions (stage or prod) with comprehensive verification
+
+Automates Step 12 (FBC stage releases) and Step 17 (FBC prod releases) of the Submariner release workflow.
+
+```bash
+/create-fbc-release 0.22.1 --stage   # Create stage releases
+/create-fbc-release 0.22.1 --prod    # Create prod releases
+/create-fbc-release 0.22 --stage     # Auto-detects latest patch
+/create-fbc-release 0.22             # Defaults to stage
+```
+
+**Alternative (make target):**
+
+```bash
+make create-fbc-releases VERSION=0.22.1              # Stage (default)
+make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
+```
+
+**Prerequisites:**
+
+- `oc login` (required for snapshot queries)
+- Step 10 complete (component stage release)
+- Step 11 complete (FBC catalog updated)
+- FBC snapshots rebuilt (~15-30 min after Step 11)
+
+**What it does:**
+
+1. Verifies GitHub catalog consistency (all 6 OCP versions have same bundle SHA)
+2. Verifies FBC snapshots (push events, tests passed, bundle SHAs match)
+3. Verifies component SHAs across 10 sources (operator repo → registry → FBC GitHub → 6 snapshots)
+4. Generates 6 Release YAMLs (one per OCP version: 4-16 through 4-21)
+5. Validates YAMLs with `make test-remote`
+6. Automatically commits with descriptive message
+
+**After running:**
+
+1. Review commit: `git show`
+2. Push: `git push origin $(git rev-parse --abbrev-ref HEAD)`
+3. Apply releases: `make apply FILE=<yaml>` for each version
+4. Monitor: `make watch NAME=<release-name>`
+
+**To undo:** `git reset HEAD~1`
+
 ## Installation
 
 ### .claude/settings.json

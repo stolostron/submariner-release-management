@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases
 
 .DEFAULT_GOAL := help
 
@@ -8,16 +8,31 @@ export SHELLCHECK_ARGS
 
 help:
 	@echo "Available targets:"
+	@echo ""
+	@echo "Release Creation:"
+	@echo "  make create-fbc-releases VERSION=... [TYPE=stage|prod]"
+	@echo "                         - Create FBC releases for all 6 OCP versions (requires oc login)"
+	@echo "                           Default TYPE is stage if not specified"
+	@echo "                           Example: make create-fbc-releases VERSION=0.22.1"
+	@echo "                           Example: make create-fbc-releases VERSION=0.22.1 TYPE=prod"
+	@echo ""
+	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
 	@echo "  make test-remote       - Run all validations including cluster checks and bundle images (requires oc login)"
-	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
-	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
 	@echo "  make validate-yaml     - YAML syntax only"
 	@echo "  make validate-fields   - Release CRD fields only"
 	@echo "  make validate-data     - Data formats only"
 	@echo "  make validate-markdown - Markdown linting (docs)"
 	@echo "  make gitlint           - Commit message linting"
 	@echo "  make shellcheck        - Shell script linting"
+	@echo ""
+	@echo "Release Operations:"
+	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
+	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
+
+create-fbc-releases:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-fbc-releases VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
+	./scripts/create-fbc-releases.sh $(VERSION) $(if $(TYPE),--$(TYPE),--stage)
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
