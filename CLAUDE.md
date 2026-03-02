@@ -62,7 +62,9 @@
 
 ## 12. Create FBC Stage Releases
 
-@.agents/workflows/create-fbc-stage-release.md
+@/create-fbc-release
+
+**Alternative:** @.agents/workflows/create-fbc-stage-release.md (manual workflow)
 
 ## 13. Apply FBC Stage Releases
 
@@ -90,7 +92,9 @@
 
 ## 17. Create FBC Prod Releases
 
-@.agents/workflows/create-fbc-prod-release.md
+@/create-fbc-release
+
+**Alternative:** @.agents/workflows/create-fbc-prod-release.md (manual workflow)
 
 ## 18. Apply FBC Prod Releases
 

@@ -41,13 +41,17 @@ validate_file() {
       fi
 
       # Validate CVE format: CVE-YYYY-NNNNN
-      if ! [[ "$cve" =~ ^CVE-[0-9]{4}-[0-9]{4,}$ ]]; then
+      if [[ "$cve" =~ ^CVE-[0-9]{4}-[0-9]{4,}$ ]]; then
+        :  # CVE format is valid
+      else
         echo "ERROR: Invalid CVE format '$cve' (expected CVE-YYYY-NNNNN)"
         exit 1
       fi
 
       # Validate component has version suffix: -X-Y
-      if ! [[ "$component" =~ -[0-9]+-[0-9]+$ ]]; then
+      if [[ "$component" =~ -[0-9]+-[0-9]+$ ]]; then
+        :  # Component version suffix is valid
+      else
         echo "ERROR: Component '$component' missing version suffix (expected -X-Y)"
         exit 1
       fi
@@ -86,14 +90,18 @@ validate_file() {
 
       if [[ "$source" == "issues.redhat.com" ]]; then
         # Jira format: PROJECT-NNNNN
-        if ! [[ "$id" =~ ^[A-Z]+-[0-9]+$ ]]; then
+        if [[ "$id" =~ ^[A-Z]+-[0-9]+$ ]]; then
+          :  # Jira ID format is valid
+        else
           echo "ERROR: Invalid Jira ID '$id' (expected PROJECT-NNNNN)"
           exit 1
         fi
         echo "  ✓ $id (Jira format valid)"
       elif [[ "$source" == "bugzilla.redhat.com" ]]; then
         # Bugzilla format: numeric only
-        if ! [[ "$id" =~ ^[0-9]+$ ]]; then
+        if [[ "$id" =~ ^[0-9]+$ ]]; then
+          :  # Bugzilla ID format is valid
+        else
           echo "ERROR: Invalid Bugzilla ID '$id' (expected numeric)"
           exit 1
         fi
