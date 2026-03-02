@@ -57,6 +57,51 @@ Diagnose and fix Konflux CI Enterprise Contract violations
 
 **Shortcuts:** operator, submariner, lighthouse, shipyard, subctl
 
+## /konflux-component-setup
+
+Automate Konflux component setup on new release branches
+
+Configures Tekton pipelines, Dockerfiles, RPM lockfiles, and hermetic builds for Submariner components.
+Handles 8 components across 5 repos. Runs 12 automated setup steps and creates per-step commits for easy review.
+
+```bash
+# From release-management (use shortcuts):
+/konflux-component-setup operator 0.23              # Setup operator
+/konflux-component-setup submariner submariner-gateway 0.23  # Multi-component repo
+/konflux-component-setup lighthouse lighthouse-agent 0.23    # Specify component
+
+# From component repo (auto-detection):
+/konflux-component-setup                            # Detect from branch
+/konflux-component-setup 0.23                       # Specify version
+
+# Use full paths:
+/konflux-component-setup ~/go/src/submariner-io/subctl subctl 0.23
+```
+
+**Shortcuts:** operator, submariner, lighthouse, shipyard, subctl
+
+**Supported components:**
+
+- `submariner-operator` (operator repo)
+- `submariner-gateway`, `submariner-globalnet`, `submariner-route-agent` (submariner repo)
+- `lighthouse-agent`, `lighthouse-coredns` (lighthouse repo)
+- `nettest` (shipyard repo)
+- `subctl` (subctl repo)
+
+**Requirements:**
+
+- `/configure-downstream` must be complete (bot PR branches created)
+- Previous release branch must exist (e.g., `release-0.22` when setting up 0.23)
+
+**What it does:**
+
+1. Checks out bot's PR branch (e.g., `konflux-submariner-operator-0-23`)
+2. Runs 12 setup steps: yamllint, RPM lockfiles, Dockerfiles, hermetic builds, multi-platform, SBOM, task updates, file filters
+3. Creates separate commits for each step
+4. Validates YAML after each modification
+
+**After running:** Review commits, validate YAML, push to remote, wait for build (~15-30 min)
+
 ## Installation
 
 ### .claude/settings.json
