@@ -699,7 +699,7 @@ submariner-route-agent, nettest). Automatically skipped for gomod-only component
 ```bash
 #!/bin/bash
 source /tmp/konflux-setup-functions.sh
-load_state "COMPONENT LOCKFILE_COMPONENT PREFETCH_TYPE PREV_VERSION REPO_PATH" 3
+load_state "COMPONENT LOCKFILE_COMPONENT PREFETCH_TYPE PREV_VERSION TARGET_BRANCH REPO_PATH" 3
 
 # Skip if no RPM dependencies
 case "$PREFETCH_TYPE" in
