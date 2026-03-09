@@ -691,97 +691,19 @@ fi
 
 ---
 
-## Step 3: Add RPM Lockfile Support (Conditional)
-
-**Only for components with RPM dependencies** (submariner-gateway, submariner-globalnet,
-submariner-route-agent, nettest). Automatically skipped for gomod-only components.
-
-```bash
-#!/bin/bash
-source /tmp/konflux-setup-functions.sh
-load_state "COMPONENT LOCKFILE_COMPONENT PREFETCH_TYPE PREV_VERSION TARGET_BRANCH REPO_PATH" 3
-
-# Skip if no RPM dependencies
-case "$PREFETCH_TYPE" in
-  *rpm*)
-    # Has RPM dependencies - proceed
-    ;;
-  *)
-    echo "━━━ Step 3: Add RPM Lockfile Support ━━━"
-    echo "ℹ️  Component has no RPM dependencies - skipping"
-    exit 0
-    ;;
-esac
-
-echo "━━━ Step 3: Add RPM Lockfile Support ━━━"
-
-# Copy lockfile infrastructure:
-# - Scripts (update-lockfile.sh, etc.) from devel (always use latest)
-# - Component directory from previous release (starting point for new release)
-
-# Copy scripts from devel using git show (more reliable)
-mkdir -p .rpm-lockfiles
-git show "origin/devel:.rpm-lockfiles/update-lockfile.sh" > .rpm-lockfiles/update-lockfile.sh || {
-  echo "❌ ERROR: Could not copy update-lockfile.sh from devel"
-  exit 1
-}
-
-# Copy additional scripts if they exist
-for script in check-repo-access.sh verify-packages.sh; do
-  if git show "origin/devel:.rpm-lockfiles/${script}" > ".rpm-lockfiles/${script}" 2>/dev/null; then
-    chmod +x ".rpm-lockfiles/${script}"
-  fi
-done
-
-# Make update-lockfile.sh executable
-chmod +x .rpm-lockfiles/update-lockfile.sh || {
-  echo "❌ ERROR: Failed to make update-lockfile.sh executable"
-  exit 1
-}
-
-# Copy component-specific lockfile directory from previous release
-git archive "origin/release-0.${PREV_VERSION}" ".rpm-lockfiles/${LOCKFILE_COMPONENT}/" | tar -x || {
-  echo "❌ ERROR: Could not copy lockfile directory from previous release"
-  echo "Expected: .rpm-lockfiles/${LOCKFILE_COMPONENT}/ on branch release-0.${PREV_VERSION}"
-  exit 1
-}
-
-# Generate lockfile
-echo "ℹ️  Generating RPM lockfile for $LOCKFILE_COMPONENT..."
-.rpm-lockfiles/update-lockfile.sh "$LOCKFILE_COMPONENT" || {
-  echo "❌ ERROR: Lockfile generation failed"
-  echo "Check RPM repository access and package availability"
-  exit 1
-}
-
-# Verify lockfile was created
-if [ ! -f ".rpm-lockfiles/${LOCKFILE_COMPONENT}/rpms.lock.yaml" ]; then
-  echo "❌ ERROR: Lockfile not created: .rpm-lockfiles/${LOCKFILE_COMPONENT}/rpms.lock.yaml"
-  exit 1
-fi
-
-git add .rpm-lockfiles/ || {
-  echo "❌ ERROR: Failed to stage .rpm-lockfiles/"
-  exit 1
-}
-commit_changes "Add RPM lockfile support for ${LOCKFILE_COMPONENT}" "RPM lockfile added and committed"
-```
-
----
-
-## Step 4: Copy and Configure Konflux Dockerfile
+## Step 3: Copy and Configure Konflux Dockerfile
 
 Copy Dockerfile from previous release and update version references, CPE labels, and Tekton config.
 
 ```bash
 #!/bin/bash
 source /tmp/konflux-setup-functions.sh
-load_state "COMPONENT VERSION_DASHED TARGET_BRANCH PREV_VERSION REPO_PATH" 4
+load_state "COMPONENT VERSION_DASHED TARGET_BRANCH PREV_VERSION REPO_PATH" 3
 
 # Tekton files for this component
 TEKTON_FILES=(.tekton/${COMPONENT}-${VERSION_DASHED}-*.yaml)
 
-echo "━━━ Step 4: Add Konflux Dockerfile ━━━"
+echo "━━━ Step 3: Add Konflux Dockerfile ━━━"
 
 # Determine Dockerfile path
 DOCKERFILE="package/Dockerfile.${COMPONENT}.konflux"
@@ -904,6 +826,84 @@ if [ -d scripts/ ]; then
 fi
 
 commit_changes "Add Konflux Dockerfile for ${COMPONENT}" "Dockerfile configured and committed"
+```
+
+---
+
+## Step 4: Add RPM Lockfile Support (Conditional)
+
+**Only for components with RPM dependencies** (submariner-gateway, submariner-globalnet,
+submariner-route-agent, nettest). Automatically skipped for gomod-only components.
+
+```bash
+#!/bin/bash
+source /tmp/konflux-setup-functions.sh
+load_state "COMPONENT LOCKFILE_COMPONENT PREFETCH_TYPE PREV_VERSION TARGET_BRANCH REPO_PATH" 4
+
+# Skip if no RPM dependencies
+case "$PREFETCH_TYPE" in
+  *rpm*)
+    # Has RPM dependencies - proceed
+    ;;
+  *)
+    echo "━━━ Step 4: Add RPM Lockfile Support ━━━"
+    echo "ℹ️  Component has no RPM dependencies - skipping"
+    exit 0
+    ;;
+esac
+
+echo "━━━ Step 4: Add RPM Lockfile Support ━━━"
+
+# Copy lockfile infrastructure:
+# - Scripts (update-lockfile.sh, etc.) from devel (always use latest)
+# - Component directory from previous release (starting point for new release)
+
+# Copy scripts from devel using git show (more reliable)
+mkdir -p .rpm-lockfiles
+git show "origin/devel:.rpm-lockfiles/update-lockfile.sh" > .rpm-lockfiles/update-lockfile.sh || {
+  echo "❌ ERROR: Could not copy update-lockfile.sh from devel"
+  exit 1
+}
+
+# Copy additional scripts if they exist
+for script in check-repo-access.sh verify-packages.sh; do
+  if git show "origin/devel:.rpm-lockfiles/${script}" > ".rpm-lockfiles/${script}" 2>/dev/null; then
+    chmod +x ".rpm-lockfiles/${script}"
+  fi
+done
+
+# Make update-lockfile.sh executable
+chmod +x .rpm-lockfiles/update-lockfile.sh || {
+  echo "❌ ERROR: Failed to make update-lockfile.sh executable"
+  exit 1
+}
+
+# Copy component-specific lockfile directory from previous release
+git archive "origin/release-0.${PREV_VERSION}" ".rpm-lockfiles/${LOCKFILE_COMPONENT}/" | tar -x || {
+  echo "❌ ERROR: Could not copy lockfile directory from previous release"
+  echo "Expected: .rpm-lockfiles/${LOCKFILE_COMPONENT}/ on branch release-0.${PREV_VERSION}"
+  exit 1
+}
+
+# Generate lockfile with correct arguments: <branch> <component>
+echo "ℹ️  Generating RPM lockfile for $LOCKFILE_COMPONENT on $TARGET_BRANCH..."
+.rpm-lockfiles/update-lockfile.sh "$TARGET_BRANCH" "$LOCKFILE_COMPONENT" || {
+  echo "❌ ERROR: Lockfile generation failed"
+  echo "Check RPM repository access and package availability"
+  exit 1
+}
+
+# Verify lockfile was created
+if [ ! -f ".rpm-lockfiles/${LOCKFILE_COMPONENT}/rpms.lock.yaml" ]; then
+  echo "❌ ERROR: Lockfile not created: .rpm-lockfiles/${LOCKFILE_COMPONENT}/rpms.lock.yaml"
+  exit 1
+fi
+
+git add .rpm-lockfiles/ || {
+  echo "❌ ERROR: Failed to stage .rpm-lockfiles/"
+  exit 1
+}
+commit_changes "Add RPM lockfile support for ${LOCKFILE_COMPONENT}" "RPM lockfile added and committed"
 ```
 
 ---
