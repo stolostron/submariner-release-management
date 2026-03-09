@@ -854,6 +854,19 @@ esac
 
 echo "━━━ Step 4: Add RPM Lockfile Support ━━━"
 
+# Check commands exist (certs/registry checked by scripts below)
+command -v podman &>/dev/null || {
+  echo "❌ ERROR: podman not found. Install: sudo dnf install podman"
+  exit 1
+}
+
+command -v subscription-manager &>/dev/null || {
+  echo "❌ ERROR: subscription-manager not found. Install: sudo dnf install subscription-manager"
+  exit 1
+}
+
+echo ""
+
 # Copy lockfile infrastructure:
 # - Scripts (update-lockfile.sh, etc.) from devel (always use latest)
 # - Component directory from previous release (starting point for new release)
@@ -885,11 +898,27 @@ git archive "origin/release-0.${PREV_VERSION}" ".rpm-lockfiles/${LOCKFILE_COMPON
   exit 1
 }
 
-# Generate lockfile with correct arguments: <branch> <component>
-echo "ℹ️  Generating RPM lockfile for $LOCKFILE_COMPONENT on $TARGET_BRANCH..."
-.rpm-lockfiles/update-lockfile.sh "$TARGET_BRANCH" "$LOCKFILE_COMPONENT" || {
+# Verify repository access before expensive lockfile generation
+if [ -x .rpm-lockfiles/check-repo-access.sh ]; then
+  .rpm-lockfiles/check-repo-access.sh || {
+    echo ""
+    echo "❌ ERROR: Repository access failed"
+    echo "   Fix: sudo subscription-manager unregister"
+    echo "        sudo subscription-manager clean"
+    echo "        sudo subscription-manager register --org='<ORG_ID>' --activationkey='<KEY_NAME>'"
+    echo ""
+    echo "   First time? See full setup guide:"
+    echo "   https://github.com/submariner-io/submariner/blob/devel/.rpm-lockfiles/README.md"
+    exit 1
+  }
+fi
+
+# Generate lockfile (use current branch since configs already in place)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "ℹ️  Generating RPM lockfile for $LOCKFILE_COMPONENT..."
+.rpm-lockfiles/update-lockfile.sh "$CURRENT_BRANCH" "$LOCKFILE_COMPONENT" || {
   echo "❌ ERROR: Lockfile generation failed"
-  echo "Check RPM repository access and package availability"
+  echo "   Debug: .rpm-lockfiles/verify-packages.sh $CURRENT_BRANCH"
   exit 1
 }
 
