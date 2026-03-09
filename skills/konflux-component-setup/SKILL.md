@@ -719,8 +719,8 @@ echo "✓ Copied Dockerfile from release-${VERSION_MAJOR}.${PREV_VERSION}"
 
 # Copy special files if needed
 if [ -n "$SPECIAL_FILES" ]; then
-  IFS=',' read -ra FILES <<< "$SPECIAL_FILES"
-  for file in "${FILES[@]}"; do
+  # Split comma-separated list (portable - works in bash and zsh)
+  for file in $(echo "$SPECIAL_FILES" | tr ',' ' '); do
     # nettest has metricsproxy.konflux in scripts/nettest/
     SPECIAL_PATH="scripts/${COMPONENT}/${file}.konflux"
     if git show "origin/release-${VERSION_MAJOR}.${PREV_VERSION}:${SPECIAL_PATH}" > "${SPECIAL_PATH}" 2>/dev/null; then
