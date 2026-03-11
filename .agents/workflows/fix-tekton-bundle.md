@@ -39,7 +39,7 @@ After bundle SHAs are updated and pushed, set up bundle Konflux build.
 **Repo:** <https://github.com/submariner-io/submariner-operator>
 **Local:** `~/go/src/submariner-io/submariner-operator`
 
-**Workflow:** `.agents/workflows/konflux-bundle-setup.md`
+**Skill:** `/konflux-bundle-setup [version]`
 
 ## Done When
 

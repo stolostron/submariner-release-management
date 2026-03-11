@@ -102,6 +102,41 @@ Handles 8 components across 5 repos. Runs 12 automated setup steps and creates p
 
 **After running:** Review commits, validate YAML, push to remote, wait for build (~15-30 min)
 
+## /konflux-bundle-setup
+
+Automate Konflux bundle setup on new release branches
+
+Configures Tekton pipelines for bundle builds including infrastructure, OLM annotations, hermetic builds, and multi-platform support.
+Runs 14 automated setup steps and creates 6-9 commits for easy review.
+
+```bash
+# Can run from anywhere (auto-navigates to submariner-operator):
+/konflux-bundle-setup              # Auto-detect version from branch
+/konflux-bundle-setup 0.23         # Specify version explicitly
+```
+
+**Requirements:**
+
+- `~/go/src/submariner-io/submariner-operator` repository must exist (auto-navigates if needed)
+- `/configure-downstream` must be complete (bot PR branch created)
+- Previous release branch must exist (e.g., `release-0.20`)
+
+**What it does:**
+
+1. Validates prerequisites (tools, repository state)
+2. Detects version and checks out appropriate branch (bot PR or release)
+3. Copies bundle infrastructure from previous release
+4. Verifies infrastructure was copied correctly
+5. Adds OLM annotations (7 feature annotations + subscription annotation)
+6. Configures Tekton build parameters (hermetic, multi-platform, SBOM)
+7. Updates file change filters (CEL expressions)
+8. Updates task references to latest versions (affects all .tekton files)
+9. Creates 6-9 commits with clear messages
+
+**Note:** Bundle image SHAs are copied from previous release. Update them with bundle-sha-update workflow after component builds complete.
+
+**After running:** Review commits, validate YAML (`make yamllint`), push to remote, wait for build (~15-30 min)
+
 ## /create-fbc-release
 
 Create FBC releases for all OCP versions (stage or prod) with comprehensive verification

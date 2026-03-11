@@ -16,7 +16,9 @@
 
 ## 3b. Fix Tekton Config PRs - Bundle (Y-stream only)
 
-@.agents/workflows/fix-tekton-bundle.md
+@/konflux-bundle-setup
+
+**Alternative:** @.agents/workflows/fix-tekton-bundle.md (manual workflow)
 
 ## 4. Update Tekton Tasks and Resolve EC Violations
 
