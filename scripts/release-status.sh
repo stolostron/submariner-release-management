@@ -588,17 +588,36 @@ check_step_1() {
 
 # Step 2: Konflux ReleasePlans
 check_step_2() {
-  STAGE_PLAN=$(oc get releaseplans -n submariner-tenant --no-headers 2>/dev/null | grep -E "submariner-release-plan-stage-$MAJOR_MINOR_DASH\s" | awk '{print $1}' || true)
-  PROD_PLAN=$(oc get releaseplans -n submariner-tenant --no-headers 2>/dev/null | grep -E "submariner-release-plan-prod-$MAJOR_MINOR_DASH\s" | awk '{print $1}' || true)
+  if [ "$OC_AVAILABLE" = true ]; then
+    # Check cluster for deployed ReleasePlans
+    STAGE_PLAN=$(oc get releaseplans -n submariner-tenant --no-headers 2>/dev/null | grep -E "submariner-release-plan-stage-$MAJOR_MINOR_DASH\s" | awk '{print $1}' || true)
+    PROD_PLAN=$(oc get releaseplans -n submariner-tenant --no-headers 2>/dev/null | grep -E "submariner-release-plan-prod-$MAJOR_MINOR_DASH\s" | awk '{print $1}' || true)
 
-  if [ -n "$STAGE_PLAN" ] && [ -n "$PROD_PLAN" ]; then
-    echo "✅ ReleasePlans deployed"
-  elif [ -n "$STAGE_PLAN" ] || [ -n "$PROD_PLAN" ]; then
-    echo "⚠️  Partial: $([ -n "$STAGE_PLAN" ] && echo "stage" || echo "prod") only"
-    echo "   ⮕ Next: Complete downstream configuration (Step 2)"
+    if [ -n "$STAGE_PLAN" ] && [ -n "$PROD_PLAN" ]; then
+      echo "✅ ReleasePlans deployed"
+    elif [ -n "$STAGE_PLAN" ] || [ -n "$PROD_PLAN" ]; then
+      echo "⚠️  Partial: $([ -n "$STAGE_PLAN" ] && echo "stage" || echo "prod") only"
+      echo "   ⮕ Next: Complete downstream configuration (Step 2)"
+    else
+      echo "❌ ReleasePlans not deployed to cluster"
+      echo "   ⮕ Next: Wait for ArgoCD sync or configure downstream (Step 2)"
+    fi
   else
-    echo "❌ ReleasePlans not found"
-    echo "   ⮕ Next: Configure downstream release (Step 2)"
+    # Fallback: Check repo for configuration files
+    OVERLAY_PATH="$KONFLUX_RELEASE_DATA_PATH/tenants-config/cluster/kflux-prd-rh02/tenants/submariner-tenant/overlay/application-submariner/$MAJOR_MINOR_DASH-overlay"
+
+    if [ -d "$OVERLAY_PATH" ]; then
+      # Check if release plan patches exist
+      if ls "$OVERLAY_PATH"/*release-plan*.yaml &>/dev/null; then
+        echo "✅ ReleasePlans configured in repo (cluster status unknown)"
+      else
+        echo "⚠️  Overlay exists but no release plan patches found"
+        echo "   ⮕ Next: Complete downstream configuration (Step 2)"
+      fi
+    else
+      echo "❌ ReleasePlans not configured"
+      echo "   ⮕ Next: Configure downstream release (Step 2)"
+    fi
   fi
 }
 
@@ -1153,12 +1172,32 @@ echo "=== Submariner $VERSION Release Status ==="
 echo ""
 
 # ============================================================================
+# Check Cluster Access
+# ============================================================================
+
+# Check if logged in to cluster
+if oc whoami &>/dev/null; then
+  OC_AVAILABLE=true
+else
+  OC_AVAILABLE=false
+  echo "⚠️  Not logged in to cluster - using repository-based verification where possible"
+  echo ""
+fi
+
+# Path to konflux-release-data repo (for fallback verification)
+KONFLUX_RELEASE_DATA_PATH="${KONFLUX_RELEASE_DATA_PATH:-$HOME/konflux/konflux-release-data}"
+
+# ============================================================================
 # Initialize Global Variables
 # ============================================================================
 
 # Fetch latest component snapshot once for Steps 3b-7 (optimization)
-SNAPSHOT=$(oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp 2>/dev/null \
-  | grep "^submariner-$MAJOR_MINOR_DASH" | tail -1 | awk '{print $1}' || true)
+if [ "$OC_AVAILABLE" = true ]; then
+  SNAPSHOT=$(oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp 2>/dev/null \
+    | grep "^submariner-$MAJOR_MINOR_DASH" | tail -1 | awk '{print $1}' || true)
+else
+  SNAPSHOT=""
+fi
 
 # Find release YAMLs once (used across multiple steps and phase detection)
 STAGE_YAML=$(find "releases/$MAJOR_MINOR/stage/" -name "submariner-$FULL_VERSION_DASH-stage-*.yaml" 2>/dev/null | tail -1 || true)
