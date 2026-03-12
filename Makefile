@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release
 
 .DEFAULT_GOAL := help
 
@@ -15,6 +15,11 @@ help:
 	@echo "                           Default TYPE is stage if not specified"
 	@echo "                           Example: make create-fbc-releases VERSION=0.22.1"
 	@echo "                           Example: make create-fbc-releases VERSION=0.22.1 TYPE=prod"
+	@echo "  make create-component-release VERSION=... [TYPE=stage|prod]"
+	@echo "                         - Create component release (requires oc login)"
+	@echo "                           Default TYPE is stage if not specified"
+	@echo "                           Example: make create-component-release VERSION=0.22.1"
+	@echo "                           Example: make create-component-release VERSION=0.22.1 TYPE=prod"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
@@ -33,6 +38,10 @@ help:
 create-fbc-releases:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-fbc-releases VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
 	./scripts/create-fbc-releases.sh $(VERSION) $(if $(TYPE),--$(TYPE),--stage)
+
+create-component-release:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-component-release VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
+	./scripts/create-component-release.sh $(VERSION) $(if $(TYPE),$(TYPE),stage)
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 

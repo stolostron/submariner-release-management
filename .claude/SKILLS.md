@@ -213,6 +213,51 @@ make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
 
 **To undo:** `git reset HEAD~1`
 
+## /create-component-release
+
+Create component release (stage or prod) with comprehensive verification
+
+Automates Step 8 (stage) and Step 15 (prod) of the Submariner release workflow.
+
+```bash
+/create-component-release 0.22.1          # Stage (default)
+/create-component-release 0.22.1 stage    # Stage (explicit)
+/create-component-release 0.22.1 prod     # Prod (copies stage)
+/create-component-release 0.22            # Auto-expands to 0.22.0
+```
+
+**Alternative (make target):**
+
+```bash
+make create-component-release VERSION=0.22.1              # Stage (default)
+make create-component-release VERSION=0.22.1 TYPE=prod    # Production
+```
+
+**Prerequisites:**
+
+- oc login (required for snapshot queries)
+- **For stage:** Step 7 complete (bundle SHAs updated)
+- **For prod:** Stage YAML exists with release notes (Steps 8-9 complete)
+
+**What it does:**
+
+1. Verifies latest component snapshot (push event, tests passed, 9 components)
+2. Generates Release YAML (stage or prod mode)
+3. Validates with make test-remote
+4. Commits automatically
+
+**After running:**
+
+- **Stage:** Fill notes placeholder via Step 9 workflow, then apply
+- **Prod:** Apply immediately (notes copied from stage)
+
+1. Review commit: `git show`
+2. Push: `git push origin $(git rev-parse --abbrev-ref HEAD)`
+3. Apply: `make apply FILE=<yaml>`
+4. Monitor: `make watch NAME=<release-name>`
+
+**To undo:** `git reset HEAD~1`
+
 ## Installation
 
 ### .claude/settings.json
