@@ -197,7 +197,7 @@ echo ""
 ## Step 1: Query Snapshot and Extract SHAs
 
 Find latest snapshot and extract component image SHAs. Prefers passing snapshots, falls back to
-latest push snapshot if none passing (handles new version setup where bundle EC fails).
+latest push snapshot if none passing. Includes manual reruns from Web UI ("incoming" event-type).
 
 ```bash
 #!/bin/bash
@@ -241,7 +241,7 @@ if [ -n "$SNAPSHOT_ARG" ]; then
 else
   # Get snapshot names only (avoids JSON corruption with large result sets)
   SNAPSHOT_NAMES=$(oc get snapshots -n submariner-tenant \
-    -l 'pac.test.appstudio.openshift.io/event-type in (push,retest-comment)' \
+    -l 'pac.test.appstudio.openshift.io/event-type in (push,retest-comment,incoming)' \
     --sort-by=.metadata.creationTimestamp -o name | \
     grep "^snapshot.appstudio.redhat.com/submariner-${VERSION_DASH}")
 
