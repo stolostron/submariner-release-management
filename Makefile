@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update
 
 .DEFAULT_GOAL := help
 
@@ -20,6 +20,11 @@ help:
 	@echo "                           Default TYPE is stage if not specified"
 	@echo "                           Example: make create-component-release VERSION=0.22.1"
 	@echo "                           Example: make create-component-release VERSION=0.22.1 TYPE=prod"
+	@echo "  make rpm-lockfile-update [BRANCH=...] [REPO=...|COMPONENT=...]"
+	@echo "                         - Update RPM lockfiles across Submariner repos"
+	@echo "                           Example: make rpm-lockfile-update"
+	@echo "                           Example: make rpm-lockfile-update COMPONENT=gateway"
+	@echo "                           Example: make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
@@ -42,6 +47,9 @@ create-fbc-releases:
 create-component-release:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-component-release VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
 	./scripts/create-component-release.sh $(VERSION) $(if $(TYPE),$(TYPE),stage)
+
+rpm-lockfile-update:
+	./scripts/rpm-lockfile-update.sh $(BRANCH) $(if $(REPO),$(REPO),$(COMPONENT))
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
