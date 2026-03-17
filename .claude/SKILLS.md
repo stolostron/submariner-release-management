@@ -133,6 +133,27 @@ regenerates bundle manifests, and verifies all SHAs match.
 
 **After running:** Review commit, push to remote, wait for bundle rebuild (~15-30 min)
 
+## /rpm-lockfile-update
+
+Regenerates RPM lockfiles in submariner and shipyard repositories by creating fix branches, running hermetic builds,
+and committing updated lockfiles.
+
+```bash
+/rpm-lockfile-update                             # Auto-detect branch, all repos
+/rpm-lockfile-update 0.21                        # Explicit branch, all repos
+/rpm-lockfile-update gateway                     # Auto-detect branch, gateway only
+/rpm-lockfile-update 0.21 submariner             # Explicit branch, repo filter
+make rpm-lockfile-update                         # Auto-detect branch
+make rpm-lockfile-update COMPONENT=gateway       # Auto-detect, component filter
+make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway  # Explicit branch
+```
+
+**Filter options:** all, submariner, shipyard, gateway, globalnet, route-agent, nettest
+
+**Requirements:** Red Hat entitlements, `podman login registry.redhat.io`, `gh auth login`, Bash 4.0+
+
+**After running:** Review commits, push to remote, create PRs per repo
+
 ## /konflux-bundle-setup
 
 Automate Konflux bundle setup on new release branches

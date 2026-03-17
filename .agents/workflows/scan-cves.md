@@ -18,7 +18,13 @@ Run CVE workflow (from each repo's CLAUDE.md on devel) on release-0.X branch for
 
 ### RPM Dependencies
 
-**TODO:** Update RPM lockfiles to fix RPM package CVEs.
+Update RPM lockfiles to fix RPM package CVEs:
+
+```bash
+/rpm-lockfile-update <branch>
+```
+
+This updates lockfiles in submariner (3 components) and shipyard (1 component) repos.
 
 ### Addon Go Toolchain
 
