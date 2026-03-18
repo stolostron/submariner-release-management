@@ -9,7 +9,7 @@ allowed-tools: Bash
 
 # Create Component Release
 
-Automates Step 8 (stage), and Step 15 (prod) of the Submariner release workflow.
+Automates Step 8 (stage) and Step 15 (prod) of the Submariner release workflow.
 
 **What it does:**
 
