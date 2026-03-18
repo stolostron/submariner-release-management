@@ -11,9 +11,18 @@ oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/
 # Show available commands
 make
 
+# Create component release (requires cluster login)
+make create-component-release VERSION=0.22.1              # Stage (default)
+make create-component-release VERSION=0.22.1 TYPE=prod    # Production
+
 # Create FBC releases (requires cluster login)
 make create-fbc-releases VERSION=0.22.1              # Stage (default)
 make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
+
+# Update RPM lockfiles (requires entitlements, registry auth)
+make rpm-lockfile-update                         # Auto-detect branch
+make rpm-lockfile-update BRANCH=0.21             # Specify branch
+make rpm-lockfile-update COMPONENT=gateway       # Filter by component
 
 # Validate locally (no cluster access needed)
 make test
@@ -44,7 +53,9 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 | `/konflux-ci-fix`          | Fix Konflux CI Enterprise Contract issues      |
 | `/konflux-component-setup` | Automate Konflux component setup on new branch |
 | `/bundle-image-update`     | Update bundle image SHAs from snapshots        |
+| `/rpm-lockfile-update`     | Update RPM lockfiles across repos              |
 | `/konflux-bundle-setup`    | Automate Konflux bundle setup on new branch    |
+| `/create-component-release`| Create component release (stage or prod)       |
 | `/create-fbc-release`      | Create FBC releases for all OCP versions       |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).
