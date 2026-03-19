@@ -724,6 +724,7 @@ if [ -n "$SPECIAL_FILES" ]; then
     # nettest has metricsproxy.konflux in scripts/nettest/
     SPECIAL_PATH="scripts/${COMPONENT}/${file}.konflux"
     if git show "origin/release-${VERSION_MAJOR}.${PREV_VERSION}:${SPECIAL_PATH}" > "${SPECIAL_PATH}" 2>/dev/null; then
+      chmod +x "$SPECIAL_PATH"
       if [ -f "$SPECIAL_PATH" ]; then
         echo "✓ Copied special file: $SPECIAL_PATH"
       else
