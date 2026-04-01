@@ -539,17 +539,24 @@ query_non_cve_issues() {
     return 0
   fi
 
+  echo "Found $(echo "$ISSUE_KEYS" | wc -l) non-CVE issue(s)"
+  echo "Fetching issue details..."
+
   # Fetch full details for each issue with view (to get created, updated dates)
   local ISSUE_DATA
   ISSUE_DATA=$(echo "$ISSUE_KEYS" | while read -r KEY; do
     acli jira workitem view "$KEY" --fields "key,priority,status,created,updated,summary" --json </dev/null 2>/dev/null || echo "{}"
   done | jq -s 'sort_by(.fields.priority.id // 99999) | reverse')
 
+  echo "Details fetched for $(echo "$ISSUE_DATA" | jq '. | length') issues"
+
   if [ -z "$ISSUE_DATA" ] || [ "$ISSUE_DATA" = "[]" ]; then
     echo "No non-CVE issues found after filtering."
     echo ""
     return 0
   fi
+
+  echo "Filtering issues..."
 
   # Filter out existing issues and submariner-addon
   local FILTERED_COUNT=0
