@@ -277,10 +277,10 @@ find_existing_fixversions() {
 
   echo "Querying Jira for existing fixVersion values..."
 
-  # Get issue keys first with search
+  # Get issue keys first with search (filter by affectedVersion for performance)
   local ISSUE_KEYS
   ISSUE_KEYS=$(acli jira workitem search \
-    --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse)' \
+    --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse) AND affectedVersion = "'"$ACM_VERSION"'"' \
     --paginate --json 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
 
   if [ -z "$ISSUE_KEYS" ]; then
@@ -294,7 +294,7 @@ find_existing_fixversions() {
   local FIXVERSIONS_JSON
   FIXVERSIONS_JSON=$(echo "$ISSUE_KEYS" | while read -r KEY; do
     acli jira workitem view "$KEY" --fields "fixVersions" --json 2>/dev/null || echo "{}"
-  done | jq -s '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("ACM"))] | unique | sort[]' 2>/dev/null)
+  done | jq -s '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("ACM"))] | unique | sort' 2>/dev/null)
 
   if [ -z "$FIXVERSIONS_JSON" ] || [ "$FIXVERSIONS_JSON" = "[]" ]; then
     echo "⚠️  WARNING: No existing fixVersions found - using affectedVersion only"
