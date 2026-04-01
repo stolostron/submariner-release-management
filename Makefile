@@ -57,7 +57,7 @@ rpm-lockfile-update:
 
 add-release-notes:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make add-release-notes VERSION=0.22.1 [STAGE_YAML=...]" && exit 1)
-	./scripts/add-release-notes.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),)
+	./scripts/add-release-notes.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),) --report-only
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 

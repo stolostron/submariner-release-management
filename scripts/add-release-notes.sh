@@ -117,15 +117,23 @@ check_prerequisites() {
 # ============================================================================
 
 show_usage() {
-  echo "Usage: $0 <version> [--stage-yaml path]"
-  echo "Example: $0 0.22.1"
-  echo "Example: $0 0.22"
-  echo "Example: $0 0.22.1 --stage-yaml releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
+  echo "Usage: $0 <version> [--stage-yaml path] [--report-only]"
+  echo ""
+  echo "Arguments:"
+  echo "  <version>          Submariner version (e.g., 0.22.1 or 0.22)"
+  echo "  --stage-yaml PATH  Path to stage YAML file (optional, auto-discovered if omitted)"
+  echo "  --report-only      Display issues without prompting or updating YAML"
+  echo ""
+  echo "Examples:"
+  echo "  $0 0.22.1                     # Interactive: query, select, update YAML"
+  echo "  $0 0.22.1 --report-only       # Report mode: query and display only"
+  echo "  $0 0.22.1 --stage-yaml releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
 }
 
 parse_arguments() {
   local VERSION_ARG="${1:-}"
   local STAGE_YAML_ARG=""
+  REPORT_ONLY=false
 
   if [ -z "$VERSION_ARG" ]; then
     echo "❌ ERROR: Version required"
@@ -145,6 +153,10 @@ parse_arguments() {
         fi
         STAGE_YAML_ARG="$2"
         shift 2
+        ;;
+      --report-only)
+        REPORT_ONLY=true
+        shift
         ;;
       *)
         echo "❌ ERROR: Unknown argument: $1"
@@ -663,33 +675,39 @@ present_results() {
       : $((IDX++))
     done
 
-    echo ""
-    echo "Enter issue numbers to include (space-separated, 'all', or 'none'):"
-    read -r SELECTION
-
-    # Parse selection
-    if [[ "$SELECTION" == "all" ]]; then
-      for item in "${NON_CVE_ISSUES[@]}"; do
-        IFS='|' read -r KEY _ _ _ _ _ <<< "$item"
-        SELECTED_ISSUES+=("$KEY")
-      done
-    elif [[ "$SELECTION" == "none" ]]; then
-      SELECTED_ISSUES=()
+    # In report-only mode, skip selection prompt
+    if [ "$REPORT_ONLY" = true ]; then
+      echo ""
+      echo "(Report-only mode: showing data without selection)"
     else
-      for NUM in $SELECTION; do
-        if [[ "$NUM" =~ ^[0-9]+$ ]] && [ "$NUM" -lt "${#NON_CVE_ISSUES[@]}" ]; then
-          IFS='|' read -r KEY _ _ _ _ _ <<< "${NON_CVE_ISSUES[$NUM]}"
-          SELECTED_ISSUES+=("$KEY")
-        else
-          echo "⚠️  Invalid selection: $NUM (skipped)"
-        fi
-      done
-    fi
+      echo ""
+      echo "Enter issue numbers to include (space-separated, 'all', or 'none'):"
+      read -r SELECTION
 
-    echo ""
-    echo "Selected ${#SELECTED_ISSUES[@]} non-CVE issue(s)"
-    if [ ${#SELECTED_ISSUES[@]} -gt 0 ]; then
-      printf '  - %s\n' "${SELECTED_ISSUES[@]}"
+      # Parse selection
+      if [[ "$SELECTION" == "all" ]]; then
+        for item in "${NON_CVE_ISSUES[@]}"; do
+          IFS='|' read -r KEY _ _ _ _ _ <<< "$item"
+          SELECTED_ISSUES+=("$KEY")
+        done
+      elif [[ "$SELECTION" == "none" ]]; then
+        SELECTED_ISSUES=()
+      else
+        for NUM in $SELECTION; do
+          if [[ "$NUM" =~ ^[0-9]+$ ]] && [ "$NUM" -lt "${#NON_CVE_ISSUES[@]}" ]; then
+            IFS='|' read -r KEY _ _ _ _ _ <<< "${NON_CVE_ISSUES[$NUM]}"
+            SELECTED_ISSUES+=("$KEY")
+          else
+            echo "⚠️  Invalid selection: $NUM (skipped)"
+          fi
+        done
+      fi
+
+      echo ""
+      echo "Selected ${#SELECTED_ISSUES[@]} non-CVE issue(s)"
+      if [ ${#SELECTED_ISSUES[@]} -gt 0 ]; then
+        printf '  - %s\n' "${SELECTED_ISSUES[@]}"
+      fi
     fi
   else
     echo "No non-CVE issues available for selection."
@@ -697,7 +715,24 @@ present_results() {
 
   echo ""
 
-  # Confirm release type
+  # Skip remaining steps in report-only mode
+  if [ "$REPORT_ONLY" = true ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Summary"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "CVE issues: ${#CVE_ISSUES[@]}"
+    echo "Non-CVE issues: ${#NON_CVE_ISSUES[@]}"
+    if [ ${#CVE_ISSUES[@]} -gt 0 ]; then
+      echo "Default release type: RHSA (CVEs present)"
+    else
+      echo "Default release type: RHBA (no CVEs)"
+    fi
+    echo ""
+    return 0
+  fi
+
+  # Confirm release type (interactive mode only)
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "Release Type"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -1028,6 +1063,12 @@ main() {
   query_cve_issues
   query_non_cve_issues
   present_results
+
+  # Exit if report-only mode (no updates)
+  if [ "$REPORT_ONLY" = true ]; then
+    exit 0
+  fi
+
   build_release_notes
   update_stage_yaml
   validate_and_commit
