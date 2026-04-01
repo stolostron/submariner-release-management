@@ -281,7 +281,7 @@ find_existing_fixversions() {
   local ISSUE_KEYS
   ISSUE_KEYS=$(acli jira workitem search \
     --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse) AND affectedVersion = "'"$ACM_VERSION"'"' \
-    --paginate --json 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
+    --paginate --json </dev/null 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
 
   if [ -z "$ISSUE_KEYS" ]; then
     echo "⚠️  WARNING: No issues found - using affectedVersion only"
@@ -290,11 +290,15 @@ find_existing_fixversions() {
     return 0
   fi
 
+  # Extract ACM major.minor for filtering (e.g., "ACM 2.16.0" → "ACM 2.16")
+  local ACM_VERSION_MAJOR_MINOR
+  ACM_VERSION_MAJOR_MINOR=$(echo "$ACM_VERSION" | grep -oE 'ACM [0-9]+\.[0-9]+')
+
   # Fetch fixVersions for each issue (batch view)
   local FIXVERSIONS_JSON
   FIXVERSIONS_JSON=$(echo "$ISSUE_KEYS" | while read -r KEY; do
-    acli jira workitem view "$KEY" --fields "fixVersions" --json 2>/dev/null || echo "{}"
-  done | jq -s '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("ACM"))] | unique | sort' 2>/dev/null)
+    acli jira workitem view "$KEY" --fields "fixVersions" --json </dev/null 2>/dev/null || echo "{}"
+  done | jq -s '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("'"$ACM_VERSION_MAJOR_MINOR"'"))] | unique | sort' 2>/dev/null)
 
   if [ -z "$FIXVERSIONS_JSON" ] || [ "$FIXVERSIONS_JSON" = "[]" ]; then
     echo "⚠️  WARNING: No existing fixVersions found - using affectedVersion only"
@@ -405,7 +409,7 @@ query_cve_issues() {
 
   # Get issue keys with search (includes labels in output)
   local SEARCH_RESULTS
-  SEARCH_RESULTS=$(acli jira workitem search --jql "$QUERY" --fields "key,labels" --paginate --json 2>/dev/null || echo "[]")
+  SEARCH_RESULTS=$(acli jira workitem search --jql "$QUERY" --fields "key,labels" --paginate --json </dev/null 2>/dev/null || echo "[]")
 
   if [ "$SEARCH_RESULTS" = "[]" ] || [ -z "$SEARCH_RESULTS" ]; then
     echo "No CVE issues found."
@@ -527,7 +531,7 @@ query_non_cve_issues() {
 
   # Get issue keys with search (basic fields only)
   local ISSUE_KEYS
-  ISSUE_KEYS=$(acli jira workitem search --jql "$QUERY" --paginate --json 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
+  ISSUE_KEYS=$(acli jira workitem search --jql "$QUERY" --paginate --json </dev/null 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
 
   if [ -z "$ISSUE_KEYS" ]; then
     echo "No non-CVE issues found."
@@ -538,7 +542,7 @@ query_non_cve_issues() {
   # Fetch full details for each issue with view (to get created, updated dates)
   local ISSUE_DATA
   ISSUE_DATA=$(echo "$ISSUE_KEYS" | while read -r KEY; do
-    acli jira workitem view "$KEY" --fields "key,priority,status,created,updated,summary" --json 2>/dev/null || echo "{}"
+    acli jira workitem view "$KEY" --fields "key,priority,status,created,updated,summary" --json </dev/null 2>/dev/null || echo "{}"
   done | jq -s 'sort_by(.fields.priority.id // 99999) | reverse')
 
   if [ -z "$ISSUE_DATA" ] || [ "$ISSUE_DATA" = "[]" ]; then
