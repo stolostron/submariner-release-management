@@ -82,20 +82,16 @@ fi
 echo ""
 echo "4. Testing apply.sh (YAML generation)..."
 
-# Create mock decisions with CVE and non-CVE issues
+# Create mock decisions (CVEs auto-included from data.json)
 cat > /tmp/release-notes-decisions.json <<'EOF'
 {
   "metadata": {
-    "version": "TEST",
+    "version": "0.23.1",
     "analyzed_at": "2026-04-01T00:00:00Z",
     "analyzer": "test-script"
   },
   "release_type": "RHSA",
   "release_type_rationale": "CVE present",
-  "cve_issues": {
-    "all_included": true,
-    "issue_keys": ["ACM-12345", "ACM-12346"]
-  },
   "non_cve_issues": {
     "selected": [
       {

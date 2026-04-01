@@ -39,6 +39,8 @@ echo "Topics file: /tmp/release-notes-topics.json"
 
 ---
 
+**Phase 3: Analyze issues and make decisions**
+
 Read `/tmp/release-notes-topics.json` and make release note decisions.
 
 **Your task:**
@@ -66,14 +68,10 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
   "metadata": {
     "version": "X.Y.Z",
     "analyzed_at": "ISO-8601 timestamp",
-    "analyzer": "claude-sonnet-4.5"
+    "analyzer": "claude-sonnet-4-5"
   },
   "release_type": "RHSA|RHBA|RHEA",
   "release_type_rationale": "Why this type (1 sentence)",
-  "cve_issues": {
-    "all_included": true,
-    "issue_keys": ["ACM-XXXXX"]
-  },
   "non_cve_issues": {
     "selected": [
       {
@@ -87,8 +85,9 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
 
 **Notes:**
 
-- Extract CVE issue keys from `topics.json` cve_topics array
-- Only include notable non-CVE issues in selected array
+- CVE issues are auto-included from `data.json` (no need to list in decisions)
+- Review CVE topics in `topics.json` to verify they make sense
+- Only select notable non-CVE issues for `selected` array
 - Use Write tool to create the file (do NOT output text directly)
 
 ---
@@ -100,7 +99,7 @@ set -euo pipefail
 REPO=$(git rev-parse --show-toplevel 2>/dev/null)
 
 echo ""
-echo "Phase 3: Applying decisions to stage YAML..."
+echo "Phase 4: Applying decisions to stage YAML..."
 bash "$REPO/scripts/release-notes/apply.sh"
 
 echo ""
