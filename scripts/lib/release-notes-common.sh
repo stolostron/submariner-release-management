@@ -1,6 +1,7 @@
 #!/bin/bash
 # Shared library for release notes workflow
 # Used by: collect.sh, prepare.sh, apply.sh
+set -euo pipefail
 
 # ============================================================================
 # ACM Version Calculation

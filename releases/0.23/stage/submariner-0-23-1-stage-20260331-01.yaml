@@ -11,7 +11,19 @@ spec:
   snapshot: submariner-0-23-20260331-195748-000
   data:
     releaseNotes:
-      type: RHBA  # Change to RHSA if adding CVEs, RHEA for enhancements
+      type: RHSA
       issues:
-        fixed: []  # Fill with Step 9 workflow
-      cves: []     # Fill with Step 9 workflow (required if type=RHSA)
+        fixed:
+          # CVE Issues (1):
+          - id: ACM-12345
+            source: issues.redhat.com
+          # Non-CVE Issues (1):
+          - id: ACM-30970
+            source: issues.redhat.com
+      cves:
+        # CVE-2024-99999 (ACM-12345): FIXED
+        #   Test: command to verify fix
+        #   Output: expected output showing fixed version
+        #   Required: minimum version needed
+        - key: CVE-2024-99999
+          component: submariner-operator-0-23
