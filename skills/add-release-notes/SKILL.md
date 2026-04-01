@@ -13,7 +13,7 @@ Automates Step 9 of the Submariner release workflow: adding Jira-sourced release
 
 **What it does:**
 
-1. Validates prerequisites (jira-cli, JIRA_API_TOKEN, oc, jq, yq)
+1. Validates prerequisites (acli, oc, jq, yq)
 2. Finds latest stage YAML (or uses --stage-yaml path)
 3. Queries Jira for CVE issues (automatic inclusion)
 4. Queries Jira for non-CVE issues (user selection)
@@ -34,10 +34,9 @@ Automates Step 9 of the Submariner release workflow: adding Jira-sourced release
 
 **Prerequisites:**
 
-- jira-cli installed: `go install github.com/ankitpokhrel/jira-cli/cmd/jira@latest`
-- JIRA_API_TOKEN in ~/.zshrc: `export JIRA_API_TOKEN="your-token"`
-- Jira init: `jira init --installation local --auth-type bearer \
-  --server https://issues.redhat.com --login rhn-support-tiwillia --project ACM --board none`
+- acli (Atlassian CLI) installed and authenticated
+- Authentication: `acli jira auth login --web` (or with API token)
+- Verify: `acli jira auth status` should show "Authenticated"
 - oc login (for release date lookups)
 - Step 8 complete (stage YAML with placeholder release notes)
 

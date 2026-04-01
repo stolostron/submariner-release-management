@@ -41,18 +41,14 @@ TIMEFRAME_START=""
 # Helper Functions
 # ============================================================================
 
-load_jira_token() {
-  # Load JIRA_API_TOKEN from environment or shell config if not already set
-  if [ -z "${JIRA_API_TOKEN:-}" ]; then
-    local TOKEN
-    if [ -f ~/.zshrc ]; then
-      TOKEN=$(grep -E '^export JIRA_API_TOKEN=' ~/.zshrc 2>/dev/null | head -1 | sed 's/^export JIRA_API_TOKEN=//' | tr -d '"' || true)
-    elif [ -f ~/.bashrc ]; then
-      TOKEN=$(grep -E '^export JIRA_API_TOKEN=' ~/.bashrc 2>/dev/null | head -1 | sed 's/^export JIRA_API_TOKEN=//' | tr -d '"' || true)
-    fi
-    if [ -n "$TOKEN" ]; then
-      export JIRA_API_TOKEN="$TOKEN"
-    fi
+check_acli_auth() {
+  # Check if acli is authenticated
+  if ! acli jira auth status &>/dev/null; then
+    echo "❌ ERROR: acli is not authenticated"
+    echo ""
+    echo "Please authenticate with: acli jira auth login --web"
+    echo "Or with API token: acli jira auth login --site redhat.atlassian.net --email your@email.com --token YOUR_TOKEN"
+    exit 1
   fi
 }
 
@@ -66,7 +62,7 @@ check_prerequisites() {
   # Check required tools
   command -v jq &>/dev/null || MISSING_TOOLS+=("jq")
   command -v git &>/dev/null || MISSING_TOOLS+=("git")
-  command -v jira &>/dev/null || MISSING_TOOLS+=("jira-cli")
+  command -v acli &>/dev/null || MISSING_TOOLS+=("acli")
   command -v oc &>/dev/null || MISSING_TOOLS+=("oc")
 
   if [ "${#MISSING_TOOLS[@]}" -gt 0 ]; then
@@ -77,7 +73,7 @@ check_prerequisites() {
       case "$tool" in
         jq) echo "  jq: https://jqlang.github.io/jq/download/" ;;
         git) echo "  git: https://git-scm.com/downloads" ;;
-        jira-cli) echo "  jira-cli: go install github.com/ankitpokhrel/jira-cli/cmd/jira@latest" ;;
+        acli) echo "  acli: https://developer.atlassian.com/cloud/acli/guides/install-acli/" ;;
         oc) echo "  oc: https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html" ;;
       esac
     done
@@ -89,41 +85,18 @@ check_prerequisites() {
     echo "ℹ️  yq not found - will use sed for YAML editing (may be less robust)"
   fi
 
-  # Test Jira CLI setup
-  echo "Testing Jira CLI configuration..."
+  # Test acli authentication
+  echo "Testing acli authentication..."
+  check_acli_auth
 
-  # Load JIRA_API_TOKEN
-  load_jira_token
-
-  local TEST_RESULT
-  local TEST_ERROR
-  TEST_ERROR=$(timeout 10 jira issue list -q 'project=ACM' --raw 2>&1 || echo '{"error": "timeout or failed"}')
-  TEST_RESULT=$(echo "$TEST_ERROR" | jq -r '.[0].key // "Setup failed"' 2>/dev/null || echo "Setup failed")
-
-  if [[ "$TEST_RESULT" == "Setup failed" ]]; then
-    echo "❌ ERROR: Jira CLI not configured properly"
-    echo ""
-
-    # Check for API version error
-    if echo "$TEST_ERROR" | grep -q "410 Gone\|API has been removed"; then
-      echo "Jira API v2 has been deprecated. Please update jira-cli:"
-      echo "  go install github.com/ankitpokhrel/jira-cli/cmd/jira@latest"
-      echo ""
-      echo "Then re-initialize:"
-      echo "  jira init --installation local --auth-type bearer \\"
-      echo "    --server https://issues.redhat.com --login rhn-support-tiwillia \\"
-      echo "    --project ACM --board none"
-    else
-      echo "Setup steps:"
-      echo "  1. Create Personal Access Token at:"
-      echo "     https://issues.redhat.com/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens"
-      echo "  2. Add to ~/.zshrc: export JIRA_API_TOKEN=\"your-token\""
-      echo "  3. Reload: source ~/.zshrc"
-      echo "  4. Initialize jira-cli:"
-      echo "     jira init --installation local --auth-type bearer \\"
-      echo "       --server https://issues.redhat.com --login rhn-support-tiwillia \\"
-      echo "       --project ACM --board none"
-    fi
+  local AUTH_STATUS
+  AUTH_STATUS=$(acli jira auth status 2>&1)
+  if echo "$AUTH_STATUS" | grep -q "✓ Authenticated"; then
+    local SITE
+    SITE=$(echo "$AUTH_STATUS" | grep "Site:" | awk '{print $2}')
+    echo "✓ Authenticated to $SITE"
+  else
+    echo "❌ ERROR: acli authentication check failed"
     exit 1
   fi
 
@@ -304,19 +277,31 @@ find_existing_fixversions() {
 
   echo "Querying Jira for existing fixVersion values..."
 
-  # Load JIRA_API_TOKEN
-  load_jira_token
+  # Get issue keys first with search
+  local ISSUE_KEYS
+  ISSUE_KEYS=$(acli jira workitem search \
+    --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse)' \
+    --paginate --json 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
 
+  if [ -z "$ISSUE_KEYS" ]; then
+    echo "⚠️  WARNING: No issues found - using affectedVersion only"
+    FIXVERSIONS_CLAUSE=""
+    echo ""
+    return 0
+  fi
+
+  # Fetch fixVersions for each issue (batch view)
   local FIXVERSIONS_JSON
-  FIXVERSIONS_JSON=$(jira issue list --raw -q 'project=ACM AND (text ~ submariner OR text ~ lighthouse)' --paginate 100 2>/dev/null | \
-    jq -r '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("ACM"))] | unique | sort[]' 2>/dev/null)
+  FIXVERSIONS_JSON=$(echo "$ISSUE_KEYS" | while read -r KEY; do
+    acli jira workitem view "$KEY" --fields "fixVersions" --json 2>/dev/null || echo "{}"
+  done | jq -s '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner '"$VERSION_MAJOR_MINOR"'") or startswith("ACM"))] | unique | sort[]' 2>/dev/null)
 
-  if [ -z "$FIXVERSIONS_JSON" ]; then
+  if [ -z "$FIXVERSIONS_JSON" ] || [ "$FIXVERSIONS_JSON" = "[]" ]; then
     echo "⚠️  WARNING: No existing fixVersions found - using affectedVersion only"
     FIXVERSIONS_CLAUSE=""
   else
     # Build IN clause: ("Submariner 0.21.2", "ACM 2.14.0", ...)
-    FIXVERSIONS_CLAUSE=$(echo "$FIXVERSIONS_JSON" | jq -Rs 'split("\n") | map(select(length > 0)) | map("\"" + . + "\"") | join(", ")')
+    FIXVERSIONS_CLAUSE=$(echo "$FIXVERSIONS_JSON" | jq -r 'map("\"" + . + "\"") | join(", ")')
     echo "Found fixVersions: $(echo "$FIXVERSIONS_JSON" | tr '\n' ' ')"
   fi
 
@@ -409,9 +394,6 @@ query_cve_issues() {
 
   echo "Fetching Security-labeled issues..."
 
-  # Load JIRA_API_TOKEN
-  load_jira_token
-
   # Build query
   local QUERY="project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest)"
 
@@ -421,10 +403,11 @@ query_cve_issues() {
     QUERY="$QUERY AND affectedVersion = \"$ACM_VERSION\""
   fi
 
-  local CVE_JSON
-  CVE_JSON=$(jira issue list --raw -q "$QUERY" 2>/dev/null || echo "[]")
+  # Get issue keys with search (includes labels in output)
+  local SEARCH_RESULTS
+  SEARCH_RESULTS=$(acli jira workitem search --jql "$QUERY" --fields "key,labels" --paginate --json 2>/dev/null || echo "[]")
 
-  if [ "$CVE_JSON" = "[]" ] || [ -z "$CVE_JSON" ]; then
+  if [ "$SEARCH_RESULTS" = "[]" ] || [ -z "$SEARCH_RESULTS" ]; then
     echo "No CVE issues found."
     echo ""
     return 0
@@ -432,10 +415,10 @@ query_cve_issues() {
 
   # Extract CVE data: issue key, CVE label, pscomponent
   local CVE_DATA
-  CVE_DATA=$(echo "$CVE_JSON" | jq -r '.[] | {
+  CVE_DATA=$(echo "$SEARCH_RESULTS" | jq -r '.[] | {
     issue: .key,
-    cve: (.fields.labels[] | select(startswith("CVE-")) // empty),
-    component: (.fields.labels[] | select(startswith("pscomponent:")) | sub("pscomponent:"; "") // empty)
+    cve: (.fields.labels[]? | select(startswith("CVE-")) // empty),
+    component: (.fields.labels[]? | select(startswith("pscomponent:")) | sub("pscomponent:"; "") // empty)
   } | select(.cve != "" and .component != "")' | jq -s '.')
 
   if [ "$CVE_DATA" = "[]" ] || [ -z "$CVE_DATA" ]; then
@@ -532,9 +515,6 @@ query_non_cve_issues() {
     echo "Fetching non-Security issues (all dates)..."
   fi
 
-  # Load JIRA_API_TOKEN
-  load_jira_token
-
   # Build query
   local QUERY="project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest)"
   QUERY="$QUERY AND (labels is EMPTY OR labels not in (Security, SecurityTracking))"
@@ -545,21 +525,23 @@ query_non_cve_issues() {
     QUERY="$QUERY AND affectedVersion = \"$ACM_VERSION\""
   fi
 
-  local NON_CVE_JSON
-  NON_CVE_JSON=$(jira issue list --raw -q "$QUERY" 2>/dev/null || echo "[]")
+  # Get issue keys with search (basic fields only)
+  local ISSUE_KEYS
+  ISSUE_KEYS=$(acli jira workitem search --jql "$QUERY" --paginate --json 2>/dev/null | jq -r '.[].key' 2>/dev/null || echo "")
 
-  if [ "$NON_CVE_JSON" = "[]" ] || [ -z "$NON_CVE_JSON" ]; then
+  if [ -z "$ISSUE_KEYS" ]; then
     echo "No non-CVE issues found."
     echo ""
     return 0
   fi
 
-  # Sort by priority and format for display
-  local FORMATTED
-  FORMATTED=$(echo "$NON_CVE_JSON" | jq -r 'sort_by(.fields.priority.id) | reverse | .[] |
-    "\(.key)|\(.fields.priority.name)|\(.fields.status.name)|\(.fields.created[:10])|\(.fields.updated[:10])|\(.fields.summary)"')
+  # Fetch full details for each issue with view (to get created, updated dates)
+  local ISSUE_DATA
+  ISSUE_DATA=$(echo "$ISSUE_KEYS" | while read -r KEY; do
+    acli jira workitem view "$KEY" --fields "key,priority,status,created,updated,summary" --json 2>/dev/null || echo "{}"
+  done | jq -s 'sort_by(.fields.priority.id // 99999) | reverse')
 
-  if [ -z "$FORMATTED" ]; then
+  if [ -z "$ISSUE_DATA" ] || [ "$ISSUE_DATA" = "[]" ]; then
     echo "No non-CVE issues found after filtering."
     echo ""
     return 0
@@ -567,7 +549,18 @@ query_non_cve_issues() {
 
   # Filter out existing issues and submariner-addon
   local FILTERED_COUNT=0
-  while IFS='|' read -r KEY PRIORITY STATUS CREATED UPDATED SUMMARY; do
+  while IFS= read -r issue_json; do
+    local KEY PRIORITY STATUS CREATED UPDATED SUMMARY
+    KEY=$(echo "$issue_json" | jq -r '.key // empty')
+    PRIORITY=$(echo "$issue_json" | jq -r '.fields.priority.name // "Undefined"')
+    STATUS=$(echo "$issue_json" | jq -r '.fields.status.name // "Unknown"')
+    CREATED=$(echo "$issue_json" | jq -r '.fields.created[:10] // "Unknown"')
+    UPDATED=$(echo "$issue_json" | jq -r '.fields.updated[:10] // "Unknown"')
+    SUMMARY=$(echo "$issue_json" | jq -r '.fields.summary // ""')
+
+    # Skip if key is empty
+    [ -z "$KEY" ] && continue
+
     # Filter existing
     if printf '%s\n' "${EXISTING_ISSUES[@]}" | grep -qxF "$KEY"; then
       continue
@@ -580,7 +573,7 @@ query_non_cve_issues() {
 
     NON_CVE_ISSUES+=("$KEY|$PRIORITY|$STATUS|$CREATED|$UPDATED|$SUMMARY")
     ((FILTERED_COUNT++))
-  done <<< "$FORMATTED"
+  done < <(echo "$ISSUE_DATA" | jq -c '.[]')
 
   echo "Found $FILTERED_COUNT non-CVE issue(s) (after filtering)"
   echo ""
