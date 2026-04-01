@@ -333,7 +333,7 @@ else
 
     # Extract fields
     PRIORITY=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.name // "Unknown"')
-    PRIORITY_ID=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.id // "99999"')
+    PRIORITY_ID=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.id // "99999"')  # Default ID for unprioritized issues
     STATUS=$(echo "$ISSUE_JSON" | jq -r '.fields.status.name // "Unknown"')
     CREATED=$(echo "$ISSUE_JSON" | jq -r '.fields.created[:10]')
     UPDATED=$(echo "$ISSUE_JSON" | jq -r '.fields.updated[:10]')

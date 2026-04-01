@@ -14,16 +14,20 @@ spec:
       type: RHSA
       issues:
         fixed:
-          # CVE Issues (1):
+          # CVE Issues (2):
           - id: ACM-12345
+            source: issues.redhat.com
+          - id: ACM-12346
             source: issues.redhat.com
           # Non-CVE Issues (1):
           - id: ACM-30970
             source: issues.redhat.com
       cves:
-        # CVE-2024-99999 (ACM-12345): FIXED
+        # CVE-2024-99999 (ACM-12345, ACM-12346): FIXED
         #   Test: command to verify fix
         #   Output: expected output showing fixed version
         #   Required: minimum version needed
         - key: CVE-2024-99999
           component: submariner-operator-0-23
+        - key: CVE-2024-99999
+          component: lighthouse-agent-0-23
