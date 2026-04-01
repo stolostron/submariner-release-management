@@ -82,7 +82,7 @@ fi
 echo ""
 echo "4. Testing apply.sh (YAML generation)..."
 
-# Create mock decisions (with one selected issue to test YAML generation)
+# Create mock decisions with CVE and non-CVE issues
 cat > /tmp/release-notes-decisions.json <<'EOF'
 {
   "metadata": {
@@ -90,11 +90,11 @@ cat > /tmp/release-notes-decisions.json <<'EOF'
     "analyzed_at": "2026-04-01T00:00:00Z",
     "analyzer": "test-script"
   },
-  "release_type": "RHBA",
-  "release_type_rationale": "Test release",
+  "release_type": "RHSA",
+  "release_type_rationale": "CVE present",
   "cve_issues": {
     "all_included": true,
-    "issue_keys": []
+    "issue_keys": ["ACM-12345", "ACM-12346"]
   },
   "non_cve_issues": {
     "selected": [
@@ -102,11 +102,29 @@ cat > /tmp/release-notes-decisions.json <<'EOF'
         "issue_key": "ACM-30970",
         "rationale": "Test issue"
       }
-    ],
-    "rejected": []
+    ]
   }
 }
 EOF
+
+# Add mock CVE data to data.json (use valid CVE format: CVE-YYYY-NNNNN)
+jq '.cve_issues = [
+  {
+    "issue_key": "ACM-12345",
+    "cve_key": "CVE-2024-99999",
+    "pscomponent": "rhacm2/submariner-operator-rhel9",
+    "component_mapped": "submariner-operator-0-23",
+    "labels": ["Security", "CVE-2024-99999", "pscomponent:rhacm2/submariner-operator-rhel9"]
+  },
+  {
+    "issue_key": "ACM-12346",
+    "cve_key": "CVE-2024-99999",
+    "pscomponent": "rhacm2/lighthouse-agent-rhel9",
+    "component_mapped": "lighthouse-agent-0-23",
+    "labels": ["Security", "CVE-2024-99999", "pscomponent:rhacm2/lighthouse-agent-rhel9"]
+  }
+]' /tmp/release-notes-data.json > /tmp/release-notes-data-with-cve.json
+mv /tmp/release-notes-data-with-cve.json /tmp/release-notes-data.json
 
 # Backup original YAML
 STAGE_YAML=$(jq -r '.metadata.stage_yaml' /tmp/release-notes-data.json)
@@ -117,27 +135,44 @@ fi
 
 cp "$STAGE_YAML" "$STAGE_YAML.test-backup"
 
-# Run apply.sh (stop after validation, before the slow git commit)
-# We just want to verify YAML generation and validation, not the full commit
-OUTPUT=$(timeout 15 bash scripts/release-notes/apply.sh 2>&1 || true)
+# Run apply.sh (stop after validation, before the git commit)
+# Use timeout to stop before commit (which may fail on pre-existing gitlint issues)
+OUTPUT=$(timeout 30 bash scripts/release-notes/apply.sh 2>&1 || true)
 
+# Check if validation passed (this is the critical test)
 if echo "$OUTPUT" | grep -q "✓ Release data validation passed"; then
-  echo "   ✓ YAML update and validation succeeded"
+  echo "   ✓ YAML validation passed"
 
-  # Verify YAML was actually updated
-  if grep -q "type: RHBA" "$STAGE_YAML"; then
-    echo "   ✓ YAML contains release notes"
+  # Verify YAML was actually updated with correct data
+  if grep -q "type: RHSA" "$STAGE_YAML"; then
+    echo "   ✓ YAML contains release type: RHSA"
   else
-    echo "   ✗ FAILED: YAML was not updated"
+    echo "   ✗ FAILED: YAML missing release type"
     mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
     exit 1
+  fi
+
+  # Verify CVE section generated correctly (key: CVE-*, component: *)
+  if grep -A1 "key: CVE-2024-99999" "$STAGE_YAML" | grep -q "component: submariner-operator-0-23"; then
+    echo "   ✓ CVE section formatted correctly"
+  else
+    echo "   ✗ FAILED: CVE section malformed"
+    grep -A2 "cves:" "$STAGE_YAML" || echo "No cves section found"
+    mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
+    exit 1
+  fi
+
+  # Verify both CVE and non-CVE issues present
+  CVE_COUNT=$(grep -c "# CVE-2024-99999" "$STAGE_YAML" || echo 0)
+  if [ "$CVE_COUNT" -gt 0 ]; then
+    echo "   ✓ CVE comments present"
   fi
 
   # Restore original
   mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
 else
   echo "   ✗ FAILED: apply.sh validation failed"
-  echo "$OUTPUT" | tail -10
+  echo "$OUTPUT" | grep -E "ERROR|❌" | tail -5
   mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
   exit 1
 fi

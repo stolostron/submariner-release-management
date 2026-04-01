@@ -55,8 +55,6 @@ RELEASE_TYPE=$(jq -r '.release_type' "$DECISIONS_JSON")
 CVE_ISSUE_KEYS=$(jq -r '.cve_issues[].issue_key // empty' "$DATA_JSON" | sort)
 SELECTED_NON_CVE_KEYS=$(jq -r '.non_cve_issues.selected[].issue_key // empty' "$DECISIONS_JSON" | sort)
 
-ALL_ISSUE_KEYS=$(echo -e "$CVE_ISSUE_KEYS\n$SELECTED_NON_CVE_KEYS" | grep -v '^$' | sort -u)
-
 # Count issues (handle empty case)
 if [ -z "$CVE_ISSUE_KEYS" ]; then
   CVE_COUNT=0
@@ -98,19 +96,20 @@ if [ "$CVE_COUNT" -gt 0 ]; then
     })
   ' "$DATA_JSON")
 
-  # Build YAML with verification comments
-  echo "$CVE_GROUPS" | jq -r '.[] |
-    "        # \(.cve_key) (\(.issue_keys)): FIXED\n" +
+  # Build YAML with verification comments (use process substitution to preserve variable)
+  while IFS= read -r line; do
+    CVES_YAML="${CVES_YAML}${line}\n"
+  done < <(echo "$CVE_GROUPS" | jq -r '.[] | .cve_key as $cve_key |
+    "        # \($cve_key) (\(.issue_keys)): FIXED\n" +
     "        #   Test: command to verify fix\n" +
     "        #   Output: expected output showing fixed version\n" +
     "        #   Required: minimum version needed\n" +
-    (.components | map("        - key: \(.cve_key)\n          component: \(.)") | join("\n"))
-  ' | while IFS= read -r line; do
-    CVES_YAML="${CVES_YAML}${line}\n"
-  done
+    (.components | map("        - key: \($cve_key)\n          component: \(.)") | join("\n"))
+  ')
 fi
 
 # Build complete releaseNotes section
+# Note: Add explicit newline before cves section (command substitution strips trailing newlines)
 RELEASE_NOTES_YAML="  data:
     releaseNotes:
       type: $RELEASE_TYPE
@@ -119,7 +118,8 @@ RELEASE_NOTES_YAML="  data:
 $(echo -e "$ISSUES_FIXED_YAML")"
 
 if [ -n "$CVES_YAML" ]; then
-  RELEASE_NOTES_YAML="${RELEASE_NOTES_YAML}        cves:
+  RELEASE_NOTES_YAML="${RELEASE_NOTES_YAML}
+      cves:
 $(echo -e "$CVES_YAML")"
 fi
 
