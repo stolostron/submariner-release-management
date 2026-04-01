@@ -16,15 +16,25 @@ Query Jira for CVEs and issues, use AI to select notable items, update stage YAM
 ---
 
 ```bash
-REPO="/home/dfarrell07/konflux/submariner-release-management"
+set -euo pipefail
 
-# Phase 1: Collect raw data from Jira
+# Find repository root
+REPO=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$REPO" ]; then
+  echo "❌ ERROR: Not in a git repository"
+  exit 1
+fi
+
+echo "Phase 1: Collecting data from Jira..."
 bash "$REPO/scripts/release-notes/collect.sh" $ARGUMENTS
 
-# Phase 2: Group and prepare for analysis
+echo ""
+echo "Phase 2: Filtering and grouping issues..."
 bash "$REPO/scripts/release-notes/prepare.sh"
 
-echo "Data collected and grouped. Ready for AI analysis."
+echo ""
+echo "Data ready for AI analysis."
+echo "Topics file: /tmp/release-notes-topics.json"
 ```
 
 ---
@@ -59,10 +69,10 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
     "analyzer": "claude-sonnet-4.5"
   },
   "release_type": "RHSA|RHBA|RHEA",
-  "release_type_rationale": "Why this type",
+  "release_type_rationale": "Why this type (1 sentence)",
   "cve_issues": {
     "all_included": true,
-    "issue_keys": ["ACM-XXXXX", ...]
+    "issue_keys": ["ACM-XXXXX"]
   },
   "non_cve_issues": {
     "selected": [
@@ -70,24 +80,33 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
         "issue_key": "ACM-XXXXX",
         "rationale": "Why include (1 sentence)"
       }
-    ],
-    "rejected": [
-      {
-        "issue_key": "ACM-YYYYY",
-        "rationale": "Why exclude (1 sentence)"
-      }
     ]
   }
 }
 ```
 
-**CRITICAL:** Use the Write tool. Do NOT output text directly.
+**Notes:**
+
+- Extract CVE issue keys from `topics.json` cve_topics array
+- Only include notable non-CVE issues in selected array
+- Use Write tool to create the file (do NOT output text directly)
 
 ---
 
 ```bash
-# Phase 3: Apply decisions to stage YAML
+set -euo pipefail
+
+# Find repository root
+REPO=$(git rev-parse --show-toplevel 2>/dev/null)
+
+echo ""
+echo "Phase 3: Applying decisions to stage YAML..."
 bash "$REPO/scripts/release-notes/apply.sh"
 
-echo "✓ Release notes applied. Review and push when ready."
+echo ""
+echo "✓ Release notes applied and committed."
+echo ""
+echo "Next steps:"
+echo "  1. Review: git show"
+echo "  2. Push: git push"
 ```

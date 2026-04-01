@@ -73,21 +73,20 @@ jq '
 ) as $cve_topics |
 
 # Categorize non-CVE issues by pattern (connectivity, performance, features, bugs)
+# Add category field to each issue first, then group by that field
 (
-  $filtered_non_cve | group_by(
-    if (.summary | test("connect|cable|gateway|route|nat"; "i")) then "connectivity"
-    elif (.summary | test("performance|latency|slow|throughput"; "i")) then "performance"
-    elif (.summary | test("feature|enhancement|add support|new"; "i")) then "features"
-    else "bugs"
-    end
-  ) | map({
-    category: (.[0].summary |
-      if test("connect|cable|gateway|route|nat"; "i") then "connectivity"
-      elif test("performance|latency|slow|throughput"; "i") then "performance"
-      elif test("feature|enhancement|add support|new"; "i") then "features"
-      else "bugs"
-      end
-    ),
+  $filtered_non_cve | map(
+    . + {
+      category: (
+        if (.summary | test("connect|cable|gateway|route|nat"; "i")) then "connectivity"
+        elif (.summary | test("performance|latency|slow|throughput"; "i")) then "performance"
+        elif (.summary | test("feature|enhancement|add support|new"; "i")) then "features"
+        else "bugs"
+        end
+      )
+    }
+  ) | group_by(.category) | map({
+    category: .[0].category,
     count: length,
     priority_breakdown: (
       group_by(.priority) | map({
