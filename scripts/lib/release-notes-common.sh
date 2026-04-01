@@ -20,7 +20,7 @@ calculate_acm_version() {
   local ACM_MINOR=$((MINOR_VERSION - 7))
 
   if [ $ACM_MINOR -lt 0 ]; then
-    echo "❌ ERROR: Cannot calculate ACM version for Submariner $VERSION_MAJOR_MINOR" >&2
+    echo "❌ ERROR: Cannot calculate ACM version for Submariner '$VERSION_MAJOR_MINOR'" >&2
     return 1
   fi
 
@@ -99,7 +99,7 @@ find_stage_yaml() {
   if [ -n "$STAGE_YAML_ARG" ]; then
     STAGE_YAML="$STAGE_YAML_ARG"
     if [ ! -f "$STAGE_YAML" ]; then
-      echo "❌ ERROR: Stage YAML not found: $STAGE_YAML" >&2
+      echo "❌ ERROR: Stage YAML not found: '$STAGE_YAML'" >&2
       return 1
     fi
   else
@@ -107,7 +107,7 @@ find_stage_yaml() {
     local STAGE_DIR="$GIT_ROOT/releases/$VERSION_MAJOR_MINOR/stage"
 
     if [ ! -d "$STAGE_DIR" ]; then
-      echo "❌ ERROR: Stage directory not found: $STAGE_DIR" >&2
+      echo "❌ ERROR: Stage directory not found: '$STAGE_DIR'" >&2
       echo "" >&2
       echo "Possible causes:" >&2
       echo "  - Step 8 not complete (create-component-release not run)" >&2
@@ -119,7 +119,7 @@ find_stage_yaml() {
     STAGE_YAML=$(find "$STAGE_DIR" -name "submariner-${VERSION_FULL_DASH}-stage-*.yaml" -type f | sort | tail -1)
 
     if [ -z "$STAGE_YAML" ] || [ ! -f "$STAGE_YAML" ]; then
-      echo "❌ ERROR: No stage YAML found for version $VERSION" >&2
+      echo "❌ ERROR: No stage YAML found for version '$VERSION'" >&2
       echo "Expected: $STAGE_DIR/submariner-${VERSION_FULL_DASH}-stage-*.yaml" >&2
       echo "" >&2
       echo "Run: /create-component-release $VERSION" >&2
@@ -183,7 +183,7 @@ view_jira() {
     fi
   done
 
-  echo "❌ ERROR: Jira view failed for $ISSUE_KEY after 2 attempts" >&2
+  echo "❌ ERROR: Jira view failed for '$ISSUE_KEY' after 2 attempts" >&2
   echo "$OUTPUT" >&2
   return 1
 }

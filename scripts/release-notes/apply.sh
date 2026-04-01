@@ -12,13 +12,13 @@ DECISIONS_JSON="/tmp/release-notes-decisions.json"
 DATA_JSON="/tmp/release-notes-data.json"
 
 if [ ! -f "$DECISIONS_JSON" ]; then
-  echo "❌ ERROR: Decisions file not found: $DECISIONS_JSON" >&2
+  echo "❌ ERROR: Decisions file not found: '$DECISIONS_JSON'" >&2
   echo "Run skill analysis first to create decisions file" >&2
   exit 1
 fi
 
 if [ ! -f "$DATA_JSON" ]; then
-  echo "❌ ERROR: Data file not found: $DATA_JSON" >&2
+  echo "❌ ERROR: Data file not found: '$DATA_JSON'" >&2
   echo "Run collect.sh first" >&2
   exit 1
 fi
@@ -38,7 +38,7 @@ echo "Stage YAML: $STAGE_YAML"
 echo ""
 
 if [ ! -f "$STAGE_YAML" ]; then
-  echo "❌ ERROR: Stage YAML not found: $STAGE_YAML" >&2
+  echo "❌ ERROR: Stage YAML not found: '$STAGE_YAML'" >&2
   exit 1
 fi
 

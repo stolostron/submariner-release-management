@@ -42,6 +42,13 @@ if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
   VERSION="${VERSION}.0"
 fi
 
+# Validate version format (X.Y.Z where X,Y,Z are numbers)
+if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "❌ ERROR: Invalid version format: $VERSION" >&2
+  echo "Expected format: X.Y.Z (e.g., 0.23.1)" >&2
+  exit 1
+fi
+
 # ============================================================================
 # Initialize
 # ============================================================================
