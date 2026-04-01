@@ -6,14 +6,12 @@
 # ACM Version Calculation
 # ============================================================================
 # Maps Submariner version to ACM version: 0.X → 2.(X-7).0
-# Sets global variables: VERSION_DOT, VERSION_DASH, VERSION_MAJOR_MINOR, ACM_VERSION
+# Sets global variables: VERSION_MAJOR_MINOR, VERSION_MAJOR_MINOR_DASH, ACM_VERSION
 # Requires: VERSION variable set by caller
 calculate_acm_version() {
-  # Extract version components
-  VERSION_DOT=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
-  VERSION_DASH="${VERSION_DOT//./-}"
-  VERSION_MAJOR_MINOR="$VERSION_DOT"
-  VERSION_MAJOR_MINOR_DASH="$VERSION_DASH"
+  # Extract version components (e.g., "0.23.1" → "0.23")
+  VERSION_MAJOR_MINOR=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
+  VERSION_MAJOR_MINOR_DASH="${VERSION_MAJOR_MINOR//./-}"
 
   # Submariner 0.X → ACM 2.(X-7)
   local MINOR_VERSION
@@ -53,9 +51,10 @@ map_component_name() {
       echo "EXCLUDE"  # Built separately in ACM/MCE - don't include
       ;;
     "rhacm2/submariner-"*"-rhel9"|"submariner-"*"-container")
-      # Extract component name (e.g., submariner-operator from rhacm2/submariner-operator-rhel9)
+      # Extract component name (e.g., submariner-route-agent from rhacm2/submariner-route-agent-rhel9)
+      # Remove rhacm2/ prefix and -rhel9/-container suffix
       local COMP
-      COMP=$(echo "$PSCOMPONENT" | sed -E 's/.*(submariner-[^-]+).*/\1/')
+      COMP=$(echo "$PSCOMPONENT" | sed -E 's/^(rhacm2\/)?(.+)-(rhel9|container)$/\2/')
       echo "${COMP}-${VERSION_DASH}"
       ;;
     "nettest-container"|"rhacm2/nettest-rhel9")
@@ -82,9 +81,9 @@ find_stage_yaml() {
   local VERSION="$1"
   local STAGE_YAML_ARG="$2"
 
-  # Extract version components
-  local VERSION_DOT
-  VERSION_DOT=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
+  # Extract version components (e.g., "0.23.1" → "0.23", "0-23-1")
+  local VERSION_MAJOR_MINOR
+  VERSION_MAJOR_MINOR=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
   local VERSION_FULL_DASH="${VERSION//./-}"
 
   # Find git repository root
@@ -104,7 +103,7 @@ find_stage_yaml() {
     fi
   else
     # Find latest stage YAML for this version
-    local STAGE_DIR="$GIT_ROOT/releases/$VERSION_DOT/stage"
+    local STAGE_DIR="$GIT_ROOT/releases/$VERSION_MAJOR_MINOR/stage"
 
     if [ ! -d "$STAGE_DIR" ]; then
       echo "❌ ERROR: Stage directory not found: $STAGE_DIR" >&2

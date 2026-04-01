@@ -372,8 +372,8 @@ echo "Building output JSON..."
 
 jq -n \
   --arg version "$VERSION" \
-  --arg version_dot "$VERSION_DOT" \
-  --arg version_dash "$VERSION_DASH" \
+  --arg version_major_minor "$VERSION_MAJOR_MINOR" \
+  --arg version_major_minor_dash "$VERSION_MAJOR_MINOR_DASH" \
   --arg acm_version "$ACM_VERSION" \
   --arg stage_yaml "$STAGE_YAML" \
   --arg timeframe_start "$TIMEFRAME_START" \
@@ -386,8 +386,8 @@ jq -n \
   '{
     metadata: {
       version: $version,
-      version_dot: $version_dot,
-      version_dash: $version_dash,
+      version_major_minor: $version_major_minor,
+      version_major_minor_dash: $version_major_minor_dash,
       acm_version: $acm_version,
       stage_yaml: $stage_yaml,
       timeframe_start: $timeframe_start,
