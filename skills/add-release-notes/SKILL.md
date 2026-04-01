@@ -30,6 +30,10 @@ Automates Step 9 of the Submariner release workflow: adding Jira-sourced release
 /add-release-notes 0.22.1                    # Auto-find latest stage YAML
 /add-release-notes 0.22                      # Auto-expands to 0.22.0
 /add-release-notes 0.22.1 --stage-yaml releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml
+
+# Or using make:
+make add-release-notes VERSION=0.22.1
+make add-release-notes VERSION=0.22.1 STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml
 ```
 
 **Prerequisites:**
@@ -40,28 +44,6 @@ Automates Step 9 of the Submariner release workflow: adding Jira-sourced release
 - oc login (for release date lookups)
 - Step 8 complete (stage YAML with placeholder release notes)
 
-**Arguments:** $ARGUMENTS
-
----
-
 ```bash
-#!/bin/bash
-set -euo pipefail
-
-# Find git repository root
-GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$GIT_ROOT" ]; then
-  echo "❌ ERROR: Not in a git repository"
-  exit 1
-fi
-
-# Verify orchestrator script exists
-if [ ! -x "$GIT_ROOT/scripts/add-release-notes.sh" ]; then
-  echo "❌ ERROR: Required orchestrator script not found"
-  echo "This skill requires: scripts/add-release-notes.sh"
-  exit 1
-fi
-
-# Delegate to orchestrator (passes all arguments)
-exec "$GIT_ROOT/scripts/add-release-notes.sh" $ARGUMENTS
+~/konflux/submariner-release-management/scripts/add-release-notes.sh $ARGUMENTS
 ```
