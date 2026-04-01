@@ -32,6 +32,7 @@ echo "Data collected and grouped. Ready for AI analysis."
 Read `/tmp/release-notes-topics.json` and make release note decisions.
 
 **Your task:**
+
 1. **Review CVE topics** - all CVEs are auto-included (verify they make sense)
 2. **Select notable non-CVE issues** - choose 3-8 issues that are:
    - User-facing (not internal refactoring)
@@ -44,6 +45,7 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
 4. **Write rationale** - explain why each issue is notable (1 sentence)
 
 **Selection criteria:**
+
 - Include: Customer-facing fixes, major features, performance improvements, security fixes
 - Exclude: Internal changes, test-only updates, minor refactors, Won't Do resolutions
 
