@@ -329,6 +329,7 @@ get_existing_issues() {
 
   if [ -z "$EXISTING_RAW" ]; then
     echo "No existing issues found (clean slate for $VERSION_MAJOR_MINOR)"
+    EXISTING_ISSUES=()
   else
     # shellcheck disable=SC2206
     EXISTING_ISSUES=($EXISTING_RAW)
@@ -558,33 +559,48 @@ query_non_cve_issues() {
 
   echo "Filtering issues..."
 
-  # Filter out existing issues and submariner-addon
+  # Filter out existing issues and submariner-addon using jq directly
   local FILTERED_COUNT=0
-  while IFS= read -r issue_json; do
-    local KEY PRIORITY STATUS CREATED UPDATED SUMMARY
-    KEY=$(echo "$issue_json" | jq -r '.key // empty')
-    PRIORITY=$(echo "$issue_json" | jq -r '.fields.priority.name // "Undefined"')
-    STATUS=$(echo "$issue_json" | jq -r '.fields.status.name // "Unknown"')
-    CREATED=$(echo "$issue_json" | jq -r '.fields.created[:10] // "Unknown"')
-    UPDATED=$(echo "$issue_json" | jq -r '.fields.updated[:10] // "Unknown"')
-    SUMMARY=$(echo "$issue_json" | jq -r '.fields.summary // ""')
+  local ISSUE_COUNT
+  ISSUE_COUNT=$(echo "$ISSUE_DATA" | jq '. | length')
 
-    # Skip if key is empty
-    [ -z "$KEY" ] && continue
+  echo "Processing $ISSUE_COUNT issues..."
+
+  # Extract keys for iteration
+  local KEYS
+  KEYS=$(echo "$ISSUE_DATA" | jq -r '.[].key // empty')
+
+  local idx=0
+  while IFS= read -r KEY; do
+    [ -z "$KEY" ] && { : $((idx++)); continue; }
+
+    local PRIORITY STATUS CREATED UPDATED SUMMARY
+    PRIORITY=$(echo "$ISSUE_DATA" | jq -r ".[$idx].fields.priority.name // \"Undefined\"")
+    STATUS=$(echo "$ISSUE_DATA" | jq -r ".[$idx].fields.status.name // \"Unknown\"")
+    CREATED=$(echo "$ISSUE_DATA" | jq -r ".[$idx].fields.created[:10] // \"Unknown\"")
+    UPDATED=$(echo "$ISSUE_DATA" | jq -r ".[$idx].fields.updated[:10] // \"Unknown\"")
+    SUMMARY=$(echo "$ISSUE_DATA" | jq -r ".[$idx].fields.summary // \"\"")
 
     # Filter existing
-    if printf '%s\n' "${EXISTING_ISSUES[@]}" | grep -qxF "$KEY"; then
-      continue
+    if [ ${#EXISTING_ISSUES[@]} -gt 0 ]; then
+      if printf '%s\n' "${EXISTING_ISSUES[@]}" | grep -qxF "$KEY"; then
+        : $((idx++))
+        continue
+      fi
     fi
 
-    # Filter submariner-addon (check summary/key)
+    # Filter submariner-addon
     if [[ "$SUMMARY" =~ submariner-addon ]] || [[ "$KEY" =~ addon ]]; then
+      : $((idx++))
       continue
     fi
 
     NON_CVE_ISSUES+=("$KEY|$PRIORITY|$STATUS|$CREATED|$UPDATED|$SUMMARY")
-    ((FILTERED_COUNT++))
-  done < <(echo "$ISSUE_DATA" | jq -c '.[]')
+    : $((FILTERED_COUNT++))
+    : $((idx++))
+  done <<< "$KEYS"
+
+  echo "Filtered down to $FILTERED_COUNT issues"
 
   echo "Found $FILTERED_COUNT non-CVE issue(s) (after filtering)"
   echo ""
@@ -644,7 +660,7 @@ present_results() {
       IFS='|' read -r KEY PRIORITY STATUS CREATED UPDATED SUMMARY <<< "$item"
       printf "[%d] %s [%s] (%s) Created: %s Updated: %s\n" "$IDX" "$KEY" "$PRIORITY" "$STATUS" "$CREATED" "$UPDATED"
       printf "    %s\n" "$SUMMARY"
-      ((IDX++))
+      : $((IDX++))
     done
 
     echo ""
@@ -876,8 +892,8 @@ use_sed_update() {
 
     if [ "$IN_RELEASE_NOTES" = true ]; then
       # Check if we've exited the releaseNotes section
-      # (line at same or less indentation, or empty line followed by less indentation)
-      if [[ "$line" =~ ^[[:space:]]{0,6}[a-zA-Z] ]] && [[ ! "$line" =~ ^[[:space:]]{8,} ]]; then
+      # Exit when we see a line with same or less indentation than "releaseNotes:" (4 spaces)
+      if [[ "$line" =~ ^[[:space:]]{0,4}[a-zA-Z] ]]; then
         IN_RELEASE_NOTES=false
         echo "$line" >> "$NEW_YAML"
       fi
@@ -905,15 +921,31 @@ validate_and_commit() {
   cd "$GIT_ROOT" || exit 1
 
   echo "Running YAML validation..."
-  if make yamllint >/dev/null 2>&1; then
-    echo "✓ YAML syntax valid"
+  # Check if yamllint target exists
+  if make -n yamllint >/dev/null 2>&1; then
+    if make yamllint >/dev/null 2>&1; then
+      echo "✓ YAML syntax valid"
+    else
+      echo "❌ YAML validation failed"
+      echo ""
+      echo "Run manually: make yamllint"
+      echo ""
+      echo "Backup saved at: ${STAGE_YAML}.bak"
+      exit 1
+    fi
   else
-    echo "❌ YAML validation failed"
-    echo ""
-    echo "Run manually: make yamllint"
-    echo ""
-    echo "Backup saved at: ${STAGE_YAML}.bak"
-    exit 1
+    # No yamllint target, try yq validation
+    if command -v yq &>/dev/null; then
+      if yq eval '.' "$STAGE_YAML" >/dev/null 2>&1; then
+        echo "✓ YAML syntax valid (yq)"
+      else
+        echo "❌ YAML syntax invalid (yq validation failed)"
+        echo "Backup saved at: ${STAGE_YAML}.bak"
+        exit 1
+      fi
+    else
+      echo "⚠️  Skipping YAML validation (no yamllint target or yq command)"
+    fi
   fi
 
   echo "Running release data validation..."
@@ -982,6 +1014,13 @@ Excludes issues already in previous $VERSION_MAJOR_MINOR releases."
 main() {
   check_prerequisites
   parse_arguments "$@"
+
+  # Initialize result arrays
+  CVE_ISSUES=()
+  CVE_KEYS=()
+  CVE_COMPONENTS=()
+  NON_CVE_ISSUES=()
+
   calculate_acm_version
   find_existing_fixversions
   get_existing_issues
