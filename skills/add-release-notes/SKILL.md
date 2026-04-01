@@ -1,49 +1,91 @@
 ---
 name: add-release-notes
-description: Add Jira-sourced release notes to component stage release YAML - automates CVE and issue queries, filtering, and YAML updates
-version: 1.0.0
-argument-hint: "<version> [--stage-yaml path]"
+description: Query Jira for CVEs and issues, use AI to select notable items, update stage YAML
+version: 2.0.0
+argument-hint: "<version> [--stage-yaml PATH]"
 user-invocable: true
-allowed-tools: Bash
+allowed-tools: Bash, Read, Write
 ---
 
 # Add Release Notes
 
-Automates Step 9 of the Submariner release workflow: adding Jira-sourced release notes to component stage release YAMLs.
+Query Jira for CVEs and issues, use AI to select notable items, update stage YAML.
 
-**What it does:**
+**Arguments:** $ARGUMENTS
 
-1. Validates prerequisites (acli, oc, jq, yq)
-2. Finds latest stage YAML (or uses --stage-yaml path)
-3. Queries Jira for CVE issues (automatic inclusion)
-4. Queries Jira for non-CVE issues (user selection)
-5. Filters out issues already in previous releases
-6. Maps component names (Jira pscomponent → Konflux component)
-7. Builds releaseNotes YAML section with proper formatting
-8. Updates stage YAML file
-9. Validates changes (make yamllint, make test)
-10. Commits with descriptive message
-
-**Usage:**
+---
 
 ```bash
-/add-release-notes 0.22.1                    # Auto-find latest stage YAML
-/add-release-notes 0.22                      # Auto-expands to 0.22.0
-/add-release-notes 0.22.1 --stage-yaml releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml
+REPO="/home/dfarrell07/konflux/submariner-release-management"
 
-# Or using make:
-make add-release-notes VERSION=0.22.1
-make add-release-notes VERSION=0.22.1 STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml
+# Phase 1: Collect raw data from Jira
+bash "$REPO/scripts/release-notes/collect.sh" $ARGUMENTS
+
+# Phase 2: Group and prepare for analysis
+bash "$REPO/scripts/release-notes/prepare.sh"
+
+echo "Data collected and grouped. Ready for AI analysis."
 ```
 
-**Prerequisites:**
+---
 
-- acli (Atlassian CLI) installed and authenticated
-- Authentication: `acli jira auth login --web` (or with API token)
-- Verify: `acli jira auth status` should show "Authenticated"
-- oc login (for release date lookups)
-- Step 8 complete (stage YAML with placeholder release notes)
+Read `/tmp/release-notes-topics.json` and make release note decisions.
+
+**Your task:**
+1. **Review CVE topics** - all CVEs are auto-included (verify they make sense)
+2. **Select notable non-CVE issues** - choose 3-8 issues that are:
+   - User-facing (not internal refactoring)
+   - Fixed (status=Closed, resolution=Done)
+   - Important (Blocker/Major priority OR significant features)
+3. **Confirm release type**:
+   - RHSA if CVEs present (required)
+   - RHBA for bug fixes (no CVEs)
+   - RHEA for enhancements (no CVEs)
+4. **Write rationale** - explain why each issue is notable (1 sentence)
+
+**Selection criteria:**
+- Include: Customer-facing fixes, major features, performance improvements, security fixes
+- Exclude: Internal changes, test-only updates, minor refactors, Won't Do resolutions
+
+**Output:** Use the Write tool to create `/tmp/release-notes-decisions.json`:
+
+```json
+{
+  "metadata": {
+    "version": "X.Y.Z",
+    "analyzed_at": "ISO-8601 timestamp",
+    "analyzer": "claude-sonnet-4.5"
+  },
+  "release_type": "RHSA|RHBA|RHEA",
+  "release_type_rationale": "Why this type",
+  "cve_issues": {
+    "all_included": true,
+    "issue_keys": ["ACM-XXXXX", ...]
+  },
+  "non_cve_issues": {
+    "selected": [
+      {
+        "issue_key": "ACM-XXXXX",
+        "rationale": "Why include (1 sentence)"
+      }
+    ],
+    "rejected": [
+      {
+        "issue_key": "ACM-YYYYY",
+        "rationale": "Why exclude (1 sentence)"
+      }
+    ]
+  }
+}
+```
+
+**CRITICAL:** Use the Write tool. Do NOT output text directly.
+
+---
 
 ```bash
-~/konflux/submariner-release-management/scripts/add-release-notes.sh $ARGUMENTS
+# Phase 3: Apply decisions to stage YAML
+bash "$REPO/scripts/release-notes/apply.sh"
+
+echo "✓ Release notes applied. Review and push when ready."
 ```
