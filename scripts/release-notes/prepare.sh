@@ -18,7 +18,7 @@ source "$LIB_DIR/release-notes-common.sh"
 INPUT_JSON="/tmp/release-notes-data.json"
 OUTPUT_JSON="/tmp/release-notes-topics.json"
 
-if [ ! -f "$INPUT_JSON" ]; then
+if [[ ! -f "$INPUT_JSON" ]]; then
   echo "❌ ERROR: Input file not found: '$INPUT_JSON'" >&2
   echo "Run collect.sh first" >&2
   exit 1

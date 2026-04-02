@@ -63,6 +63,9 @@ source "$LIB_DIR/release-notes-common.sh"
 # Output file
 OUTPUT_JSON="/tmp/release-notes-data.json"
 
+# JQL text filter for Submariner-related issues
+readonly JQL_TEXT_FILTER="(text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest)"
+
 banner "Collect Release Notes Data: $VERSION"
 
 # ============================================================================
@@ -117,9 +120,9 @@ banner "Finding Existing fixVersions"
 echo "Querying Jira for existing fixVersion values..."
 
 # Get issue keys first (filter by affectedVersion for performance)
-ISSUE_KEYS=$(query_jira --jql "project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND affectedVersion = \"$ACM_VERSION\"" | jq -r '.[].key')
+ISSUE_KEYS=$(query_jira --jql "project=ACM AND $JQL_TEXT_FILTER AND affectedVersion = \"$ACM_VERSION\"" | jq -r '.[].key')
 
-if [ -z "$ISSUE_KEYS" ]; then
+if [[ -z "$ISSUE_KEYS" ]]; then
   echo "⚠️  No issues found with affectedVersion - using empty fixVersions"
   FIXVERSIONS_JSON="[]"
 else
@@ -131,7 +134,7 @@ else
     view_jira "$KEY" --fields "fixVersions" 2>/dev/null || echo "{}"
   done | jq -s "[.[] | .fields.fixVersions[]?.name | select(startswith(\"Submariner $VERSION_MAJOR_MINOR\") or startswith(\"$ACM_VERSION_MAJOR_MINOR\"))] | unique | sort" 2>/dev/null)
 
-  if [ -z "$FIXVERSIONS_JSON" ] || [ "$FIXVERSIONS_JSON" = "[]" ]; then
+  if [[ -z "$FIXVERSIONS_JSON" || "$FIXVERSIONS_JSON" == "[]" ]]; then
     echo "⚠️  No fixVersions found - will use affectedVersion only in queries"
     FIXVERSIONS_JSON="[]"
   else
@@ -147,7 +150,7 @@ echo ""
 banner "Checking for Existing Issues"
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$GIT_ROOT" ]; then
+if [[ -z "$GIT_ROOT" ]]; then
   echo "❌ ERROR: Not in a git repository" >&2
   echo "Run this script from within the repository" >&2
   exit 1
@@ -184,7 +187,7 @@ banner "Determining Release Timeframe"
 # Extract patch number
 PATCH_VERSION=$(echo "$VERSION" | cut -d. -f3)
 
-if [ "$PATCH_VERSION" = "0" ]; then
+if [[ "$PATCH_VERSION" == "0" ]]; then
   echo "Y-stream release ($VERSION) - no timeframe filtering needed"
   TIMEFRAME_START=""
   TIMEFRAME_TYPE="y-stream"
@@ -211,7 +214,7 @@ echo ""
 banner "Querying Jira for CVE Issues"
 
 # Build fixVersion clause (only if we have fixVersions)
-if [ "$(echo "$FIXVERSIONS_JSON" | jq 'length')" -gt 0 ]; then
+if [[ "$(echo "$FIXVERSIONS_JSON" | jq 'length')" -gt 0 ]]; then
   FIXVERSION_IN=$(echo "$FIXVERSIONS_JSON" | jq -r 'map("\"" + . + "\"") | join(", ")')
   VERSION_CLAUSE="(affectedVersion = \"$ACM_VERSION\" OR fixVersion in ($FIXVERSION_IN))"
 else
@@ -220,11 +223,11 @@ fi
 
 echo "Fetching Security-labeled issues..."
 
-CVE_JQL="project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND $VERSION_CLAUSE"
+CVE_JQL="project=ACM AND labels in (Security) AND $JQL_TEXT_FILTER AND $VERSION_CLAUSE"
 
 CVE_KEYS=$(query_jira --jql "$CVE_JQL" | jq -r '.[].key')
 
-if [ -z "$CVE_KEYS" ]; then
+if [[ -z "$CVE_KEYS" ]]; then
   echo "No CVE issues found."
   CVE_ISSUES_JSON="[]"
 else
@@ -248,7 +251,7 @@ else
     CVE_KEY=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("CVE-"))' | head -1 || echo "")
     PSCOMPONENT=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("pscomponent:")) | sub("pscomponent:"; "")' || echo "")
 
-    if [ -z "$CVE_KEY" ] || [ -z "$PSCOMPONENT" ]; then
+    if [[ -z "$CVE_KEY" || -z "$PSCOMPONENT" ]]; then
       echo "⚠️  $KEY: Missing CVE or pscomponent label, skipping"
       continue
     fi
@@ -279,11 +282,11 @@ else
   echo "Fetching non-Security issues (no timeframe filtering)..."
 fi
 
-NON_CVE_JQL="project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND $VERSION_CLAUSE AND (labels is EMPTY OR labels not in (Security, SecurityTracking))"
+NON_CVE_JQL="project=ACM AND $JQL_TEXT_FILTER AND $VERSION_CLAUSE AND (labels is EMPTY OR labels not in (Security, SecurityTracking))"
 
 NON_CVE_KEYS=$(query_jira --jql "$NON_CVE_JQL" | jq -r '.[].key')
 
-if [ -z "$NON_CVE_KEYS" ]; then
+if [[ -z "$NON_CVE_KEYS" ]]; then
   echo "No non-CVE issues found."
   NON_CVE_ISSUES_JSON="[]"
 else
