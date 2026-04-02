@@ -252,7 +252,11 @@ else
       continue
     fi
 
-    LABELS_JSON=$(view_jira "$KEY" --fields "labels" | jq -r '.fields.labels')
+    # Fetch labels with error handling
+    if ! LABELS_JSON=$(view_jira "$KEY" --fields "labels" 2>&1 | jq -r '.fields.labels' 2>/dev/null); then
+      echo "⚠️  $KEY: Failed to fetch labels, skipping" >&2
+      continue
+    fi
 
     # Extract CVE key (first CVE-* label)
     CVE_KEY=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("CVE-"))' | head -1)
@@ -329,7 +333,11 @@ else
       continue
     fi
 
-    ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution")
+    # Fetch issue details with error handling
+    if ! ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution" 2>&1); then
+      echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
+      continue
+    fi
 
     # Extract fields
     PRIORITY=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.name // "Unknown"')
