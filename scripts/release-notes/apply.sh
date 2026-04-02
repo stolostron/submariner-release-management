@@ -155,8 +155,8 @@ sed -n '1,/^  data:/p' "$STAGE_YAML" | head -n -1 > "$TMPFILE"
 echo "$RELEASE_NOTES_YAML" >> "$TMPFILE"
 
 # Extract everything after data section (next top-level key onwards)
-# Find line number of "  data:"
-DATA_LINE=$(grep -n '^  data:' "$STAGE_YAML" | cut -d: -f1 || echo "")
+# Find line number of "  data:" (use first match if multiple exist)
+DATA_LINE=$(grep -n '^  data:' "$STAGE_YAML" | head -1 | cut -d: -f1 || echo "")
 if [ -n "$DATA_LINE" ]; then
   # Find next line starting with 0-2 spaces after data line (exclusive of data line itself)
   NEXT_KEY_LINE=$(tail -n +"$((DATA_LINE + 1))" "$STAGE_YAML" | grep -n '^[[:space:]]\{0,2\}[a-zA-Z]' | head -1 | cut -d: -f1 || echo "")
