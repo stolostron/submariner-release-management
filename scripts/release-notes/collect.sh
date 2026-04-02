@@ -343,8 +343,8 @@ else
     PRIORITY=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.name // "Unknown"')
     PRIORITY_ID=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.id // "99999"')  # Default ID for unprioritized issues
     STATUS=$(echo "$ISSUE_JSON" | jq -r '.fields.status.name // "Unknown"')
-    CREATED=$(echo "$ISSUE_JSON" | jq -r '.fields.created[:10]')
-    UPDATED=$(echo "$ISSUE_JSON" | jq -r '.fields.updated[:10]')
+    CREATED=$(echo "$ISSUE_JSON" | jq -r '(.fields.created // "1970-01-01T00:00:00Z")[:10]')
+    UPDATED=$(echo "$ISSUE_JSON" | jq -r '(.fields.updated // "1970-01-01T00:00:00Z")[:10]')
     SUMMARY=$(echo "$ISSUE_JSON" | jq -r '.fields.summary // ""')
     FIXVERSIONS=$(echo "$ISSUE_JSON" | jq -r '[.fields.fixVersions[]?.name] | join(", ")')
     RESOLUTION=$(echo "$ISSUE_JSON" | jq -r '.fields.resolution.name // "Unresolved"')
