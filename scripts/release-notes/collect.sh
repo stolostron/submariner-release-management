@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [ -z "$VERSION" ]; then
+      if [[ -z "$VERSION" ]]; then
         VERSION="$1"
       else
         echo "Multiple positional arguments not supported" >&2
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z "$VERSION" ]; then
+if [[ -z "$VERSION" ]]; then
   echo "Usage: $0 VERSION [--stage-yaml PATH]" >&2
   exit 1
 fi
@@ -159,13 +159,13 @@ echo "Scanning $RELEASE_DIR/*/*.yaml for already-documented issues..."
 
 # Use yq to properly parse YAML and extract issue IDs
 EXISTING_ISSUES_JSON="[]"
-if [ -d "$RELEASE_DIR" ]; then
+if [[ -d "$RELEASE_DIR" ]]; then
   # Find all YAML files and extract issue IDs with yq (note: some YAMLs may not have data section)
   EXISTING_ISSUES=$(find "$RELEASE_DIR" -name "*.yaml" -type f -exec sh -c '
     yq eval ".spec.data.releaseNotes.issues.fixed[].id" "$1" 2>/dev/null || true
   ' _ {} \; | sort -u || echo "")
-  if [ -n "$EXISTING_ISSUES" ]; then
-    EXISTING_ISSUES_JSON=$(echo "$EXISTING_ISSUES" | jq -R . | jq -s .)
+  if [[ -n "$EXISTING_ISSUES" ]]; then
+    EXISTING_ISSUES_JSON=$(echo "$EXISTING_ISSUES" | jq -Rs 'split("\n") | map(select(length > 0))')
     echo "Found $(echo "$EXISTING_ISSUES_JSON" | jq 'length') existing issues"
   else
     echo "No existing issues found (clean slate for $VERSION_MAJOR_MINOR)"
@@ -228,7 +228,7 @@ if [ -z "$CVE_KEYS" ]; then
   echo "No CVE issues found."
   CVE_ISSUES_JSON="[]"
 else
-  echo "Found $(echo "$CVE_KEYS" | wc -l) CVE issues, fetching details and mapping components..."
+  echo "Found $(echo "$CVE_KEYS" | grep -c .) CVE issues, fetching details and mapping components..."
 
   # Collect all issue data, then build JSON once (avoids O(n²) array recreation)
   # Performance: Accumulate to bash array first, then single jq -s '.' at end
@@ -273,7 +273,7 @@ echo ""
 
 banner "Querying Jira for Non-CVE Issues"
 
-if [ -n "$TIMEFRAME_START" ]; then
+if [[ -n "$TIMEFRAME_START" ]]; then
   echo "Fetching non-Security issues (timeframe: since $TIMEFRAME_START)..."
 else
   echo "Fetching non-Security issues (no timeframe filtering)..."
@@ -287,7 +287,7 @@ if [ -z "$NON_CVE_KEYS" ]; then
   echo "No non-CVE issues found."
   NON_CVE_ISSUES_JSON="[]"
 else
-  echo "Found $(echo "$NON_CVE_KEYS" | wc -l) non-CVE issues, fetching details..."
+  echo "Found $(echo "$NON_CVE_KEYS" | grep -c .) non-CVE issues, fetching details..."
 
   # Collect all issue data, then build JSON once (avoids O(n²) array recreation)
   NON_CVE_DATA_LINES=()

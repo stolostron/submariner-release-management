@@ -18,13 +18,13 @@ source "$LIB_DIR/release-notes-common.sh"
 DECISIONS_JSON="/tmp/release-notes-decisions.json"
 DATA_JSON="/tmp/release-notes-data.json"
 
-if [ ! -f "$DECISIONS_JSON" ]; then
+if [ ! -f "$DECISIONS_JSON" ]]; then
   echo "❌ ERROR: Decisions file not found: '$DECISIONS_JSON'" >&2
   echo "Run skill analysis first to create decisions file" >&2
   exit 1
 fi
 
-if [ ! -f "$DATA_JSON" ]; then
+if [ ! -f "$DATA_JSON" ]]; then
   echo "❌ ERROR: Data file not found: '$DATA_JSON'" >&2
   echo "Run collect.sh first" >&2
   exit 1
@@ -40,7 +40,7 @@ echo "Version: $VERSION"
 echo "Stage YAML: $STAGE_YAML"
 echo ""
 
-if [ ! -f "$STAGE_YAML" ]; then
+if [ ! -f "$STAGE_YAML" ]]; then
   echo "❌ ERROR: Stage YAML not found: '$STAGE_YAML'" >&2
   exit 1
 fi
@@ -64,14 +64,14 @@ NON_CVE_COUNT=$(jq -r '.non_cve_issues.selected | length' "$DECISIONS_JSON")
 
 # Build issues.fixed YAML (with section headers)
 ISSUES_FIXED_YAML=""
-if [ "$CVE_COUNT" -gt 0 ]; then
+if [ "$CVE_COUNT" -gt 0 ]]; then
   ISSUES_FIXED_YAML="${ISSUES_FIXED_YAML}          # CVE Issues ($CVE_COUNT):\n"
   for KEY in $CVE_ISSUE_KEYS; do
     ISSUES_FIXED_YAML="${ISSUES_FIXED_YAML}          - id: $KEY\n            source: issues.redhat.com\n"
   done
 fi
 
-if [ "$NON_CVE_COUNT" -gt 0 ]; then
+if [ "$NON_CVE_COUNT" -gt 0 ]]; then
   ISSUES_FIXED_YAML="${ISSUES_FIXED_YAML}          # Non-CVE Issues ($NON_CVE_COUNT):\n"
   for KEY in $SELECTED_NON_CVE_KEYS; do
     ISSUES_FIXED_YAML="${ISSUES_FIXED_YAML}          - id: $KEY\n            source: issues.redhat.com\n"
@@ -80,7 +80,7 @@ fi
 
 # Build cves[] array (grouped by CVE key, with verification comments)
 CVES_YAML=""
-if [ "$CVE_COUNT" -gt 0 ]; then
+if [ "$CVE_COUNT" -gt 0 ]]; then
   # Group CVE data by cve_key (from data.json)
   CVE_GROUPS=$(jq -r '
     .cve_issues | group_by(.cve_key) | map({
@@ -111,7 +111,7 @@ RELEASE_NOTES_YAML="  data:
         fixed:
 $(echo -e "$ISSUES_FIXED_YAML")"
 
-if [ -n "$CVES_YAML" ]; then
+if [[ -n "$CVES_YAML" ]]; then
   RELEASE_NOTES_YAML="${RELEASE_NOTES_YAML}
       cves:
 $(echo -e "$CVES_YAML")"
@@ -131,7 +131,7 @@ echo "Updating stage YAML..."
 
 # Validate YAML doesn't have duplicate data: sections (malformed)
 DATA_COUNT=$(grep -c "^  data:" "$STAGE_YAML" || echo "0")
-if [ "$DATA_COUNT" -gt 1 ]; then
+if [ "$DATA_COUNT" -gt 1 ]]; then
   echo "❌ ERROR: YAML has $DATA_COUNT 'data:' sections (expected 0 or 1)" >&2
   echo "File is malformed. Fix manually before applying release notes." >&2
   exit 1
@@ -159,7 +159,7 @@ trap 'rm -f "$TMPFILE"' EXIT INT TERM
 
 DATA_LINE=$(grep -n '^  data:' "$STAGE_YAML" | head -1 | cut -d: -f1 || echo "")
 
-if [ -n "$DATA_LINE" ]; then
+if [[ -n "$DATA_LINE" ]]; then
   # YAML has existing data: section - replace it
 
   # Extract everything before "  data:" (excluding the data: line itself)
@@ -173,7 +173,7 @@ if [ -n "$DATA_LINE" ]; then
   NEXT_KEY_LINE=$(tail -n +"$((DATA_LINE + 1))" "$STAGE_YAML" | \
     grep -n '^[[:space:]]\{0,2\}[a-zA-Z]' | head -1 | cut -d: -f1 || echo "")
 
-  if [ -n "$NEXT_KEY_LINE" ]; then
+  if [[ -n "$NEXT_KEY_LINE" ]]; then
     # Append everything from next key onwards (preserves releasePlan, etc.)
     ABS_LINE=$((DATA_LINE + NEXT_KEY_LINE))
     tail -n +"$ABS_LINE" "$STAGE_YAML" >> "$TMPFILE"
@@ -207,7 +207,7 @@ echo "✓ YAML syntax valid"
 
 # Find git root for make command
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$GIT_ROOT" ]; then
+if [[ -z "$GIT_ROOT" ]]; then
   echo "⚠️  WARNING: Not in git repository - skipping validation" >&2
 else
   # Run file validation (yaml, fields, data - excludes gitlint/markdown)
