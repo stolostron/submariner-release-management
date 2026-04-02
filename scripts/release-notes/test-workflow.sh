@@ -136,7 +136,11 @@ cp "$STAGE_YAML" "$STAGE_YAML.test-backup"
 OUTPUT=$(timeout 30 bash scripts/release-notes/apply.sh 2>&1 || true)
 
 # Check if validation passed (this is the critical test)
-if echo "$OUTPUT" | grep -q "✓ Release data validation passed"; then
+# NOTE: Use grep without -q and redirect to /dev/null to avoid pipefail issues
+echo "$OUTPUT" | grep "Release data validation passed" >/dev/null 2>&1
+VALIDATION_PASSED=$?
+
+if [ "$VALIDATION_PASSED" -eq 0 ]; then
   echo "   ✓ YAML validation passed"
 
   # Verify YAML was actually updated with correct data
