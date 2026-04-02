@@ -147,6 +147,12 @@ echo ""
 banner "Checking for Existing Issues"
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$GIT_ROOT" ]; then
+  echo "❌ ERROR: Not in a git repository" >&2
+  echo "Run this script from within the repository" >&2
+  exit 1
+fi
+
 RELEASE_DIR="$GIT_ROOT/releases/$VERSION_MAJOR_MINOR"
 
 echo "Scanning $RELEASE_DIR/*/*.yaml for already-documented issues..."
