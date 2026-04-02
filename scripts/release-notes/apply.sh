@@ -145,6 +145,8 @@ echo "✓ Backup created: ${STAGE_YAML}.bak"
 
 # Create temporary file with updated content
 TMPFILE=$(mktemp)
+# Ensure temp file is cleaned up on exit/error/interrupt
+trap 'rm -f "$TMPFILE"' EXIT INT TERM
 
 # Extract everything before "  data:" (if exists)
 sed -n '1,/^  data:/p' "$STAGE_YAML" | head -n -1 > "$TMPFILE"
