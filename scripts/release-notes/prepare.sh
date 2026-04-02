@@ -120,6 +120,7 @@ jq '
     cve_count: ($filtered_cve | length),
     non_cve_total: ($filtered_non_cve | length),
     non_cve_blocker: ($filtered_non_cve | map(select(.priority == "Blocker")) | length),
+    non_cve_critical: ($filtered_non_cve | map(select(.priority == "Critical")) | length),
     non_cve_major: ($filtered_non_cve | map(select(.priority == "Major")) | length)
   }
 ) as $statistics |
@@ -135,7 +136,7 @@ jq '
     ),
     suggested_non_cve_issues: (
       $filtered_non_cve |
-      map(select(.priority == "Blocker" or .priority == "Major")) |
+      map(select(.priority == "Blocker" or .priority == "Critical" or .priority == "Major")) |
       map(.issue_key)
     )
   }
@@ -164,6 +165,7 @@ jq -r '
 "  Non-CVE topics: \(.non_cve_topics | length)",
 "  Total non-CVE issues: \(.statistics.non_cve_total)",
 "  Blockers: \(.statistics.non_cve_blocker)",
+"  Criticals: \(.statistics.non_cve_critical)",
 "  Majors: \(.statistics.non_cve_major)",
 "",
 "Recommendation:",

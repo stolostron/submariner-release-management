@@ -49,7 +49,7 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
 2. **Select notable non-CVE issues** - choose 3-8 issues that are:
    - User-facing (not internal refactoring)
    - Fixed (status=Closed, resolution=Done)
-   - Important (Blocker/Major priority OR significant features)
+   - Important (Blocker/Critical/Major priority OR significant features)
 3. **Confirm release type**:
    - RHSA if CVEs present (required)
    - RHBA for bug fixes (no CVEs)
