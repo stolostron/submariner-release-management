@@ -225,6 +225,8 @@ else
   echo "Found $(echo "$CVE_KEYS" | wc -l) CVE issues, fetching details and mapping components..."
 
   # Collect all issue data, then build JSON once (avoids O(n²) array recreation)
+  # Performance: Accumulate to bash array first, then single jq -s '.' at end
+  # vs appending to JSON array in loop: CVE_JSON=$(echo "$CVE_JSON" | jq '. + [$obj]')
   CVE_DATA_LINES=()
   for KEY in $CVE_KEYS; do
     # Skip empty/null keys

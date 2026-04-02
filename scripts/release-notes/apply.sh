@@ -150,36 +150,46 @@ fi
 cp "$STAGE_YAML" "${STAGE_YAML}.bak"
 echo "✓ Backup created: ${STAGE_YAML}.bak"
 
-# Use sed to replace releaseNotes section (from "  data:" to next top-level key)
-# Strategy: Delete from "  data:" to next line starting with 0-2 spaces (exclusive)
-#           Then insert new releaseNotes section
+# Replace data: section in YAML using sed (robust YAML parsing would use yq)
+# Algorithm:
+#   1. Extract lines before "  data:" (if exists) → tmpfile
+#   2. Append new releaseNotes section → tmpfile
+#   3. Append lines after old data section (next spec.* key onwards) → tmpfile
+#
+# Example transformations:
+#   Input: spec:\n  snapshot: X\n  data:\n    old: Y\n  releasePlan: Z
+#   Output: spec:\n  snapshot: X\n  data:\n    releaseNotes: {...}\n  releasePlan: Z
+#
+#   Input: spec:\n  snapshot: X\n  releasePlan: Y  (no data section)
+#   Output: spec:\n  snapshot: X\n  releasePlan: Y\n  data:\n    releaseNotes: {...}
 
-# Create temporary file with updated content
 TMPFILE=$(mktemp)
-# Ensure temp file is cleaned up on exit/error/interrupt
 trap 'rm -f "$TMPFILE"' EXIT INT TERM
 
-# Extract everything before "  data:" (if exists)
-sed -n '1,/^  data:/p' "$STAGE_YAML" | head -n -1 > "$TMPFILE"
-
-# Add new releaseNotes section
-echo "$RELEASE_NOTES_YAML" >> "$TMPFILE"
-
-# Extract everything after data section (next top-level key onwards)
-# Find line number of "  data:" (use first match if multiple exist)
 DATA_LINE=$(grep -n '^  data:' "$STAGE_YAML" | head -1 | cut -d: -f1 || echo "")
+
 if [ -n "$DATA_LINE" ]; then
-  # Find next line starting with 0-2 spaces after data line (exclusive of data line itself)
-  NEXT_KEY_LINE=$(tail -n +"$((DATA_LINE + 1))" "$STAGE_YAML" | grep -n '^[[:space:]]\{0,2\}[a-zA-Z]' | head -1 | cut -d: -f1 || echo "")
+  # YAML has existing data: section - replace it
+
+  # Extract everything before "  data:" (excluding the data: line itself)
+  sed -n '1,/^  data:/p' "$STAGE_YAML" | head -n -1 > "$TMPFILE"
+
+  # Add new releaseNotes section
+  echo "$RELEASE_NOTES_YAML" >> "$TMPFILE"
+
+  # Find next key at same indentation (e.g., "  releasePlan:" after "  data:")
+  # This marks where the old data: section ends
+  NEXT_KEY_LINE=$(tail -n +"$((DATA_LINE + 1))" "$STAGE_YAML" | \
+    grep -n '^[[:space:]]\{0,2\}[a-zA-Z]' | head -1 | cut -d: -f1 || echo "")
 
   if [ -n "$NEXT_KEY_LINE" ]; then
-    # Calculate absolute line number
+    # Append everything from next key onwards (preserves releasePlan, etc.)
     ABS_LINE=$((DATA_LINE + NEXT_KEY_LINE))
     tail -n +"$ABS_LINE" "$STAGE_YAML" >> "$TMPFILE"
   fi
-  # If NEXT_KEY_LINE empty, data is last section - nothing to append after releaseNotes
+  # If no next key found, data: was the last section (nothing to append)
 else
-  # No existing data section - append to end
+  # YAML has no data: section - append new section at end
   cat "$STAGE_YAML" > "$TMPFILE"
   echo "$RELEASE_NOTES_YAML" >> "$TMPFILE"
 fi

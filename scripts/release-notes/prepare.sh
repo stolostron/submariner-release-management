@@ -29,6 +29,12 @@ banner "Prepare Release Notes Data for Analysis"
 # ============================================================================
 # Filter and Group with jq
 # ============================================================================
+# Single jq pipeline to:
+#   1. Filter non-CVE issues by timeframe (Z-stream) or existing (Y-stream)
+#   2. Group CVEs by CVE key (multiple issues can fix same CVE)
+#   3. Categorize non-CVEs by pattern (connectivity, performance, features, bugs)
+#   4. Calculate statistics (counts by priority)
+#   5. Generate recommendation (RHSA if CVEs, else RHBA/RHEA)
 
 jq '
 # Extract metadata
