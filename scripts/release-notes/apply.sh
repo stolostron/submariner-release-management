@@ -8,6 +8,13 @@ set -euo pipefail
 # Initialize
 # ============================================================================
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(cd "$SCRIPT_DIR/../lib" && pwd)"
+
+# Source shared library for banner function
+# shellcheck source=../lib/release-notes-common.sh
+source "$LIB_DIR/release-notes-common.sh"
+
 DECISIONS_JSON="/tmp/release-notes-decisions.json"
 DATA_JSON="/tmp/release-notes-data.json"
 
@@ -23,11 +30,7 @@ if [ ! -f "$DATA_JSON" ]; then
   exit 1
 fi
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Apply Release Notes to Stage YAML"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Apply Release Notes to Stage YAML"
 
 # Extract metadata and stage YAML path
 STAGE_YAML=$(jq -r '.metadata.stage_yaml' "$DATA_JSON")

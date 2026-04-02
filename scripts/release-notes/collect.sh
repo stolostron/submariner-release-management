@@ -63,11 +63,7 @@ source "$LIB_DIR/release-notes-common.sh"
 # Output file
 OUTPUT_JSON="/tmp/release-notes-data.json"
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Collect Release Notes Data: $VERSION"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Collect Release Notes Data: $VERSION"
 
 # ============================================================================
 # Prerequisites
@@ -97,11 +93,7 @@ echo ""
 # Calculate Versions
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Calculating ACM Version"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Calculating ACM Version"
 
 calculate_acm_version
 
@@ -120,11 +112,7 @@ echo ""
 # Find Existing fixVersions
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Finding Existing fixVersions"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Finding Existing fixVersions"
 
 echo "Querying Jira for existing fixVersion values..."
 
@@ -156,20 +144,20 @@ echo ""
 # Scan Existing Issues
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Checking for Existing Issues"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Checking for Existing Issues"
 
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 RELEASE_DIR="$GIT_ROOT/releases/$VERSION_MAJOR_MINOR"
 
 echo "Scanning $RELEASE_DIR/*/*.yaml for already-documented issues..."
 
+# Use yq to properly parse YAML and extract issue IDs
 EXISTING_ISSUES_JSON="[]"
 if [ -d "$RELEASE_DIR" ]; then
-  EXISTING_ISSUES=$(grep -h "id: ACM-" "$RELEASE_DIR"/*/*.yaml 2>/dev/null | sed 's/.*id: //' | sed 's/[[:space:]]*$//' | sort -u || echo "")
+  # Find all YAML files and extract issue IDs with yq (note: some YAMLs may not have data section)
+  EXISTING_ISSUES=$(find "$RELEASE_DIR" -name "*.yaml" -type f -exec sh -c '
+    yq eval ".spec.data.releaseNotes.issues.fixed[].id" "$1" 2>/dev/null || true
+  ' _ {} \; | sort -u || echo "")
   if [ -n "$EXISTING_ISSUES" ]; then
     EXISTING_ISSUES_JSON=$(echo "$EXISTING_ISSUES" | jq -R . | jq -s .)
     echo "Found $(echo "$EXISTING_ISSUES_JSON" | jq 'length') existing issues"
@@ -185,11 +173,7 @@ echo ""
 # Determine Release Timeframe
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Determining Release Timeframe"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Determining Release Timeframe"
 
 # Extract patch number
 PATCH_VERSION=$(echo "$VERSION" | cut -d. -f3)
@@ -218,11 +202,7 @@ echo ""
 # Query CVE Issues
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Querying Jira for CVE Issues"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Querying Jira for CVE Issues"
 
 # Build fixVersion clause (only if we have fixVersions)
 if [ "$(echo "$FIXVERSIONS_JSON" | jq 'length')" -gt 0 ]; then
@@ -244,57 +224,37 @@ if [ -z "$CVE_KEYS" ]; then
 else
   echo "Found $(echo "$CVE_KEYS" | wc -l) CVE issues, fetching details and mapping components..."
 
-  # Fetch labels for each CVE issue
-  CVE_ISSUES_JSON="[]"
+  # Collect all issue data, then build JSON once (avoids O(n²) array recreation)
+  CVE_DATA_LINES=()
   for KEY in $CVE_KEYS; do
     # Skip empty/null keys
-    if [ -z "$KEY" ] || [ "$KEY" = "null" ]; then
-      continue
-    fi
+    [ -z "$KEY" ] || [ "$KEY" = "null" ] && continue
 
     # Fetch labels with error handling
-    if ! LABELS_JSON=$(view_jira "$KEY" --fields "labels" | jq -r '.fields.labels' 2>/dev/null); then
+    LABELS_JSON=$(view_jira "$KEY" --fields "labels" | jq -r '.fields.labels' 2>/dev/null) || {
       echo "⚠️  $KEY: Failed to fetch labels, skipping" >&2
       continue
-    fi
+    }
 
-    # Extract CVE key (first CVE-* label)
+    # Extract CVE key and pscomponent
     CVE_KEY=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("CVE-"))' | head -1)
-
-    # Extract pscomponent (pscomponent:* label without prefix)
     PSCOMPONENT=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("pscomponent:")) | sub("pscomponent:"; "")')
 
-    if [ -z "$CVE_KEY" ] || [ -z "$PSCOMPONENT" ]; then
+    [ -z "$CVE_KEY" ] || [ -z "$PSCOMPONENT" ] && {
       echo "⚠️  $KEY: Missing CVE or pscomponent label, skipping"
       continue
-    fi
+    }
 
-    # Map component in bash (cannot call bash function from jq)
+    # Map component
     COMPONENT_MAPPED=$(map_component_name "$PSCOMPONENT" "$VERSION_MAJOR_MINOR_DASH")
+    [ "$COMPONENT_MAPPED" = "EXCLUDE" ] || [ "$COMPONENT_MAPPED" = "UNKNOWN" ] && continue
 
-    # Skip EXCLUDE and UNKNOWN
-    if [ "$COMPONENT_MAPPED" = "EXCLUDE" ] || [ "$COMPONENT_MAPPED" = "UNKNOWN" ]; then
-      continue
-    fi
-
-    # Build JSON object
-    ISSUE_OBJ=$(jq -n \
-      --arg issue_key "$KEY" \
-      --arg cve_key "$CVE_KEY" \
-      --arg pscomponent "$PSCOMPONENT" \
-      --arg component_mapped "$COMPONENT_MAPPED" \
-      --argjson labels "$LABELS_JSON" \
-      '{
-        issue_key: $issue_key,
-        cve_key: $cve_key,
-        pscomponent: $pscomponent,
-        component_mapped: $component_mapped,
-        labels: $labels
-      }')
-
-    CVE_ISSUES_JSON=$(echo "$CVE_ISSUES_JSON" | jq --argjson obj "$ISSUE_OBJ" '. + [$obj]')
+    # Store as JSON line for batch processing
+    CVE_DATA_LINES+=("$(jq -n --arg ik "$KEY" --arg ck "$CVE_KEY" --arg ps "$PSCOMPONENT" --arg cm "$COMPONENT_MAPPED" --argjson lb "$LABELS_JSON" '{issue_key:$ik,cve_key:$ck,pscomponent:$ps,component_mapped:$cm,labels:$lb}')")
   done
 
+  # Build JSON array once from all lines
+  CVE_ISSUES_JSON=$(printf '%s\n' "${CVE_DATA_LINES[@]}" | jq -s '.')
   echo "Mapped $(echo "$CVE_ISSUES_JSON" | jq 'length') CVE issues to components"
 fi
 echo ""
@@ -303,11 +263,7 @@ echo ""
 # Query Non-CVE Issues
 # ============================================================================
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Querying Jira for Non-CVE Issues"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Querying Jira for Non-CVE Issues"
 
 if [ -n "$TIMEFRAME_START" ]; then
   echo "Fetching non-Security issues (timeframe: since $TIMEFRAME_START)..."
@@ -325,56 +281,34 @@ if [ -z "$NON_CVE_KEYS" ]; then
 else
   echo "Found $(echo "$NON_CVE_KEYS" | wc -l) non-CVE issues, fetching details..."
 
-  # Fetch details for each issue
-  NON_CVE_ISSUES_JSON="[]"
+  # Collect all issue data, then build JSON once (avoids O(n²) array recreation)
+  NON_CVE_DATA_LINES=()
   for KEY in $NON_CVE_KEYS; do
     # Skip empty/null keys
-    if [ -z "$KEY" ] || [ "$KEY" = "null" ]; then
-      continue
-    fi
+    [ -z "$KEY" ] || [ "$KEY" = "null" ] && continue
 
     # Fetch issue details with error handling
-    if ! ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution"); then
+    ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution") || {
       echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
       continue
-    fi
+    }
 
-    # Extract fields
-    PRIORITY=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.name // "Unknown"')
-    PRIORITY_ID=$(echo "$ISSUE_JSON" | jq -r '.fields.priority.id // "99999"')  # Default ID for unprioritized issues
-    STATUS=$(echo "$ISSUE_JSON" | jq -r '.fields.status.name // "Unknown"')
-    CREATED=$(echo "$ISSUE_JSON" | jq -r '(.fields.created // "1970-01-01T00:00:00Z")[:10]')
-    UPDATED=$(echo "$ISSUE_JSON" | jq -r '(.fields.updated // "1970-01-01T00:00:00Z")[:10]')
-    SUMMARY=$(echo "$ISSUE_JSON" | jq -r '.fields.summary // ""')
-    FIXVERSIONS=$(echo "$ISSUE_JSON" | jq -r '[.fields.fixVersions[]?.name] | join(", ")')
-    RESOLUTION=$(echo "$ISSUE_JSON" | jq -r '.fields.resolution.name // "Unresolved"')
-
-    # Build JSON object
-    ISSUE_OBJ=$(jq -n \
-      --arg issue_key "$KEY" \
-      --arg priority "$PRIORITY" \
-      --arg priority_id "$PRIORITY_ID" \
-      --arg status "$STATUS" \
-      --arg created "$CREATED" \
-      --arg updated "$UPDATED" \
-      --arg summary "$SUMMARY" \
-      --arg fixversions "$FIXVERSIONS" \
-      --arg resolution "$RESOLUTION" \
-      '{
-        issue_key: $issue_key,
-        priority: $priority,
-        priority_id: $priority_id,
-        status: $status,
-        created: $created,
-        updated: $updated,
-        summary: $summary,
-        fixversions: $fixversions,
-        resolution: $resolution
-      }')
-
-    NON_CVE_ISSUES_JSON=$(echo "$NON_CVE_ISSUES_JSON" | jq --argjson obj "$ISSUE_OBJ" '. + [$obj]')
+    # Extract and store as JSON line (let jq handle all extraction and defaults)
+    NON_CVE_DATA_LINES+=("$(echo "$ISSUE_JSON" | jq -c --arg ik "$KEY" '{
+      issue_key: $ik,
+      priority: (.fields.priority.name // "Unknown"),
+      priority_id: (.fields.priority.id // "99999"),
+      status: (.fields.status.name // "Unknown"),
+      created: ((.fields.created // "1970-01-01T00:00:00Z")[:10]),
+      updated: ((.fields.updated // "1970-01-01T00:00:00Z")[:10]),
+      summary: (.fields.summary // ""),
+      fixversions: ([.fields.fixVersions[]?.name] | join(", ")),
+      resolution: (.fields.resolution.name // "Unresolved")
+    }')")
   done
 
+  # Build JSON array once from all lines
+  NON_CVE_ISSUES_JSON=$(printf '%s\n' "${NON_CVE_DATA_LINES[@]}" | jq -s '.')
   echo "Collected $(echo "$NON_CVE_ISSUES_JSON" | jq 'length') non-CVE issue details"
 fi
 echo ""

@@ -8,6 +8,13 @@ set -euo pipefail
 # Initialize
 # ============================================================================
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(cd "$SCRIPT_DIR/../lib" && pwd)"
+
+# Source shared library for banner function
+# shellcheck source=../lib/release-notes-common.sh
+source "$LIB_DIR/release-notes-common.sh"
+
 INPUT_JSON="/tmp/release-notes-data.json"
 OUTPUT_JSON="/tmp/release-notes-topics.json"
 
@@ -17,11 +24,7 @@ if [ ! -f "$INPUT_JSON" ]; then
   exit 1
 fi
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Prepare Release Notes Data for Analysis"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+banner "Prepare Release Notes Data for Analysis"
 
 # ============================================================================
 # Filter and Group with jq
