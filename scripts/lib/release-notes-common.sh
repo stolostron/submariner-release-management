@@ -51,6 +51,10 @@ map_component_name() {
     "rhacm2/submariner-addon-rhel9")
       echo "EXCLUDE"  # Built separately in ACM/MCE - don't include
       ;;
+    "rhacm2/submariner-rhel9-operator")
+      # Alternative label format for operator (rhel9 in middle)
+      echo "submariner-operator-${VERSION_DASH}"
+      ;;
     "rhacm2/submariner-"*"-rhel9"|"submariner-"*"-container")
       # Extract component name (e.g., submariner-route-agent from rhacm2/submariner-route-agent-rhel9)
       # Remove rhacm2/ prefix and -rhel9/-container suffix

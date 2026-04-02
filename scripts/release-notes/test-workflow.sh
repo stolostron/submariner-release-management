@@ -28,6 +28,7 @@ fi
 # Test other components
 for test_case in \
   "rhacm2/submariner-operator-rhel9:submariner-operator-0-23" \
+  "rhacm2/submariner-rhel9-operator:submariner-operator-0-23" \
   "rhacm2/lighthouse-agent-rhel9:lighthouse-agent-0-23" \
   "nettest-container:nettest-0-23" \
   "rhacm2/submariner-addon-rhel9:EXCLUDE"; do
