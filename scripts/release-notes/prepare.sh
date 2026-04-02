@@ -37,17 +37,21 @@ jq '
 # Filter non-CVE issues
 (
   if $meta.timeframe_type == "z-stream" then
-    # Z-stream: exclude existing + filter by timeframe
+    # Z-stream: exclude existing + filter by timeframe + status/resolution
     .non_cve_issues | map(
       select(
         (.issue_key | IN($existing[]) | not) and
-        (.created >= $meta.timeframe_start or .updated >= $meta.timeframe_start)
+        (.created >= $meta.timeframe_start or .updated >= $meta.timeframe_start) and
+        ((.status == "Closed" or .status == "Resolved") and .resolution == "Done")
       )
     )
   else
-    # Y-stream: exclude existing only (no timeframe filter)
+    # Y-stream: exclude existing + status/resolution only (no timeframe filter)
     .non_cve_issues | map(
-      select(.issue_key | IN($existing[]) | not)
+      select(
+        (.issue_key | IN($existing[]) | not) and
+        ((.status == "Closed" or .status == "Resolved") and .resolution == "Done")
+      )
     )
   end
 ) as $filtered_non_cve |
