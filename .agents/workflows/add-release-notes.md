@@ -13,31 +13,34 @@ Add complete release notes to stage YAML. QE verifies both code and release note
 - For 0.21.0, 0.21.1, 0.21.2 → all use `affectedVersion = "ACM 2.14.0"`
 - For 0.20.0, 0.20.1, 0.20.2 → all use `affectedVersion = "ACM 2.13.0"`
 
-### Jira CLI Setup (User Must Complete)
+### Atlassian CLI Setup (User Must Complete)
 
 **These steps must be done by the user before Claude can query Jira:**
 
-1. Create a Personal Access Token at <https://issues.redhat.com/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens>
-2. Install jira-cli: `go install github.com/ankitpokhrel/jira-cli/cmd/jira@latest`
-3. Add token to shell config (e.g., `~/.zshrc`): `export JIRA_API_TOKEN="your-token"`
-4. Reload shell: `source ~/.zshrc`
-5. Initialize:
+1. Install acli: See [installation guide](https://developer.atlassian.com/cloud/acli/guides/install-acli/)
+2. Authenticate to Jira:
 
    ```bash
-   jira init --installation local --auth-type bearer \
-     --server https://issues.redhat.com --login rhn-support-tiwillia \
-     --project ACM --board none
+   acli jira auth login --web
+   # OR with API token:
+   acli jira auth login --site redhat.atlassian.net --email your@email.com --token YOUR_TOKEN
    ```
+
+3. Verify authentication:
+
+   ```bash
+   acli jira auth status
+   ```
+
+   Should show "✓ Authenticated" to redhat.atlassian.net
 
 **Claude: Test if setup works with:**
 
 ```bash
-source ~/.zshrc && jira issue list -q 'project=ACM' --raw | jq -r '.[0].key // "Setup failed"'
+acli jira workitem search --jql 'project=ACM' --limit 1 --json | jq -r '.[0].key // "Setup failed"'
 ```
 
 If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask user to complete setup steps above.
-
-**IMPORTANT for Claude:** Each Bash tool invocation is independent. Always prefix jira commands with `source ~/.zshrc &&` to load JIRA_API_TOKEN.
 
 ### Workflow
 
@@ -74,7 +77,10 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
    - For non-obvious issues, fetch full details:
 
    ```bash
-   source ~/.zshrc && jira issue list --raw -q 'project=ACM AND key in (ACM-XXXXX, ACM-YYYYY)' | jq -r '.[] | {key: .key, status: .fields.status.name, summary: .fields.summary, fixVersions: [.fields.fixVersions[]?.name], resolution: .fields.resolution.name}'
+   for KEY in ACM-XXXXX ACM-YYYYY; do
+     acli jira workitem view "$KEY" --fields "status,summary,fixVersions,resolution" --json | \
+       jq '{key: .key, status: .fields.status.name, summary: .fields.summary, fixVersions: [.fields.fixVersions[]?.name], resolution: .fields.resolution.name}'
+   done
    ```
 
    - Check fixVersions starts with ACM series (0.21.x → "ACM 2.14", 0.20.x → "ACM 2.13")
@@ -136,7 +142,13 @@ If this returns an issue key (e.g., "ACM-12345"), setup is working. If not, ask 
 **Note:** Adjust versions for your release. First, find existing fixVersion values:
 
 ```bash
-source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner OR text ~ lighthouse)' --paginate 100 | jq -r '[.[] | .fields.fixVersions[]?.name | select(startswith("Submariner") or startswith("ACM"))] | unique | sort[]'
+# Get issue keys
+KEYS=$(acli jira workitem search --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse)' --paginate --json | jq -r '.[].key')
+
+# Fetch fixVersions for each issue
+echo "$KEYS" | while read -r KEY; do
+  acli jira workitem view "$KEY" --fields "fixVersions" --json 2>/dev/null
+done | jq -r '[.fields.fixVersions[]?.name | select(startswith("Submariner") or startswith("ACM"))] | unique | sort[]'
 ```
 
 Then construct the query:
@@ -153,16 +165,20 @@ Then construct the query:
 Query for CVEs affecting this release (checks BOTH affectedVersion and fixVersion):
 
 ```bash
-source ~/.zshrc && jira issue list --raw -q 'project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1"))'
+acli jira workitem search \
+  --jql 'project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1"))' \
+  --fields "key,labels" --paginate --json
 ```
 
 Extract CVE and component data:
 
 ```bash
-source ~/.zshrc && jira issue list --raw -q 'project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1"))' | jq -r '.[] | {
+acli jira workitem search \
+  --jql 'project=ACM AND labels in (Security) AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1"))' \
+  --fields "key,labels" --paginate --json | jq -r '.[] | {
   issue: .key,
-  cve: (.fields.labels[] | select(startswith("CVE-"))),
-  component: (.fields.labels[] | select(startswith("pscomponent:")) | sub("pscomponent:"; ""))
+  cve: (.fields.labels[]? | select(startswith("CVE-"))),
+  component: (.fields.labels[]? | select(startswith("pscomponent:")) | sub("pscomponent:"; ""))
 }'
 ```
 
@@ -214,7 +230,10 @@ release. Exclude any CVEs with `pscomponent:rhacm2/submariner-addon-rhel9` from 
 Query for non-security issues (checks BOTH affectedVersion and fixVersion):
 
 ```bash
-source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1")) AND (labels is EMPTY OR labels not in (Security, SecurityTracking))'
+# Get issue keys
+KEYS=$(acli jira workitem search \
+  --jql 'project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1")) AND (labels is EMPTY OR labels not in (Security, SecurityTracking))' \
+  --paginate --json | jq -r '.[].key')
 ```
 
 **Note:** Query includes both `affectedVersion` and `fixVersion` (with IN operator for exact matches) because some
@@ -224,7 +243,10 @@ issues are only tagged with fixVersion (e.g., ACM-25262). This ensures we don't 
 Format for user review (sorted by priority, with dates):
 
 ```bash
-source ~/.zshrc && jira issue list --raw -q 'project=ACM AND (text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest) AND (affectedVersion = "ACM 2.14.0" OR fixVersion in ("Submariner 0.21.2", "ACM 2.14.0", "ACM 2.14.1")) AND (labels is EMPTY OR labels not in (Security, SecurityTracking))' | jq -r 'sort_by(.fields.priority.id) | reverse | .[] | "\(.key) [\(.fields.priority.name)] (\(.fields.status.name)) Created: \(.fields.created[:10]) Updated: \(.fields.updated[:10]): \(.fields.summary)"'
+# Fetch full details for each issue and format
+echo "$KEYS" | while read -r KEY; do
+  acli jira workitem view "$KEY" --fields "priority,status,created,updated,summary" --json 2>/dev/null
+done | jq -s 'sort_by(.fields.priority.id // 99999) | reverse | .[] | "\(.key) [\(.fields.priority.name)] (\(.fields.status.name)) Created: \(.fields.created[:10]) Updated: \(.fields.updated[:10]): \(.fields.summary)"' -r
 ```
 
 **Note:** Exclude submariner-addon issues from selection (built separately in ACM/MCE, not in operator release).
