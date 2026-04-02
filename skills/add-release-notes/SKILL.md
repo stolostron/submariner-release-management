@@ -39,7 +39,7 @@ echo "Topics file: /tmp/release-notes-topics.json"
 
 ---
 
-**Phase 3: Analyze issues and make decisions**
+## Phase 3: Analyze issues and make decisions
 
 Read `/tmp/release-notes-topics.json` and make release note decisions.
 

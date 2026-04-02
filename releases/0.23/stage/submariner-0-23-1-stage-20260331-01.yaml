@@ -11,7 +11,7 @@ spec:
   snapshot: submariner-0-23-20260331-195748-000
   data:
     releaseNotes:
-      type: RHSA
+      type: RHBA
       issues:
         fixed:
           # CVE Issues (2):
