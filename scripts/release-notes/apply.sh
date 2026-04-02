@@ -58,18 +58,9 @@ RELEASE_TYPE=$(jq -r '.release_type' "$DECISIONS_JSON")
 CVE_ISSUE_KEYS=$(jq -r '.cve_issues[].issue_key // empty' "$DATA_JSON" | sort)
 SELECTED_NON_CVE_KEYS=$(jq -r '.non_cve_issues.selected[].issue_key // empty' "$DECISIONS_JSON" | sort)
 
-# Count issues (handle empty case)
-if [ -z "$CVE_ISSUE_KEYS" ]; then
-  CVE_COUNT=0
-else
-  CVE_COUNT=$(echo "$CVE_ISSUE_KEYS" | wc -l)
-fi
-
-if [ -z "$SELECTED_NON_CVE_KEYS" ]; then
-  NON_CVE_COUNT=0
-else
-  NON_CVE_COUNT=$(echo "$SELECTED_NON_CVE_KEYS" | wc -l)
-fi
+# Count issues directly from JSON (avoids shell wc -l edge cases)
+CVE_COUNT=$(jq -r '.cve_issues | length' "$DATA_JSON")
+NON_CVE_COUNT=$(jq -r '.non_cve_issues.selected | length' "$DECISIONS_JSON")
 
 # Build issues.fixed YAML (with section headers)
 ISSUES_FIXED_YAML=""
