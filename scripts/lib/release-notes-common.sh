@@ -12,6 +12,7 @@ set -euo pipefail
 calculate_acm_version() {
   # Extract version components (e.g., "0.23.1" → "0.23")
   VERSION_MAJOR_MINOR=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
+  # shellcheck disable=SC2034  # Used by caller after sourcing
   VERSION_MAJOR_MINOR_DASH="${VERSION_MAJOR_MINOR//./-}"
 
   # Submariner 0.X → ACM 2.(X-7)
@@ -25,6 +26,7 @@ calculate_acm_version() {
   fi
 
   # Always use base ACM version (not patch)
+  # shellcheck disable=SC2034  # Used by caller after sourcing
   ACM_VERSION="ACM 2.${ACM_MINOR}.0"
 }
 
