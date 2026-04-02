@@ -156,16 +156,14 @@ find_stage_yaml() {
 # Exits: 1 if both attempts fail
 query_jira() {
   local OUTPUT
-  local RETRY=0
 
-  while [ $RETRY -lt 2 ]; do
+  for ATTEMPT in 1 2; do
     if OUTPUT=$(acli jira workitem search "$@" --paginate --json </dev/null 2>&1); then
       echo "$OUTPUT"
       return 0
     fi
 
-    : $((RETRY++))
-    if [ $RETRY -lt 2 ]; then
+    if [ "$ATTEMPT" -eq 1 ]; then
       echo "⚠️  Jira query failed, retrying..." >&2
       sleep 2
     fi
@@ -187,16 +185,14 @@ view_jira() {
   local ISSUE_KEY="$1"
   shift
   local OUTPUT
-  local RETRY=0
 
-  while [ $RETRY -lt 2 ]; do
+  for ATTEMPT in 1 2; do
     if OUTPUT=$(acli jira workitem view "$ISSUE_KEY" "$@" --json </dev/null 2>&1); then
       echo "$OUTPUT"
       return 0
     fi
 
-    : $((RETRY++))
-    if [ $RETRY -lt 2 ]; then
+    if [ "$ATTEMPT" -eq 1 ]; then
       echo "⚠️  Jira view failed for $ISSUE_KEY, retrying..." >&2
       sleep 2
     fi
