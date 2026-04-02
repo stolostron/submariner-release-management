@@ -237,13 +237,13 @@ else
     }
 
     # Extract CVE key and pscomponent
-    CVE_KEY=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("CVE-"))' | head -1)
-    PSCOMPONENT=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("pscomponent:")) | sub("pscomponent:"; "")')
+    CVE_KEY=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("CVE-"))' | head -1 || echo "")
+    PSCOMPONENT=$(echo "$LABELS_JSON" | jq -r '.[] | select(startswith("pscomponent:")) | sub("pscomponent:"; "")' || echo "")
 
-    [ -z "$CVE_KEY" ] || [ -z "$PSCOMPONENT" ] && {
+    if [ -z "$CVE_KEY" ] || [ -z "$PSCOMPONENT" ]; then
       echo "⚠️  $KEY: Missing CVE or pscomponent label, skipping"
       continue
-    }
+    fi
 
     # Map component
     COMPONENT_MAPPED=$(map_component_name "$PSCOMPONENT" "$VERSION_MAJOR_MINOR_DASH")
@@ -299,8 +299,8 @@ else
       priority: (.fields.priority.name // "Unknown"),
       priority_id: (.fields.priority.id // "99999"),
       status: (.fields.status.name // "Unknown"),
-      created: ((.fields.created // "1970-01-01T00:00:00Z")[:10]),
-      updated: ((.fields.updated // "1970-01-01T00:00:00Z")[:10]),
+      created: (if .fields.created and .fields.created != "" then .fields.created[:10] else "1970-01-01" end),
+      updated: (if .fields.updated and .fields.updated != "" then .fields.updated[:10] else "1970-01-01" end),
       summary: (.fields.summary // ""),
       fixversions: ([.fields.fixVersions[]?.name] | join(", ")),
       resolution: (.fields.resolution.name // "Unresolved")

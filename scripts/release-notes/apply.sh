@@ -138,6 +138,14 @@ echo ""
 
 echo "Updating stage YAML..."
 
+# Validate YAML doesn't have duplicate data: sections (malformed)
+DATA_COUNT=$(grep -c "^  data:" "$STAGE_YAML" || echo "0")
+if [ "$DATA_COUNT" -gt 1 ]; then
+  echo "❌ ERROR: YAML has $DATA_COUNT 'data:' sections (expected 0 or 1)" >&2
+  echo "File is malformed. Fix manually before applying release notes." >&2
+  exit 1
+fi
+
 # Backup original
 cp "$STAGE_YAML" "${STAGE_YAML}.bak"
 echo "✓ Backup created: ${STAGE_YAML}.bak"
