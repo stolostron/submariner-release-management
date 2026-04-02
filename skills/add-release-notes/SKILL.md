@@ -48,7 +48,7 @@ Read `/tmp/release-notes-topics.json` and make release note decisions.
 1. **Review CVE topics** - all CVEs are auto-included (verify they make sense)
 2. **Select notable non-CVE issues** - choose 3-8 issues that are:
    - User-facing (not internal refactoring)
-   - Fixed (status=Closed, resolution=Done)
+   - Fixed (status=Closed or Resolved, resolution=Done)
    - Important (Blocker/Critical/Major priority OR significant features)
 3. **Confirm release type**:
    - RHSA if CVEs present (required)

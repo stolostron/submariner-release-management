@@ -253,7 +253,7 @@ else
     fi
 
     # Fetch labels with error handling
-    if ! LABELS_JSON=$(view_jira "$KEY" --fields "labels" 2>&1 | jq -r '.fields.labels' 2>/dev/null); then
+    if ! LABELS_JSON=$(view_jira "$KEY" --fields "labels" | jq -r '.fields.labels' 2>/dev/null); then
       echo "⚠️  $KEY: Failed to fetch labels, skipping" >&2
       continue
     fi
@@ -334,7 +334,7 @@ else
     fi
 
     # Fetch issue details with error handling
-    if ! ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution" 2>&1); then
+    if ! ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,summary,fixVersions,resolution"); then
       echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
       continue
     fi
