@@ -85,6 +85,9 @@ validate-fields:
 validate-data:
 	./scripts/validate-release-data.sh $(FILE)
 
+validate-file: validate-yaml validate-fields validate-data
+	@echo "File validation passed"
+
 validate-markdown:
 	npx markdownlint-cli2 "**/*.md"
 

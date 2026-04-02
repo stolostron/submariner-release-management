@@ -194,10 +194,10 @@ echo "✓ YAML syntax valid"
 # Find git root for make command
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 if [ -z "$GIT_ROOT" ]; then
-  echo "⚠️  WARNING: Not in git repository - skipping make test" >&2
+  echo "⚠️  WARNING: Not in git repository - skipping validation" >&2
 else
-  # Run make test on file
-  if (cd "$GIT_ROOT" && make test FILE="$STAGE_YAML" 2>&1) | grep -q "ERROR"; then
+  # Run file validation (yaml, fields, data - excludes gitlint/markdown)
+  if (cd "$GIT_ROOT" && make validate-file FILE="$STAGE_YAML" 2>&1) | grep -q "ERROR"; then
     echo "❌ ERROR: Release data validation failed" >&2
     echo "Restoring backup..." >&2
     mv "${STAGE_YAML}.bak" "$STAGE_YAML"
