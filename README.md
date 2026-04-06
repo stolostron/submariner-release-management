@@ -27,7 +27,7 @@ make rpm-lockfile-update COMPONENT=gateway       # Filter by component
 # Validate locally (no cluster access needed)
 make test
 
-# Validate with cluster checks (requires cluster login)
+# Validate with cluster checks and CVE verification (requires cluster login)
 make test-remote
 
 # Apply release (requires cluster login)
@@ -39,6 +39,11 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 # Add release notes to stage release (requires acli authentication)
 make add-release-notes VERSION=0.22.1                          # Auto-find latest stage YAML
 make add-release-notes VERSION=0.22.1 STAGE_YAML=...           # Use specific YAML
+
+# Verify CVE fixes in snapshot images (requires oc login)
+# Checks Clair reports to confirm CVEs are actually fixed
+# Run automatically by add-release-notes, or manually for re-verification
+make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
 
 # Setup acli (one-time)
 acli jira auth login --web

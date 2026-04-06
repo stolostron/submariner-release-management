@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes verify-cve-fixes
 
 .DEFAULT_GOAL := help
 
@@ -30,10 +30,15 @@ help:
 	@echo "                           Review commit and use 'git commit --amend' to remove unwanted issues"
 	@echo "                           Example: make add-release-notes VERSION=0.22.1"
 	@echo "                           Example: make add-release-notes VERSION=0.22.1 STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
+	@echo "  make verify-cve-fixes STAGE_YAML=..."
+	@echo "                         - Verify CVE fixes in snapshot images via Clair reports (requires oc login)"
+	@echo "                           Reports which CVEs are actually fixed (absent in Clair) vs still present"
+	@echo "                           Run automatically by 'make add-release-notes' - manual use for re-verification"
+	@echo "                           Example: make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
-	@echo "  make test-remote       - Run all validations including cluster checks and bundle images (requires oc login)"
+	@echo "  make test-remote       - Run all validations including cluster checks, bundle images, and CVE verification (requires oc login)"
 	@echo "  make validate-yaml     - YAML syntax only"
 	@echo "  make validate-fields   - Release CRD fields only"
 	@echo "  make validate-data     - Data formats only"
@@ -60,15 +65,23 @@ add-release-notes:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make add-release-notes VERSION=0.22.1 [STAGE_YAML=...]" && exit 1)
 	@./scripts/add-release-notes.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),)
 
+verify-cve-fixes:
+	@test -n "$(STAGE_YAML)" || (echo "ERROR: STAGE_YAML parameter required. Usage: make verify-cve-fixes STAGE_YAML=releases/0.22/stage/..." && exit 1)
+	@test -f "$(STAGE_YAML)" || (echo "ERROR: File '$(STAGE_YAML)' not found" && exit 1)
+	@./scripts/release-notes/verify-cve-fixes.sh $(STAGE_YAML)
+
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
-test-remote: test validate-references validate-bundle-images
+test-remote: test validate-references validate-bundle-images validate-cve-fixes
 
 validate-references:
 	./scripts/validate-release-references.sh $(FILE)
 
 validate-bundle-images:
 	./scripts/validate-bundle-images.sh $(FILE)
+
+validate-cve-fixes:
+	./scripts/validate-cve-fixes.sh $(FILE)
 
 validate-yaml:
 	yamllint .
