@@ -28,7 +28,7 @@ make rpm-lockfile-update COMPONENT=gateway       # Filter by component
 make test
 
 # Validate with cluster checks and CVE verification (requires cluster login)
-make test-remote
+make test-remote FILE=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
 
 # Apply release (requires cluster login)
 make apply FILE=releases/0.20/stage/submariner-0-20-2-stage-20250930-01.yaml
@@ -40,9 +40,7 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 make add-release-notes VERSION=0.22.1                          # Auto-find latest stage YAML
 make add-release-notes VERSION=0.22.1 STAGE_YAML=...           # Use specific YAML
 
-# Verify CVE fixes in snapshot images (requires oc login)
-# Checks Clair reports to confirm CVEs are actually fixed
-# Run automatically by add-release-notes, or manually for re-verification
+# Verify CVE fixes via Clair reports (requires oc login, auto-runs in add-release-notes)
 make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
 
 # Setup acli (one-time)
