@@ -58,9 +58,9 @@ if [[ "$CVE_COUNT" -gt 0 ]]; then
     (.issues | length) as $issue_count |
     (.issues | map(.component)) as $components |
     if $issue_count == 1 then
-      "        # \($cve_key): FIXED\n"
+      "        # \($cve_key): Verified absent in Clair report\n"
     else
-      "        # \($cve_key) (\($issue_count) issues): FIXED\n"
+      "        # \($cve_key) (\($issue_count) issues): Verified absent in Clair reports\n"
     end +
     ($components | map("        - key: \($cve_key)\n          component: \(.)") | join("\n"))
   ' "$TOPICS_JSON")
@@ -88,29 +88,14 @@ validate_stage_yaml "$STAGE_YAML"
 
 echo "Preparing commit..."
 
-RATIONALE=$(jq -r --argjson cve_count "$CVE_COUNT" --argjson non_cve_count "$NON_CVE_COUNT" '
-  if $cve_count > 0 then
-    "Security release: \($cve_count) CVEs, \($non_cve_count) other fixes"
-  elif .statistics.non_cve_blocker > 0 then
-    "Fixes: \(.statistics.non_cve_blocker) blocker, \(.statistics.non_cve_critical) critical, \(.statistics.non_cve_major) major"
-  elif .statistics.non_cve_critical > 0 then
-    "Fixes: \(.statistics.non_cve_critical) critical, \(.statistics.non_cve_major) major"
-  else
-    "Bug fixes and enhancements"
-  end
-' "$TOPICS_JSON")
-
-COMMIT_MSG="Add release notes for $VERSION (auto-applied)
+COMMIT_MSG="Add release notes for $VERSION
 
 Type: $RELEASE_TYPE
 CVE issues: $CVE_COUNT
 Non-CVE issues: $NON_CVE_COUNT
 
-Rationale:
-$RATIONALE
-
-All filtered issues auto-included. Review and amend to remove
-any that don't belong in release notes."
+All filtered issues auto-applied. Review commit and amend to
+remove any that don't belong in release notes."
 
 commit_release_notes "$STAGE_YAML" "$COMMIT_MSG" "auto-applied"
 

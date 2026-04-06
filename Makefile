@@ -72,7 +72,10 @@ verify-cve-fixes:
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
-test-remote: test validate-references validate-bundle-images validate-cve-fixes
+test-remote:
+	@test -n "$(FILE)" || (echo "ERROR: FILE parameter required. Usage: make test-remote FILE=releases/..." && exit 1)
+	@$(MAKE) test
+	@$(MAKE) validate-references validate-bundle-images validate-cve-fixes
 
 validate-references:
 	./scripts/validate-release-references.sh $(FILE)
