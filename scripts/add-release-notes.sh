@@ -101,6 +101,25 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 "$SCRIPT_DIR/release-notes/auto-apply.sh"
 
 echo ""
+
+# Phase 4: Verify CVE fixes in Clair reports (if CVEs present)
+CVE_COUNT=$(jq -r '.cve_topics | length' /tmp/release-notes-topics.json 2>/dev/null || echo "0")
+if [[ "$CVE_COUNT" -gt 0 ]]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "Phase 4: Verify CVE fixes in snapshot images"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  STAGE_YAML=$(jq -r '.metadata.stage_yaml' /tmp/release-notes-data.json)
+  if "$SCRIPT_DIR/release-notes/verify-cve-fixes.sh" "$STAGE_YAML"; then
+    echo ""
+  else
+    echo ""
+    echo "⚠️  Some CVEs are NOT actually fixed - see verification output above"
+    echo "Remove unfixed CVEs from commit: git commit --amend"
+    echo ""
+  fi
+fi
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Release notes workflow complete"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
