@@ -35,6 +35,14 @@ make apply FILE=releases/0.20/stage/submariner-0-20-2-stage-20250930-01.yaml
 
 # Watch release (requires cluster login)
 make watch NAME=submariner-0-20-2-stage-20250930-01
+
+# Add release notes to stage release (requires acli authentication)
+make add-release-notes VERSION=0.22.1                          # Auto-find latest stage YAML
+make add-release-notes VERSION=0.22.1 STAGE_YAML=...           # Use specific YAML
+
+# Setup acli (one-time)
+acli jira auth login --web
+acli jira auth status
 ```
 
 ## Claude Skills
@@ -53,6 +61,7 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 | `/konflux-ci-fix`          | Fix Konflux CI Enterprise Contract issues      |
 | `/konflux-component-setup` | Automate Konflux component setup on new branch |
 | `/bundle-image-update`     | Update bundle image SHAs from snapshots        |
+| `/add-release-notes`       | Add release notes from Jira to stage YAML      |
 | `/rpm-lockfile-update`     | Update RPM lockfiles across repos              |
 | `/konflux-bundle-setup`    | Automate Konflux bundle setup on new branch    |
 | `/create-component-release`| Create component release (stage or prod)       |
