@@ -50,7 +50,11 @@
 
 ## 9. Add Release Notes
 
-@.agents/workflows/add-release-notes.md
+```bash
+make add-release-notes VERSION=0.22.1
+```
+
+See `.agents/workflows/add-release-notes.md` for workflow details.
 
 ## 10. Apply Component Stage Release
 

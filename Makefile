@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes
 
 .DEFAULT_GOAL := help
 
@@ -25,6 +25,11 @@ help:
 	@echo "                           Example: make rpm-lockfile-update"
 	@echo "                           Example: make rpm-lockfile-update COMPONENT=gateway"
 	@echo "                           Example: make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway"
+	@echo "  make add-release-notes VERSION=... [STAGE_YAML=...]"
+	@echo "                         - Auto-apply ALL filtered release notes to stage YAML and commit"
+	@echo "                           Review commit and use 'git commit --amend' to remove unwanted issues"
+	@echo "                           Example: make add-release-notes VERSION=0.22.1"
+	@echo "                           Example: make add-release-notes VERSION=0.22.1 STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
@@ -51,6 +56,10 @@ create-component-release:
 rpm-lockfile-update:
 	./scripts/rpm-lockfile-update.sh $(BRANCH) $(if $(REPO),$(REPO),$(COMPONENT))
 
+add-release-notes:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make add-release-notes VERSION=0.22.1 [STAGE_YAML=...]" && exit 1)
+	@./scripts/add-release-notes.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),)
+
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
 test-remote: test validate-references validate-bundle-images
@@ -69,6 +78,9 @@ validate-fields:
 
 validate-data:
 	./scripts/validate-release-data.sh $(FILE)
+
+validate-file: validate-yaml validate-fields validate-data
+	@echo "File validation passed"
 
 validate-markdown:
 	npx markdownlint-cli2 "**/*.md"

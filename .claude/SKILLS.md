@@ -133,6 +133,31 @@ regenerates bundle manifests, and verifies all SHAs match.
 
 **After running:** Review commit, push to remote, wait for bundle rebuild (~15-30 min)
 
+## /add-release-notes
+
+Add release notes from Jira to stage YAML
+
+Queries Jira, filters, auto-applies, commits.
+
+```bash
+make add-release-notes VERSION=0.22.1              # Auto-find latest stage YAML
+make add-release-notes VERSION=0.22.1 STAGE_YAML=path/to/file.yaml
+```
+
+**Requirements:**
+
+- acli authenticated: `acli jira auth login --web`
+- Step 8 complete (stage YAML exists)
+
+**What it does:**
+
+1. Queries Jira, scans prod for existing
+2. Filters (excludes published, invalid resolutions; keeps Unresolved)
+3. Z-stream: also filters by date
+4. Auto-applies, validates, commits
+
+**After running:** Review (`git show`), amend, push
+
 ## /rpm-lockfile-update
 
 Regenerates RPM lockfiles in submariner and shipyard repositories by creating fix branches, running hermetic builds,
