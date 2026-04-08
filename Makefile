@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes verify-cve-fixes
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes
 
 .DEFAULT_GOAL := help
 
@@ -27,9 +27,14 @@ help:
 	@echo "                           Example: make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway"
 	@echo "  make add-release-notes VERSION=... [STAGE_YAML=...]"
 	@echo "                         - Auto-apply ALL filtered release notes to stage YAML and commit"
-	@echo "                           Review commit and use 'git commit --amend' to remove unwanted issues"
+	@echo "                           Then run 'make review-release-notes' for per-issue agent review"
 	@echo "                           Example: make add-release-notes VERSION=0.22.1"
 	@echo "                           Example: make add-release-notes VERSION=0.22.1 STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260316-01.yaml"
+	@echo "  make review-release-notes VERSION=... [STAGE_YAML=...]"
+	@echo "                         - Per-issue agent review of release notes (run after add-release-notes)"
+	@echo "                           Spawns one Claude agent per issue to verify it belongs"
+	@echo "                           Each removal is a separate commit (easily revertable)"
+	@echo "                           Example: make review-release-notes VERSION=0.22.1"
 	@echo "  make verify-cve-fixes STAGE_YAML=..."
 	@echo "                         - Verify CVE fixes in snapshot images via Clair reports (requires oc login)"
 	@echo "                           Reports which CVEs are actually fixed (absent in Clair) vs still present"
@@ -64,6 +69,10 @@ rpm-lockfile-update:
 add-release-notes:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make add-release-notes VERSION=0.22.1 [STAGE_YAML=...]" && exit 1)
 	@./scripts/add-release-notes.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),)
+
+review-release-notes:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make review-release-notes VERSION=0.22.1 [STAGE_YAML=...]" && exit 1)
+	@./scripts/release-notes/review.sh $(VERSION) $(if $(STAGE_YAML),--stage-yaml $(STAGE_YAML),)
 
 verify-cve-fixes:
 	@test -n "$(STAGE_YAML)" || (echo "ERROR: STAGE_YAML parameter required. Usage: make verify-cve-fixes STAGE_YAML=releases/0.22/stage/..." && exit 1)

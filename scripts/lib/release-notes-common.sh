@@ -154,7 +154,7 @@ query_jira() {
   local OUTPUT
 
   for ATTEMPT in 1 2; do
-    if OUTPUT=$(acli jira workitem search "$@" --paginate --json </dev/null 2>&1); then
+    if OUTPUT=$(acli jira workitem search "$@" --paginate --json </dev/null); then
       echo "$OUTPUT"
       return 0
     fi
@@ -166,7 +166,6 @@ query_jira() {
   done
 
   echo "❌ ERROR: Jira query failed after 2 attempts" >&2
-  echo "$OUTPUT" >&2
   return 1
 }
 
@@ -183,7 +182,7 @@ view_jira() {
   local OUTPUT
 
   for ATTEMPT in 1 2; do
-    if OUTPUT=$(acli jira workitem view "$ISSUE_KEY" "$@" --json </dev/null 2>&1); then
+    if OUTPUT=$(acli jira workitem view "$ISSUE_KEY" "$@" --json </dev/null); then
       echo "$OUTPUT"
       return 0
     fi
@@ -195,7 +194,6 @@ view_jira() {
   done
 
   echo "❌ ERROR: Jira view failed for '$ISSUE_KEY' after 2 attempts" >&2
-  echo "$OUTPUT" >&2
   return 1
 }
 
@@ -242,10 +240,10 @@ update_stage_yaml_data_section() {
     # Add new releaseNotes section
     echo "$RELEASE_NOTES_YAML" >> "$TMPFILE"
 
-    # Find next key at same indentation (e.g., "  releasePlan:" after "  data:")
+    # Find next key at same indentation (2 spaces - spec level)
     local NEXT_KEY_LINE
     NEXT_KEY_LINE=$(tail -n +"$((DATA_LINE + 1))" "$STAGE_YAML" | \
-      grep -n -m1 '^[[:space:]]\{0,2\}[a-zA-Z]' | cut -d: -f1 || true)
+      grep -n -m1 '^  [a-zA-Z]' | cut -d: -f1 || true)
 
     if [[ -n "$NEXT_KEY_LINE" ]]; then
       # Append everything from next key onwards (preserves releasePlan, etc.)
@@ -291,8 +289,17 @@ validate_stage_yaml() {
     echo "⚠️  WARNING: Not in git repository - skipping validation" >&2
   else
     # Run file validation (yaml, fields, data - excludes gitlint/markdown)
-    if (cd "$GIT_ROOT" && make validate-file FILE="$STAGE_YAML" 2>&1) | grep -q "ERROR"; then
-      echo "❌ ERROR: Release data validation failed" >&2
+    local VALIDATION_OUTPUT
+    if ! VALIDATION_OUTPUT=$(cd "$GIT_ROOT" && make validate-file FILE="$STAGE_YAML" 2>&1); then
+      echo "❌ ERROR: Validation command failed" >&2
+      echo "$VALIDATION_OUTPUT" >&2
+      echo "Restoring backup..." >&2
+      mv "${STAGE_YAML}.bak" "$STAGE_YAML"
+      return 1
+    fi
+    if echo "$VALIDATION_OUTPUT" | grep -q "ERROR"; then
+      echo "❌ ERROR: Validation output contains errors" >&2
+      echo "$VALIDATION_OUTPUT" >&2
       echo "Restoring backup..." >&2
       mv "${STAGE_YAML}.bak" "$STAGE_YAML"
       return 1
@@ -350,13 +357,13 @@ build_issues_fixed_yaml() {
 
   if [[ "$CVE_COUNT" -gt 0 ]]; then
     printf '          # CVE Issues (%s):\n' "$CVE_COUNT"
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086  # Intentional word splitting: pass each issue key as separate arg
     format_issues $CVE_ISSUE_KEYS
   fi
 
   if [[ "$NON_CVE_COUNT" -gt 0 ]]; then
     printf '          # Non-CVE Issues (%s):\n' "$NON_CVE_COUNT"
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086  # Intentional word splitting: pass each issue key as separate arg
     format_issues $NON_CVE_ISSUE_KEYS
   fi
 }

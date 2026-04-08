@@ -52,6 +52,7 @@
 
 ```bash
 make add-release-notes VERSION=0.22.1
+make review-release-notes VERSION=0.22.1
 ```
 
 See `.agents/workflows/add-release-notes.md` for workflow details.

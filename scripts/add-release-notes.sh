@@ -110,14 +110,12 @@ if [[ "$CVE_COUNT" -gt 0 ]]; then
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   STAGE_YAML=$(jq -r '.metadata.stage_yaml' /tmp/release-notes-data.json)
-  if "$SCRIPT_DIR/release-notes/verify-cve-fixes.sh" "$STAGE_YAML"; then
-    echo ""
-  else
+  if ! "$SCRIPT_DIR/release-notes/verify-cve-fixes.sh" "$STAGE_YAML"; then
     echo ""
     echo "⚠️  Some CVEs are NOT actually fixed - see verification output above"
     echo "Remove unfixed CVEs from commit: git commit --amend"
-    echo ""
   fi
+  echo ""
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
