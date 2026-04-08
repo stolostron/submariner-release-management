@@ -14,9 +14,6 @@ spec:
       type: RHBA
       issues:
         fixed:
-          # Non-CVE Issues (6):
-          - id: ACM-17874
-            source: issues.redhat.com
           - id: ACM-29865
             source: issues.redhat.com
           - id: ACM-30202
