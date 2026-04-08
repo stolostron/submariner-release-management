@@ -14,56 +14,16 @@ spec:
       type: RHBA
       issues:
         fixed:
-          # Non-CVE Issues (26):
-          - id: ACM-15963
-            source: issues.redhat.com
+          # Non-CVE Issues (6):
           - id: ACM-17874
-            source: issues.redhat.com
-          - id: ACM-17920
-            source: issues.redhat.com
-          - id: ACM-25651
-            source: issues.redhat.com
-          - id: ACM-26963
-            source: issues.redhat.com
-          - id: ACM-27325
-            source: issues.redhat.com
-          - id: ACM-27641
-            source: issues.redhat.com
-          - id: ACM-27703
-            source: issues.redhat.com
-          - id: ACM-28458
-            source: issues.redhat.com
-          - id: ACM-28591
-            source: issues.redhat.com
-          - id: ACM-28874
             source: issues.redhat.com
           - id: ACM-29865
             source: issues.redhat.com
-          - id: ACM-30048
-            source: issues.redhat.com
-          - id: ACM-30065
-            source: issues.redhat.com
-          - id: ACM-30198
-            source: issues.redhat.com
-          - id: ACM-30199
-            source: issues.redhat.com
-          - id: ACM-30200
-            source: issues.redhat.com
-          - id: ACM-30201
-            source: issues.redhat.com
           - id: ACM-30202
-            source: issues.redhat.com
-          - id: ACM-30229
-            source: issues.redhat.com
-          - id: ACM-30230
             source: issues.redhat.com
           - id: ACM-30240
             source: issues.redhat.com
-          - id: ACM-30529
-            source: issues.redhat.com
           - id: ACM-30970
-            source: issues.redhat.com
-          - id: ACM-31075
             source: issues.redhat.com
           - id: ACM-31480
             source: issues.redhat.com
