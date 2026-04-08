@@ -56,11 +56,11 @@ if [[ "$CVE_COUNT" -gt 0 ]]; then
     .cve_topics[] |
     .cve_key as $cve_key |
     (.issues | length) as $issue_count |
-    (.issues | map(.component)) as $components |
+    (.issues | map(.component) | unique) as $components |
     if $issue_count == 1 then
-      "        # \($cve_key): Verified absent in Clair report\n"
+      "        # \($cve_key)\n"
     else
-      "        # \($cve_key) (\($issue_count) issues): Verified absent in Clair reports\n"
+      "        # \($cve_key) (\($issue_count) issues)\n"
     end +
     ($components | map("        - key: \($cve_key)\n          component: \(.)") | join("\n"))
   ' "$TOPICS_JSON")
@@ -101,5 +101,5 @@ commit_release_notes "$STAGE_YAML" "$COMMIT_MSG" "auto-applied"
 
 echo "Next steps:"
 echo "  1. Review auto-included issues: git show"
-echo "  2. Remove irrelevant issues: git commit --amend"
+echo "  2. Per-issue agent review: make review-release-notes VERSION=$VERSION"
 echo "  3. Push when satisfied: git push"

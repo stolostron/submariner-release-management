@@ -39,6 +39,7 @@ make watch NAME=submariner-0-20-2-stage-20250930-01
 # Add release notes to stage release (requires acli authentication)
 make add-release-notes VERSION=0.22.1                          # Auto-find latest stage YAML
 make add-release-notes VERSION=0.22.1 STAGE_YAML=...           # Use specific YAML
+make review-release-notes VERSION=0.22.1                       # Per-issue agent review
 
 # Verify CVE fixes via Clair reports (requires oc login, auto-runs in add-release-notes)
 make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
@@ -64,7 +65,7 @@ acli jira auth status
 | `/konflux-ci-fix`          | Fix Konflux CI Enterprise Contract issues      |
 | `/konflux-component-setup` | Automate Konflux component setup on new branch |
 | `/bundle-image-update`     | Update bundle image SHAs from snapshots        |
-| `/add-release-notes`       | Add release notes from Jira to stage YAML      |
+| `/add-release-notes`       | Add release notes from Jira, per-issue review  |
 | `/rpm-lockfile-update`     | Update RPM lockfiles across repos              |
 | `/konflux-bundle-setup`    | Automate Konflux bundle setup on new branch    |
 | `/create-component-release`| Create component release (stage or prod)       |

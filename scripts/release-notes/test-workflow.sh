@@ -70,57 +70,39 @@ echo "3. Testing prepare.sh (filtering/grouping)..."
 if bash scripts/release-notes/prepare.sh >/dev/null 2>&1; then
   echo "   ✓ Data preparation completed"
 
-  TOPIC_COUNT=$(jq '.non_cve_topics | length' /tmp/release-notes-topics.json)
-  BLOCKER_COUNT=$(jq '.statistics.non_cve_blocker' /tmp/release-notes-topics.json)
-  MAJOR_COUNT=$(jq '.statistics.non_cve_major' /tmp/release-notes-topics.json)
-  echo "   ✓ Grouped into $TOPIC_COUNT topics ($BLOCKER_COUNT Blockers, $MAJOR_COUNT Majors)"
+  CVE_COUNT=$(jq '.statistics.cve_count' /tmp/release-notes-topics.json)
+  NON_CVE_COUNT=$(jq '.statistics.non_cve_total' /tmp/release-notes-topics.json)
+  echo "   ✓ Filtered: $CVE_COUNT CVE issues, $NON_CVE_COUNT non-CVE issues"
 else
   echo "   ✗ FAILED: prepare.sh failed"
   exit 1
 fi
 
 echo ""
-echo "4. Testing apply.sh (YAML generation)..."
+echo "4. Testing auto-apply.sh (YAML generation)..."
 
-# Create mock decisions (CVEs auto-included from data.json)
-cat > /tmp/release-notes-decisions.json <<'EOF'
-{
-  "metadata": {
-    "version": "0.23.1",
-    "analyzed_at": "2026-04-01T00:00:00Z",
-    "analyzer": "test-script"
-  },
-  "release_type": "RHSA",
-  "release_type_rationale": "CVE present",
-  "non_cve_issues": {
-    "selected": [
-      {
-        "issue_key": "ACM-30970",
-        "rationale": "Test issue"
-      }
-    ]
-  }
-}
-EOF
-
-# Add mock CVE data to data.json (use valid CVE format: CVE-YYYY-NNNNN)
+# Inject mock CVE data and re-run prepare.sh to get topics with CVEs
 jq '.cve_issues = [
   {
     "issue_key": "ACM-12345",
     "cve_key": "CVE-2024-99999",
-    "pscomponent": "rhacm2/submariner-operator-rhel9",
     "component_mapped": "submariner-operator-0-23",
-    "labels": ["Security", "CVE-2024-99999", "pscomponent:rhacm2/submariner-operator-rhel9"]
+    "resolved": "2026-01-15"
   },
   {
     "issue_key": "ACM-12346",
     "cve_key": "CVE-2024-99999",
-    "pscomponent": "rhacm2/lighthouse-agent-rhel9",
     "component_mapped": "lighthouse-agent-0-23",
-    "labels": ["Security", "CVE-2024-99999", "pscomponent:rhacm2/lighthouse-agent-rhel9"]
+    "resolved": "2026-01-15"
   }
 ]' /tmp/release-notes-data.json > /tmp/release-notes-data-with-cve.json
 mv /tmp/release-notes-data-with-cve.json /tmp/release-notes-data.json
+
+# Re-run prepare.sh to generate topics from injected CVE data
+if ! bash scripts/release-notes/prepare.sh >/dev/null 2>&1; then
+  echo "   ✗ FAILED: prepare.sh failed after CVE injection"
+  exit 1
+fi
 
 # Backup original YAML
 STAGE_YAML=$(jq -r '.metadata.stage_yaml' /tmp/release-notes-data.json)
@@ -131,9 +113,9 @@ fi
 
 cp "$STAGE_YAML" "$STAGE_YAML.test-backup"
 
-# Run apply.sh (stop after validation, before the git commit)
+# Run auto-apply.sh (the production path used by make add-release-notes)
 # Use timeout to stop before commit (which may fail on pre-existing gitlint issues)
-OUTPUT=$(timeout 30 bash scripts/release-notes/apply.sh 2>&1 || true)
+OUTPUT=$(timeout 30 bash scripts/release-notes/auto-apply.sh 2>&1 || true)
 
 # Check if validation passed (this is the critical test)
 # NOTE: Use grep without -q and redirect to /dev/null to avoid pipefail issues
@@ -171,7 +153,7 @@ if [ "$VALIDATION_PASSED" -eq 0 ]; then
   # Restore original
   mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
 else
-  echo "   ✗ FAILED: apply.sh validation failed"
+  echo "   ✗ FAILED: auto-apply.sh validation failed"
   echo "$OUTPUT" | grep -E "ERROR|❌" | tail -5
   mv "$STAGE_YAML.test-backup" "$STAGE_YAML"
   exit 1
@@ -183,9 +165,9 @@ echo "✅ All tests passed!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Workflow summary:"
-echo "  collect.sh:  ✓ Queries Jira, maps components"
-echo "  prepare.sh:  ✓ Filters and groups issues"
-echo "  apply.sh:    ✓ Generates valid YAML"
+echo "  collect.sh:     ✓ Queries Jira, maps components"
+echo "  prepare.sh:     ✓ Filters and groups issues"
+echo "  auto-apply.sh:  ✓ Generates valid YAML"
 echo ""
 echo "Ready for production use:"
 echo "  make add-release-notes VERSION=$VERSION"

@@ -60,7 +60,7 @@ source "$LIB_DIR/release-notes-common.sh"
 
 OUTPUT_JSON="/tmp/release-notes-data.json"
 
-# JQL text filter for Submariner-related issues
+# JQL text search filter to find Submariner component mentions
 readonly JQL_TEXT_FILTER="(text ~ submariner OR text ~ lighthouse OR text ~ subctl OR text ~ nettest)"
 
 banner "Collect Release Notes Data: $VERSION"
@@ -98,7 +98,32 @@ find_stage_yaml "$VERSION" "$STAGE_YAML_ARG"
 echo "Version mapping: Submariner $VERSION_MAJOR_MINOR → $ACM_VERSION"
 echo "Stage YAML: $STAGE_YAML"
 
-VERSION_CLAUSE="(affectedVersion = \"$ACM_VERSION\" OR fixVersion = \"$ACM_VERSION\")"
+# Extract snapshot build date from stage YAML (embedded in snapshot name: *-YYYYMMDD-*)
+# CVEs filed after this date can't be verified — "absent in Clair" would be a false positive
+# because the CVE didn't exist yet when the scan ran
+SNAPSHOT_NAME=$(yq eval '.spec.snapshot' "$STAGE_YAML" 2>/dev/null)
+SNAPSHOT_DATE=""
+if [[ -n "$SNAPSHOT_NAME" && "$SNAPSHOT_NAME" != "null" ]]; then
+  SNAP_DATE_RAW=$(echo "$SNAPSHOT_NAME" | grep -oE '[0-9]{8}' | head -1)
+  if [[ -n "$SNAP_DATE_RAW" ]]; then
+    SNAPSHOT_DATE="${SNAP_DATE_RAW:0:4}-${SNAP_DATE_RAW:4:2}-${SNAP_DATE_RAW:6:2}"
+    echo "Snapshot date: $SNAPSHOT_DATE (CVEs filed after this are excluded)"
+  fi
+fi
+
+# JQL version filter: match both ACM and Submariner version formats.
+# Some issues use fixVersion "ACM 2.15.0", others use "Submariner 0.22.1".
+# Jira rejects queries with nonexistent version values, so we check first.
+VERSION_CLAUSE="(affectedVersion = \"$ACM_VERSION\" OR fixVersion = \"$ACM_VERSION\""
+
+# Add Submariner version formats if they exist in Jira
+for SUBM_VER in "Submariner $VERSION" "Submariner $VERSION_MAJOR_MINOR"; do
+  if acli jira workitem search --jql "fixVersion = \"$SUBM_VER\"" --limit 1 --json </dev/null >/dev/null 2>&1; then
+    VERSION_CLAUSE+=" OR fixVersion = \"$SUBM_VER\""
+  fi
+done
+VERSION_CLAUSE+=")"
+
 echo "Version clause: $VERSION_CLAUSE"
 
 # ============================================================================
@@ -118,21 +143,21 @@ PROD_DIR="$GIT_ROOT/releases/$VERSION_MAJOR_MINOR/prod"
 
 echo "Scanning $PROD_DIR/*.yaml for published issues..."
 
-# Use yq to properly parse YAML and extract issue IDs from prod releases only
-# Rationale: Only prod releases are actually published to registry.redhat.io
-# Stage releases are attempts that may never get applied
+# Extract issue IDs from prod releases only (prod releases are published to registry.redhat.io)
 EXISTING_ISSUES_JSON="[]"
 if [[ -d "$PROD_DIR" ]]; then
-  # Find all prod YAML files and extract issue IDs with yq
-  EXISTING_ISSUES=$(find "$PROD_DIR" -name "*.yaml" -type f -exec sh -c '
-    yq eval ".spec.data.releaseNotes.issues.fixed[].id" "$1" 2>/dev/null || true
-  ' _ {} \; | sort -u || echo "")
+  EXISTING_ISSUES=$(find "$PROD_DIR" -name "*.yaml" -type f -print0 | \
+    xargs -0 yq eval ".spec.data.releaseNotes.issues.fixed[].id" 2>/dev/null | \
+    sort -u || echo "")
   if [[ -n "$EXISTING_ISSUES" ]]; then
     EXISTING_ISSUES_JSON=$(jq -Rs 'split("\n") | map(select(length > 0))' <<< "$EXISTING_ISSUES")
     echo "Found $(jq 'length' <<< "$EXISTING_ISSUES_JSON") published issues (from prod releases)"
+  else
+    echo "No published issues found (clean slate for $VERSION_MAJOR_MINOR)"
   fi
+else
+  echo "No published issues found (clean slate for $VERSION_MAJOR_MINOR)"
 fi
-[[ "$EXISTING_ISSUES_JSON" == "[]" ]] && echo "No published issues found (clean slate for $VERSION_MAJOR_MINOR)"
 
 # ============================================================================
 # Get Last Published Release Info (Metadata Only)
@@ -211,10 +236,19 @@ else
   for KEY in $CVE_KEYS; do
     [[ -z "$KEY" || "$KEY" == "null" ]] && continue
 
-    ISSUE_JSON=$(view_jira "$KEY" --fields "labels,resolutiondate") || {
+    ISSUE_JSON=$(view_jira "$KEY" --fields "labels,resolutiondate,created") || {
       echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
       continue
     }
+
+    # Skip CVEs filed after the snapshot was built
+    if [[ -n "$SNAPSHOT_DATE" ]]; then
+      CREATED=$(jq -r '(.fields.created // "")[:10]' <<< "$ISSUE_JSON")
+      if [[ -n "$CREATED" && "$CREATED" > "$SNAPSHOT_DATE" ]]; then
+        echo "  $KEY: Skipping (created $CREATED, after snapshot $SNAPSHOT_DATE)"
+        continue
+      fi
+    fi
 
     read -r CVE_KEY PSCOMPONENT < <(jq -r '
       ([.fields.labels[] | select(startswith("CVE-"))] | first // "") as $cve |
@@ -231,7 +265,7 @@ else
     [[ "$COMPONENT_MAPPED" == "EXCLUDE" || "$COMPONENT_MAPPED" == "UNKNOWN" ]] && continue
 
     RESOLVED=$(jq -r '(.fields.resolutiondate // "")[:10]' <<< "$ISSUE_JSON")
-    CVE_DATA_LINES+=("$(jq -n --arg ik "$KEY" --arg ck "$CVE_KEY" --arg ps "$PSCOMPONENT" --arg cm "$COMPONENT_MAPPED" --arg rd "$RESOLVED" '{issue_key:$ik,cve_key:$ck,pscomponent:$ps,component_mapped:$cm,resolved:$rd}')")
+    CVE_DATA_LINES+=("$(jq -n --arg ik "$KEY" --arg ck "$CVE_KEY" --arg cm "$COMPONENT_MAPPED" --arg rd "$RESOLVED" '{issue_key:$ik,cve_key:$ck,component_mapped:$cm,resolved:$rd}')")
   done
 
   CVE_ISSUES_JSON=$(printf '%s\n' "${CVE_DATA_LINES[@]}" | jq -s '.')
@@ -264,20 +298,51 @@ else
   for KEY in $NON_CVE_KEYS; do
     [[ -z "$KEY" || "$KEY" == "null" ]] && continue
 
-    ISSUE_JSON=$(view_jira "$KEY" --fields "priority,status,created,updated,resolutiondate,summary,resolution") || {
+    ISSUE_JSON=$(view_jira "$KEY" --fields "summary,status,resolutiondate,resolution,labels,components,issuelinks") || {
       echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
       continue
     }
 
+    # Only include issues owned by Submariner (Multicluster Networking) or Documentation.
+    # The JQL text filter catches many false positives from other ACM teams (Console, CNV,
+    # PICS, Installer, QE) whose issues mention "submariner" in passing.
+    COMPONENTS=$(jq -r '[.fields.components[]?.name] | join(", ")' <<< "$ISSUE_JSON")
+    if ! echo "$COMPONENTS" | grep -qE "Multicluster Networking|Documentation"; then
+      echo "  $KEY: Skipping (component: $COMPONENTS)"
+      continue
+    fi
+
+    # Skip submariner-addon issues (addon is built separately in ACM/MCE)
+    if jq -e '[.fields.labels[]? | select(startswith("component:submariner-addon"))] | length > 0' <<< "$ISSUE_JSON" >/dev/null 2>&1; then
+      echo "  $KEY: Skipping (submariner-addon, built separately)"
+      continue
+    fi
+
+    # Skip process/tracking tasks that never produce code changes
+    SUMMARY=$(jq -r '.fields.summary' <<< "$ISSUE_JSON")
+    if echo "$SUMMARY" | grep -qiE "Branch Cut|Support Matri|Doc audit|REMOVE old known issues"; then
+      echo "  $KEY: Skipping (process task: $SUMMARY)"
+      continue
+    fi
+
+    # Skip untouched issues: status New/Backlog + Unresolved + no issue links + no PRs.
+    # Only filter truly untouched — "In Progress" or "Testing" means active work
+    # even if the fix isn't linked to this Jira key.
+    RESOLUTION=$(jq -r '.fields.resolution.name // "Unresolved"' <<< "$ISSUE_JSON")
+    STATUS=$(jq -r '.fields.status.name' <<< "$ISSUE_JSON")
+    LINK_COUNT=$(jq '[.fields.issuelinks[]? | select(.type.name != "Cloners")] | length' <<< "$ISSUE_JSON")
+    if [[ "$RESOLUTION" == "Unresolved" && "$LINK_COUNT" -eq 0 ]] && echo "$STATUS" | grep -qiE "^(New|Backlog|To Do)$"; then
+      if ! gh search prs "$KEY" --owner submariner-io --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1 && \
+         ! gh search prs "$KEY" --owner stolostron --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1; then
+        echo "  $KEY: Skipping ($STATUS, unresolved, no links, no PRs)"
+        continue
+      fi
+    fi
+
     NON_CVE_DATA_LINES+=("$(jq -c --arg ik "$KEY" '
       {
         issue_key: $ik,
-        priority: (.fields.priority.name // "Unknown"),
-        status: (.fields.status.name // "Unknown"),
-        created: ((.fields.created // "1970-01-01")[:10]),
-        updated: ((.fields.updated // "1970-01-01")[:10]),
         resolved: ((.fields.resolutiondate // "")[:10]),
-        summary: (.fields.summary // ""),
         resolution: (.fields.resolution.name // "Unresolved")
       }
     ' <<< "$ISSUE_JSON")")
@@ -296,7 +361,6 @@ echo "Building output JSON..."
 jq -n \
   --arg version "$VERSION" \
   --arg version_major_minor "$VERSION_MAJOR_MINOR" \
-  --arg version_major_minor_dash "$VERSION_MAJOR_MINOR_DASH" \
   --arg acm_version "$ACM_VERSION" \
   --arg stage_yaml "$STAGE_YAML" \
   --arg last_published_date "$LAST_PUBLISHED_DATE" \
@@ -309,7 +373,6 @@ jq -n \
     metadata: {
       version: $version,
       version_major_minor: $version_major_minor,
-      version_major_minor_dash: $version_major_minor_dash,
       acm_version: $acm_version,
       stage_yaml: $stage_yaml,
       last_published_date: $last_published_date,
