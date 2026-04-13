@@ -194,8 +194,8 @@ verify_release() {
 
   # Call combined verification script (batched queries + parallel extraction)
   local COMBINED_JSON
-  COMBINED_JSON=$("$SCRIPTS_DIR/verify-fbc-release.sh" "$VERSION" 2>&1)
-  local VERIFY_EXIT=$?
+  local VERIFY_EXIT=0
+  COMBINED_JSON=$("$SCRIPTS_DIR/verify-fbc-release.sh" "$VERSION" 2>&1) || VERIFY_EXIT=$?
 
   if [ $VERIFY_EXIT -ne 0 ]; then
     echo "$COMBINED_JSON"
