@@ -20,7 +20,7 @@
 
 @/konflux-bundle-setup
 
-**Alternative:** @.agents/workflows/fix-tekton-bundle.md (manual workflow)
+**Alternative:** `make konflux-bundle-setup VERSION=<version>`
 
 ## 4. Update Tekton Tasks and Resolve EC Violations
 

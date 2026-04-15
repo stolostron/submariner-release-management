@@ -26,6 +26,9 @@ make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
 make konflux-component-setup REPO=operator VERSION=0.24
 make konflux-component-setup REPO=submariner COMPONENT=submariner-gateway VERSION=0.24
 
+# Setup Konflux CI/CD for bundle on new release branch
+make konflux-bundle-setup VERSION=0.24
+
 # Update RPM lockfiles (requires entitlements, registry auth)
 make rpm-lockfile-update                         # Auto-detect branch
 make rpm-lockfile-update BRANCH=0.21             # Specify branch

@@ -200,6 +200,12 @@ Runs 14 automated setup steps and creates 6-9 commits for easy review.
 /konflux-bundle-setup 0.23         # Specify version explicitly
 ```
 
+**Alternative (make target):**
+
+```bash
+make konflux-bundle-setup VERSION=0.23
+```
+
 **Requirements:**
 
 - `~/go/src/submariner-io/submariner-operator` repository must exist (auto-navigates if needed)
