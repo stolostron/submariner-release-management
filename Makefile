@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup
 
 .DEFAULT_GOAL := help
 
@@ -50,6 +50,10 @@ help:
 	@echo "                           All parameters optional (auto-detected from current branch)"
 	@echo "                           Example: make konflux-component-setup REPO=operator VERSION=0.23"
 	@echo "                           Example: make konflux-component-setup REPO=submariner COMPONENT=submariner-gateway VERSION=0.23"
+	@echo "  make konflux-bundle-setup VERSION=..."
+	@echo "                         - Setup Konflux CI/CD for bundle on new release branch"
+	@echo "                           Configures Tekton pipelines, OLM annotations, hermetic builds, multi-platform"
+	@echo "                           Example: make konflux-bundle-setup VERSION=0.23"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
@@ -95,6 +99,10 @@ verify-cve-fixes:
 
 konflux-component-setup:
 	./scripts/konflux-component-setup.sh $(REPO) $(COMPONENT) $(VERSION)
+
+konflux-bundle-setup:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make konflux-bundle-setup VERSION=0.23" && exit 1)
+	./scripts/konflux-bundle-setup.sh $(VERSION)
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
