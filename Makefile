@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes
 
 .DEFAULT_GOAL := help
 
@@ -10,6 +10,10 @@ help:
 	@echo "Available targets:"
 	@echo ""
 	@echo "Release Creation:"
+	@echo "  make configure-downstream VERSION=..."
+	@echo "                         - Configure Konflux for new Submariner Y-stream version"
+	@echo "                           Creates overlays, tenant config, and RPAs in konflux-release-data repo"
+	@echo "                           Example: make configure-downstream VERSION=0.24"
 	@echo "  make create-fbc-releases VERSION=... [TYPE=stage|prod]"
 	@echo "                         - Create FBC releases for all 6 OCP versions (requires oc login)"
 	@echo "                           Default TYPE is stage if not specified"
@@ -54,6 +58,10 @@ help:
 	@echo "Release Operations:"
 	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
 	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
+
+configure-downstream:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make configure-downstream VERSION=0.24" && exit 1)
+	./scripts/configure-downstream.sh $(VERSION)
 
 create-fbc-releases:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-fbc-releases VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)

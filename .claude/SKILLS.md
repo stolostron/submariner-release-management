@@ -24,6 +24,7 @@ Configure Konflux for new Submariner version (Y-stream releases)
 ```bash
 /configure-downstream 0.23
 /configure-downstream 0.23.0  # Extracts major.minor
+make configure-downstream VERSION=0.23
 ```
 
 ## /add-team-member
