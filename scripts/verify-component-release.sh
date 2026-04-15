@@ -158,14 +158,17 @@ if [ -z "$TEST_STATUS" ] || [ "$TEST_STATUS" = "null" ]; then
 fi
 
 # Parse test status JSON
-FAILED_TESTS=$(echo "$TEST_STATUS" | jq -r '.[] | select(.status != "TestPassed") | .scenario' 2>/dev/null)
+# TestPassed = test passed; BuildPLRInProgress = test passed, post-build pipeline triggered
+# Both have completionTime set and details say "Integration test passed [with warnings]"
+FAILED_TESTS=$(echo "$TEST_STATUS" | jq -r '.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | .scenario' 2>/dev/null)
 
 if [ -n "$FAILED_TESTS" ]; then
   echo "❌ ERROR: Snapshot has failing tests" >&2
   echo "" >&2
   echo "Failed test scenarios:" >&2
   echo "$FAILED_TESTS" | while read -r scenario; do
-    echo "  - $scenario" >&2
+    STATUS=$(echo "$TEST_STATUS" | jq -r --arg s "$scenario" '.[] | select(.scenario == $s) | .status')
+    echo "  - $scenario ($STATUS)" >&2
   done
   echo "" >&2
   echo "All tests must pass before creating a release" >&2
@@ -176,8 +179,8 @@ fi
 EC_TEST=$(echo "$TEST_STATUS" | jq -r '.[] | select(.scenario | contains("enterprise-contract")) | .status' 2>/dev/null)
 
 if [ -n "$EC_TEST" ]; then
-  if [ "$EC_TEST" = "TestPassed" ]; then
-    echo "  ✓ enterprise-contract: TestPassed" >&2
+  if [ "$EC_TEST" = "TestPassed" ] || [ "$EC_TEST" = "BuildPLRInProgress" ]; then
+    echo "  ✓ enterprise-contract: $EC_TEST" >&2
   else
     echo "  ✗ enterprise-contract: $EC_TEST (CRITICAL FAILURE)" >&2
     exit 1

@@ -206,9 +206,8 @@ verify_release() {
   echo ""
 
   # Call verification script
-  local VERIFY_JSON
-  VERIFY_JSON=$("$SCRIPTS_DIR/verify-component-release.sh" "$VERSION" 2>&1)
-  local VERIFY_EXIT=$?
+  local VERIFY_JSON VERIFY_EXIT
+  VERIFY_JSON=$("$SCRIPTS_DIR/verify-component-release.sh" "$VERSION" 2>&1) && VERIFY_EXIT=0 || VERIFY_EXIT=$?
 
   if [ $VERIFY_EXIT -ne 0 ]; then
     echo "$VERIFY_JSON"
