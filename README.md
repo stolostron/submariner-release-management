@@ -29,6 +29,11 @@ make konflux-component-setup REPO=submariner COMPONENT=submariner-gateway VERSIO
 # Setup Konflux CI/CD for bundle on new release branch
 make konflux-bundle-setup VERSION=0.24
 
+# Update bundle component image SHAs from Konflux snapshots
+make bundle-image-update                              # Auto-detect from branch
+make bundle-image-update VERSION=0.21.2               # Version bump
+make bundle-image-update VERSION=0.21.2 SNAPSHOT=submariner-0-21-xxxxx
+
 # Update RPM lockfiles (requires entitlements, registry auth)
 make rpm-lockfile-update                         # Auto-detect branch
 make rpm-lockfile-update BRANCH=0.21             # Specify branch

@@ -123,6 +123,14 @@ regenerates bundle manifests, and verifies all SHAs match.
 /bundle-image-update --snapshot submariner-0-21-xxxxx  # Specific snapshot
 ```
 
+**Alternative (make target):**
+
+```bash
+make bundle-image-update                                # Auto-detect from branch
+make bundle-image-update VERSION=0.21.2                 # Version bump
+make bundle-image-update VERSION=0.21.2 SNAPSHOT=submariner-0-21-xxxxx
+```
+
 **Requirements:**
 
 - Must be in `submariner-operator` repository on release branch

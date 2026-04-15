@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update
 
 .DEFAULT_GOAL := help
 
@@ -54,6 +54,12 @@ help:
 	@echo "                         - Setup Konflux CI/CD for bundle on new release branch"
 	@echo "                           Configures Tekton pipelines, OLM annotations, hermetic builds, multi-platform"
 	@echo "                           Example: make konflux-bundle-setup VERSION=0.23"
+	@echo "  make bundle-image-update [VERSION=...] [SNAPSHOT=...]"
+	@echo "                         - Update bundle component image SHAs from Konflux snapshots"
+	@echo "                           VERSION auto-detected from branch if not specified"
+	@echo "                           Example: make bundle-image-update"
+	@echo "                           Example: make bundle-image-update VERSION=0.21.2"
+	@echo "                           Example: make bundle-image-update VERSION=0.21.2 SNAPSHOT=submariner-0-21-xxxxx"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make test              - Run local validations (no cluster access needed)"
@@ -103,6 +109,9 @@ konflux-component-setup:
 konflux-bundle-setup:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make konflux-bundle-setup VERSION=0.23" && exit 1)
 	./scripts/konflux-bundle-setup.sh $(VERSION)
+
+bundle-image-update:
+	./scripts/bundle-image-update.sh $(VERSION) $(if $(SNAPSHOT),--snapshot $(SNAPSHOT),)
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 

@@ -44,7 +44,7 @@
 
 @/bundle-image-update
 
-**Alternative:** @.agents/workflows/update-bundle-shas.md (manual workflow)
+**Alternative:** `make bundle-image-update VERSION=<version>` or @.agents/workflows/update-bundle-shas.md (manual workflow)
 
 ## 8. Create Component Stage Release
 
