@@ -81,6 +81,13 @@ Handles 8 components across 5 repos. Runs 12 automated setup steps and creates p
 
 **Shortcuts:** operator, submariner, lighthouse, shipyard, subctl
 
+**Alternative (make target):**
+
+```bash
+make konflux-component-setup REPO=operator VERSION=0.23
+make konflux-component-setup REPO=submariner COMPONENT=submariner-gateway VERSION=0.23
+```
+
 **Supported components:**
 
 - `submariner-operator` (operator repo)

@@ -12,7 +12,9 @@
 
 ## 3. Fix Tekton Config PRs - Components (Y-stream only)
 
-@.agents/workflows/fix-tekton-prs.md
+@/konflux-component-setup
+
+**Alternative:** `make konflux-component-setup REPO=<repo> COMPONENT=<component> VERSION=<version>`
 
 ## 3b. Fix Tekton Config PRs - Bundle (Y-stream only)
 
