@@ -1,0 +1,536 @@
+#!/bin/bash
+# Update bundle component image SHAs from Konflux snapshots
+#
+# Usage: bundle-image-update.sh [X.Y|X.Y.Z] [--snapshot name]
+#
+# Arguments:
+#   X.Y|X.Y.Z: Target version (auto-detected from branch if omitted).
+#               X.Y defaults to X.Y.0.
+#   --snapshot: Use specific snapshot instead of auto-detecting latest passing.
+#
+# What it does:
+#   - Navigates to submariner-operator repo (auto-detects or uses default path)
+#   - Queries Konflux for latest passing snapshot (or uses --snapshot arg)
+#   - Extracts 7 component SHAs (8 total with metrics-proxy duplicate)
+#   - Updates config/manager/patches/related-images.deployment.config.yaml
+#   - Runs make bundle to regenerate manifests
+#   - Updates Dockerfile labels (version bumps only)
+#   - Verifies all SHAs match snapshot
+#   - Creates single commit with all changes
+#
+# Exit codes:
+#   0: Success (all steps completed)
+#   1: Failure (prerequisites, validation, or step failed)
+
+set -euo pipefail
+
+# ━━━ CONSTANTS ━━━
+
+readonly OPERATOR_REPO="$HOME/go/src/submariner-io/submariner-operator"
+readonly CONFIG_FILE="config/manager/patches/related-images.deployment.config.yaml"
+
+# Component mapping: snapshot-component-suffix:related-image-var-name
+readonly COMPONENT_MAP=(
+  "submariner-operator:submariner-operator"
+  "submariner-gateway:submariner-gateway"
+  "submariner-route-agent:submariner-routeagent"
+  "submariner-globalnet:submariner-globalnet"
+  "lighthouse-agent:submariner-lighthouse-agent"
+  "lighthouse-coredns:submariner-lighthouse-coredns"
+  "nettest:submariner-nettest"
+)
+
+# ━━━ GLOBAL VARIABLES ━━━
+
+VERSION_DOT=""
+VERSION_DASH=""
+CURRENT_VERSION=""
+TARGET_VERSION=""
+UPDATE_TYPE=""
+SNAPSHOT_ARG=""
+SNAPSHOT=""
+BRANCH=""
+
+# SHA variables (set during extract_shas)
+declare -A COMPONENT_SHAS
+
+# ━━━ HELPERS ━━━
+
+die() {
+  echo "ERROR: $1"
+  [ -n "${2:-}" ] && echo "$2"
+  exit 1
+}
+
+# ━━━ STEP 0: PREREQUISITES AND ARGUMENTS ━━━
+
+check_prerequisites() {
+  echo "=== Bundle Image Update ==="
+  echo ""
+
+  # Check bash version (need 4.0+ for associative arrays)
+  local BASH_MAJOR
+  BASH_MAJOR=$(bash -c 'echo ${BASH_VERSINFO[0]}' 2>/dev/null)
+  if [ -z "$BASH_MAJOR" ]; then
+    BASH_MAJOR=$(bash --version 2>/dev/null | head -1 | sed -nE 's/.*version ([0-9]+).*/\1/p')
+  fi
+
+  if [ -z "$BASH_MAJOR" ] || [ "$BASH_MAJOR" -lt 4 ]; then
+    local BASH_VER
+    BASH_VER=$(bash --version 2>/dev/null | head -1 || echo "unknown")
+    die "Bash 4.0+ required (current: $BASH_VER)" \
+      "Associative arrays needed for component mapping"
+  fi
+
+  # Check oc login
+  if oc auth can-i get snapshots -n submariner-tenant &>/dev/null; then
+    echo "Logged into Konflux cluster"
+  else
+    die "Not logged into Konflux cluster" \
+      "Run: oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/"
+  fi
+
+  # Navigate to submariner-operator repo
+  local REPO_NAME
+  REPO_NAME=$(basename "$(pwd)" 2>/dev/null)
+  if [ "$REPO_NAME" != "submariner-operator" ]; then
+    echo "Not in submariner-operator, changing directory..."
+
+    if [ ! -d "$OPERATOR_REPO" ]; then
+      die "Repository not found at $OPERATOR_REPO"
+    fi
+
+    cd "$OPERATOR_REPO"
+    echo "Changed to: $(pwd)"
+  fi
+
+  BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+  echo "Prerequisites verified"
+  echo ""
+}
+
+parse_arguments() {
+  local VERSION_ARG=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --snapshot)
+        if [ -z "${2:-}" ]; then
+          die "--snapshot requires a value" \
+            "Usage: bundle-image-update.sh [X.Y|X.Y.Z] [--snapshot name]"
+        fi
+        SNAPSHOT_ARG="$2"
+        shift 2
+        ;;
+      *)
+        if [ -z "$VERSION_ARG" ]; then
+          VERSION_ARG="$1"
+        else
+          die "Unexpected argument: $1" \
+            "Usage: bundle-image-update.sh [X.Y|X.Y.Z] [--snapshot name]"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  # Extract version from branch if not provided
+  if [ -z "$VERSION_ARG" ]; then
+    # Try extracting version from various branch patterns
+    case "$BRANCH" in
+      release-*)
+        VERSION_DOT="${BRANCH#release-}"  # release-0.21 -> 0.21
+        ;;
+      konflux-submariner-bundle-*)
+        # Bot branch: konflux-submariner-bundle-0-24 -> 0.24
+        local TEMP="${BRANCH#konflux-submariner-bundle-}"
+        VERSION_DOT="${TEMP//-/.}"
+        ;;
+      *)
+        # Try extracting X-Y or X.Y pattern from branch name
+        VERSION_DOT=$(echo "$BRANCH" | grep -oE '[0-9]+-[0-9]+' | head -1 | tr '-' '.' || true)
+        ;;
+    esac
+    if ! echo "$VERSION_DOT" | grep -qE '^[0-9]+\.[0-9]+$'; then
+      die "Cannot auto-detect version from branch: $BRANCH" \
+        "Provide version explicitly: bundle-image-update.sh X.Y"
+    fi
+    echo "Auto-detected version from branch: $VERSION_DOT"
+  else
+    # Validate format and default to .0 if patch version omitted
+    if echo "$VERSION_ARG" | grep -qE '^[0-9]+\.[0-9]+$'; then
+      VERSION_ARG="${VERSION_ARG}.0"
+      echo "Defaulting to $VERSION_ARG (patch version 0)"
+    elif ! echo "$VERSION_ARG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+      die "Invalid version format: $VERSION_ARG" \
+        "Expected: X.Y or X.Y.Z (e.g., 0.23, 0.21.2)"
+    fi
+    VERSION_DOT=$(echo "$VERSION_ARG" | grep -oE '^[0-9]+\.[0-9]+')
+  fi
+
+  VERSION_DASH="${VERSION_DOT//./-}"  # 0.21 -> 0-21
+
+  # Read current bundle version
+  CURRENT_VERSION=$(grep "^  version:" bundle/manifests/submariner.clusterserviceversion.yaml | head -1 | awk '{print $2}')
+
+  if ! echo "$CURRENT_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    die "Invalid version format in CSV: $CURRENT_VERSION" \
+      "Expected: X.Y.Z (e.g., 0.21.1)"
+  fi
+
+  # Determine target version and update type
+  if [ -z "$VERSION_ARG" ]; then
+    TARGET_VERSION="$CURRENT_VERSION"
+    UPDATE_TYPE="sha-only"
+  elif [ "$VERSION_ARG" = "$CURRENT_VERSION" ]; then
+    TARGET_VERSION="$CURRENT_VERSION"
+    UPDATE_TYPE="sha-only"
+  else
+    TARGET_VERSION="$VERSION_ARG"
+    UPDATE_TYPE="version-bump"
+  fi
+
+  echo "Version: $VERSION_DOT"
+  echo "Current bundle version: $CURRENT_VERSION"
+  echo "Target bundle version: $TARGET_VERSION"
+  echo "Update type: $UPDATE_TYPE"
+  echo ""
+}
+
+# ━━━ STEP 1: QUERY SNAPSHOT AND EXTRACT SHAS ━━━
+
+find_snapshot() {
+  echo "Querying Konflux snapshots..."
+
+  if [ -n "$SNAPSHOT_ARG" ]; then
+    SNAPSHOT="$SNAPSHOT_ARG"
+    # Verify snapshot exists
+    local CREATION_TIME
+    CREATION_TIME=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null)
+    if [ -z "$CREATION_TIME" ]; then
+      die "Snapshot not found: $SNAPSHOT"
+    fi
+    echo "Using specified snapshot: $SNAPSHOT (created $CREATION_TIME)"
+  else
+    # Get snapshot names only (avoids JSON corruption with large result sets)
+    local SNAPSHOT_NAMES
+    SNAPSHOT_NAMES=$(oc get snapshots -n submariner-tenant \
+      -l 'pac.test.appstudio.openshift.io/event-type in (push,retest-comment,incoming)' \
+      --sort-by=.metadata.creationTimestamp -o name | \
+      grep "^snapshot.appstudio.redhat.com/submariner-${VERSION_DASH}")
+
+    if [ -z "$SNAPSHOT_NAMES" ]; then
+      die "No snapshots found for version ${VERSION_DOT}"
+    fi
+
+    # Try finding passing snapshot (check recent 20)
+    SNAPSHOT=""
+    local SNAP_NAME SNAP STATUS
+    for SNAP_NAME in $(echo "$SNAPSHOT_NAMES" | tail -20); do
+      SNAP="${SNAP_NAME#snapshot.appstudio.redhat.com/}"
+      STATUS=$(oc get snapshot "$SNAP" -n submariner-tenant \
+        -o jsonpath='{.status.conditions[?(@.type=="AppStudioTestSucceeded")].status}' 2>/dev/null)
+      if [ "$STATUS" = "True" ]; then
+        SNAPSHOT="$SNAP"
+      fi
+    done
+
+    local FALLBACK=false
+    if [ -z "$SNAPSHOT" ]; then
+      echo "WARNING: No passing snapshot found - using latest push snapshot..."
+      SNAP_NAME=$(echo "$SNAPSHOT_NAMES" | tail -1)
+      SNAPSHOT="${SNAP_NAME#snapshot.appstudio.redhat.com/}"
+      FALLBACK=true
+    fi
+
+    local CREATION_TIME
+    CREATION_TIME=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant -o jsonpath='{.metadata.creationTimestamp}')
+    echo "Using snapshot: $SNAPSHOT (created $CREATION_TIME)"
+    [ "$FALLBACK" = true ] && echo "  Note: Snapshot may have test failures (expected for new version setup)"
+  fi
+
+  echo ""
+}
+
+extract_shas() {
+  echo "Extracting component SHAs from snapshot..."
+
+  local COMPONENT SNAPSHOT_COMPONENT VAR_NAME SHA
+  for PAIR in "${COMPONENT_MAP[@]}"; do
+    COMPONENT="${PAIR%%:*}"
+    VAR_NAME="${PAIR##*:}"
+    SNAPSHOT_COMPONENT="${COMPONENT}-${VERSION_DASH}"
+
+    # Pipe directly from oc to jq (don't store JSON in variable)
+    SHA=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant -o json | \
+      jq -r ".spec.components[] | select(.name==\"$SNAPSHOT_COMPONENT\") | .containerImage" | \
+      grep -oP 'sha256:\K[a-f0-9]+')
+
+    if [ -z "$SHA" ]; then
+      die "Failed to extract SHA for component: $SNAPSHOT_COMPONENT"
+    fi
+
+    COMPONENT_SHAS["$VAR_NAME"]="sha256:$SHA"
+    echo "  $VAR_NAME: ${SHA:0:12}..."
+  done
+
+  # Metrics-proxy uses same SHA as nettest
+  COMPONENT_SHAS["submariner-metrics-proxy"]="${COMPONENT_SHAS[submariner-nettest]}"
+  local SHA_DISPLAY="${COMPONENT_SHAS[submariner-metrics-proxy]#sha256:}"
+  echo "  submariner-metrics-proxy: ${SHA_DISPLAY:0:12}... (same as nettest)"
+
+  echo "Extracted 7 component SHAs from snapshot"
+}
+
+# ━━━ STEP 2: UPDATE RELATED IMAGES CONFIG ━━━
+
+update_config() {
+  if [ ! -f "$CONFIG_FILE" ]; then
+    die "$CONFIG_FILE not found" \
+      "Run bundle setup first: /konflux-bundle-setup ${VERSION_DOT}"
+  fi
+
+  echo ""
+  echo "Updating $CONFIG_FILE..."
+
+  local VAR_NAME
+  for VAR_NAME in submariner-operator submariner-gateway submariner-routeagent submariner-globalnet \
+                  submariner-lighthouse-agent submariner-lighthouse-coredns submariner-nettest \
+                  submariner-metrics-proxy; do
+    local NEW_SHA="${COMPONENT_SHAS[$VAR_NAME]}"
+
+    # Replace SHA256 digest while preserving registry.redhat.io URL
+    sed -i "/name: RELATED_IMAGE_${VAR_NAME}/,/value:/ s|@sha256:[a-f0-9]*|@${NEW_SHA}|" "$CONFIG_FILE"
+
+    echo "  RELATED_IMAGE_${VAR_NAME}"
+  done
+
+  # Update container image field (uses operator SHA)
+  sed -i "/path:.*\/containers\/.*\/image$/,/value:/ s|@sha256:[a-f0-9]*|@${COMPONENT_SHAS[submariner-operator]}|" "$CONFIG_FILE"
+  echo "  Container image (uses operator SHA)"
+
+  echo ""
+  echo "Updated $CONFIG_FILE with 9 SHA references"
+}
+
+# ━━━ STEP 3: GENERATE BUNDLE ━━━
+
+generate_bundle() {
+  echo ""
+  echo "Regenerating bundle..."
+
+  if [ ! -d "bundle" ]; then
+    die "bundle/ directory not found" \
+      "Run bundle setup first: /konflux-bundle-setup ${VERSION_DOT}"
+  fi
+
+  # Remove v prefix if present (Makefile regex requires X.Y.Z format without v)
+  local VERSION_NO_V="${TARGET_VERSION#v}"
+
+  # Run make bundle with semantic version (triggers IS_SEMANTIC_VERSION=true in Makefile)
+  if make bundle LOCAL_BUILD=1 VERSION="$VERSION_NO_V"; then
+    echo "Bundle regenerated successfully"
+  else
+    die "make bundle failed"
+  fi
+}
+
+# ━━━ STEP 4: UPDATE DOCKERFILE LABELS ━━━
+
+update_dockerfile_labels() {
+  if [ "$UPDATE_TYPE" = "version-bump" ]; then
+    echo ""
+    echo "Updating Dockerfile labels for version bump..."
+
+    if [ ! -f "bundle.Dockerfile.konflux" ]; then
+      die "bundle.Dockerfile.konflux not found" \
+        "Run bundle setup first: /konflux-bundle-setup ${VERSION_DOT}"
+    fi
+
+    local VERSION_NO_V="${TARGET_VERSION#v}"
+
+    sed -i \
+      -e "s/csv-version=\"[^\"]*\"/csv-version=\"$VERSION_NO_V\"/" \
+      -e "s/release=\"v[^\"]*\"/release=\"v$VERSION_NO_V\"/" \
+      -e "s/version=\"v[^\"]*\"/version=\"v$VERSION_NO_V\"/" \
+      bundle.Dockerfile.konflux
+
+    # Verify labels updated
+    if grep -q "csv-version=\"$VERSION_NO_V\"" bundle.Dockerfile.konflux && \
+       grep -q "release=\"v$VERSION_NO_V\"" bundle.Dockerfile.konflux && \
+       grep -q "version=\"v$VERSION_NO_V\"" bundle.Dockerfile.konflux; then
+      echo "  csv-version=\"$VERSION_NO_V\""
+      echo "  release=\"v$VERSION_NO_V\""
+      echo "  version=\"v$VERSION_NO_V\""
+      echo "Dockerfile labels updated"
+    else
+      die "Failed to update Dockerfile labels"
+    fi
+  else
+    echo ""
+    echo "SHA-only update - skipping Dockerfile label update"
+  fi
+}
+
+# ━━━ STEP 5: VERIFY CHANGES ━━━
+
+verify_shas() {
+  echo ""
+  echo "=== Verifying SHAs match snapshot $SNAPSHOT ==="
+
+  local ERRORS=0
+
+  local PAIR COMPONENT SNAPSHOT_COMPONENT VAR_NAME SNAPSHOT_SHA BUNDLE_SHA
+  for PAIR in "${COMPONENT_MAP[@]}"; do
+    COMPONENT="${PAIR%%:*}"
+    VAR_NAME="${PAIR##*:}"
+    SNAPSHOT_COMPONENT="${COMPONENT}-${VERSION_DASH}"
+
+    # Get SHA from snapshot (source of truth)
+    SNAPSHOT_SHA=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant -o json | \
+      jq -r ".spec.components[] | select(.name==\"$SNAPSHOT_COMPONENT\") | .containerImage" | \
+      grep -o 'sha256:[a-f0-9]*')
+
+    # Get SHA from bundle CSV (what we generated)
+    BUNDLE_SHA=$(grep -A1 "name: RELATED_IMAGE_$VAR_NAME" bundle/manifests/submariner.clusterserviceversion.yaml \
+      | grep "value:" | grep -o 'sha256:[a-f0-9]*')
+
+    if [ -z "$SNAPSHOT_SHA" ] || [ -z "$BUNDLE_SHA" ]; then
+      echo "FAIL $SNAPSHOT_COMPONENT: MISSING SHA!"
+      echo "  Snapshot: ${SNAPSHOT_SHA:-<empty>}"
+      echo "  Bundle:   ${BUNDLE_SHA:-<empty>}"
+      ((ERRORS++))
+    elif [ "$SNAPSHOT_SHA" = "$BUNDLE_SHA" ]; then
+      echo "OK   $SNAPSHOT_COMPONENT"
+    else
+      echo "FAIL $SNAPSHOT_COMPONENT: MISMATCH!"
+      echo "  Snapshot: $SNAPSHOT_SHA"
+      echo "  Bundle:   $BUNDLE_SHA"
+      ((ERRORS++))
+    fi
+  done
+
+  # Verify metrics-proxy uses nettest SHA
+  local NETTEST_SHA METRICS_SHA
+  NETTEST_SHA=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant -o json | \
+    jq -r ".spec.components[] | select(.name==\"nettest-${VERSION_DASH}\") | .containerImage" | \
+    grep -o 'sha256:[a-f0-9]*')
+  METRICS_SHA=$(grep -A1 "name: RELATED_IMAGE_submariner-metrics-proxy" bundle/manifests/submariner.clusterserviceversion.yaml \
+    | grep "value:" | grep -o 'sha256:[a-f0-9]*')
+
+  if [ -z "$NETTEST_SHA" ] || [ -z "$METRICS_SHA" ]; then
+    echo "FAIL metrics-proxy: MISSING SHA!"
+    echo "  Expected (nettest): ${NETTEST_SHA:-<empty>}"
+    echo "  Bundle:             ${METRICS_SHA:-<empty>}"
+    ((ERRORS++))
+  elif [ "$NETTEST_SHA" = "$METRICS_SHA" ]; then
+    echo "OK   metrics-proxy (uses nettest SHA)"
+  else
+    echo "FAIL metrics-proxy: MISMATCH!"
+    echo "  Expected (nettest): $NETTEST_SHA"
+    echo "  Bundle:             $METRICS_SHA"
+    ((ERRORS++))
+  fi
+
+  echo ""
+
+  if [ $ERRORS -eq 0 ]; then
+    echo "All SHAs verified - bundle matches snapshot!"
+  else
+    die "VERIFICATION FAILED - $ERRORS mismatches found!" \
+      "DO NOT COMMIT. Review and fix SHA mismatches above."
+  fi
+
+  echo ""
+
+  # Validate YAML
+  echo "Validating YAML..."
+  if make yamllint; then
+    echo "YAML validation passed"
+  else
+    die "YAML validation failed"
+  fi
+}
+
+# ━━━ STEP 6: COMMIT CHANGES ━━━
+
+commit_changes() {
+  echo ""
+  echo "Creating commit..."
+
+  # Stage all bundle-related changes
+  git add config/manager/patches/related-images.deployment.config.yaml \
+          bundle/ \
+          config/bundle/kustomization.yaml \
+          config/manifests/kustomization.yaml
+
+  # Stage Dockerfile for version bumps
+  if [ "$UPDATE_TYPE" = "version-bump" ]; then
+    git add bundle.Dockerfile.konflux
+  fi
+
+  # Generate commit message based on update type
+  local COMMIT_MSG
+  if [ "$UPDATE_TYPE" = "version-bump" ]; then
+    COMMIT_MSG="Update bundle to $TARGET_VERSION
+
+Updates container image SHAs to match Konflux snapshot.
+
+Snapshot: $SNAPSHOT"
+  else
+    COMMIT_MSG="Update bundle SHAs to latest
+
+Updates container image SHAs to match Konflux snapshot.
+
+Snapshot: $SNAPSHOT"
+  fi
+
+  git commit -s -m "$COMMIT_MSG"
+  echo "Commit created"
+}
+
+# ━━━ STEP 7: SUMMARY ━━━
+
+print_summary() {
+  echo ""
+  echo "======================================="
+  echo "Bundle Image Update Complete"
+  echo "======================================="
+  echo ""
+  echo "Summary:"
+  echo "  Update type: $UPDATE_TYPE"
+  echo "  Version: $CURRENT_VERSION -> $TARGET_VERSION"
+  echo "  Snapshot: $SNAPSHOT"
+  echo "  Branch: $BRANCH"
+  echo ""
+  echo "Commit created:"
+  git --no-pager log -1 --oneline
+  echo ""
+  echo "Files modified:"
+  git --no-pager diff --stat HEAD~1
+  echo ""
+  echo "Next steps:"
+  echo "  1. Review changes: git show"
+  echo "  2. Push: git push origin $BRANCH"
+  echo "  3. Wait for bundle rebuild (~15-30 min)"
+  echo "  4. Verify: oc get snapshots -n submariner-tenant | grep submariner-bundle-${VERSION_DASH}"
+  echo ""
+}
+
+# ━━━ MAIN ━━━
+
+main() {
+  check_prerequisites
+  parse_arguments "$@"
+  find_snapshot
+  extract_shas
+  update_config
+  generate_bundle
+  update_dockerfile_labels
+  verify_shas
+  commit_changes
+  print_summary
+}
+
+main "$@"
