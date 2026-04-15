@@ -11,6 +11,9 @@ oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/
 # Show available commands
 make
 
+# Configure downstream for new Y-stream version
+make configure-downstream VERSION=0.24
+
 # Create component release (requires cluster login)
 make create-component-release VERSION=0.22.1              # Stage (default)
 make create-component-release VERSION=0.22.1 TYPE=prod    # Production
