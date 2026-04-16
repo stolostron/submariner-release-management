@@ -1,0 +1,17 @@
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Release
+metadata:
+  name: submariner-0-24-0-stage-20260415-01
+  namespace: submariner-tenant
+  labels:
+    release.appstudio.openshift.io/author: 'dfarrell07'
+spec:
+  releasePlan: submariner-release-plan-stage-0-24
+  snapshot: submariner-0-24-20260416-014407-000
+  data:
+    releaseNotes:
+      type: RHBA  # Change to RHSA if adding CVEs, RHEA for enhancements
+      issues:
+        fixed: []  # Fill with Step 9 workflow
+      cves: []     # Fill with Step 9 workflow (required if type=RHSA)
