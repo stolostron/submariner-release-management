@@ -331,6 +331,16 @@ add_bundle_infrastructure() {
   grep -q "BASE_BRANCH=${RELEASE_BRANCH}" .tekton/konflux.args || \
     die "BASE_BRANCH not updated in konflux.args"
 
+  # Sync operator-sdk version from bundle.Dockerfile (kept up to date by make bundle)
+  if [ -f bundle.Dockerfile ]; then
+    local SDK_VERSION
+    SDK_VERSION=$(grep -oP 'metrics\.builder=\K[^ ]+' bundle.Dockerfile || true)
+    if [ -n "$SDK_VERSION" ]; then
+      sed -i "s/metrics\.builder=.*/metrics.builder=${SDK_VERSION}/" bundle.Dockerfile.konflux
+      echo "✓ Synced operator-sdk version: ${SDK_VERSION}"
+    fi
+  fi
+
   echo "✓ Version strings updated (${VERSION}, ${VERSION_DASH}, ${ACM_VERSION})"
 
   # Commit changes
