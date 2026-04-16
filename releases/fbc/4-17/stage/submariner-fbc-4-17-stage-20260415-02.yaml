@@ -2,10 +2,10 @@
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
 metadata:
-  name: submariner-fbc-4-21-stage-20260415-01
+  name: submariner-fbc-4-17-stage-20260415-02
   namespace: submariner-tenant
   labels:
     release.appstudio.openshift.io/author: 'dfarrell07'
 spec:
-  releasePlan: submariner-fbc-release-plan-stage-4-21
-  snapshot: submariner-fbc-4-21-20260416-002713-000
+  releasePlan: submariner-fbc-release-plan-stage-4-17
+  snapshot: submariner-fbc-4-17-20260416-002714-000
