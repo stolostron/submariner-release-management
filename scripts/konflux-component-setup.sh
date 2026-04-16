@@ -575,6 +575,14 @@ add_konflux_dockerfile() {
     fi
   fi
 
+  # Fix com.github.url to point to correct repo
+  local CURRENT_REPO
+  CURRENT_REPO=$(basename "$(pwd)")
+  if grep -q 'com.github.url=' "$DOCKERFILE"; then
+    sed -i "s|com.github.url=\"https://github.com/submariner-io/[^\"]*\"|com.github.url=\"https://github.com/submariner-io/${CURRENT_REPO}\"|" "$DOCKERFILE"
+    echo "✓ Set com.github.url to submariner-io/${CURRENT_REPO}"
+  fi
+
   # Update version label for Y-stream (initial version)
   if grep -q 'version=' "$DOCKERFILE"; then
     sed -i "s/version=\"[^\"]*\"/version=\"v${VERSION_MAJOR}.${VERSION_MINOR}.0\"/" "$DOCKERFILE" || \
