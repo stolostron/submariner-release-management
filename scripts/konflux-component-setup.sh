@@ -39,7 +39,7 @@ declare -A COMPONENT_META=(
   ["lighthouse-agent"]="gomod:yes:"
   ["lighthouse-coredns"]="gomod:yes:"
   ["nettest"]="rpm:yes:metricsproxy"
-  ["subctl"]="gomod:no:"
+  ["subctl"]="gomod:yes:"
 )
 
 # Repository shortcuts
