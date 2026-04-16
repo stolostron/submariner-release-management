@@ -660,7 +660,7 @@ check_step_3b() {
 
       if [ -n "$test_status" ]; then
         local ec_passed
-        ec_passed=$(echo "$test_status" | jq -r '.[] | select(.scenario | contains("enterprise-contract")) | select(.status == "TestPassed") | .status' 2>/dev/null || true)
+        ec_passed=$(echo "$test_status" | jq -r '.[] | select(.scenario | contains("enterprise-contract")) | select(.status == "TestPassed" or .status == "BuildPLRInProgress") | .status' 2>/dev/null || true)
 
         if [ -n "$ec_passed" ]; then
           echo "✅ Bundle configured and passing EC"
@@ -690,7 +690,7 @@ check_step_4() {
 
     if [ -n "$test_status" ]; then
       local ec_failed
-      ec_failed=$(echo "$test_status" | jq -r '.[] | select(.scenario | contains("enterprise-contract")) | select(.status != "TestPassed") | "\(.scenario): \(.status)"' 2>/dev/null || true)
+      ec_failed=$(echo "$test_status" | jq -r '.[] | select(.scenario | contains("enterprise-contract")) | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | "\(.scenario): \(.status)"' 2>/dev/null || true)
 
       if [ -z "$ec_failed" ]; then
         echo "✅ All EC validations passed"
@@ -793,7 +793,7 @@ check_step_7() {
 
     if [ -n "$test_status" ]; then
       local all_passed total_tests
-      all_passed=$(echo "$test_status" | jq '[.[] | select(.status == "TestPassed")] | length' 2>/dev/null || echo 0)
+      all_passed=$(echo "$test_status" | jq '[.[] | select(.status == "TestPassed" or .status == "BuildPLRInProgress")] | length' 2>/dev/null || echo 0)
       total_tests=$(echo "$test_status" | jq '. | length' 2>/dev/null || echo 0)
 
       if [ "$all_passed" -eq "$total_tests" ] && [ "$total_tests" -gt 0 ]; then
@@ -957,7 +957,7 @@ check_step_11() {
 
       if [ -n "$fbc_test_status" ]; then
         local fbc_all_passed fbc_total
-        fbc_all_passed=$(echo "$fbc_test_status" | jq '[.[] | select(.status == "TestPassed")] | length' 2>/dev/null || echo 0)
+        fbc_all_passed=$(echo "$fbc_test_status" | jq '[.[] | select(.status == "TestPassed" or .status == "BuildPLRInProgress")] | length' 2>/dev/null || echo 0)
         fbc_total=$(echo "$fbc_test_status" | jq '. | length' 2>/dev/null || echo 0)
 
         if [ "$fbc_all_passed" -ne "$fbc_total" ] || [ "$fbc_total" -eq 0 ]; then

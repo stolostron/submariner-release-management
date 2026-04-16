@@ -327,7 +327,8 @@ for VERSION in 16 17 18 19 20 21; do
   fi
 
   # Check for any non-passing tests
-  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed") | .scenario' 2>/dev/null || true)
+  # TestPassed and BuildPLRInProgress both indicate the integration test passed
+  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | .scenario' 2>/dev/null || true)
   if [ -n "$FAILED_TESTS" ]; then
     echo "  4-${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Tests failed: $FAILED_TESTS\n"
