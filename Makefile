@@ -87,6 +87,10 @@ create-component-release:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-component-release VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
 	./scripts/create-component-release.sh $(VERSION) $(if $(TYPE),$(TYPE),stage)
 
+update-version-labels:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION required. Usage: make update-version-labels VERSION=0.23.1 [REPO=subctl]" && exit 1)
+	./scripts/update-version-labels.sh $(VERSION) $(if $(REPO),$(REPO),)
+
 rpm-lockfile-update:
 	./scripts/rpm-lockfile-update.sh $(BRANCH) $(if $(REPO),$(REPO),$(COMPONENT))
 

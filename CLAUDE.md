@@ -34,7 +34,9 @@
 
 ## 5b. Update Component Version Labels (Z-stream only)
 
-@.agents/workflows/update-version-labels.md
+@/update-version-labels
+
+**Alternative:** `make update-version-labels VERSION=<version>`
 
 ## 6. Cut Upstream Release
 
