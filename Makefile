@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls
 
 .DEFAULT_GOAL := help
 
@@ -74,6 +74,13 @@ help:
 	@echo "Release Operations:"
 	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
 	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
+	@echo "  make get-fbc-urls VERSION=... [OCP=4.XX] [RAW_URL=true] [PROD_INDEX=true]"
+	@echo "                         - Get FBC catalog URLs for QE sharing"
+	@echo "                           Default: quay.io catalog URLs (Release CRs + snapshot fallback)"
+	@echo "                           PROD_INDEX=true: prod operator index URLs at registry.redhat.io"
+	@echo "                           Example: make get-fbc-urls VERSION=0.24.0"
+	@echo "                           Example: make get-fbc-urls VERSION=0.24.0 OCP=4.21 RAW_URL=true"
+	@echo "                           Example: make get-fbc-urls VERSION=0.24.0 PROD_INDEX=true"
 
 configure-downstream:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make configure-downstream VERSION=0.24" && exit 1)
@@ -116,6 +123,10 @@ konflux-bundle-setup:
 
 bundle-image-update:
 	./scripts/bundle-image-update.sh $(VERSION) $(if $(SNAPSHOT),--snapshot $(SNAPSHOT),)
+
+get-fbc-urls:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make get-fbc-urls VERSION=0.24.0 [OCP=4.21] [RAW_URL=true] [PROD_INDEX=true]" && exit 1)
+	./scripts/get-fbc-urls.sh $(VERSION) $(if $(OCP),--ocp $(OCP),) $(if $(filter true,$(RAW_URL)),--raw-url,) $(if $(filter true,$(PROD_INDEX)),--prod-index,)
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 

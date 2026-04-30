@@ -89,7 +89,9 @@ See `.agents/workflows/add-release-notes.md` for workflow details.
 
 ## 14. Share Stage FBC with QE
 
-@.agents/workflows/share-with-qe.md
+@/get-fbc-urls
+
+**Alternative:** @.agents/workflows/share-with-qe.md (manual workflow)
 
 ## 15. Create Component Prod Release
 
@@ -119,7 +121,9 @@ See `.agents/workflows/add-release-notes.md` for workflow details.
 
 ## 19. Share Prod FBC with QE
 
-@.agents/workflows/share-with-qe.md
+@/get-fbc-urls
+
+**Alternative:** @.agents/workflows/share-with-qe.md (manual workflow)
 
 ## 20. Update FBC Templates with Prod URLs (Optional)
 
