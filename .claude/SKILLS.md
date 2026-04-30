@@ -236,6 +236,19 @@ make konflux-bundle-setup VERSION=0.23
 
 **After running:** Review commits, validate YAML (`make yamllint`), push to remote, wait for build (~15-30 min)
 
+## /get-fbc-urls
+
+Get FBC catalog URLs for QE sharing (Release CRs, snapshots, or prod index)
+
+```bash
+/get-fbc-urls 0.24.0                    # All OCP versions
+/get-fbc-urls 0.24.0 --ocp 4.21         # Single OCP version
+/get-fbc-urls 0.24.0 --raw-url          # URLs only (for automation)
+/get-fbc-urls 0.24.0 --prod-index       # Prod operator index URLs
+make get-fbc-urls VERSION=0.24.0        # Via make target
+make get-fbc-urls VERSION=0.24.0 PROD_INDEX=true
+```
+
 ## /create-fbc-release
 
 Create FBC releases for all OCP versions (stage or prod) with comprehensive verification

@@ -56,6 +56,12 @@ make add-release-notes VERSION=0.22.1                          # Auto-find lates
 make add-release-notes VERSION=0.22.1 STAGE_YAML=...           # Use specific YAML
 make review-release-notes VERSION=0.22.1                       # Per-issue agent review
 
+# Get FBC catalog URLs for QE sharing (requires cluster login or skopeo)
+make get-fbc-urls VERSION=0.24.0                          # All OCP versions
+make get-fbc-urls VERSION=0.24.0 OCP=4.21                 # Single OCP version
+make get-fbc-urls VERSION=0.24.0 OCP=4.21 RAW_URL=true    # quay URL only
+make get-fbc-urls VERSION=0.24.0 PROD_INDEX=true           # Prod operator index URLs
+
 # Verify CVE fixes via Clair reports (requires oc login, auto-runs in add-release-notes)
 make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
 
@@ -71,19 +77,20 @@ acli jira auth status
 /plugin install release-management@submariner-release
 ```
 
-| Command                    | Purpose                                        |
-|----------------------------|------------------------------------------------|
-| `/learn-release`           | Learn 20-step release workflow                 |
-| `/release-ls`              | Check release status                           |
-| `/configure-downstream`    | Create Konflux app for new version             |
-| `/add-team-member`         | Add user to Submariner Konflux RBAC            |
-| `/konflux-ci-fix`          | Fix Konflux CI Enterprise Contract issues      |
-| `/konflux-component-setup` | Automate Konflux component setup on new branch |
-| `/bundle-image-update`     | Update bundle image SHAs from snapshots        |
-| `/add-release-notes`       | Add release notes from Jira, per-issue review  |
-| `/rpm-lockfile-update`     | Update RPM lockfiles across repos              |
-| `/konflux-bundle-setup`    | Automate Konflux bundle setup on new branch    |
-| `/create-component-release`| Create component release (stage or prod)       |
-| `/create-fbc-release`      | Create FBC releases for all OCP versions       |
+| Command                     | Purpose                                        |
+|-----------------------------|------------------------------------------------|
+| `/learn-release`            | Learn 20-step release workflow                 |
+| `/release-ls`               | Check release status                           |
+| `/configure-downstream`     | Create Konflux app for new version             |
+| `/add-team-member`          | Add user to Submariner Konflux RBAC            |
+| `/konflux-ci-fix`           | Fix Konflux CI Enterprise Contract issues      |
+| `/konflux-component-setup`  | Automate Konflux component setup on new branch |
+| `/bundle-image-update`      | Update bundle image SHAs from snapshots        |
+| `/add-release-notes`        | Add release notes from Jira, per-issue review  |
+| `/rpm-lockfile-update`      | Update RPM lockfiles across repos              |
+| `/konflux-bundle-setup`     | Automate Konflux bundle setup on new branch    |
+| `/create-component-release` | Create component release (stage or prod)       |
+| `/create-fbc-release`       | Create FBC releases for all OCP versions       |
+| `/get-fbc-urls`             | Get FBC catalog URLs for QE sharing            |
 
 See [.claude/SKILLS.md](.claude/SKILLS.md).
