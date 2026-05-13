@@ -369,6 +369,17 @@ OUTPUT=$(claude -p "$PROMPT" \
 if echo "$OUTPUT" | grep -qiE "^\*{0,2}REMOVE"; then
   REASON=$(echo "$OUTPUT" | grep -oiE "REMOVE:?\*{0,2} .*" | tail -1 | sed 's/^[*]*REMOVE:*[*]* *//')
   echo "  ✗ REMOVE $ISSUE_KEY - $REASON"
+
+  # Execute removal deterministically (don't rely on agent running bash)
+  # Strip markdown formatting from reason for clean commit messages
+  CLEAN_REASON=$(echo "$REASON" | sed 's/\*//g' | sed 's/^[[:space:]]*//')
+  yq eval -i "del(.spec.data.releaseNotes.issues.fixed[] | select(.id == \"$ISSUE_KEY\"))" "$STAGE_YAML"
+  yq eval '.' "$STAGE_YAML" > /dev/null
+  git add "$STAGE_YAML"
+  git commit -s -m "Remove $ISSUE_KEY from ${VERSION} release notes
+
+${CLEAN_REASON:0:78}" || true
+
 elif echo "$OUTPUT" | grep -qiE "KEEP:"; then
   REASON=$(echo "$OUTPUT" | grep -oiE "KEEP:?\*{0,2} .*" | tail -1 | sed 's/^[*]*KEEP:*[*]* *//')
   echo "  ✓ KEEP  $ISSUE_KEY - ${REASON:-issue passes review}"

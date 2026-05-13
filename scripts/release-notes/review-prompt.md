@@ -126,17 +126,11 @@ Keep if ANY of the following:
 
 ## Decision
 
-If keeping, print exactly: `KEEP: <one-line reason>`
+Print exactly one of these as the LAST line of your output:
 
-If removing, remove from YAML and commit:
+- `KEEP: <one-line reason>`
+- `REMOVE: <one-line reason>`
 
-```bash
-yq eval -i 'del(.spec.data.releaseNotes.issues.fixed[] | select(.id == "${ISSUE_KEY}"))' "${STAGE_YAML}"
-yq eval '.' "${STAGE_YAML}" > /dev/null
-git add "${STAGE_YAML}"
-git commit -s -m "Remove ${ISSUE_KEY} from release notes: <reason>
-
-<2-3 sentence justification citing the evidence.>"
-```
-
-Then print exactly: `REMOVE: <one-line reason>`
+Do NOT run any bash commands, modify files, or make git commits.
+The calling script handles YAML modification and commits based on
+your verdict line. Just output your reasoning and the verdict.
