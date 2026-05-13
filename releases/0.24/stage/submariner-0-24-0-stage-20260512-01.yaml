@@ -16,5 +16,3 @@ spec:
         fixed:
           - id: ACM-32309
             source: issues.redhat.com
-          - id: ACM-32580
-            source: issues.redhat.com
