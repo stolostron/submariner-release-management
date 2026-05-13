@@ -11,7 +11,13 @@ spec:
   snapshot: submariner-0-24-20260512-181004-000
   data:
     releaseNotes:
-      type: RHBA  # Change to RHSA if adding CVEs, RHEA for enhancements
+      type: RHBA
       issues:
-        fixed: []  # Fill with Step 9 workflow
-      cves: []     # Fill with Step 9 workflow (required if type=RHSA)
+        fixed:
+          # Non-CVE Issues (3):
+          - id: ACM-30182
+            source: issues.redhat.com
+          - id: ACM-32309
+            source: issues.redhat.com
+          - id: ACM-32580
+            source: issues.redhat.com
