@@ -1,0 +1,214 @@
+================================================================================
+SUBMARINER RELEASE TIMELINE - Y-STREAM (0.21 → 0.22)
+================================================================================
+
+Week 1: SETUP & BUILD PREPARATION
+──────────────────────────────────────────────────────────────────────────────
+
+Day 1 (Monday)                                                    [6-10 hours]
+──────────────────────────────────────────────────────────────────────────────
+  09:00 │ ✓ Step 1: Create release branches                      [30 min]
+  09:30 │ ⧗ Step 2: Configure Konflux (PR + ArgoCD sync)        [1-2 hours]
+  11:00 │ ⧗ Step 3: Fix Tekton PRs (5 repos in parallel)        [2-4 hours]
+  14:00 │ ⏳ Wait: Component builds                              [15-30 min]
+  14:30 │ ⧗ Step 3b: Bundle setup (SHAs + Tekton)               [1-2 hours]
+  16:00 │ ⏳ Wait: Bundle builds                                 [15-30 min]
+        └─────────────────────────────────────────────────────────────────
+
+Day 2-3 (Tue-Wed)                                               [7-33 hours] ⚠️
+──────────────────────────────────────────────────────────────────────────────
+  09:00 │ ⧗ Step 4: Fix EC violations                           [2-8 hours]
+  12:00 │ ⏳ Wait: Rebuilds after EC fixes                       [30-60 min]
+  13:00 │ ⧗⚠️ Step 5: CVE scanning & fixes (ITERATIVE)          [4-24 hours]
+        │   ├─ Grype scan upstream (7 repos)                    [1 hour]
+        │   ├─ Clair scan downstream (9 images)                 [1 hour]
+        │   ├─ Triage CVEs (team discussion)                    [1-2 hours]
+        │   ├─ Fix CVEs in source                               [2-8 hours]
+        │   ├─ PR review + merge                                [2-4 hours]
+        │   ├─ Wait for rebuilds                                [30-60 min]
+        │   └─ Re-scan to verify                                [1 hour]
+        │
+  Day 3 │ ⧗ Step 6: Cut upstream release                        [30 min]
+  14:00 │ ⏳ Wait: Upstream images publish                       [15-30 min]
+  14:30 │ ⧗ Step 7: Update bundle SHAs                          [30 min]
+  15:00 │ ⏳ Wait: Bundle rebuild                                [15-30 min]
+        └─────────────────────────────────────────────────────────────────
+
+        ✓ GATE: Builds ready, EC passed, CVEs triaged
+
+
+Week 1-2: STAGE RELEASE
+──────────────────────────────────────────────────────────────────────────────
+
+Day 4 (Thursday)                                                   [4-6 hours]
+──────────────────────────────────────────────────────────────────────────────
+  09:00 │ ⧗ Step 8: Create stage release YAML                   [15 min]
+  09:15 │ ⧗ Step 9: Add release notes (Jira triage)             [1-2 hours]
+        │   ├─ Query CVEs (automatic)                           [15 min]
+        │   ├─ Query other issues                               [15 min]
+        │   ├─ User selection & mapping                         [30-60 min]
+        │   └─ Update YAML with releaseNotes                    [15 min]
+        │
+  11:00 │ ⧗ Step 10: Apply stage release                        [15 min]
+  11:15 │ ⏳ Wait: Stage pipeline                                [20-40 min]
+  12:00 │ ⧗ Step 10b: Verify build                              [10 min]
+  12:15 │ ⧗ Step 11: Update FBC catalog                         [30 min]
+  12:45 │ ⏳ Wait: FBC snapshots rebuild (6 catalogs)            [15-30 min]
+  13:15 │ ⧗ Step 12: Create 6 FBC stage YAMLs                   [30 min]
+  13:45 │ ⧗ Step 13: Apply 6 FBC releases                       [15 min]
+  14:00 │ ⏳ Wait: FBC pipelines (6 parallel)                    [20-40 min]
+  14:45 │ ⧗ Step 13b: Verify all 6 builds                       [10 min]
+  15:00 │ ⧗ Step 14: Share with QE (create Jira)                [15 min]
+        └─────────────────────────────────────────────────────────────────
+
+        ⏸️ WAIT FOR QE APPROVAL (typically 3-7 days, up to 2 weeks)
+
+Day 4-11 (Thu-Thu)                                           [QE Testing] ⏸️
+──────────────────────────────────────────────────────────────────────────────
+        │ QE testing in progress...
+        │ (Monitor for issues, respond to questions)
+        │
+  Day X │ ⚠️ IF ISSUES FOUND:
+        │   ├─ Fix code/config
+        │   ├─ Rebuild components
+        │   ├─ Update FBC catalogs
+        │   ├─ Apply new stage release (increment suffix)
+        │   └─ Re-submit to QE
+        │   └─ Add 3-7 days per cycle
+        │
+  Day Y │ ✅ QE APPROVAL RECEIVED
+        └─────────────────────────────────────────────────────────────────
+
+
+Week 2-3: PRODUCTION RELEASE
+──────────────────────────────────────────────────────────────────────────────
+
+Day 11-12 (Thu-Fri)                                              [2-3 hours]
+──────────────────────────────────────────────────────────────────────────────
+  09:00 │ ⧗ Step 15: Create prod release YAML                   [10 min]
+  09:10 │ ⧗ Step 16: Apply prod release                         [10 min]
+  09:20 │ ⏳ Wait: Prod pipeline                                 [20-40 min]
+  10:00 │ ⧗ Step 16b: Verify build                              [10 min]
+  10:10 │ ⧗ Step 17: Create 6 FBC prod YAMLs                    [10 min]
+  10:20 │ ⧗ Step 18: Apply 6 FBC prod releases                  [10 min]
+  10:30 │ ⏳ Wait: FBC prod pipelines (6 parallel)               [20-40 min]
+  11:15 │ ⧗ Step 18b: Verify all 6 builds                       [10 min]
+  11:30 │ ⧗ Step 19: Notify QE of production                    [10 min]
+        │
+  (opt) │ ⧗ Step 20: Update FBC templates (cleanup)             [1 hour]
+        └─────────────────────────────────────────────────────────────────
+
+        🎉 RELEASE COMPLETE: Submariner 0.22.0 in production
+
+
+================================================================================
+SUBMARINER RELEASE TIMELINE - Z-STREAM (0.21.1 → 0.21.2)
+================================================================================
+
+Week 1: BUILD PREPARATION & STAGE
+──────────────────────────────────────────────────────────────────────────────
+
+Day 1-2 (Mon-Tue)                                               [7-33 hours] ⚠️
+──────────────────────────────────────────────────────────────────────────────
+  09:00 │ ⧗ Step 4: Fix EC violations                           [2-8 hours]
+  12:00 │ ⏳ Wait: Rebuilds after EC fixes                       [30-60 min]
+  13:00 │ ⧗⚠️ Step 5: CVE scanning & fixes (ITERATIVE)          [4-24 hours]
+        │   (Same process as Y-stream)
+        │
+  Day 2 │ ⧗ Step 5b: Update version labels (9 Dockerfiles)      [1 hour]
+  10:00 │ ⏳ Wait: Rebuilds with new labels                      [15-30 min]
+  10:30 │ ⧗ Step 6: Cut upstream release                        [30 min]
+  11:00 │ ⏳ Wait: Upstream images publish                       [15-30 min]
+  11:30 │ ⧗ Step 7: Update bundle SHAs                          [30 min]
+  12:00 │ ⏳ Wait: Bundle rebuild                                [15-30 min]
+        └─────────────────────────────────────────────────────────────────
+
+Day 3 (Wednesday)                                                  [4-6 hours]
+──────────────────────────────────────────────────────────────────────────────
+        │ Steps 8-14: Same as Y-stream
+        │ (See Y-stream Day 4 timeline above)
+        └─────────────────────────────────────────────────────────────────
+
+        ⏸️ WAIT FOR QE APPROVAL (typically 3-7 days)
+
+Day 3-8 (Wed-Wed)                                            [QE Testing] ⏸️
+──────────────────────────────────────────────────────────────────────────────
+        │ QE testing in progress...
+  Day X │ ✅ QE APPROVAL RECEIVED
+        └─────────────────────────────────────────────────────────────────
+
+
+Week 2: PRODUCTION RELEASE
+──────────────────────────────────────────────────────────────────────────────
+
+Day 8-9 (Wed-Thu)                                                [2-3 hours]
+──────────────────────────────────────────────────────────────────────────────
+        │ Steps 15-20: Same as Y-stream
+        │ (See Y-stream Day 11-12 timeline above)
+        └─────────────────────────────────────────────────────────────────
+
+        🎉 RELEASE COMPLETE: Submariner 0.21.2 in production
+
+
+================================================================================
+LEGEND
+================================================================================
+
+  ⧗  Manual work (requires human action)
+  ⏳  Automated wait (pipeline/build/sync)
+  ⏸️  External dependency (QE approval)
+  ⚠️  High variability / risk area
+  ✓  Automated step (minimal human intervention)
+  ✅ Gate/milestone achieved
+
+
+================================================================================
+KEY INSIGHTS
+================================================================================
+
+CRITICAL PATH:
+  Setup (Y) → CVE Fixes → QE Approval → Production
+  └─ Longest: QE approval (3-14 days external dependency)
+
+HIGHEST VARIABILITY:
+  Step 5 (CVE scanning): 4-24 hours
+  └─ Simple releases: 4 hours
+  └─ Complex (Go stdlib CVEs): 24+ hours
+
+PARALLELIZATION:
+  • Step 3: Work on 5 repos simultaneously
+  • Step 5: Fix CVEs in multiple repos in parallel
+  • Step 13/18: 6 FBC releases applied sequentially (avoid cluster overload)
+
+AUTOMATION WINS:
+  • Steps 1, 6: Fully automated (saves ~2 hours per release)
+  • Steps 7, 9, 12: Script-assisted (saves ~4 hours per release)
+  • Future: Steps 2, 3 automation could save additional 3-6 hours
+
+RISK MITIGATION:
+  1. Start CVE scanning early (Day 1-2)
+  2. Validate EC compliance before Step 4
+  3. Thorough pre-QE testing before Step 14
+  4. Monitor pipelines during wait times
+
+
+================================================================================
+TIMELINE ASSUMPTIONS
+================================================================================
+
+• Work hours: 9am-5pm (8 hour day)
+• No blockers or major issues
+• CVE fixes: Moderate complexity (middle of 4-24 hour range)
+• QE approval: Standard timeline (3-7 days)
+• Pipeline success rate: >95% (minimal retries)
+• Team availability: Release manager + on-call developers
+
+ACTUAL TIMELINES MAY VARY based on:
+  - CVE severity and complexity
+  - EC policy changes
+  - QE workload and findings
+  - Infrastructure stability
+  - Team availability
+
+
+Last Updated: 2026-04-08
