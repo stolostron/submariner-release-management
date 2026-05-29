@@ -27,6 +27,26 @@ Configure Konflux for new Submariner version (Y-stream releases)
 make configure-downstream VERSION=0.23
 ```
 
+## /add-fbc-ocp-version
+
+Add FBC support for new OCP version in Konflux release data
+
+```bash
+/add-fbc-ocp-version 4.22 0.23
+make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23
+```
+
+**Requirements:** `konflux-release-data` repo at `~/konflux/konflux-release-data`, clean working tree on main
+
+**What it does:**
+
+1. Creates FBC overlay directory (8 YAML files)
+2. Enables overlay in tenant config (7 auto-generated files)
+3. Adds new application to FBC stage/prod RPAs
+4. Prints Phase 2 instructions for submariner-operator-fbc
+
+**After running:** Push branch, create GitLab MR, then handle bot PR per Phase 2 instructions
+
 ## /add-team-member
 
 Add user to Submariner Konflux team RBAC
