@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream add-fbc-ocp-version create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls
 
 .DEFAULT_GOAL := help
 
@@ -14,6 +14,10 @@ help:
 	@echo "                         - Configure Konflux for new Submariner Y-stream version"
 	@echo "                           Creates overlays, tenant config, and RPAs in konflux-release-data repo"
 	@echo "                           Example: make configure-downstream VERSION=0.24"
+	@echo "  make add-fbc-ocp-version OCP_VERSION=... MIN_SUB=..."
+	@echo "                         - Add FBC support for new OCP version in Konflux release data"
+	@echo "                           Creates overlays, tenant config, and RPA entries"
+	@echo "                           Example: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23"
 	@echo "  make create-fbc-releases VERSION=... [TYPE=stage|prod]"
 	@echo "                         - Create FBC releases for all 6 OCP versions (requires oc login)"
 	@echo "                           Default TYPE is stage if not specified"
@@ -85,6 +89,11 @@ help:
 configure-downstream:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make configure-downstream VERSION=0.24" && exit 1)
 	./scripts/configure-downstream.sh $(VERSION)
+
+add-fbc-ocp-version:
+	@test -n "$(OCP_VERSION)" || (echo "ERROR: OCP_VERSION parameter required. Usage: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23" && exit 1)
+	@test -n "$(MIN_SUB)" || (echo "ERROR: MIN_SUB parameter required. Usage: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23" && exit 1)
+	./scripts/add-fbc-ocp-version.sh $(OCP_VERSION) $(MIN_SUB)
 
 create-fbc-releases:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-fbc-releases VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)

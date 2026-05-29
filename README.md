@@ -82,6 +82,7 @@ acli jira auth status
 | `/learn-release`            | Learn 20-step release workflow                 |
 | `/release-ls`               | Check release status                           |
 | `/configure-downstream`     | Create Konflux app for new version             |
+| `/add-fbc-ocp-version`      | Add FBC support for new OCP version            |
 | `/add-team-member`          | Add user to Submariner Konflux RBAC            |
 | `/konflux-ci-fix`           | Fix Konflux CI Enterprise Contract issues      |
 | `/konflux-component-setup`  | Automate Konflux component setup on new branch |

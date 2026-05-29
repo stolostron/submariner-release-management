@@ -20,10 +20,15 @@ Add catalog directory and Tekton pipelines for new OCP version.
 
 Add overlay, tenant config, and RPA entries for new OCP version.
 
-**Repo:** <https://gitlab.cee.redhat.com/releng/konflux-release-data>
-**Local:** `~/konflux/konflux-release-data`
+**Automated:**
 
-**Workflow:** `tenants-config/cluster/kflux-prd-rh02/tenants/submariner-tenant/CLAUDE.md` → "Add FBC Support for New OCP Version"
+```bash
+/add-fbc-ocp-version 4.22 0.23
+# Or: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23
+```
+
+**Manual:** See `~/konflux/konflux-release-data` tenant CLAUDE.md,
+section "Add FBC Support for New OCP Version"
 
 ### 3. Update Release Workflows (this repo)
 

@@ -137,4 +137,6 @@ Tasks not tied to normal release workflow timing.
 
 ### Add FBC Support for New OCP Version
 
-@.agents/workflows/add-fbc-ocp-version.md
+@/add-fbc-ocp-version
+
+**Alternative:** `make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23` or @.agents/workflows/add-fbc-ocp-version.md (manual workflow)
