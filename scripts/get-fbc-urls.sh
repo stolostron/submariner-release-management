@@ -28,7 +28,7 @@ set -euo pipefail
 
 readonly KONFLUX_UI="https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com"
 readonly NAMESPACE="submariner-tenant"
-readonly ALL_OCP_VERSIONS=(16 17 18 19 20 21)
+readonly ALL_OCP_VERSIONS=(16 17 18 19 20 21 22)
 
 # ━━━ GLOBAL VARIABLES ━━━
 

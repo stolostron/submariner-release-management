@@ -220,7 +220,7 @@ verify_release() {
   fi
 
   # Extract snapshot names for each OCP version
-  for VERSION_NUM in 16 17 18 19 20 21; do
+  for VERSION_NUM in 16 17 18 19 20 21 22; do
     local SNAPSHOT
     SNAPSHOT=$(echo "$COMBINED_RESULT" | jq -r ".snapshots[\"4-${VERSION_NUM}\"]")
     SNAPSHOTS["4-${VERSION_NUM}"]="$SNAPSHOT"
@@ -246,7 +246,7 @@ generate_yamls() {
   # Change to git root so generate script can use relative paths
   cd "$GIT_ROOT" || exit 1
 
-  for OCP_VERSION in 16 17 18 19 20 21; do
+  for OCP_VERSION in 16 17 18 19 20 21 22; do
     # Get snapshot name from combined JSON
     local SNAPSHOT="${SNAPSHOTS[4-${OCP_VERSION}]}"
 
@@ -267,7 +267,7 @@ generate_yamls() {
   done
 
   echo ""
-  echo "✓ Created 6 FBC ${RELEASE_TYPE} Release YAMLs"
+  echo "✓ Created 7 FBC ${RELEASE_TYPE} Release YAMLs"
 }
 
 # ============================================================================
@@ -331,7 +331,7 @@ commit_changes() {
   local COMMIT_MSG
   COMMIT_MSG="Add FBC ${RELEASE_TYPE} releases for $VERSION
 
-Generated 6 Release CRs (OCP 4-16 through 4-21) with:
+Generated 7 Release CRs (OCP 4-16 through 4-22) with:
 - Verified GitHub catalog consistency
 - Verified FBC snapshots (push events, tests passed)
 - Verified component SHAs across all sources

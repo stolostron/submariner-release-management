@@ -40,8 +40,8 @@ readonly SECONDS_PER_DAY=86400
 readonly FBC_DATE_MATCH_WINDOW_DAYS=3
 readonly FBC_DATE_MATCH_WINDOW_SECS=$((FBC_DATE_MATCH_WINDOW_DAYS * SECONDS_PER_DAY))
 readonly BUNDLE_CLOCK_SKEW_SECS=300  # 5 minutes tolerance for clock skew
-readonly CURRENT_OCP_VERSION_COUNT=6
-readonly OCP_VERSIONS="16 17 18 19 20 21"
+readonly CURRENT_OCP_VERSION_COUNT=7
+readonly OCP_VERSIONS="16 17 18 19 20 21 22"
 
 # Submariner component repos (for branch checks)
 readonly SUBMARINER_REPOS="submariner-operator submariner lighthouse shipyard subctl admiral cloud-prepare"
@@ -299,7 +299,7 @@ find_fbc_yaml_by_date() {
 #   $1 - Current scope (space-separated OCP versions, e.g., "16 17 18 19 20")
 # Returns: space-separated list of missing versions compared to OCP_VERSIONS
 #
-# Example: If OCP_VERSIONS="16 17 18 19 20 21" and scope="16 17 18 19 20", returns "21"
+# Example: If OCP_VERSIONS="16 17 18 19 20 21 22" and scope="16 17 18 19 20 21", returns "22"
 get_missing_ocp_versions() {
   local scope=$1
   comm -13 <(echo "$scope" | tr ' ' '\n' | sort) <(echo "$OCP_VERSIONS" | tr ' ' '\n' | sort) | tr '\n' ' ' | xargs

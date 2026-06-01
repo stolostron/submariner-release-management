@@ -4,7 +4,7 @@
 
 ## Process
 
-Apply all FBC YAMLs to cluster (one per OCP version: 4-16 through 4-21).
+Apply all FBC YAMLs to cluster (one per OCP version: 4-16 through 4-22).
 
 **Repo:** `~/konflux/submariner-release-management`
 
