@@ -29,9 +29,21 @@ if [[ ! -f "$DATA_JSON" ]]; then
   exit 1
 fi
 
+FORCE="${FORCE:-false}"
+
 banner "Auto-Apply ALL Filtered Issues to Stage YAML"
 
 extract_and_validate_metadata "$DATA_JSON"
+
+# Check if YAML already has populated release notes (not just placeholder)
+EXISTING_ISSUES=$(grep -c "id: ACM-" "$STAGE_YAML" 2>/dev/null || echo 0)
+if [[ "$EXISTING_ISSUES" -gt 0 && "$FORCE" != "true" ]]; then
+  echo "⚠️  Stage YAML already has $EXISTING_ISSUES issues in release notes."
+  echo "    Re-running will overwrite existing notes (including review removals)."
+  echo "    To overwrite: FORCE=true $0 $*"
+  echo "    To review existing: git show"
+  exit 1
+fi
 
 # ============================================================================
 # Build releaseNotes Section
