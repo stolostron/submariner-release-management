@@ -46,8 +46,10 @@ jq '
 
 # Define invalid resolutions to exclude
 # NOTE: "Unresolved" is intentionally NOT excluded - release is what resolves issues,
-# and Jira hygiene is not great at moving issues to testing/QE status
-["Won\u0027t Do", "Won\u0027t Fix", "Duplicate", "Cannot Reproduce"] as $invalid_resolutions |
+# and Jira hygiene is not great at moving issues to testing/QE status.
+# "Not a Bug" means Product Security evaluated the CVE as not applicable - never include.
+# "Obsolete" is ambiguous but exclude from issues; CVE key preserved if other trackers are Done.
+["Won\u0027t Do", "Won\u0027t Fix", "Duplicate", "Cannot Reproduce", "Not a Bug", "Obsolete"] as $invalid_resolutions |
 
 # Filter non-CVE issues
 (
@@ -72,6 +74,8 @@ jq '
     select(
       # Exclude existing issues (in prod releases)
       (.issue_key | IN($existing[]) | not) and
+      # Exclude invalid resolutions (Not a Bug = CVE not applicable, Obsolete = stale)
+      ((.resolution // "Unresolved") | IN($invalid_resolutions[]) | not) and
       # For Z-streams: exclude issues resolved before last published release
       (if ($meta.last_published_date != "" and .resolved != "")
        then (.resolved >= $meta.last_published_date)
@@ -134,10 +138,53 @@ jq '
 echo "✓ Data prepared: $OUTPUT_JSON"
 
 # ============================================================================
+# Display Excluded Issues
+# ============================================================================
+
+# Show CVE issues that were filtered out (with reason)
+EXCLUDED_CVES=$(jq -r '
+  .existing_issues as $existing |
+  ["Won\u0027t Do", "Won\u0027t Fix", "Duplicate", "Cannot Reproduce", "Not a Bug", "Obsolete"] as $invalid |
+  .metadata as $meta |
+  [.cve_issues[] | select(
+    (.issue_key | IN($existing[])) or
+    ((.resolution // "Unresolved") | IN($invalid[])) or
+    (if ($meta.last_published_date != "" and .resolved != "")
+     then (.resolved < $meta.last_published_date) else false end)
+  ) | "\(.issue_key) (\(.resolution // "Unresolved")): \(.cve_key)"] | .[]
+' "$INPUT_JSON" 2>/dev/null)
+
+if [[ -n "$EXCLUDED_CVES" ]]; then
+  echo ""
+  echo "Excluded CVE issues:"
+  echo "$EXCLUDED_CVES" | while read -r line; do echo "  ✗ $line"; done
+fi
+
+# Show non-CVE issues that were filtered out
+EXCLUDED_NON_CVE=$(jq -r '
+  .existing_issues as $existing |
+  ["Won\u0027t Do", "Won\u0027t Fix", "Duplicate", "Cannot Reproduce", "Not a Bug", "Obsolete"] as $invalid |
+  .metadata as $meta |
+  [.non_cve_issues[] | select(
+    (.issue_key | IN($existing[])) or
+    (.resolution | IN($invalid[])) or
+    (if ($meta.last_published_date != "" and .resolved != "")
+     then (.resolved < $meta.last_published_date) else false end)
+  ) | "\(.issue_key) (\(.resolution))"] | .[]
+' "$INPUT_JSON" 2>/dev/null)
+
+if [[ -n "$EXCLUDED_NON_CVE" ]]; then
+  echo ""
+  echo "Excluded non-CVE issues:"
+  echo "$EXCLUDED_NON_CVE" | while read -r line; do echo "  ✗ $line"; done
+fi
+
+# ============================================================================
 # Display Summary
 # ============================================================================
 
 jq -r '
+"",
 "Summary:",
 "  CVE topics: \(.cve_topics | length)",
 "  Non-CVE issues: \(.statistics.non_cve_total)",

@@ -236,7 +236,7 @@ else
   for KEY in $CVE_KEYS; do
     [[ -z "$KEY" || "$KEY" == "null" ]] && continue
 
-    ISSUE_JSON=$(view_jira "$KEY" --fields "labels,resolutiondate,created") || {
+    ISSUE_JSON=$(view_jira "$KEY" --fields "labels,resolutiondate,created,resolution") || {
       echo "⚠️  $KEY: Failed to fetch details, skipping" >&2
       continue
     }
@@ -265,7 +265,8 @@ else
     [[ "$COMPONENT_MAPPED" == "EXCLUDE" || "$COMPONENT_MAPPED" == "UNKNOWN" ]] && continue
 
     RESOLVED=$(jq -r '(.fields.resolutiondate // "")[:10]' <<< "$ISSUE_JSON")
-    CVE_DATA_LINES+=("$(jq -n --arg ik "$KEY" --arg ck "$CVE_KEY" --arg cm "$COMPONENT_MAPPED" --arg rd "$RESOLVED" '{issue_key:$ik,cve_key:$ck,component_mapped:$cm,resolved:$rd}')")
+    RESOLUTION=$(jq -r '.fields.resolution.name // "Unresolved"' <<< "$ISSUE_JSON")
+    CVE_DATA_LINES+=("$(jq -n --arg ik "$KEY" --arg ck "$CVE_KEY" --arg cm "$COMPONENT_MAPPED" --arg rd "$RESOLVED" --arg res "$RESOLUTION" '{issue_key:$ik,cve_key:$ck,component_mapped:$cm,resolved:$rd,resolution:$res}')")
   done
 
   CVE_ISSUES_JSON=$(printf '%s\n' "${CVE_DATA_LINES[@]}" | jq -s '.')
