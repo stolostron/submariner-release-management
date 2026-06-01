@@ -11,7 +11,176 @@ spec:
   snapshot: submariner-0-21-20260531-172514-000
   data:
     releaseNotes:
-      type: RHBA  # Change to RHSA if adding CVEs, RHEA for enhancements
+      type: RHSA
       issues:
-        fixed: []  # Fill with Step 9 workflow
-      cves: []     # Fill with Step 9 workflow (required if type=RHSA)
+        fixed:
+          # CVE Issues (37):
+          - id: ACM-27238
+            source: issues.redhat.com
+          - id: ACM-28294
+            source: issues.redhat.com
+          - id: ACM-28295
+            source: issues.redhat.com
+          - id: ACM-28311
+            source: issues.redhat.com
+          - id: ACM-28313
+            source: issues.redhat.com
+          - id: ACM-28314
+            source: issues.redhat.com
+          - id: ACM-28315
+            source: issues.redhat.com
+          - id: ACM-28316
+            source: issues.redhat.com
+          - id: ACM-28329
+            source: issues.redhat.com
+          - id: ACM-28331
+            source: issues.redhat.com
+          - id: ACM-28333
+            source: issues.redhat.com
+          - id: ACM-28335
+            source: issues.redhat.com
+          - id: ACM-28337
+            source: issues.redhat.com
+          - id: ACM-28339
+            source: issues.redhat.com
+          - id: ACM-28342
+            source: issues.redhat.com
+          - id: ACM-29317
+            source: issues.redhat.com
+          - id: ACM-29511
+            source: issues.redhat.com
+          - id: ACM-29613
+            source: issues.redhat.com
+          - id: ACM-29614
+            source: issues.redhat.com
+          - id: ACM-29631
+            source: issues.redhat.com
+          - id: ACM-29632
+            source: issues.redhat.com
+          - id: ACM-29633
+            source: issues.redhat.com
+          - id: ACM-29634
+            source: issues.redhat.com
+          - id: ACM-29776
+            source: issues.redhat.com
+          - id: ACM-30134
+            source: issues.redhat.com
+          - id: ACM-30726
+            source: issues.redhat.com
+          - id: ACM-30727
+            source: issues.redhat.com
+          - id: ACM-30728
+            source: issues.redhat.com
+          - id: ACM-30729
+            source: issues.redhat.com
+          - id: ACM-31136
+            source: issues.redhat.com
+          - id: ACM-31831
+            source: issues.redhat.com
+          - id: ACM-31840
+            source: issues.redhat.com
+          - id: ACM-32575
+            source: issues.redhat.com
+          - id: ACM-32842
+            source: issues.redhat.com
+          - id: ACM-34108
+            source: issues.redhat.com
+          - id: ACM-34586
+            source: issues.redhat.com
+          - id: ACM-34589
+            source: issues.redhat.com
+          # Non-CVE Issues (7):
+          - id: ACM-30970
+            source: issues.redhat.com
+          - id: ACM-34578
+            source: issues.redhat.com
+      cves:
+        # CVE-2024-25621
+        - key: CVE-2024-25621
+          component: submariner-operator-0-21
+        # CVE-2025-61726 (7 issues)
+        - key: CVE-2025-61726
+          component: lighthouse-agent-0-21
+        - key: CVE-2025-61726
+          component: lighthouse-coredns-0-21
+        - key: CVE-2025-61726
+          component: subctl-0-21
+        - key: CVE-2025-61726
+          component: submariner-gateway-0-21
+        - key: CVE-2025-61726
+          component: submariner-globalnet-0-21
+        - key: CVE-2025-61726
+          component: submariner-operator-0-21
+        - key: CVE-2025-61726
+          component: submariner-route-agent-0-21
+        # CVE-2025-61728
+        - key: CVE-2025-61728
+          component: lighthouse-coredns-0-21
+        # CVE-2025-61729 (7 issues)
+        - key: CVE-2025-61729
+          component: lighthouse-agent-0-21
+        - key: CVE-2025-61729
+          component: lighthouse-coredns-0-21
+        - key: CVE-2025-61729
+          component: subctl-0-21
+        - key: CVE-2025-61729
+          component: submariner-gateway-0-21
+        - key: CVE-2025-61729
+          component: submariner-globalnet-0-21
+        - key: CVE-2025-61729
+          component: submariner-operator-0-21
+        - key: CVE-2025-61729
+          component: submariner-route-agent-0-21
+        # CVE-2025-68121
+        - key: CVE-2025-68121
+          component: subctl-0-21
+        # CVE-2025-68151
+        - key: CVE-2025-68151
+          component: lighthouse-coredns-0-21
+        # CVE-2026-21441 (7 issues)
+        - key: CVE-2026-21441
+          component: lighthouse-agent-0-21
+        - key: CVE-2026-21441
+          component: lighthouse-coredns-0-21
+        - key: CVE-2026-21441
+          component: nettest-0-21
+        - key: CVE-2026-21441
+          component: subctl-0-21
+        - key: CVE-2026-21441
+          component: submariner-gateway-0-21
+        - key: CVE-2026-21441
+          component: submariner-globalnet-0-21
+        - key: CVE-2026-21441
+          component: submariner-route-agent-0-21
+        # CVE-2026-25679
+        - key: CVE-2026-25679
+          component: subctl-0-21
+        # CVE-2026-26017 (2 issues)
+        - key: CVE-2026-26017
+          component: lighthouse-agent-0-21
+        - key: CVE-2026-26017
+          component: lighthouse-coredns-0-21
+        # CVE-2026-26018 (2 issues)
+        - key: CVE-2026-26018
+          component: lighthouse-agent-0-21
+        - key: CVE-2026-26018
+          component: lighthouse-coredns-0-21
+        # CVE-2026-32280
+        - key: CVE-2026-32280
+          component: subctl-0-21
+        # CVE-2026-32936 (2 issues)
+        - key: CVE-2026-32936
+          component: lighthouse-agent-0-21
+        - key: CVE-2026-32936
+          component: lighthouse-coredns-0-21
+        # CVE-2026-33186 (2 issues)
+        - key: CVE-2026-33186
+          component: lighthouse-coredns-0-21
+        - key: CVE-2026-33186
+          component: subctl-0-21
+        # CVE-2026-34986
+        - key: CVE-2026-34986
+          component: submariner-operator-0-21
+        # CVE-2026-35579
+        - key: CVE-2026-35579
+          component: lighthouse-coredns-0-21
