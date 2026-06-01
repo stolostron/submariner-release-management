@@ -37,9 +37,9 @@ Update OCP version ranges in bash loops. Replace `4-XX` with new version in:
 - `update-fbc-stage.md` - OCP version ranges in Done When
 
 ```bash
-# Example: Adding 4-21 to existing 4-16 through 4-20 range
-# Change: for VERSION in 16 17 18 19 20
-# To:     for VERSION in 16 17 18 19 20 21
+# Example: Adding 4-22 to existing 4-16 through 4-21 range
+# Change: for VERSION in 16 17 18 19 20 21
+# To:     for VERSION in 16 17 18 19 20 21 22
 ```
 
 ## Done When

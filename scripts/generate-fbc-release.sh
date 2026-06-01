@@ -29,12 +29,12 @@ SNAPSHOT="$2"
 RELEASE_TYPE="$3"
 RELEASE_DATE="$4"
 
-# Validate OCP version format (4-16 through 4-21)
-if [[ "$OCP_VERSION" =~ ^4-(1[6-9]|2[0-1])$ ]]; then
+# Validate OCP version format (4-16 through 4-22)
+if [[ "$OCP_VERSION" =~ ^4-(1[6-9]|2[0-2])$ ]]; then
   :  # OCP version is valid
 else
   echo "❌ ERROR: Invalid OCP version: $OCP_VERSION" >&2
-  echo "Expected: 4-16 through 4-21" >&2
+  echo "Expected: 4-16 through 4-22" >&2
   exit 1
 fi
 
