@@ -196,6 +196,15 @@ update_lockfiles() {
 
     chmod +x .rpm-lockfiles/update-lockfile.sh
 
+    # Fix UBI version mismatch: devel script may use ubi10 but release branches use RHEL 9 repos.
+    # Detect from repo files and patch the script to match.
+    if grep -q 'ubi9\|rhel9' .rpm-lockfiles/*/submariner-rhel-*.repo 2>/dev/null && \
+       grep -q 'ubi10' .rpm-lockfiles/update-lockfile.sh; then
+      sed -i 's|registry.access.redhat.com/ubi10/ubi:latest|registry.access.redhat.com/ubi9/ubi:latest|g' \
+        .rpm-lockfiles/update-lockfile.sh
+      echo "    (patched update-lockfile.sh: ubi10 → ubi9 to match branch repo files)"
+    fi
+
     set +e  # Disable errexit to capture exit code and cleanup
     local LOCKFILE_PATTERN
     if [[ "$COMPONENT_FILTER" =~ $COMPONENT_PATTERN ]]; then
