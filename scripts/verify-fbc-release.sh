@@ -188,7 +188,7 @@ FAILED=0
 FAILED_DETAILS=""
 
 for VERSION in 16 17 18 19 20 21 22; do
-  # Filter for this version, get latest (all in one jq query)
+  # Filter for this version, prefer push/incoming events (releasable), fall back to latest
   SNAPSHOT_DATA=""
   SNAPSHOT_DATA=$(echo "$ALL_SNAPSHOTS" | jq -r \
     ".items[] | select(.metadata.name | startswith(\"submariner-fbc-4-${VERSION}\")) |
@@ -198,7 +198,9 @@ for VERSION in 16 17 18 19 20 21 22; do
      tests: .metadata.annotations[\"test.appstudio.openshift.io/status\"],
      image: .spec.components[0].containerImage,
      timestamp: .metadata.creationTimestamp} |
-    @json" | jq -s 'sort_by(.timestamp) | last')
+    @json" | jq -s 'sort_by(.timestamp) |
+    (map(select(.event == "push" or .event == "incoming")) | last) //
+    last')
 
   if [ -z "$SNAPSHOT_DATA" ] || [ "$SNAPSHOT_DATA" = "null" ]; then
     echo "  4-${VERSION}: ✗ No snapshot found" >&2
@@ -310,10 +312,10 @@ for VERSION in 16 17 18 19 20 21 22; do
   TESTS_JSON="${TEST_STATUSES[4-${VERSION}]}"
   SNAPSHOT_BUNDLE_SHA=$(cat "$TMPDIR/extract-4-${VERSION}/bundle-sha.txt")
 
-  # Verify event type
-  if [ "$EVENT_TYPE" != "push" ]; then
-    echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push')" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (must be 'push', not PR)\n"
+  # Verify event type (push and incoming are both main-branch builds; reject PR/retest)
+  if [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ]; then
+    echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push' or 'incoming')" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (must be 'push' or 'incoming', not PR)\n"
     ((FAILED++))
     continue
   fi
@@ -345,7 +347,7 @@ for VERSION in 16 17 18 19 20 21 22; do
   fi
 
   # All checks passed
-  echo "  4-${VERSION}: ✓ $SNAPSHOT (push, tests passed, bundle SHA verified)" >&2
+  echo "  4-${VERSION}: ✓ $SNAPSHOT ($EVENT_TYPE, tests passed, bundle SHA verified)" >&2
   VERIFIED_SNAPSHOTS["4-${VERSION}"]="$SNAPSHOT"
 done
 
