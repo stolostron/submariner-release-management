@@ -70,7 +70,7 @@ fi
 SNAPSHOT_NAME=$(echo "$ALL_SNAPSHOTS" | jq -r "
   .items[]
   | select(.metadata.name | startswith(\"submariner-${VERSION_MAJOR_MINOR_DASH}-\"))
-  | select(.metadata.labels.\"pac.test.appstudio.openshift.io/event-type\" == \"push\")
+  | select(.metadata.labels.\"pac.test.appstudio.openshift.io/event-type\" == \"push\" or .metadata.labels.\"pac.test.appstudio.openshift.io/event-type\" == \"incoming\")
   | {name: .metadata.name, created: .metadata.creationTimestamp}
 " | jq -rs 'sort_by(.created) | reverse | .[0].name' 2>/dev/null)
 
@@ -79,7 +79,7 @@ if [ -z "$SNAPSHOT_NAME" ] || [ "$SNAPSHOT_NAME" = "null" ]; then
   echo "" >&2
   echo "Possible causes:" >&2
   echo "- Step 7 not complete (bundle not built)" >&2
-  echo "- Latest snapshot is from PR (not push event)" >&2
+  echo "- Latest snapshot is from PR (not push/incoming event)" >&2
   echo "- Check: oc get snapshots -n submariner-tenant | grep submariner-${VERSION_MAJOR_MINOR_DASH}" >&2
   exit 1
 fi

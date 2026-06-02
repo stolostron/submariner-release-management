@@ -63,9 +63,9 @@ for VERSION in 16 17 18 19 20 21 22; do
     ((FAILED++)); continue
   fi
 
-  # Verify push event (PR snapshots fail EC quay_expiration policy)
+  # Verify event type (push/incoming are main-branch builds; reject PR/retest)
   EVENT_TYPE=$(oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotations.pac\.test\.appstudio\.openshift\.io/event-type}')
-  [ "$EVENT_TYPE" != "push" ] && { echo "4-$VERSION: ✗ Event '$EVENT_TYPE' (must be 'push')"; ((FAILED++)); continue; }
+  [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ] && { echo "4-$VERSION: ✗ Event '$EVENT_TYPE' (must be 'push' or 'incoming')"; ((FAILED++)); continue; }
 
   # Verify all tests passed
   TESTS=$(oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}')
