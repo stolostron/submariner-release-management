@@ -2,12 +2,12 @@
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
 metadata:
-  name: submariner-0-21-3-stage-20260531-01
+  name: submariner-0-21-3-prod-20260608-01
   namespace: submariner-tenant
   labels:
     release.appstudio.openshift.io/author: 'dfarrell07'
 spec:
-  releasePlan: submariner-release-plan-stage-0-21
+  releasePlan: submariner-release-plan-prod-0-21
   snapshot: submariner-0-21-20260531-172514-000
   data:
     releaseNotes:
