@@ -118,9 +118,10 @@ Keep if ANY of the following:
 - GitHub links found in Jira comments (often the best evidence)
 - Commits or PRs found in submariner-io repos that address the
   specific problem described in the issue (not just keyword overlap)
-- PRs found in stolostron/rhacm-docs (for Documentation issues) —
-  rhacm-docs is the official repo for Submariner user documentation
-  and PRs there are sufficient evidence even without upstream code
+- **Merged** PRs found in stolostron/rhacm-docs (for Documentation
+  issues) targeting a branch for this release version (e.g.,
+  `2.14_stage` for Submariner 0.21) — open/unmerged PRs or PRs
+  targeting a different version branch are NOT evidence of shipped work
 - You are uncertain AND some relevant evidence exists — err on
   inclusion
 

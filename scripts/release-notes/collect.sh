@@ -326,16 +326,17 @@ else
       continue
     fi
 
-    # Skip untouched issues: status New/Backlog + Unresolved + no issue links + no PRs.
+    # Skip untouched issues: status New/Backlog + Unresolved + no issue links + no merged PRs.
     # Only filter truly untouched — "In Progress" or "Testing" means active work
     # even if the fix isn't linked to this Jira key.
+    # Require MERGED PRs (not just open) — an open PR means work in progress, not shipped.
     RESOLUTION=$(jq -r '.fields.resolution.name // "Unresolved"' <<< "$ISSUE_JSON")
     STATUS=$(jq -r '.fields.status.name' <<< "$ISSUE_JSON")
     LINK_COUNT=$(jq '[.fields.issuelinks[]? | select(.type.name != "Cloners")] | length' <<< "$ISSUE_JSON")
     if [[ "$RESOLUTION" == "Unresolved" && "$LINK_COUNT" -eq 0 ]] && echo "$STATUS" | grep -qiE "^(New|Backlog|To Do)$"; then
-      if ! gh search prs "$KEY" --owner submariner-io --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1 && \
-         ! gh search prs "$KEY" --owner stolostron --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1; then
-        echo "  $KEY: Skipping ($STATUS, unresolved, no links, no PRs)"
+      if ! gh search prs "$KEY" --owner submariner-io --state merged --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1 && \
+         ! gh search prs "$KEY" --owner stolostron --state merged --json url --limit 1 2>/dev/null | jq -e 'length > 0' >/dev/null 2>&1; then
+        echo "  $KEY: Skipping ($STATUS, unresolved, no links, no merged PRs)"
         continue
       fi
     fi
