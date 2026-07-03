@@ -44,3 +44,17 @@ Ensure all Konflux builds pass Enterprise Contract validation before cutting rel
   oc get snapshot <snapshot-name> -n submariner-tenant -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}' | jq '.[] | {scenario, status}'
   # Should show: "status": "TestPassed" for standard and operator scenarios
   ```
+
+### Retrigger Failed Push Builds
+
+If a push build fails due to an infra flake, retrigger with a `/retest` comment on the HEAD commit:
+
+```bash
+# Component repos
+gh api repos/submariner-io/<repo>/commits/release-0.X --jq '.sha' | \
+  xargs -I{} gh api repos/submariner-io/<repo>/commits/{}/comments -f body="/retest"
+
+# FBC repo
+gh api repos/stolostron/submariner-operator-fbc/commits/main --jq '.sha' | \
+  xargs -I{} gh api repos/stolostron/submariner-operator-fbc/commits/{}/comments -f body="/retest"
+```

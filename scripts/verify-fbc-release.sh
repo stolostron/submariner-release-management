@@ -200,7 +200,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
      image: .spec.components[0].containerImage,
      timestamp: .metadata.creationTimestamp} |
     @json" | jq -s 'sort_by(.timestamp) |
-    (map(select(.event == "push" or .event == "incoming")) | last) //
+    (map(select(.event == "push" or .event == "incoming" or .event == "retest-all-comment")) | last) //
     last')
 
   if [ -z "$SNAPSHOT_DATA" ] || [ "$SNAPSHOT_DATA" = "null" ]; then
@@ -315,10 +315,10 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   TESTS_JSON="${TEST_STATUSES[4-${VERSION}]}"
   SNAPSHOT_BUNDLE_SHA=$(cat "$TMPDIR/extract-4-${VERSION}/bundle-sha.txt")
 
-  # Verify event type (push and incoming are both main-branch builds; reject PR/retest)
-  if [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ]; then
-    echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push' or 'incoming')" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (must be 'push' or 'incoming', not PR)\n"
+  # Verify event type (push, incoming, and retest-all-comment are main-branch builds; reject PR)
+  if [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ] && [ "$EVENT_TYPE" != "retest-all-comment" ]; then
+    echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push', 'incoming', or 'retest-all-comment')" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (not a main-branch build)\n"
     FAILED=$((FAILED + 1))
     continue
   fi

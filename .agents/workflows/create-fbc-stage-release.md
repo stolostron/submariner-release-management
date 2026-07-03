@@ -63,9 +63,9 @@ for VERSION in 16 17 18 19 20 21 22; do
     ((FAILED++)); continue
   fi
 
-  # Verify event type (push/incoming are main-branch builds; reject PR/retest)
+  # Verify event type (push/incoming/retest-all-comment are main-branch builds; reject PR)
   EVENT_TYPE=$(oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotations.pac\.test\.appstudio\.openshift\.io/event-type}')
-  [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ] && { echo "4-$VERSION: ✗ Event '$EVENT_TYPE' (must be 'push' or 'incoming')"; ((FAILED++)); continue; }
+  [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ] && [ "$EVENT_TYPE" != "retest-all-comment" ] && { echo "4-$VERSION: ✗ Event '$EVENT_TYPE' (not a main-branch build)"; ((FAILED++)); continue; }
 
   # Verify all tests passed
   TESTS=$(oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}')
