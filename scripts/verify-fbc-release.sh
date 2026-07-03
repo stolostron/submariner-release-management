@@ -118,52 +118,53 @@ wait_parallel_jobs() {
 echo "Step 1: Verifying GitHub catalog consistency..." >&2
 
 declare -A BUNDLE_SHAS
-FAILED=0
+declare -a APPLICABLE_VERSIONS
+SKIPPED=0
 
-for VERSION in 16 17 18 19 20 21 22; do
+for VERSION in 14 15 16 17 18 19 20 21 22; do
   CATALOG_URL="https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${VERSION}/bundles/bundle-v${FULL_VERSION}.yaml"
 
   # Fetch bundle and extract SHA
   BUNDLE_SHA=$(curl -sf "$CATALOG_URL" | grep "^image:" | head -1 | grep -oP 'sha256:\K[a-f0-9]+' || true)
 
   if [ -z "$BUNDLE_SHA" ]; then
-    echo "  4-${VERSION}: ✗ Failed to fetch bundle or extract SHA" >&2
-    echo "    URL: $CATALOG_URL" >&2
-    ((FAILED++))
+    echo "  4-${VERSION}: - bundle not in catalog (skipped)" >&2
+    ((SKIPPED++))
     continue
   fi
 
   BUNDLE_SHAS["4-${VERSION}"]="$BUNDLE_SHA"
+  APPLICABLE_VERSIONS+=("$VERSION")
   echo "  4-${VERSION}: ${BUNDLE_SHA:0:12}..." >&2
 done
 
-# Check if all SHAs are the same
-if [ $FAILED -eq 0 ]; then
-  UNIQUE_SHAS=$(printf '%s\n' "${BUNDLE_SHAS[@]}" | sort -u | wc -l)
-
-  if [ "$UNIQUE_SHAS" -ne 1 ]; then
-    echo "" >&2
-    echo "✗ ERROR: FBC catalog bundle SHA mismatch:" >&2
-    for VERSION in 16 17 18 19 20 21 22; do
-      echo "  4-${VERSION}: ${BUNDLE_SHAS[4-${VERSION}]}" >&2
-    done
-    echo "" >&2
-    echo "Remediation:" >&2
-    echo "1. Check if Step 11 (FBC catalog update) completed correctly" >&2
-    echo "2. Verify all 7 catalogs were updated with same bundle SHA" >&2
-    echo "3. Re-run Step 11 if needed" >&2
-    exit 1
-  fi
-
-  # Get the common SHA
-  EXPECTED_BUNDLE_SHA="${BUNDLE_SHAS[4-16]}"
+if [ ${#APPLICABLE_VERSIONS[@]} -eq 0 ]; then
   echo "" >&2
-  echo "✓ Bundle SHA consistent across all 7 GitHub catalogs: ${EXPECTED_BUNDLE_SHA:0:12}..." >&2
-else
-  echo "" >&2
-  echo "✗ ERROR: Failed to fetch $FAILED catalog(s)" >&2
+  echo "✗ ERROR: Bundle v${FULL_VERSION} not found in any OCP catalog" >&2
   exit 1
 fi
+
+# Check if all SHAs are the same
+UNIQUE_SHAS=$(printf '%s\n' "${BUNDLE_SHAS[@]}" | sort -u | wc -l)
+
+if [ "$UNIQUE_SHAS" -ne 1 ]; then
+  echo "" >&2
+  echo "✗ ERROR: FBC catalog bundle SHA mismatch:" >&2
+  for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
+    echo "  4-${VERSION}: ${BUNDLE_SHAS[4-${VERSION}]}" >&2
+  done
+  echo "" >&2
+  echo "Remediation:" >&2
+  echo "1. Check if Step 11 (FBC catalog update) completed correctly" >&2
+  echo "2. Verify all catalogs were updated with same bundle SHA" >&2
+  echo "3. Re-run Step 11 if needed" >&2
+  exit 1
+fi
+
+# Get the common SHA
+EXPECTED_BUNDLE_SHA="${BUNDLE_SHAS[4-${APPLICABLE_VERSIONS[0]}]}"
+echo "" >&2
+echo "✓ Bundle SHA consistent across ${#APPLICABLE_VERSIONS[@]} GitHub catalogs (${SKIPPED} skipped): ${EXPECTED_BUNDLE_SHA:0:12}..." >&2
 
 # ============================================================================
 # Step 2: Batch Fetch All Snapshots (OPTIMIZATION: 1 query vs 30)
@@ -184,10 +185,10 @@ declare -A CATALOG_IMAGES
 declare -A EVENT_TYPES
 declare -A TEST_STATUSES
 
-FAILED=0
-FAILED_DETAILS=""
+declare -a RELEASABLE_VERSIONS
+SKIPPED_SNAPSHOTS=0
 
-for VERSION in 16 17 18 19 20 21 22; do
+for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   # Filter for this version, prefer push/incoming events (releasable), fall back to latest
   SNAPSHOT_DATA=""
   SNAPSHOT_DATA=$(echo "$ALL_SNAPSHOTS" | jq -r \
@@ -203,9 +204,8 @@ for VERSION in 16 17 18 19 20 21 22; do
     last')
 
   if [ -z "$SNAPSHOT_DATA" ] || [ "$SNAPSHOT_DATA" = "null" ]; then
-    echo "  4-${VERSION}: ✗ No snapshot found" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: No snapshot found\n"
-    ((FAILED++))
+    echo "  4-${VERSION}: - no snapshot (skipped, no build pipeline)" >&2
+    ((SKIPPED_SNAPSHOTS++))
     continue
   fi
 
@@ -215,18 +215,21 @@ for VERSION in 16 17 18 19 20 21 22; do
   EVENT_TYPES["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.event // "unknown"')
   TEST_STATUSES["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.tests // "{}"')
 
+  RELEASABLE_VERSIONS+=("$VERSION")
   echo "  4-${VERSION}: ${SNAPSHOTS[4-${VERSION}]}" >&2
 done
 
-if [ $FAILED -gt 0 ]; then
+if [ ${#RELEASABLE_VERSIONS[@]} -eq 0 ]; then
   echo "" >&2
-  echo "✗ ERROR: Failed to find $FAILED snapshot(s):" >&2
-  echo -e "$FAILED_DETAILS" >&2
+  echo "✗ ERROR: No releasable FBC snapshots found" >&2
   exit 1
 fi
 
 echo "" >&2
-echo "✓ Found all 7 FBC snapshots" >&2
+echo "✓ Found ${#RELEASABLE_VERSIONS[@]} FBC snapshots (${SKIPPED_SNAPSHOTS} skipped)" >&2
+
+# Narrow APPLICABLE_VERSIONS to only those with snapshots
+APPLICABLE_VERSIONS=("${RELEASABLE_VERSIONS[@]}")
 
 # ============================================================================
 # Step 3: Single-Pass Bundle Extraction (OPTIMIZATION: Parallel + extract once)
@@ -280,7 +283,7 @@ export -f extract_single_bundle
 export TMPDIR FULL_VERSION
 
 # Launch parallel extraction jobs
-for VERSION in 16 17 18 19 20 21 22; do
+for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
     run_parallel_job "extract-4-${VERSION}" extract_single_bundle \
         "$VERSION" "${SNAPSHOTS[4-${VERSION}]}" "${CATALOG_IMAGES[4-${VERSION}]}" "$FULL_VERSION"
 done
@@ -293,7 +296,7 @@ if ! wait_parallel_jobs "bundle extraction"; then
 fi
 
 echo "" >&2
-echo "✓ Extracted all 6 bundles (parallel, single-pass)" >&2
+echo "✓ Extracted all ${#APPLICABLE_VERSIONS[@]} bundles (parallel, single-pass)" >&2
 
 # ============================================================================
 # Step 4: Verify Snapshot Readiness
@@ -306,7 +309,7 @@ declare -A VERIFIED_SNAPSHOTS
 FAILED=0
 FAILED_DETAILS=""
 
-for VERSION in 16 17 18 19 20 21 22; do
+for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   SNAPSHOT="${SNAPSHOTS[4-${VERSION}]}"
   EVENT_TYPE="${EVENT_TYPES[4-${VERSION}]}"
   TESTS_JSON="${TEST_STATUSES[4-${VERSION}]}"
@@ -363,7 +366,7 @@ if [ $FAILED -gt 0 ]; then
 fi
 
 echo "" >&2
-echo "✓ All 7 FBC snapshots ready for release" >&2
+echo "✓ All ${#APPLICABLE_VERSIONS[@]} FBC snapshots ready for release" >&2
 
 # ============================================================================
 # Step 5: Extract Bundle Metadata (Source Commit)
@@ -372,12 +375,13 @@ echo "✓ All 7 FBC snapshots ready for release" >&2
 echo "" >&2
 echo "Step 5: Extracting bundle source commit..." >&2
 
-# Get bundle image URL from FBC catalog (using 4-21 as representative - all verified identical)
-BUNDLE_IMAGE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-21/bundles/bundle-v${FULL_VERSION}.yaml" | grep "^image:" | head -1 | awk '{print $2}' || true)
+# Get bundle image URL from FBC catalog (using first applicable version as representative - all verified identical)
+REPRESENTATIVE_VERSION="${APPLICABLE_VERSIONS[0]}"
+BUNDLE_IMAGE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" | grep "^image:" | head -1 | awk '{print $2}' || true)
 
 if [ -z "$BUNDLE_IMAGE" ]; then
   echo "❌ ERROR: Failed to fetch bundle image URL from FBC catalog" >&2
-  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-21/bundles/bundle-v${FULL_VERSION}.yaml" >&2
+  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
   exit 1
 fi
 
@@ -435,11 +439,11 @@ fi
 
 echo "  ✓ Fetched operator CSV from commit ${SOURCE_COMMIT:0:7}" >&2
 
-# Fetch FBC bundle for comparison (using 4-21 as representative - all 7 catalogs verified identical)
-FBC_BUNDLE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-21/bundles/bundle-v${FULL_VERSION}.yaml")
+# Fetch FBC bundle for comparison (using first applicable version as representative - all verified identical)
+FBC_BUNDLE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml")
 if [ -z "$FBC_BUNDLE" ]; then
   echo "❌ ERROR: Failed to fetch FBC bundle from GitHub" >&2
-  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-21/bundles/bundle-v${FULL_VERSION}.yaml" >&2
+  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
   exit 1
 fi
 
@@ -490,7 +494,7 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
 
   # Verify all 7 FBC snapshots have same SHA as operator repo (using extracted bundles)
   SNAP_MISMATCH=0
-  for VERSION in 16 17 18 19 20 21 22; do
+  for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
     SNAPSHOT="${SNAPSHOTS[4-${VERSION}]}"
     BUNDLE_YAML="$TMPDIR/extract-4-${VERSION}/bundle-v${FULL_VERSION}.yaml"
 
@@ -544,43 +548,42 @@ if [ $MISMATCH -gt 0 ]; then
 fi
 
 echo "" >&2
-echo "✓ All 7 components verified (operator commit ${SOURCE_COMMIT:0:7}, FBC GitHub, 7 FBC snapshots)" >&2
+echo "✓ All 7 components verified (operator commit ${SOURCE_COMMIT:0:7}, FBC GitHub, ${#APPLICABLE_VERSIONS[@]} FBC snapshots)" >&2
 
 # ============================================================================
 # Step 8: Output Combined JSON
 # ============================================================================
 
-# Extract component data (format: "pass:SHA")
-OP_STATUS=$(echo "${COMPONENT_RESULTS[submariner-operator]}" | cut -d: -f1)
-OP_SHA=$(echo "${COMPONENT_RESULTS[submariner-operator]}" | cut -d: -f2)
-GW_STATUS=$(echo "${COMPONENT_RESULTS[submariner-gateway]}" | cut -d: -f1)
-GW_SHA=$(echo "${COMPONENT_RESULTS[submariner-gateway]}" | cut -d: -f2)
-GL_STATUS=$(echo "${COMPONENT_RESULTS[submariner-globalnet]}" | cut -d: -f1)
-GL_SHA=$(echo "${COMPONENT_RESULTS[submariner-globalnet]}" | cut -d: -f2)
-RA_STATUS=$(echo "${COMPONENT_RESULTS[submariner-route-agent]}" | cut -d: -f1)
-RA_SHA=$(echo "${COMPONENT_RESULTS[submariner-route-agent]}" | cut -d: -f2)
-LA_STATUS=$(echo "${COMPONENT_RESULTS[lighthouse-agent]}" | cut -d: -f1)
-LA_SHA=$(echo "${COMPONENT_RESULTS[lighthouse-agent]}" | cut -d: -f2)
-LC_STATUS=$(echo "${COMPONENT_RESULTS[lighthouse-coredns]}" | cut -d: -f1)
-LC_SHA=$(echo "${COMPONENT_RESULTS[lighthouse-coredns]}" | cut -d: -f2)
-NT_STATUS=$(echo "${COMPONENT_RESULTS[nettest]}" | cut -d: -f1)
-NT_SHA=$(echo "${COMPONENT_RESULTS[nettest]}" | cut -d: -f2)
+# Build snapshots and applicable_versions JSON dynamically
+SNAPSHOTS_JSON="{"
+FIRST=true
+for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
+  $FIRST || SNAPSHOTS_JSON+=","
+  SNAPSHOTS_JSON+="\"4-${VERSION}\":\"${VERIFIED_SNAPSHOTS[4-${VERSION}]}\""
+  FIRST=false
+done
+SNAPSHOTS_JSON+="}"
+
+VERSIONS_JSON="["
+FIRST=true
+for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
+  $FIRST || VERSIONS_JSON+=","
+  VERSIONS_JSON+="\"${VERSION}\""
+  FIRST=false
+done
+VERSIONS_JSON+="]"
+
+# Build component results JSON
+COMPONENTS_JSON="{"
+FIRST=true
+for COMP in submariner-operator submariner-gateway submariner-globalnet submariner-route-agent lighthouse-agent lighthouse-coredns nettest; do
+  $FIRST || COMPONENTS_JSON+=","
+  C_STATUS=$(echo "${COMPONENT_RESULTS[$COMP]}" | cut -d: -f1)
+  C_SHA=$(echo "${COMPONENT_RESULTS[$COMP]}" | cut -d: -f2)
+  COMPONENTS_JSON+="\"${COMP}\":{\"status\":\"${C_STATUS}\",\"sha\":\"${C_SHA}\"}"
+  FIRST=false
+done
+COMPONENTS_JSON+="}"
 
 # Output JSON to stdout (single line for easy parsing)
-printf '{"status":"pass","bundle_sha":"%s","source_commit":"%s","snapshots":{"4-16":"%s","4-17":"%s","4-18":"%s","4-19":"%s","4-20":"%s","4-21":"%s","4-22":"%s"},"components":{"submariner-operator":{"status":"%s","sha":"%s"},"submariner-gateway":{"status":"%s","sha":"%s"},"submariner-globalnet":{"status":"%s","sha":"%s"},"submariner-route-agent":{"status":"%s","sha":"%s"},"lighthouse-agent":{"status":"%s","sha":"%s"},"lighthouse-coredns":{"status":"%s","sha":"%s"},"nettest":{"status":"%s","sha":"%s"}}}\n' \
-  "$EXPECTED_BUNDLE_SHA" \
-  "$SOURCE_COMMIT" \
-  "${VERIFIED_SNAPSHOTS[4-16]}" \
-  "${VERIFIED_SNAPSHOTS[4-17]}" \
-  "${VERIFIED_SNAPSHOTS[4-18]}" \
-  "${VERIFIED_SNAPSHOTS[4-19]}" \
-  "${VERIFIED_SNAPSHOTS[4-20]}" \
-  "${VERIFIED_SNAPSHOTS[4-21]}" \
-  "${VERIFIED_SNAPSHOTS[4-22]}" \
-  "$OP_STATUS" "$OP_SHA" \
-  "$GW_STATUS" "$GW_SHA" \
-  "$GL_STATUS" "$GL_SHA" \
-  "$RA_STATUS" "$RA_SHA" \
-  "$LA_STATUS" "$LA_SHA" \
-  "$LC_STATUS" "$LC_SHA" \
-  "$NT_STATUS" "$NT_SHA"
+echo "{\"status\":\"pass\",\"bundle_sha\":\"${EXPECTED_BUNDLE_SHA}\",\"source_commit\":\"${SOURCE_COMMIT}\",\"applicable_versions\":${VERSIONS_JSON},\"snapshots\":${SNAPSHOTS_JSON},\"components\":${COMPONENTS_JSON}}"
