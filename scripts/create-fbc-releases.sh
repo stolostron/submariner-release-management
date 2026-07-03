@@ -219,8 +219,10 @@ verify_release() {
     exit 1
   fi
 
-  # Extract snapshot names for each OCP version
-  for VERSION_NUM in 16 17 18 19 20 21 22; do
+  # Extract applicable OCP versions and snapshot names dynamically
+  local APPLICABLE
+  APPLICABLE=$(echo "$COMBINED_RESULT" | jq -r '.applicable_versions[]')
+  for VERSION_NUM in $APPLICABLE; do
     local SNAPSHOT
     SNAPSHOT=$(echo "$COMBINED_RESULT" | jq -r ".snapshots[\"4-${VERSION_NUM}\"]")
     SNAPSHOTS["4-${VERSION_NUM}"]="$SNAPSHOT"
@@ -246,28 +248,34 @@ generate_yamls() {
   # Change to git root so generate script can use relative paths
   cd "$GIT_ROOT" || exit 1
 
-  for OCP_VERSION in 16 17 18 19 20 21 22; do
-    # Get snapshot name from combined JSON
-    local SNAPSHOT="${SNAPSHOTS[4-${OCP_VERSION}]}"
+  local COUNT=0
+  for VERSION_NUM in $(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sed 's/^4-//' | sort -n); do
+    local OCP_VERSION="4-${VERSION_NUM}"
+    local SNAPSHOT="${SNAPSHOTS[$OCP_VERSION]}"
 
-    echo "Generating 4-${OCP_VERSION} release..."
+    if [ -z "$SNAPSHOT" ] || [ "$SNAPSHOT" = "null" ]; then
+      continue
+    fi
+
+    echo "Generating ${OCP_VERSION} release..."
 
     # Call generate-fbc-release.sh using absolute path
     local YAML_FILE
-    YAML_FILE=$("$SCRIPTS_DIR/generate-fbc-release.sh" "4-${OCP_VERSION}" "$SNAPSHOT" "$RELEASE_TYPE" "$RELEASE_DATE")
+    YAML_FILE=$("$SCRIPTS_DIR/generate-fbc-release.sh" "$OCP_VERSION" "$SNAPSHOT" "$RELEASE_TYPE" "$RELEASE_DATE")
     local GENERATE_EXIT=$?
 
     if [ $GENERATE_EXIT -ne 0 ]; then
-      echo "❌ Failed to generate YAML for 4-${OCP_VERSION}"
+      echo "❌ Failed to generate YAML for ${OCP_VERSION}"
       exit 1
     fi
 
     echo "  ✓ Created: $YAML_FILE"
     CREATED_FILES+=("$YAML_FILE")
+    ((COUNT++))
   done
 
   echo ""
-  echo "✓ Created 7 FBC ${RELEASE_TYPE} Release YAMLs"
+  echo "✓ Created $COUNT FBC ${RELEASE_TYPE} Release YAMLs"
 }
 
 # ============================================================================
@@ -329,9 +337,11 @@ commit_changes() {
 
   # Create commit message
   local COMMIT_MSG
+  local OCP_LIST
+  OCP_LIST=$(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sort -t- -k2 -n | xargs)
   COMMIT_MSG="Add FBC ${RELEASE_TYPE} releases for $VERSION
 
-Generated 7 Release CRs (OCP 4-16 through 4-22) with:
+Generated ${#CREATED_FILES[@]} Release CRs (${OCP_LIST}) with:
 - Verified GitHub catalog consistency
 - Verified FBC snapshots (push events, tests passed)
 - Verified component SHAs across all sources
