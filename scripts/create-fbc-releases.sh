@@ -271,7 +271,7 @@ generate_yamls() {
 
     echo "  ✓ Created: $YAML_FILE"
     CREATED_FILES+=("$YAML_FILE")
-    ((COUNT++))
+    COUNT=$((COUNT + 1))
   done
 
   echo ""
@@ -298,7 +298,7 @@ validate_yamls() {
       echo "  ✓ Validation passed"
     else
       echo "  ✗ Validation failed"
-      ((VALIDATION_FAILED++))
+      VALIDATION_FAILED=$((VALIDATION_FAILED + 1))
     fi
   done
 

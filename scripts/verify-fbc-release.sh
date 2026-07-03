@@ -93,7 +93,7 @@ wait_parallel_jobs() {
         [ -f "$exit_file" ] || continue
         exit_code=$(cat "$exit_file")
         if [ "$exit_code" -ne 0 ]; then
-            ((failed_count++))
+            failed_count=$((failed_count + 1))
             job_name=$(basename "$exit_file" .exit)
             stderr=$(cat "${exit_file%.exit}.stderr" 2>/dev/null || echo "")
             error_msg="${error_msg}  ${job_name}: ${stderr}\n"
@@ -129,7 +129,7 @@ for VERSION in 14 15 16 17 18 19 20 21 22; do
 
   if [ -z "$BUNDLE_SHA" ]; then
     echo "  4-${VERSION}: - bundle not in catalog (skipped)" >&2
-    ((SKIPPED++))
+    SKIPPED=$((SKIPPED + 1))
     continue
   fi
 
@@ -205,7 +205,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
 
   if [ -z "$SNAPSHOT_DATA" ] || [ "$SNAPSHOT_DATA" = "null" ]; then
     echo "  4-${VERSION}: - no snapshot (skipped, no build pipeline)" >&2
-    ((SKIPPED_SNAPSHOTS++))
+    SKIPPED_SNAPSHOTS=$((SKIPPED_SNAPSHOTS + 1))
     continue
   fi
 
@@ -319,7 +319,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   if [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ]; then
     echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push' or 'incoming')" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (must be 'push' or 'incoming', not PR)\n"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
     continue
   fi
 
@@ -327,7 +327,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   if [ -z "$TESTS_JSON" ] || [ "$TESTS_JSON" = "{}" ]; then
     echo "  4-${VERSION}: ✗ No test status" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: No test status\n"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
     continue
   fi
 
@@ -337,7 +337,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   if [ -n "$FAILED_TESTS" ]; then
     echo "  4-${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Tests failed: $FAILED_TESTS\n"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
     continue
   fi
 
@@ -345,7 +345,7 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   if [ "$SNAPSHOT_BUNDLE_SHA" != "$EXPECTED_BUNDLE_SHA" ]; then
     echo "  4-${VERSION}: ✗ Bundle SHA mismatch (snapshot: ${SNAPSHOT_BUNDLE_SHA:0:12}, expected: ${EXPECTED_BUNDLE_SHA:0:12})" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Bundle SHA mismatch\n"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
     continue
   fi
 
@@ -488,7 +488,7 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
     echo "    Operator CSV (commit ${SOURCE_COMMIT:0:7}): ${OP_SHA:-NOT FOUND}" >&2
     echo "    FBC bundle (v${FULL_VERSION}): ${FBC_SHA:-NOT FOUND}" >&2
     COMPONENT_RESULTS[$COMP]="fail"
-    ((MISMATCH++))
+    MISMATCH=$((MISMATCH + 1))
     continue
   fi
 
@@ -507,16 +507,16 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
 
     if [ -z "$SNAP_SHA" ]; then
       echo "  $COMP: ✗ Failed to extract SHA from snapshot $SNAPSHOT" >&2
-      ((SNAP_MISMATCH++))
+      SNAP_MISMATCH=$((SNAP_MISMATCH + 1))
     elif [ "$SNAP_SHA" != "$OP_SHA" ]; then
       echo "  $COMP: ✗ Snapshot $SNAPSHOT SHA mismatch (${SNAP_SHA:0:12} vs ${OP_SHA:0:12})" >&2
-      ((SNAP_MISMATCH++))
+      SNAP_MISMATCH=$((SNAP_MISMATCH + 1))
     fi
   done
 
   if [ $SNAP_MISMATCH -gt 0 ]; then
     COMPONENT_RESULTS[$COMP]="fail"
-    ((MISMATCH++))
+    MISMATCH=$((MISMATCH + 1))
     continue
   fi
 
@@ -526,7 +526,7 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
     echo "    Operator repo:  ${OP_SHA:0:12}" >&2
     echo "    FBC GitHub:     ${FBC_SHA:0:12}" >&2
     COMPONENT_RESULTS[$COMP]="fail"
-    ((MISMATCH++))
+    MISMATCH=$((MISMATCH + 1))
     continue
   fi
 
