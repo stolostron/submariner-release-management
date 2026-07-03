@@ -73,8 +73,9 @@ echo "Testing acli authentication..."
 if ! acli jira workitem search --jql 'project=ACM' --limit 1 --json </dev/null >/dev/null 2>&1; then
   echo "❌ ERROR: acli authentication failed" >&2
   echo "Setup steps:" >&2
-  echo "  1. acli jira auth login --web" >&2
-  echo "  2. acli jira auth status" >&2
+  echo "  1. Create API token: https://id.atlassian.com/manage-profile/security/api-tokens" >&2
+  echo "  2. acli jira auth login --token" >&2
+  echo "  3. acli jira auth status" >&2
   exit 1
 fi
 echo "✓ Authenticated to redhat.atlassian.net"

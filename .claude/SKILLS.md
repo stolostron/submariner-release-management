@@ -182,7 +182,7 @@ make add-release-notes VERSION=0.22.1 STAGE_YAML=path/to/file.yaml
 
 **Requirements:**
 
-- acli authenticated: `acli jira auth login --web`
+- acli authenticated: `acli jira auth login --token` (create token at <https://id.atlassian.com/manage-profile/security/api-tokens>)
 - Step 8 complete (stage YAML exists)
 
 **What it does:**
