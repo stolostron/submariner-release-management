@@ -66,7 +66,8 @@ make get-fbc-urls VERSION=0.24.0 PROD_INDEX=true           # Prod operator index
 make verify-cve-fixes STAGE_YAML=releases/0.22/stage/submariner-0-22-1-stage-20260319-01.yaml
 
 # Setup acli (one-time)
-acli jira auth login --web
+# Create API token at: https://id.atlassian.com/manage-profile/security/api-tokens
+acli jira auth login --token
 acli jira auth status
 ```
 

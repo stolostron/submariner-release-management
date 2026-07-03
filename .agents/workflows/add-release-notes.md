@@ -13,7 +13,8 @@ then per-issue agent review.
 
 ```bash
 # One-time setup
-acli jira auth login --web
+# Create API token at: https://id.atlassian.com/manage-profile/security/api-tokens
+acli jira auth login --token
 acli jira auth status  # Verify authenticated
 ```
 
