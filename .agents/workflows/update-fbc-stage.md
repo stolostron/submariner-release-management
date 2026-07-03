@@ -25,3 +25,18 @@ oc get snapshot $SNAPSHOT -n submariner-tenant -o jsonpath='{.metadata.annotatio
 ```
 
 Record snapshot names for all OCP versions - needed for Step 12.
+
+### Retrigger Failed Push Builds
+
+If a push build fails due to an infra flake (e.g., `PipelineValidationFailed` with all tasks passing), retrigger
+with a `/retest` comment on the HEAD commit of the target branch:
+
+```bash
+# Find the HEAD commit
+gh api repos/stolostron/submariner-operator-fbc/commits/main --jq '.sha'
+
+# Add /retest comment (retriggers all push pipelines for that commit)
+gh api repos/stolostron/submariner-operator-fbc/commits/<sha>/comments -f body="/retest"
+```
+
+The retested build uses the same push pipeline and produces permanent images (no expiration).

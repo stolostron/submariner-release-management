@@ -216,7 +216,7 @@ find_snapshot() {
     # Get snapshot names only (avoids JSON corruption with large result sets)
     local SNAPSHOT_NAMES
     SNAPSHOT_NAMES=$(oc get snapshots -n submariner-tenant \
-      -l 'pac.test.appstudio.openshift.io/event-type in (push,retest-comment,incoming)' \
+      -l 'pac.test.appstudio.openshift.io/event-type in (push,retest-all-comment,incoming)' \
       --sort-by=.metadata.creationTimestamp -o name | \
       grep "^snapshot.appstudio.redhat.com/submariner-${VERSION_DASH}")
 
