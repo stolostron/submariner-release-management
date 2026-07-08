@@ -1,0 +1,134 @@
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Release
+metadata:
+  name: submariner-0-20-3-prod-20260708-01
+  namespace: submariner-tenant
+  labels:
+    release.appstudio.openshift.io/author: 'dfarrell07'
+spec:
+  releasePlan: submariner-release-plan-prod-0-20
+  snapshot: submariner-0-20-20260702-140743-000
+  data:
+    releaseNotes:
+      type: RHSA
+      issues:
+        fixed:
+          # CVE Issues (24):
+          - id: ACM-21727
+            source: issues.redhat.com
+          - id: ACM-21731
+            source: issues.redhat.com
+          - id: ACM-25148
+            source: issues.redhat.com
+          - id: ACM-25152
+            source: issues.redhat.com
+          - id: ACM-25169
+            source: issues.redhat.com
+          - id: ACM-29510
+            source: issues.redhat.com
+          - id: ACM-29564
+            source: issues.redhat.com
+          - id: ACM-29565
+            source: issues.redhat.com
+          - id: ACM-29574
+            source: issues.redhat.com
+          - id: ACM-29584
+            source: issues.redhat.com
+          - id: ACM-29585
+            source: issues.redhat.com
+          - id: ACM-29586
+            source: issues.redhat.com
+          - id: ACM-29587
+            source: issues.redhat.com
+          - id: ACM-29774
+            source: issues.redhat.com
+          - id: ACM-29775
+            source: issues.redhat.com
+          - id: ACM-29800
+            source: issues.redhat.com
+          - id: ACM-30133
+            source: issues.redhat.com
+          - id: ACM-30722
+            source: issues.redhat.com
+          - id: ACM-30723
+            source: issues.redhat.com
+          - id: ACM-30724
+            source: issues.redhat.com
+          - id: ACM-30725
+            source: issues.redhat.com
+          - id: ACM-36662
+            source: issues.redhat.com
+          - id: ACM-37000
+            source: issues.redhat.com
+          - id: ACM-37038
+            source: issues.redhat.com
+          # Non-CVE Issues (5):
+          - id: ACM-17819
+            source: issues.redhat.com
+          - id: ACM-24786
+            source: issues.redhat.com
+          - id: ACM-30970
+            source: issues.redhat.com
+          - id: ACM-7515
+            source: issues.redhat.com
+          - id: ACM-8292
+            source: issues.redhat.com
+      cves:
+        # CVE-2025-47950 (2 issues)
+        - key: CVE-2025-47950
+          component: lighthouse-agent-0-20
+        - key: CVE-2025-47950
+          component: lighthouse-coredns-0-20
+        # CVE-2025-59530 (3 issues)
+        - key: CVE-2025-59530
+          component: lighthouse-agent-0-20
+        - key: CVE-2025-59530
+          component: lighthouse-coredns-0-20
+        # CVE-2025-61726 (8 issues)
+        - key: CVE-2025-61726
+          component: lighthouse-agent-0-20
+        - key: CVE-2025-61726
+          component: lighthouse-coredns-0-20
+        - key: CVE-2025-61726
+          component: nettest-0-20
+        - key: CVE-2025-61726
+          component: subctl-0-20
+        - key: CVE-2025-61726
+          component: submariner-gateway-0-20
+        - key: CVE-2025-61726
+          component: submariner-globalnet-0-20
+        - key: CVE-2025-61726
+          component: submariner-operator-0-20
+        - key: CVE-2025-61726
+          component: submariner-route-agent-0-20
+        # CVE-2025-61729
+        - key: CVE-2025-61729
+          component: subctl-0-20
+        # CVE-2025-68121
+        - key: CVE-2025-68121
+          component: subctl-0-20
+        # CVE-2025-68151 (2 issues)
+        - key: CVE-2025-68151
+          component: lighthouse-agent-0-20
+        - key: CVE-2025-68151
+          component: lighthouse-coredns-0-20
+        # CVE-2026-26017 (2 issues)
+        - key: CVE-2026-26017
+          component: lighthouse-agent-0-20
+        - key: CVE-2026-26017
+          component: lighthouse-coredns-0-20
+        # CVE-2026-26018 (2 issues)
+        - key: CVE-2026-26018
+          component: lighthouse-agent-0-20
+        - key: CVE-2026-26018
+          component: lighthouse-coredns-0-20
+        # CVE-2026-44740
+        - key: CVE-2026-44740
+          component: submariner-operator-0-20
+        # CVE-2026-53488
+        - key: CVE-2026-53488
+          component: submariner-operator-0-20
+        # CVE-2026-53492
+        - key: CVE-2026-53492
+          component: submariner-operator-0-20
