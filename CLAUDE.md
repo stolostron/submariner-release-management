@@ -140,3 +140,9 @@ Tasks not tied to normal release workflow timing.
 @/add-fbc-ocp-version
 
 **Alternative:** `make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23` or @.agents/workflows/add-fbc-ocp-version.md (manual workflow)
+
+---
+
+## Release Planning & Tracking
+
+See `plans/jira-release-tracker.md` for the Jira-based release tracker design plan.
