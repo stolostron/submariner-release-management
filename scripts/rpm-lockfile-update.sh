@@ -304,7 +304,23 @@ print_summary() {
 main() {
   check_prerequisites
   parse_arguments "$@"
+
+  # Tracker integration
+  TRACKER_LIB="${TRACKER_LIB:-$HOME/konflux/submariner-release-management/scripts/lib/jira-tracker.sh}"
+  # shellcheck source=/dev/null
+  [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+  TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+  [ -n "${TRACKER:-}" ] && update_step "$VERSION" "rpmLockfiles" "in_progress" '{}' "$TRACKER"
+
   update_lockfiles
+
+  # Record completion before print_summary (which returns non-zero on partial failure)
+  if [ -n "${TRACKER:-}" ] && [ "${#REPOS_UPDATED[@]}" -gt 0 ]; then
+    local data
+    data=$(jq -n --arg count "${#REPOS_UPDATED[@]}" '{reposUpdated:($count|tonumber)}' | jq -c .) || data="{}"
+    update_step "$VERSION" "rpmLockfiles" "complete" "$data" "$TRACKER"
+  fi
+
   print_summary
 }
 

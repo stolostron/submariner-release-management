@@ -1188,6 +1188,28 @@ fi
 KONFLUX_RELEASE_DATA_PATH="${KONFLUX_RELEASE_DATA_PATH:-$HOME/konflux/konflux-release-data}"
 
 # ============================================================================
+# Jira Release Tracker (optional)
+# ============================================================================
+
+TRACKER_KEY=""
+TRACKER_LIB="$(dirname "$0")/lib/jira-tracker.sh"
+
+if [ -f "$TRACKER_LIB" ]; then
+  # Source tracker library (best-effort, never fails)
+  # shellcheck source=lib/jira-tracker.sh
+  source "$TRACKER_LIB" 2>/dev/null || true
+
+  # Look up tracker if version has 3 segments (X.Y.Z)
+  if echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    TRACKER_KEY=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+    if [ -n "$TRACKER_KEY" ]; then
+      echo "📋 Jira Tracker: $TRACKER_KEY (https://issues.redhat.com/browse/$TRACKER_KEY)"
+      echo ""
+    fi
+  fi
+fi
+
+# ============================================================================
 # Initialize Global Variables
 # ============================================================================
 
@@ -1267,6 +1289,28 @@ done
 # Summary
 echo "━━━ SUMMARY ━━━"
 echo ""
+
+if [ -n "$TRACKER_KEY" ]; then
+  echo "Jira Tracker: $TRACKER_KEY"
+elif echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+  echo "Jira Tracker: (none — run /create-release-tracker $VERSION to create)"
+fi
+
+# Freshness warnings from Jira tracker
+if [ -n "$TRACKER_KEY" ] && type get_release_summary &>/dev/null; then
+  TRACKER_SUMMARY=$(get_release_summary "$VERSION" 2>/dev/null || true)
+  if [ -n "$TRACKER_SUMMARY" ] && [ "$TRACKER_SUMMARY" != "{}" ]; then
+    STALE_STEPS=""
+    for step_key in cveFixes rpmLockfiles ecFixes bundleShas fbcCatalogUpdate qeValidation fbcProdUrls; do
+      freshness=$(printf '%s' "$TRACKER_SUMMARY" | jq -r --arg k "$step_key" '.steps[$k].freshness // empty' 2>/dev/null || true)
+      if [ "$freshness" = "stale" ]; then
+        title=$(printf '%s' "$TRACKER_SUMMARY" | jq -r --arg k "$step_key" '.steps[$k].title // $k' 2>/dev/null || true)
+        STALE_STEPS="${STALE_STEPS:+$STALE_STEPS, }$title"
+      fi
+    done
+    [ -n "$STALE_STEPS" ] && echo "⚠️  Stale steps: $STALE_STEPS"
+  fi
+fi
 
 if [ "$IS_ZSTREAM" = "true" ]; then
   BASE_VERSION=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')

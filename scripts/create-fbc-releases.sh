@@ -390,10 +390,27 @@ Generated ${#CREATED_FILES[@]} Release CRs (${OCP_LIST}) with:
 main() {
   check_prerequisites
   parse_arguments "$@"
+
+  # Tracker integration
+  TRACKER_LIB="${TRACKER_LIB:-$SCRIPTS_DIR/lib/jira-tracker.sh}"
+  # shellcheck source=lib/jira-tracker.sh
+  [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+  TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+  STEP_KEY=$( [ "$RELEASE_TYPE" = "prod" ] && echo "fbcProdReleases" || echo "fbcStageReleases" )
+  [ -n "${TRACKER:-}" ] && update_step "$VERSION" "$STEP_KEY" "in_progress" '{}' "$TRACKER"
+
   verify_release
   generate_yamls
   validate_yamls
   commit_changes
+
+  # Record completion
+  if [ -n "${TRACKER:-}" ]; then
+    local ocp_count="${#CREATED_FILES[@]}"
+    local data
+    data=$(jq -n --arg count "$ocp_count" '{ocpVersionCount:($count|tonumber)}' | jq -c .) || data="{}"
+    update_step "$VERSION" "$STEP_KEY" "complete" "$data" "$TRACKER"
+  fi
 }
 
 main "$@"

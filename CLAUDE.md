@@ -1,5 +1,14 @@
 # CLAUDE.md
 
+## 0. Create Release Tracker
+
+@/create-release-tracker
+
+**Alternative:** `make create-release-tracker VERSION=<version>`
+
+Creates a Jira tracker with subtasks for each step below. Run at the start of every release.
+Release scripts automatically update tracker subtasks as they complete.
+
 ## 1. Create Upstream Release Branch (Y-stream only)
 
 @.agents/workflows/create-release-branch.md

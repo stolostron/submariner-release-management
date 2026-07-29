@@ -449,10 +449,24 @@ get_urls() {
 main() {
   parse_arguments "$@"
   check_prerequisites
+
+  # Tracker integration
+  TRACKER_LIB="${TRACKER_LIB:-$(cd "$(dirname "$0")" && pwd)/lib/jira-tracker.sh}"
+  # shellcheck source=lib/jira-tracker.sh
+  [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+  TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+
   if $PROD_INDEX; then
     get_urls_from_prod_index
   else
     get_urls
+  fi
+
+  # Phase 3: populate QE subtask with catalog URLs
+  if [ -n "${TRACKER:-}" ] && ! $RAW_URL && ! $PROD_INDEX; then
+    local url_markdown
+    url_markdown=$(printf '## Stage Catalog URLs\n\n_(populated by /get-fbc-urls)_')
+    update_subtask_description "$VERSION" "qeValidation" "$url_markdown" "$TRACKER" 2>/dev/null || true
   fi
 }
 

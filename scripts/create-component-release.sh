@@ -401,10 +401,38 @@ Release notes: Copied from stage (QE-verified)"
 main() {
   check_prerequisites
   parse_arguments "$@"
+
+  # Tracker integration
+  TRACKER_LIB="${TRACKER_LIB:-$SCRIPTS_DIR/lib/jira-tracker.sh}"
+  # shellcheck source=lib/jira-tracker.sh
+  [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+  TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+  STEP_KEY=$( [ "$RELEASE_TYPE" = "prod" ] && echo "componentProd" || echo "componentStage" )
+  [ -n "${TRACKER:-}" ] && update_step "$VERSION" "$STEP_KEY" "in_progress" '{}' "$TRACKER"
+
+  # Phase 3: QE gate check for prod releases
+  if [ "$RELEASE_TYPE" = "prod" ] && [ -n "${TRACKER:-}" ]; then
+    local qe_data
+    qe_data=$(get_step "$VERSION" "qeValidation" "$TRACKER" 2>/dev/null || true)
+    local qe_status
+    qe_status=$(printf '%s' "$qe_data" | jq -r '.status // empty' 2>/dev/null || true)
+    [ "$qe_status" != "complete" ] && echo "⚠️  QE validation not marked complete in tracker" >&2
+  fi
+
   verify_release
   generate_yaml
   validate_yaml
   commit_changes
+
+  # Record completion
+  if [ -n "${TRACKER:-}" ]; then
+    local release_name
+    release_name=$(basename "${YAML_FILE:-.yaml}" .yaml)
+    local data
+    data=$(jq -n --arg name "$release_name" --arg snap "${SNAPSHOT_NAME:-}" --arg type "$RELEASE_TYPE" \
+      '{releaseName:$name,snapshot:$snap,type:$type}' | jq -c .) || data="{}"
+    update_step "$VERSION" "$STEP_KEY" "complete" "$data" "$TRACKER"
+  fi
 }
 
 main "$@"
