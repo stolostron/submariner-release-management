@@ -58,6 +58,13 @@ LIB_DIR="$(cd "$SCRIPT_DIR/lib" && pwd)"
 # shellcheck source=lib/release-notes-common.sh
 source "$LIB_DIR/release-notes-common.sh"
 
+# Tracker integration
+TRACKER_LIB="${TRACKER_LIB:-$LIB_DIR/jira-tracker.sh}"
+# shellcheck source=lib/jira-tracker.sh
+[ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+[ -n "${TRACKER:-}" ] && update_step "$VERSION" "releaseNotes" "in_progress" '{}' "$TRACKER"
+
 # ============================================================================
 # Main Workflow
 # ============================================================================
@@ -121,3 +128,13 @@ fi
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Release notes workflow complete"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Record completion
+if [ -n "${TRACKER:-}" ]; then
+  local_cve_count=$(jq -r '.cve_topics | length' /tmp/release-notes-topics.json 2>/dev/null || echo "0")
+  local_total=$(jq -r '.total_issues // 0' /tmp/release-notes-data.json 2>/dev/null || echo "0")
+  local_type=$( [ "$local_cve_count" -gt 0 ] && echo "RHSA" || echo "RHBA" )
+  data=$(jq -n --arg type "$local_type" --arg total "$local_total" --arg cves "$local_cve_count" \
+    '{advisoryType:$type,totalIssues:($total|tonumber),cveCount:($cves|tonumber)}' | jq -c .) || data="{}"
+  update_step "$VERSION" "releaseNotes" "complete" "$data" "$TRACKER"
+fi

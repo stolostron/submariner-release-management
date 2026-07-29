@@ -523,6 +523,21 @@ print_summary() {
 main() {
   check_prerequisites
   parse_arguments "$@"
+
+  # Tracker integration
+  TRACKER_LIB="${TRACKER_LIB:-$HOME/konflux/submariner-release-management/scripts/lib/jira-tracker.sh}"
+  # shellcheck source=/dev/null
+  [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+  TRACKER=$(find_release_tracker "${TARGET_VERSION:-}" 2>/dev/null || true)
+  [ -n "${TRACKER:-}" ] && update_step "$TARGET_VERSION" "bundleShas" "in_progress" '{}' "$TRACKER"
+
+  # CVE recheck gate
+  if [ -n "${TRACKER:-}" ]; then
+    local freshness
+    freshness=$(check_freshness "$TARGET_VERSION" "cveFixes" "$TRACKER" 2>/dev/null || true)
+    [ "$freshness" = "stale" ] && echo "⚠️  CVE fixes may be stale — consider re-running CVE checks" >&2
+  fi
+
   find_snapshot
   extract_shas
   update_config
@@ -531,6 +546,14 @@ main() {
   verify_shas
   commit_changes
   print_summary
+
+  # Record completion
+  if [ -n "${TRACKER:-}" ]; then
+    local data
+    data=$(jq -n --arg snap "${SNAPSHOT:-}" --arg ver "$TARGET_VERSION" \
+      '{snapshot:$snap,version:$ver}' | jq -c .) || data="{}"
+    update_step "$TARGET_VERSION" "bundleShas" "complete" "$data" "$TRACKER"
+  fi
 }
 
 main "$@"

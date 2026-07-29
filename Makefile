@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream add-fbc-ocp-version create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream add-fbc-ocp-version create-fbc-releases create-component-release rpm-lockfile-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls create-release-tracker test-tracker
 
 .DEFAULT_GOAL := help
 
@@ -74,10 +74,16 @@ help:
 	@echo "  make validate-markdown - Markdown linting (docs)"
 	@echo "  make gitlint           - Commit message linting"
 	@echo "  make shellcheck        - Shell script linting"
+	@echo "  make test-tracker      - Jira tracker library tests"
 	@echo ""
 	@echo "Release Operations:"
 	@echo "  make apply FILE=...    - Validate and apply release YAML to cluster (requires oc login)"
 	@echo "  make watch NAME=...    - Watch release status (requires oc login)"
+	@echo "  make create-release-tracker VERSION=... [QE_ASSIGNEE=...]"
+	@echo "                         - Create Jira release tracker with subtasks per workflow step"
+	@echo "                           Creates parent Task + 15-19 Sub-tasks in ACM project"
+	@echo "                           Example: make create-release-tracker VERSION=0.24.0"
+	@echo "                           Example: make create-release-tracker VERSION=0.24.0 QE_ASSIGNEE=qe@redhat.com"
 	@echo "  make get-fbc-urls VERSION=... [OCP=4.XX] [RAW_URL=true] [PROD_INDEX=true]"
 	@echo "                         - Get FBC catalog URLs for QE sharing"
 	@echo "                           Default: quay.io catalog URLs (Release CRs + snapshot fallback)"
@@ -136,6 +142,13 @@ bundle-image-update:
 get-fbc-urls:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make get-fbc-urls VERSION=0.24.0 [OCP=4.21] [RAW_URL=true] [PROD_INDEX=true]" && exit 1)
 	./scripts/get-fbc-urls.sh $(VERSION) $(if $(OCP),--ocp $(OCP),) $(if $(filter true,$(RAW_URL)),--raw-url,) $(if $(filter true,$(PROD_INDEX)),--prod-index,)
+
+create-release-tracker:
+	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-release-tracker VERSION=0.24.0 [QE_ASSIGNEE=...]" && exit 1)
+	./scripts/create-release-tracker.sh $(VERSION) $(if $(QE_ASSIGNEE),--qe-assignee $(QE_ASSIGNEE),)
+
+test-tracker:
+	./scripts/lib/test-jira-tracker.sh
 
 test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck
 
