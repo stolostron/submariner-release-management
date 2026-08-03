@@ -1,6 +1,6 @@
 ---
 name: create-release-tracker
-description: Create Jira release tracker with parent task and 15-19 subtasks for Submariner release workflow tracking
+description: Create Jira release tracker with parent task and 15-18 subtasks for Submariner release workflow tracking
 version: 1.0.0
 argument-hint: "<version> [--qe-assignee EMAIL] [--dry-run]"
 user-invocable: true
@@ -10,7 +10,7 @@ allowed-tools: Bash
 # Create Release Tracker
 
 Creates a Task in the ACM Jira project ("Release Submariner X.Y.Z") with per-step
-subtasks (15 for Z-stream, 19 for Y-stream). Other release skills
+subtasks (15 for Z-stream, 18 for Y-stream). Other release skills
 (`/create-component-release`, `/bundle-image-update`, `/add-release-notes`, etc.)
 automatically update tracker subtasks as they run.
 

@@ -103,6 +103,53 @@ assert_eq "AUTOMATION_LEVEL values valid" "$al_invalid" "0"
 
 # ============================================================================
 echo ""
+echo "=== 2b. Conductor Constants ==="
+# ============================================================================
+
+# ZSTREAM_STEPS count
+assert_eq "ZSTREAM_STEPS has 1 entry" "${#ZSTREAM_STEPS[@]}" "1"
+
+# DAG fix: versionLabels in upstreamRelease deps
+deps="${STEP_DEPENDENCIES[upstreamRelease]:-}"
+echo "$deps" | grep -qF "versionLabels" && vl_in_deps="yes" || vl_in_deps="no"
+assert_eq "versionLabels in upstreamRelease deps" "$vl_in_deps" "yes"
+
+# DAG fix: cveFixes is review (not auto)
+assert_eq "cveFixes automation is review" "${AUTOMATION_LEVEL[cveFixes]:-}" "review"
+
+# DAG fix: releaseNotes depends on componentStage (notes modify existing YAML)
+deps="${STEP_DEPENDENCIES[releaseNotes]:-}"
+echo "$deps" | grep -qF "componentStage" && cs_in_deps="yes" || cs_in_deps="no"
+assert_eq "componentStage in releaseNotes deps" "$cs_in_deps" "yes"
+
+# STEP_SCRIPT keys are valid STEP_ORDER entries
+script_invalid=0
+for key in "${!STEP_SCRIPT[@]}"; do
+  found=false
+  for sk in "${STEP_ORDER[@]}"; do [ "$sk" = "$key" ] && found=true && break; done
+  [ "$found" = "false" ] && script_invalid=$((script_invalid + 1))
+done
+assert_eq "STEP_SCRIPT keys valid" "$script_invalid" "0"
+
+# STEP_EXTRA_ARGS keys exist in STEP_SCRIPT
+args_invalid=0
+for key in "${!STEP_EXTRA_ARGS[@]}"; do
+  [ -z "${STEP_SCRIPT[$key]:-}" ] && args_invalid=$((args_invalid + 1))
+done
+assert_eq "STEP_EXTRA_ARGS keys in STEP_SCRIPT" "$args_invalid" "0"
+
+# step_applies_to_release
+step_applies_to_release "cveFixes" "z-stream" && r1="yes" || r1="no"
+assert_eq "cveFixes applies to z-stream" "$r1" "yes"
+step_applies_to_release "createBranches" "z-stream" && r2="yes" || r2="no"
+assert_eq "createBranches skipped for z-stream" "$r2" "no"
+step_applies_to_release "versionLabels" "y-stream" && r3="yes" || r3="no"
+assert_eq "versionLabels skipped for y-stream" "$r3" "no"
+step_applies_to_release "versionLabels" "z-stream" && r4="yes" || r4="no"
+assert_eq "versionLabels applies to z-stream" "$r4" "yes"
+
+# ============================================================================
+echo ""
 echo "=== 3. Subtask Counts ==="
 # ============================================================================
 
@@ -111,10 +158,10 @@ query_jira() { echo "[]"; }
 # shellcheck disable=SC2034  # ACM_VERSION used by library after mock returns
 calculate_acm_version() { ACM_VERSION="ACM 2.17.0"; }
 
-# Y-stream: 19 subtasks
+# Y-stream: 18 subtasks (versionLabels is Z-stream-only)
 output=$(create_release_tracker "0.24.0" 2>&1 >/dev/null)
 count=$(printf '%s' "$output" | grep -c "Would create: Sub-task" || true)
-assert_eq "y-stream: 19 subtasks" "$count" "19"
+assert_eq "y-stream: 18 subtasks" "$count" "18"
 
 # Z-stream: 15 subtasks
 output=$(create_release_tracker "0.24.1" 2>&1 >/dev/null)
@@ -291,6 +338,36 @@ query_jira() { echo "[]"; }
 
 # ============================================================================
 echo ""
+echo "=== 6b. File Existence ==="
+# ============================================================================
+
+GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+
+# STEP_SCRIPT paths
+script_missing=0
+for key in "${!STEP_SCRIPT[@]}"; do
+  if [ ! -f "$GIT_ROOT/${STEP_SCRIPT[$key]}" ]; then
+    echo "  Missing STEP_SCRIPT: ${STEP_SCRIPT[$key]}" >&2
+    script_missing=$((script_missing + 1))
+  fi
+done
+assert_eq "all STEP_SCRIPT files exist" "$script_missing" "0"
+
+# STEP_SKILL_HINT embedded workflow paths
+hint_missing=0
+for key in "${!STEP_SKILL_HINT[@]}"; do
+  hint="${STEP_SKILL_HINT[$key]}"
+  path=$(echo "$hint" | grep -oP '\.agents/workflows/\S+\.md' || true)
+  [ -z "$path" ] && continue
+  if [ ! -f "$GIT_ROOT/$path" ]; then
+    echo "  Missing STEP_SKILL_HINT path: $path" >&2
+    hint_missing=$((hint_missing + 1))
+  fi
+done
+assert_eq "all STEP_SKILL_HINT workflow paths exist" "$hint_missing" "0"
+
+# ============================================================================
+echo ""
 echo "=== 7. Smoke Tests ==="
 # ============================================================================
 
@@ -306,7 +383,7 @@ printf '%s' "$summary" | jq -e . >/dev/null 2>&1 && valid="yes" || valid="no"
 assert_eq "get_release_summary: valid JSON" "$valid" "yes"
 
 step_count=$(printf '%s' "$summary" | jq '.steps | keys | length' 2>/dev/null)
-assert_eq "get_release_summary: 19 steps" "$step_count" "19"
+assert_eq "get_release_summary: 18 steps (y-stream, versionLabels excluded)" "$step_count" "18"
 
 # Template completeness
 fallback_found=0

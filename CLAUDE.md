@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+## Run Next Release Step
+
+@/autorelease
+
+Finds the next ready step and runs it. Chains consecutive auto steps, stopping at
+gate, review, or manual steps. Re-run to advance.
+
 ## 0. Create Release Tracker
 
 @/create-release-tracker
