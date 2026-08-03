@@ -3,7 +3,7 @@
 # Used by: create-release-tracker.sh, release-status.sh, and release workflow scripts
 #
 # Provides structured Jira-based tracking for Submariner releases.
-# Each release gets a parent Task with 15-19 Sub-task children (one per workflow step).
+# Each release gets a parent Task with 15-18 Sub-task children (one per workflow step).
 # Automation appends structured STEP_DATA comments as steps complete.
 #
 # Best-effort: tracker failures never crash calling scripts. Functions that are
@@ -61,6 +61,9 @@ readonly STEP_ORDER=(
 # Y-stream only steps (omitted for Z-stream)
 readonly YSTREAM_STEPS=("createBranches" "configureDownstream" "tektonComponents" "tektonBundle")
 
+# Z-stream only steps (omitted for Y-stream)
+readonly ZSTREAM_STEPS=("versionLabels")
+
 # Phase groupings for display
 declare -A STEP_PHASE=(
   ["createBranches"]="Branch Setup"
@@ -107,14 +110,14 @@ declare -A STEP_DEPENDENCIES=(
   ["rpmLockfiles"]=""
   ["tektonTasks"]=""
   ["versionLabels"]=""
-  ["upstreamRelease"]="cveFixes,ecFixes,rpmLockfiles,tektonTasks"
+  ["upstreamRelease"]="cveFixes,ecFixes,rpmLockfiles,tektonTasks,versionLabels"
   ["bundleShas"]="upstreamRelease"
   ["componentStage"]="bundleShas"
-  ["releaseNotes"]="bundleShas"
+  ["releaseNotes"]="componentStage"
   ["fbcCatalogUpdate"]="componentStage"
   ["fbcStageReleases"]="fbcCatalogUpdate"
   ["qeValidation"]="fbcStageReleases"
-  ["componentProd"]="qeValidation,componentStage"
+  ["componentProd"]="qeValidation,componentStage,releaseNotes"
   ["fbcProdReleases"]="componentProd"
   ["fbcProdUrls"]="fbcProdReleases"
 )
@@ -126,7 +129,7 @@ declare -A AUTOMATION_LEVEL=(
   ["configureDownstream"]="auto"
   ["tektonComponents"]="auto"
   ["tektonBundle"]="auto"
-  ["cveFixes"]="auto"
+  ["cveFixes"]="review"
   ["ecFixes"]="auto"
   ["rpmLockfiles"]="auto"
   ["tektonTasks"]="auto"
@@ -143,6 +146,44 @@ declare -A AUTOMATION_LEVEL=(
   ["fbcProdUrls"]="auto"
 )
 
+# Scripts the conductor can execute directly (step key → script path)
+# shellcheck disable=SC2034  # Exported for use by autorelease conductor
+declare -A STEP_SCRIPT=(
+  ["configureDownstream"]="scripts/configure-downstream.sh"
+  ["rpmLockfiles"]="scripts/rpm-lockfile-update.sh"
+  ["versionLabels"]="scripts/update-version-labels.sh"
+  ["bundleShas"]="scripts/bundle-image-update.sh"
+  ["componentStage"]="scripts/create-component-release.sh"
+  ["releaseNotes"]="scripts/add-release-notes.sh"
+  ["fbcStageReleases"]="scripts/create-fbc-releases.sh"
+  ["componentProd"]="scripts/create-component-release.sh"
+  ["fbcProdReleases"]="scripts/create-fbc-releases.sh"
+)
+
+# Guidance for steps without backing scripts (step key → hint text)
+# shellcheck disable=SC2034  # Exported for use by autorelease conductor
+declare -A STEP_SKILL_HINT=(
+  ["createBranches"]="See .agents/workflows/create-release-branch.md"
+  ["tektonComponents"]="/konflux-component-setup"
+  ["tektonBundle"]="/konflux-bundle-setup"
+  ["cveFixes"]="See .agents/workflows/scan-cves.md"
+  ["ecFixes"]="/konflux-ci-fix"
+  ["tektonTasks"]="/konflux-ci-fix"
+  ["upstreamRelease"]="See .agents/workflows/cut-upstream-release.md"
+  ["fbcCatalogUpdate"]="/fbc-update"
+  ["qeValidation"]="Share URLs with /get-fbc-urls, then await QE approval"
+  ["fbcProdUrls"]="See .agents/workflows/update-fbc-templates-prod.md"
+)
+
+# Extra arguments for step scripts (appended after VERSION)
+# shellcheck disable=SC2034  # Exported for use by autorelease conductor
+declare -A STEP_EXTRA_ARGS=(
+  ["componentStage"]="stage"
+  ["componentProd"]="prod"
+  ["fbcStageReleases"]="--stage"
+  ["fbcProdReleases"]="--prod"
+)
+
 # Jira status names (overridable via env for project-specific names)
 readonly JIRA_STATUS_IN_PROGRESS="${JIRA_STATUS_IN_PROGRESS:-In Progress}"
 readonly JIRA_STATUS_RESOLVED="${JIRA_STATUS_RESOLVED:-Resolved}"
@@ -151,6 +192,24 @@ readonly JIRA_STATUS_CLOSED="${JIRA_STATUS_CLOSED:-Closed}"
 # ============================================================================
 # Internal Helpers
 # ============================================================================
+
+# Check if a step applies to the given release type
+# Args: $1=step_key $2=release_type (y-stream|z-stream)
+# Returns: 0 if applicable, 1 if not
+step_applies_to_release() {
+  local step_key="$1"
+  local release_type="$2"
+  if [ "$release_type" = "z-stream" ]; then
+    for ys in "${YSTREAM_STEPS[@]}"; do
+      [ "$step_key" = "$ys" ] && return 1
+    done
+  elif [ "$release_type" = "y-stream" ]; then
+    for zs in "${ZSTREAM_STEPS[@]}"; do
+      [ "$step_key" = "$zs" ] && return 1
+    done
+  fi
+  return 0
+}
 
 # Normalize version: expand 2-segment (0.24) to 3-segment (0.24.0)
 # Args: $1=version
@@ -552,14 +611,7 @@ create_release_tracker() {
   local failed_count=0
 
   for step_key in "${STEP_ORDER[@]}"; do
-    # Skip Y-stream steps for Z-stream releases
-    if [ "$release_type" = "z-stream" ]; then
-      local is_ystream=false
-      for ys in "${YSTREAM_STEPS[@]}"; do
-        [ "$step_key" = "$ys" ] && is_ystream=true && break
-      done
-      [ "$is_ystream" = "true" ] && continue
-    fi
+    step_applies_to_release "$step_key" "$release_type" || continue
 
     local title="${STEP_TITLES[$step_key]:-$step_key}"
 
@@ -747,6 +799,7 @@ get_step() {
 # Args: $1=version (X.Y.Z)
 #       $2=step_key
 #       $3=parent_key [optional]
+#       $4=pre-fetched step_data JSON [optional, avoids re-fetching]
 # Output: "fresh" or "stale"
 # Returns: 0 always
 check_freshness() {
@@ -761,9 +814,11 @@ check_freshness() {
     return 0
   fi
 
-  # Get step data
-  local step_data
-  step_data=$(get_step "$version" "$step_key" "$parent_key") || true
+  # Use pre-fetched step data if provided, otherwise fetch
+  local step_data="${4:-}"
+  if [ -z "$step_data" ]; then
+    step_data=$(get_step "$version" "$step_key" "$parent_key") || true
+  fi
   if [ -z "$step_data" ]; then
     echo "fresh"
     return 0
@@ -915,14 +970,7 @@ get_release_summary() {
     '{version: $version, type: $type, tracker: $tracker, steps: {}}') || { echo "{}"; return 0; }
 
   for step_key in "${STEP_ORDER[@]}"; do
-    # Skip Y-stream steps for Z-stream
-    if [ "$release_type" = "z-stream" ]; then
-      local is_ystream=false
-      for ys in "${YSTREAM_STEPS[@]}"; do
-        [ "$step_key" = "$ys" ] && is_ystream=true && break
-      done
-      [ "$is_ystream" = "true" ] && continue
-    fi
+    step_applies_to_release "$step_key" "$release_type" || continue
 
     local title="${STEP_TITLES[$step_key]:-$step_key}"
     local phase="${STEP_PHASE[$step_key]:-unknown}"
@@ -951,7 +999,7 @@ get_release_summary() {
     # Check freshness
     local freshness="fresh"
     if [ -n "${STALENESS_RULES[$step_key]:-}" ] && [ "$step_data" != "{}" ]; then
-      freshness=$(check_freshness "$version" "$step_key" "$parent_key" 2>/dev/null) || true
+      freshness=$(check_freshness "$version" "$step_key" "$parent_key" "$step_data" 2>/dev/null) || true
     fi
 
     # Merge step into result using jq (handles escaping safely)
