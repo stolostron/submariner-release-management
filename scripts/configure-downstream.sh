@@ -22,6 +22,9 @@
 
 set -euo pipefail
 
+# Resolve script location before any cd so lib paths work from any clone location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 INPUT_VERSION="${1:-}"
 
 if [ -z "$INPUT_VERSION" ]; then
@@ -76,6 +79,12 @@ echo "$INPUT_VERSION" | grep -qE '^0\.[0-9]+(\.[0-9]+)?$' || {
   exit 1
 }
 
+# Tracker integration
+TRACKER_LIB="${TRACKER_LIB:-$SCRIPT_DIR/lib/jira-tracker.sh}"
+# shellcheck source=/dev/null
+[ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+TRACKER=$(find_release_tracker "$INPUT_VERSION" 2>/dev/null || true)
+
 # Extract major.minor (0.23.1 → 0.23)
 MAJOR_MINOR=$(echo "$INPUT_VERSION" | grep -oE '^[0-9]+\.[0-9]+')
 NEW_MINOR=$(echo "$MAJOR_MINOR" | cut -d. -f2)
@@ -83,13 +92,15 @@ NEW_MINOR=$(echo "$MAJOR_MINOR" | cut -d. -f2)
 # Convert to hyphenated format (NEW version)
 NEW="0-${NEW_MINOR}"
 
-# Check if version already exists
+# Check if version already exists (before marking in_progress to avoid stuck tracker state)
 OVERLAY_DIR="$HOME/konflux/konflux-release-data/tenants-config/cluster/kflux-prd-rh02/tenants/submariner-tenant/overlay/application-submariner"
 if [ -d "${OVERLAY_DIR}/${NEW}-overlay" ]; then
   echo "❌ Error: Version ${MAJOR_MINOR} already configured"
   echo "   Overlay directory exists: ${NEW}-overlay"
   exit 1
 fi
+
+[ -n "${TRACKER:-}" ] && update_step "$INPUT_VERSION" "configureDownstream" "in_progress" '{}' "$TRACKER"
 
 # Find all existing overlays and extract minor versions
 EXISTING_VERSIONS=$(find "${OVERLAY_DIR}" -maxdepth 1 -name '[0-9]*-overlay' -printf '%f\n' 2>/dev/null | \
@@ -126,8 +137,11 @@ echo ""
 
 BRANCH="subm-configure-v${NEW//-/.}"
 
-# Check if branch exists on remote (MUST NOT exist)
-if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+# Check if branch exists on remote (MUST NOT exist).
+# Query the remote directly. show-ref reads the local remote-tracking ref,
+# which is stale here — only `git fetch origin main` ran above, so a branch
+# created (or deleted) remotely since the last full fetch would be misjudged.
+if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
   echo "❌ Error: Branch $BRANCH already exists on remote"
   echo "   Delete it first: git push origin --delete $BRANCH"
   echo "   Then re-run this skill"
@@ -208,7 +222,9 @@ cd ~/konflux/konflux-release-data/tenants-config
 ./build-single.sh submariner-tenant
 
 # Verify (auto-generated files use hyphenated names like submariner-0-23.yaml)
-COUNT=$(ls "auto-generated/cluster/kflux-prd-rh02/tenants/submariner-tenant/"*"-${NEW}.yaml" 2>/dev/null | wc -l)
+# || COUNT=0: a non-matching glob makes ls exit non-zero, which under
+# set -o pipefail would abort before the friendly "found $COUNT" error below.
+COUNT=$(ls "auto-generated/cluster/kflux-prd-rh02/tenants/submariner-tenant/"*"-${NEW}.yaml" 2>/dev/null | wc -l) || COUNT=0
 [ "$COUNT" -eq 22 ] || { echo "❌ Error: Expected 22 auto-generated files, found $COUNT"; exit 1; }
 
 # Commit
@@ -244,7 +260,9 @@ grep -q "intention: staging" "submariner-release-plan-admission-stage-$NEW.yaml"
 
 grep -q "intention: production" "submariner-release-plan-admission-prod-$NEW.yaml" || { echo "❌ Prod RPA intention not 'production'"; exit 1; }
 
-COMPONENT_COUNT=$(grep -c "url: registry" "submariner-release-plan-admission-prod-$NEW.yaml")
+# || COMPONENT_COUNT=0: grep -c exits 1 on zero matches (and 2 if the file is
+# missing), which would abort under set -e before the friendly error below.
+COMPONENT_COUNT=$(grep -c "url: registry" "submariner-release-plan-admission-prod-$NEW.yaml") || COMPONENT_COUNT=0
 [ "$COMPONENT_COUNT" -eq 9 ] || { echo "❌ Expected 9 components in RPA, found $COMPONENT_COUNT"; exit 1; }
 
 grep -q "product_version: \"$NEW_ACM\"" "submariner-release-plan-admission-prod-$NEW.yaml" || { echo "❌ Product version not set to \"$NEW_ACM\""; exit 1; }
@@ -269,6 +287,20 @@ echo "   - Updated version strings and ACM version"
 echo "   - Verified: intentions, component count (9), product version, tag format"
 echo "   - Committed: Add Submariner v${NEW//-/.} stage/prod RPAs"
 echo ""
+
+# Append to push summary if conductor is running (before marking complete so the
+# log entry is present if the step is recorded as done)
+if [ -n "${AUTORELEASE_PUSH_LOG:-}" ]; then
+  printf '\n  cd %s\n  git push origin %s\n' \
+    "$HOME/konflux/konflux-release-data" "$BRANCH" \
+    >> "$AUTORELEASE_PUSH_LOG"
+fi
+
+# Record completion in tracker
+if [ -n "${TRACKER:-}" ]; then
+  _tracker_data=$(jq -n --arg branch "$BRANCH" '{branch:$branch}' | jq -c .) || _tracker_data="{}"
+  update_step "$INPUT_VERSION" "configureDownstream" "complete" "$_tracker_data" "$TRACKER"
+fi
 
 # ━━━ SUMMARY ━━━
 
