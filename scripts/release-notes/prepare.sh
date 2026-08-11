@@ -1,7 +1,7 @@
 #!/bin/bash
 # Phase 2: Filter and group release notes data
-# Input: /tmp/release-notes-data.json
-# Output: /tmp/release-notes-topics.json
+# Input: ${RELEASE_NOTES_DATA:-/tmp/release-notes-data.json}
+# Output: ${RELEASE_NOTES_TOPICS:-/tmp/release-notes-topics.json}
 set -euo pipefail
 
 # ============================================================================
@@ -14,8 +14,8 @@ LIB_DIR="$(cd "$SCRIPT_DIR/../lib" && pwd)"
 # shellcheck source=../lib/release-notes-common.sh
 source "$LIB_DIR/release-notes-common.sh"
 
-INPUT_JSON="/tmp/release-notes-data.json"
-OUTPUT_JSON="/tmp/release-notes-topics.json"
+INPUT_JSON="${RELEASE_NOTES_DATA:-/tmp/release-notes-data.json}"
+OUTPUT_JSON="${RELEASE_NOTES_TOPICS:-/tmp/release-notes-topics.json}"
 
 if [[ ! -f "$INPUT_JSON" ]]; then
   echo "❌ ERROR: Input file not found: '$INPUT_JSON'" >&2
@@ -152,7 +152,7 @@ EXCLUDED_CVES=$(jq -r '
     (if ($meta.last_published_date != "" and .resolved != "")
      then (.resolved < $meta.last_published_date) else false end)
   ) | "\(.issue_key) (\(.resolution // "Unresolved")): \(.cve_key)"] | .[]
-' "$INPUT_JSON" 2>/dev/null)
+' "$INPUT_JSON" 2>/dev/null || true)
 
 if [[ -n "$EXCLUDED_CVES" ]]; then
   echo ""
@@ -171,7 +171,7 @@ EXCLUDED_NON_CVE=$(jq -r '
     (if ($meta.last_published_date != "" and .resolved != "")
      then (.resolved < $meta.last_published_date) else false end)
   ) | "\(.issue_key) (\(.resolution))"] | .[]
-' "$INPUT_JSON" 2>/dev/null)
+' "$INPUT_JSON" 2>/dev/null || true)
 
 if [[ -n "$EXCLUDED_NON_CVE" ]]; then
   echo ""
@@ -192,4 +192,4 @@ jq -r '
 "Recommendation:",
 "  Release type: \(.recommendation.release_type)",
 "  Reason: \(.recommendation.reason)"
-' "$OUTPUT_JSON"
+' "$OUTPUT_JSON" || true

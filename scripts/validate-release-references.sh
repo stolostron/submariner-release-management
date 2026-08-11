@@ -4,13 +4,17 @@
 set -euo pipefail
 
 # Check cluster auth before attempting any oc commands
+if ! command -v oc &>/dev/null; then
+  echo "❌ ERROR: oc not installed — install the OpenShift CLI first" >&2
+  exit 2
+fi
 if ! oc whoami &>/dev/null; then
   echo "❌ ERROR: Not logged in to Konflux cluster"
   echo ""
   echo "Run:  oc login --web https://api.kflux-prd-rh02.0fk9.p1.openshiftapps.com:6443/"
   echo ""
   echo "Then retry: make test-remote FILE=<your-release-yaml>"
-  exit 1
+  exit 2
 fi
 
 validate_file() {
@@ -46,7 +50,7 @@ validate_file() {
   # Check snapshot test status
   test_status=$(oc get snapshot "$snapshot" -n "$namespace" -o jsonpath='{.metadata.annotations.test\.appstudio\.openshift\.io/status}' 2>/dev/null || echo "")
   if [[ -n "$test_status" ]]; then
-    failed_count=$(echo "$test_status" | jq '[.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress")] | length' 2>/dev/null || echo "0")
+    failed_count=$(echo "$test_status" | jq '[.[] | select(.status != "TestPassed")] | length' 2>/dev/null || echo "0")
     if [[ "$failed_count" -gt 0 ]]; then
       echo "  ⚠ Snapshot has $failed_count failed test(s)"
     else
