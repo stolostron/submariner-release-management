@@ -19,6 +19,9 @@ set -euo pipefail
 # Resolve script location before any cd so lib paths work from any clone location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# shellcheck source=lib/git-utils.sh
+source "$SCRIPT_DIR/lib/git-utils.sh" 2>/dev/null || true
+
 # ━━━ CONSTANTS ━━━
 
 readonly SUBMARINER_BASE="$HOME/go/src/submariner-io"
@@ -282,21 +285,30 @@ print_summary() {
   if [ "$UPDATED_COUNT" -gt 0 ]; then
     echo ""
     echo "Next Steps"
+    local gh_user
+    gh_user=$(get_gh_user)
     for entry in "${REPOS_UPDATED[@]}"; do
       local repo="${entry%%#*}"
       local rest="${entry#*#}"
       local major_minor="${rest%%#*}"
       local branch="${rest#*#}"
+      local path fork fix_branch head_ref
+      path="$SUBMARINER_BASE/$repo"
+      fix_branch="fix-version-labels-${major_minor}"
+      fork="$(fork_remote "$path" "$gh_user")"
+      head_ref="$fix_branch"
+      [ -n "$gh_user" ] && head_ref="${gh_user}:${fix_branch}"
       echo ""
       echo "# $repo"
-      echo "cd $SUBMARINER_BASE/$repo"
+      echo "cd $path"
       echo "git show"
-      echo "git push origin fix-version-labels-${major_minor}"
-      echo "gh pr create --base $branch --head fix-version-labels-${major_minor} --title \"Update version labels to v$VERSION\" --body \"Enables correct Konflux image tagging.\""
+      echo "git push $fork $fix_branch"
+      echo "gh pr create --base $branch --head $head_ref --title \"Update version labels to v$VERSION\" --body \"Enables correct Konflux image tagging.\" --assignee @me --label ready-to-test"
+      echo "gh pr merge --auto --rebase $fix_branch"
       # Append to push summary if conductor is running
       if [ -n "${AUTORELEASE_PUSH_LOG:-}" ]; then
-        printf '\n  cd %s/%s\n  git push origin fix-version-labels-%s\n  gh pr create --base %s --head fix-version-labels-%s\n' \
-          "$SUBMARINER_BASE" "$repo" "$major_minor" "$branch" "$major_minor" \
+        printf '\n  cd %s\n  git push %s %s\n  gh pr create --base %s --head %s --title "Update version labels to v%s" --body "Enables correct Konflux image tagging." --assignee @me --label ready-to-test\n  gh pr merge --auto --rebase %s\n' \
+          "$path" "$fork" "$fix_branch" "$branch" "$head_ref" "$VERSION" "$fix_branch" \
           >> "$AUTORELEASE_PUSH_LOG"
       fi
     done
@@ -333,11 +345,13 @@ main() {
   # mark the whole step complete.
   # update_step is called AFTER print_summary so that a push-log write failure
   # (inside print_summary) leaves the tracker at 'in_progress' rather than 'complete'.
+  # review level: script stays in_progress. User must push the label changes and
+  # wait for Konflux to rebuild, then explicitly mark complete.
   if [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && [ "${#REPOS_FAILED[@]}" -eq 0 ]; then
     local data
+    # shellcheck disable=SC2034
     data=$(jq -n --arg count "${#REPOS_UPDATED[@]}" --arg ver "$VERSION" \
       '{reposUpdated:($count|tonumber),version:$ver}' | jq -c .) || data="{}"
-    update_step "$VERSION" "versionLabels" "complete" "$data" "$TRACKER"
   fi
 }
 

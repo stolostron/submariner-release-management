@@ -33,6 +33,8 @@ _LIB_DIR="$SCRIPT_DIR/lib"
 # source inside main() a no-op.
 # shellcheck source=lib/jira-tracker.sh
 source "$_LIB_DIR/jira-tracker.sh" 2>/dev/null || true
+# shellcheck source=lib/git-utils.sh
+source "$_LIB_DIR/git-utils.sh" 2>/dev/null || true
 
 # ━━━ CONSTANTS ━━━
 
@@ -72,6 +74,7 @@ repo_path() {
     *)   echo "$SUBMARINER_BASE/$1" ;;
   esac
 }
+
 
 # Branch a repo's fix branch is cut from and its PR targets.
 repo_base_branch() {
@@ -331,23 +334,36 @@ print_summary() {
   if [ "$UPDATED_COUNT" -gt 0 ]; then
     echo ""
     echo "Next Steps"
+    # Get GitHub username once for fork remote detection across all repos.
+    local gh_user
+    gh_user=$(get_gh_user)
     for entry in "${REPOS_UPDATED[@]}"; do
       local repo="${entry%%#*}"
       local rest="${entry#*#}"
       local fix_branch="${rest%%#*}"
       local base_branch="${rest#*#}"
-      local path
+      local path fork
       path="$(repo_path "$repo")"
+      fork="$(fork_remote "$path" "$gh_user")"
       echo ""
       echo "# $repo"
       echo "cd $path"
       echo "git show"
-      echo "git push origin $fix_branch"
-      echo "gh pr create --base $base_branch --head $fix_branch --title \"Update Tekton task references\" --body \"Refresh .tekton task refs for Enterprise Contract.\""
+      echo "git push $fork $fix_branch"
+      # FBC repo (stolostron/submariner-operator-fbc) has no ready-to-test label
+      local label_flag="--label ready-to-test"
+      [ "$repo" = "fbc" ] && label_flag=""
+      # --head <user>:<branch> opens a cross-repo (fork) PR; gh_user is the
+      # fork owner. Falls back to branch-only if gh_user is unavailable.
+      local head_ref="$fix_branch"
+      [ -n "$gh_user" ] && head_ref="${gh_user}:${fix_branch}"
+      # shellcheck disable=SC2086
+      echo "gh pr create --base $base_branch --head $head_ref --title \"Update Tekton task references\" --body \"Refresh .tekton task refs for Enterprise Contract.\" --assignee @me $label_flag"
+      echo "gh pr merge --auto --rebase $fix_branch"
       # Append to push summary if conductor is running
       if [ -n "${AUTORELEASE_PUSH_LOG:-}" ]; then
-        printf '\n  cd %s\n  git push origin %s\n  gh pr create --base %s --head %s\n' \
-          "$path" "$fix_branch" "$base_branch" "$fix_branch" \
+        printf '\n  cd %s\n  git push %s %s\n  gh pr create --base %s --head %s --title "Update Tekton task references" --body "Refresh .tekton task refs for Enterprise Contract." --assignee @me %s\n  gh pr merge --auto --rebase %s\n' \
+          "$path" "$fork" "$fix_branch" "$base_branch" "$head_ref" "$label_flag" "$fix_branch" \
           >> "$AUTORELEASE_PUSH_LOG"
       fi
     done
@@ -377,25 +393,28 @@ main() {
   # shellcheck source=/dev/null
   [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
   TRACKER=$(find_release_tracker "$VERSION" 2>/dev/null || true)
+  # AUTORELEASE_TRACKER_STEP lets the conductor call this script for ecFixes
+  # (same operation — bump task refs — just tracked under a different step key).
+  local TRACKER_STEP="${AUTORELEASE_TRACKER_STEP:-tektonTasks}"
   # Only move tracker state on a full run. A filtered (single-repo) run is a manual
   # partial retry: guarding in_progress the same way as completion (below) keeps it
   # from flipping an already-complete step back to in_progress and never restoring it.
-  [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && update_step "$VERSION" "tektonTasks" "in_progress" '{}' "$TRACKER"
+  [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && update_step "$VERSION" "$TRACKER_STEP" "in_progress" '{}' "$TRACKER"
 
   update_all
 
   print_summary
 
   # Record completion when the full repo set was processed with no failures.
-  # "All already current" (0 updated, 0 failed) is still success. A single-repo
-  # run (REPO_FILTER) covers only part of the step, so it must not complete it.
-  # update_step is called AFTER print_summary so that a push-log write failure
-  # (inside print_summary) leaves the tracker at 'in_progress' rather than 'complete'.
+  # review level: script stays in_progress. User must push/merge PRs, then
+  # explicitly mark complete: /autorelease --complete tektonTasks (or ecFixes). This prevents
+  # auto-chaining to downstream steps before the Tekton changes are merged.
+  # (Historically scripts marked themselves complete, which broke the review stop.)
   if [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && [ "${#REPOS_FAILED[@]}" -eq 0 ]; then
     local data
+    # shellcheck disable=SC2034
     data=$(jq -n --arg count "${#REPOS_UPDATED[@]}" --arg ver "$VERSION" \
       '{reposUpdated:($count|tonumber),version:$ver}' | jq -c .) || data="{}"
-    update_step "$VERSION" "tektonTasks" "complete" "$data" "$TRACKER"
   fi
 }
 

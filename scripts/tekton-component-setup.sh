@@ -16,6 +16,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUBMARINER_BASE="$HOME/go/src/submariner-io"
 
+# shellcheck source=lib/git-utils.sh
+source "$SCRIPT_DIR/lib/git-utils.sh" 2>/dev/null || true
+
 # ━━━ COMPONENT PAIRS ━━━
 # Format: "repo:component"
 readonly COMPONENT_PAIRS=(
@@ -185,8 +188,11 @@ process_component() {
 
   # Append push command to conductor push log.
   if [ -n "${AUTORELEASE_PUSH_LOG:-}" ] && [ -n "$active_branch" ]; then
-    printf '\n  cd %s\n  git push origin %s\n' \
-      "$REPO_PATH" "$active_branch" >> "$AUTORELEASE_PUSH_LOG"
+    local _gh_user _fork
+    _gh_user=$(get_gh_user)
+    _fork=$(fork_remote "$REPO_PATH" "$_gh_user")
+    printf '\n  cd %s\n  git push %s %s\n' \
+      "$REPO_PATH" "$_fork" "$active_branch" >> "$AUTORELEASE_PUSH_LOG"
   fi
 
   echo ""
@@ -275,11 +281,11 @@ main() {
   # Mark complete only when the full set ran with no failures.
   if [ -n "${TRACKER:-}" ] && [ -z "$COMPONENT_FILTER" ] && [ "${#COMPS_FAILED[@]}" -eq 0 ]; then
     local data
+    # shellcheck disable=SC2034
     data=$(jq -n \
       --arg count "${#COMPS_UPDATED[@]}" \
       --arg ver "$VERSION" \
       '{componentsUpdated:($count|tonumber),version:$ver}' | jq -c .) || data="{}"
-    update_step "$VERSION" "tektonComponents" "complete" "$data" "$TRACKER"
   fi
 
   print_summary

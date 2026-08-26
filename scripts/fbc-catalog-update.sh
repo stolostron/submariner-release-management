@@ -17,6 +17,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TRACKER_LIB="${TRACKER_LIB:-$SCRIPT_DIR/lib/jira-tracker.sh}"
 # shellcheck source=lib/jira-tracker.sh
 [ -f "$TRACKER_LIB" ] && source "$TRACKER_LIB" 2>/dev/null || true
+# shellcheck source=lib/git-utils.sh
+source "$SCRIPT_DIR/lib/git-utils.sh" 2>/dev/null || true
 
 usage() { echo "Usage: $0 <version> [--snapshot <name>] [--replace <old-version>]" >&2; }
 
@@ -102,6 +104,11 @@ make build-catalogs
 
 echo "" >&2
 
+# Resolve fork remote once for both push-log and next-steps output
+_gh_user=$(get_gh_user)
+_fork=$(fork_remote "$FBC_REPO" "$_gh_user")
+_cur_branch=$(git rev-parse --abbrev-ref HEAD)
+
 # Commit if there are changes
 if git diff --quiet && git diff --cached --quiet; then
   echo "ℹ️  No changes (catalog already up to date)" >&2
@@ -114,23 +121,18 @@ else
   # in the conductor's Pending Actions trailer alongside the push command.
   # Only emit when a commit was actually created (matches bundle-image-update.sh pattern).
   if [ -n "${AUTORELEASE_PUSH_LOG:-}" ]; then
-    _branch=$(git rev-parse --abbrev-ref HEAD)
-    printf '\n  cd %s\n  git push origin %s\n  # Wait ~15-30 min for FBC rebuild before re-running\n' \
-      "$FBC_REPO" "$_branch" >> "$AUTORELEASE_PUSH_LOG"
+    printf '\n  cd %s\n  git push %s %s\n  # Wait ~15-30 min for FBC rebuild before re-running\n' \
+      "$FBC_REPO" "$_fork" "$_cur_branch" >> "$AUTORELEASE_PUSH_LOG"
   fi
 fi
 
-# Record completion. Carry the bundleShas snapshot (via the shared, unit-tested
-# snapshot_step_data helper) so fbcCatalogUpdate's snapshot-staleness rule (see
-# STALENESS_RULES / check_freshness) can flag the catalog as stale once a newer
-# component build lands in bundleShas.
+# review level: script stays in_progress. User must push the catalog update and
+# wait for the FBC rebuild (~15-30 min), then explicitly mark complete.
 if [ -n "${TRACKER:-}" ]; then
   _data=$(snapshot_step_data "$VERSION" "$TRACKER")
-  update_step "$VERSION" "fbcCatalogUpdate" "complete" "$_data" "$TRACKER"
 fi
-
 echo "" >&2
 echo "Next steps:" >&2
 echo "  1. Review: git show" >&2
-echo "  2. Push: git push origin $(git rev-parse --abbrev-ref HEAD)" >&2
+echo "  2. Push: git push $_fork $_cur_branch" >&2
 echo "  3. Wait for FBC rebuild (~15-30 min)" >&2

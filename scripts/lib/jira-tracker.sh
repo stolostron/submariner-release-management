@@ -90,21 +90,21 @@ STEP_SKILL_HINT["createBranches"]="See .agents/workflows/create-release-branch.m
 STEP_TITLES["configureDownstream"]="Configure Konflux downstream"
 STEP_PHASE["configureDownstream"]="Branch Setup"
 STEP_DEPENDENCIES["configureDownstream"]="createBranches"
-AUTOMATION_LEVEL["configureDownstream"]="auto"
+AUTOMATION_LEVEL["configureDownstream"]="review"
 STEP_SCRIPT["configureDownstream"]="scripts/configure-downstream.sh"
 
 # ── tektonComponents ────────────────────────────────────────────────────────
 STEP_TITLES["tektonComponents"]="Tekton component setup"
 STEP_PHASE["tektonComponents"]="Branch Setup"
 STEP_DEPENDENCIES["tektonComponents"]="configureDownstream"
-AUTOMATION_LEVEL["tektonComponents"]="auto"
+AUTOMATION_LEVEL["tektonComponents"]="review"
 STEP_SCRIPT["tektonComponents"]="scripts/tekton-component-setup.sh"
 
 # ── tektonBundle ────────────────────────────────────────────────────────────
 STEP_TITLES["tektonBundle"]="Tekton bundle setup"
 STEP_PHASE["tektonBundle"]="Branch Setup"
 STEP_DEPENDENCIES["tektonBundle"]="configureDownstream"
-AUTOMATION_LEVEL["tektonBundle"]="auto"
+AUTOMATION_LEVEL["tektonBundle"]="review"
 STEP_SCRIPT["tektonBundle"]="scripts/konflux-bundle-setup.sh"
 
 # === Build Readiness steps ===
@@ -122,29 +122,29 @@ STEP_TITLES["ecFixes"]="EC compliance fixes"
 STEP_PHASE["ecFixes"]="Build Readiness"
 STEP_DEPENDENCIES["ecFixes"]=""
 STALENESS_RULES["ecFixes"]="snapshot"
-AUTOMATION_LEVEL["ecFixes"]="auto"
-STEP_SKILL_HINT["ecFixes"]="/konflux-ci-fix (EC passes only after Build Readiness PRs merge and Konflux rebuilds — snapshots from in-flight builds will not pass)"
+AUTOMATION_LEVEL["ecFixes"]="review"
+STEP_SCRIPT["ecFixes"]="scripts/tekton-task-version-bump.sh"
 
 # ── rpmLockfiles ────────────────────────────────────────────────────────────
 STEP_TITLES["rpmLockfiles"]="RPM lockfile updates"
 STEP_PHASE["rpmLockfiles"]="Build Readiness"
 STEP_DEPENDENCIES["rpmLockfiles"]=""
 STALENESS_RULES["rpmLockfiles"]="3d"
-AUTOMATION_LEVEL["rpmLockfiles"]="auto"
+AUTOMATION_LEVEL["rpmLockfiles"]="review"
 STEP_SCRIPT["rpmLockfiles"]="scripts/rpm-lockfile-update.sh"
 
 # ── tektonTasks ─────────────────────────────────────────────────────────────
 STEP_TITLES["tektonTasks"]="Tekton task updates"
 STEP_PHASE["tektonTasks"]="Build Readiness"
 STEP_DEPENDENCIES["tektonTasks"]=""
-AUTOMATION_LEVEL["tektonTasks"]="auto"
+AUTOMATION_LEVEL["tektonTasks"]="review"
 STEP_SCRIPT["tektonTasks"]="scripts/tekton-task-refs-update.sh"
 
 # ── versionLabels ───────────────────────────────────────────────────────────
 STEP_TITLES["versionLabels"]="Version label updates"
 STEP_PHASE["versionLabels"]="Build Readiness"
 STEP_DEPENDENCIES["versionLabels"]=""
-AUTOMATION_LEVEL["versionLabels"]="auto"
+AUTOMATION_LEVEL["versionLabels"]="review"
 STEP_SCRIPT["versionLabels"]="scripts/update-version-labels.sh"
 
 # ── upstreamRelease ─────────────────────────────────────────────────────────
@@ -350,7 +350,7 @@ _find_subtask() {
   fi
 
   local result
-  result=$(query_jira --jql "parent = $parent_key AND summary = \"$title\"" --fields "key" 2>/dev/null) || return 1
+  result=$(query_jira --jql "parent = $parent_key AND summary ~ \"$title\"" --fields "key" 2>/dev/null) || return 1
 
   echo "$result" | jq -r '.[0].key // empty' 2>/dev/null
 }
