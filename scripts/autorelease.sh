@@ -349,62 +349,7 @@ handle_step_override() {
   update_step "$version" "$step_key" "$action" "$data" "$tracker"
   echo "Step '$step_key' marked as $action for $version (tracker: $tracker)" >&2
 
-  # Cascade: when --refresh resets a step, downstream steps that depended on it
-  # become stale. Reset them to not_started so the conductor doesn't skip them
-  # on the next run with stale "complete" status.
-  if [ "$action" = "in_progress" ]; then
-    _cascade_refresh "$version" "$step_key" "$tracker"
-  fi
-
   return 0
-}
-
-# Build reverse-dependency map and BFS from the refreshed step, resetting each
-# downstream step to not_started in Jira. Called only by handle_step_override
-# when action=in_progress (i.e., --refresh).
-_cascade_refresh() {
-  local version="$1"
-  local refresh_step="$2"
-  local tracker="$3"
-
-  # Build reverse deps: for each step, record which steps depend on it.
-  declare -A _reverse_deps=()
-  local step dep
-  for step in "${!STEP_DEPENDENCIES[@]}"; do
-    IFS=',' read -ra _deps <<< "${STEP_DEPENDENCIES[$step]}"
-    for dep in "${_deps[@]}"; do
-      dep="${dep// /}"  # strip spaces
-      [ -z "$dep" ] && continue
-      _reverse_deps[$dep]+=" $step"
-    done
-  done
-
-  # BFS from the refreshed step to collect all transitive dependents.
-  local queue=("$refresh_step")
-  local cascade=()
-  local visited=" $refresh_step "
-
-  while [ "${#queue[@]}" -gt 0 ]; do
-    local cur="${queue[0]}"
-    queue=("${queue[@]:1}")
-    for ds in ${_reverse_deps[$cur]:-}; do
-      if [[ "$visited" != *" $ds "* ]]; then
-        visited+="$ds "
-        cascade+=("$ds")
-        queue+=("$ds")
-      fi
-    done
-  done
-
-  if [ "${#cascade[@]}" -eq 0 ]; then
-    return 0
-  fi
-
-  echo "  Cascading --refresh to downstream steps: ${cascade[*]}" >&2
-  for ds in "${cascade[@]}"; do
-    update_step "$version" "$ds" "not_started" "{}" "$tracker"
-    echo "  Step '$ds' reset to not_started" >&2
-  done
 }
 
 # --- Mark a finished release's tracker done (resolve parent + subtasks) ---
@@ -547,17 +492,52 @@ try_auto_verify() {
   #
   # Exit-code contract:
   #   0  — step verified complete; caller should `continue` the walk
-  #   1  — step not yet complete; caller stops or handles terminals
+  #   1  — step not yet complete (no evidence of work); caller runs script or stops
   #   2  — precondition failure (no oc, no network, missing repo); cannot tell
   #          whether step is done — caller should surface a diagnostic and stop
+  #   3  — work in progress (PRs open, not merged); caller should wait, not re-run
   local vdata="" verify_rc=0
   vdata=$("$verifier" "$VERSION" "$TRACKER") || verify_rc=$?
   if [ "$verify_rc" -eq 2 ]; then
-    # Precondition failure — cannot determine step status; propagate to caller.
     return 2
+  fi
+  if [ "$verify_rc" -eq 3 ]; then
+    # Work in progress (PRs open). vdata contains the Jira comment text emitted
+    # by the verifier on stdout (subshell, so _add_comment wasn't available there).
+    # Only post if the open PR set has changed since the last run (dedup via
+    # local cache file — avoids an extra Jira write just to store the hash).
+    if [ -n "$vdata" ] && [ -n "$TRACKER" ]; then
+      local new_hash
+      new_hash=$(printf '%s' "$vdata" | md5sum | cut -d' ' -f1)
+      local cache_file="${GIT_ROOT}/.git/autorelease-pr-hash-${step}"
+      local cached_hash=""
+      [ -f "$cache_file" ] && cached_hash=$(cat "$cache_file")
+      if [ "$new_hash" != "$cached_hash" ]; then
+        _add_comment "$TRACKER" "$vdata" || true
+        printf '%s' "$new_hash" > "$cache_file"
+        update_subtask_description "$VERSION" "$step" \
+          "$(printf '## PRs\n\n%s\n\n## Status\n\nPRs open — waiting for merge and Konflux rebuild.' "$vdata")" \
+          "$TRACKER" || true
+      fi
+    fi
+    return 3
   fi
   if [ "$verify_rc" -eq 0 ]; then
     echo "  ✓ ${STEP_TITLES[$step]:-$step}: verified externally" >&2
+    # PR-merge verifiers emit Jira comment text on stdout (not JSON) so they can
+    # run in this subshell context. Post the comment now, then record "{}" as the
+    # tracker data (PR URLs already in the Jira comment; JSON tracker data is
+    # secondary). Other verifiers (createBranches, upstreamRelease, ecFixes,
+    # fbcProdUrls) emit JSON — detect by attempting jq parse.
+    if [ -n "$vdata" ] && [ -n "$TRACKER" ]; then
+      if ! printf '%s' "$vdata" | jq -e . >/dev/null 2>&1; then
+        _add_comment "$TRACKER" "$vdata" || true
+        update_subtask_description "$VERSION" "$step" \
+          "$(printf '## PRs\n\n%s\n\n## Status\n\nAll PRs merged ✓' "$vdata")" \
+          "$TRACKER" || true
+        vdata="{}"
+      fi
+    fi
     [ -n "$vdata" ] || vdata="{}"
     update_step "$VERSION" "$step" "complete" "$vdata" "$TRACKER"
     _AUTORELEASE_QUIET=true
@@ -637,6 +617,26 @@ verify_ecFixes() {
   local tracker="${2:-}"
   local dash_mm="${version%.*}"
   dash_mm="${dash_mm//./-}"
+
+  # If fix-tekton-tasks-<mm> PRs are open in any repo, the Konflux rebuild
+  # hasn't happened yet — return rc=3 (PRs open) so the conductor waits
+  # instead of re-running the script unnecessarily.  We reuse _verify_prs_merged
+  # (same branch + repos as verify_tektonTasks) but only act on the "open"
+  # signal; if it returns 0 (all merged) or 1 (no PRs), fall through to EC check.
+  if command -v gh &>/dev/null; then
+    local _pr_rc=0 _pr_out=""
+    # Capture stdout: _verify_prs_merged emits PR URLs on stdout which would
+    # corrupt verify_ecFixes's own stdout (JSON returned to try_auto_verify).
+    # Re-emit only on rc=3 so try_auto_verify can post the open URLs to Jira.
+    _pr_out=$(_verify_prs_merged "$version" "" "fix-tekton-tasks-${version%.*}" \
+      "submariner-io/submariner-operator submariner-io/submariner submariner-io/lighthouse submariner-io/shipyard submariner-io/subctl stolostron/submariner-operator-fbc" \
+      2>/dev/null) || _pr_rc=$?
+    if [ "$_pr_rc" -eq 3 ]; then
+      printf '%s' "$_pr_out"
+      return 3
+    fi
+  fi
+
   if ! command -v oc &>/dev/null; then
     echo "  oc not installed — install OpenShift CLI first" >&2
     return 2
@@ -690,7 +690,11 @@ verify_ecFixes() {
     fi
     ec_status_t=$(printf '%s' "$snap_json" | _ec_status_from_snap)
     if [ "$ec_status_t" != "TestPassed" ]; then
+      local ui_url="https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com/ns/submariner-tenant/applications/submariner-${dash_mm}/snapshots/${target_snap}"
       echo "ecFixes: bundleShas snapshot: $target_snap (ec: $ec_status_t)" >&2
+      echo "  View EC failure details: $ui_url" >&2
+      echo "  If Tekton task refs are already current, EC is failing for a different reason." >&2
+      echo "  Investigate the EC log, fix the root cause, then re-run: /autorelease $version" >&2
       return 1
     fi
     snap_name="$target_snap"
@@ -715,7 +719,11 @@ verify_ecFixes() {
       '[.items[] | select(.metadata.name == $n)] | last' 2>/dev/null) || snap_obj_f="null"
     ec_status_f=$(printf '%s' "$snap_obj_f" | _ec_status_from_snap)
     if [ "$ec_status_f" != "TestPassed" ]; then
+      local ui_url_f="https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com/ns/submariner-tenant/applications/submariner-${dash_mm}/snapshots/${latest_candidate}"
       echo "ecFixes: Latest snapshot: $latest_candidate (ec: $ec_status_f)" >&2
+      echo "  View EC failure details: $ui_url_f" >&2
+      echo "  If Tekton task refs are already current, EC is failing for a different reason." >&2
+      echo "  Investigate the EC log, fix the root cause, then re-run: /autorelease $version" >&2
       return 1
     fi
     snap_name="$latest_candidate"
@@ -769,12 +777,226 @@ verify_fbcProdUrls() {
   jq -cn --arg img "$bundle_image" --arg ver "$version" '{bundleImage:$img,version:$ver}'
 }
 
+# --- PR-merge verifiers for review-level steps ---
+# Each checks that all expected PRs on a fix branch are merged, posts the PR
+# URLs to Jira as a comment, and returns JSON data for the tracker.
+# Exit codes: 0=verified complete, 1=no PRs found (script hasn't run yet),
+#             2=precondition failure, 3=PRs open but not merged yet (wait).
+
+# _verify_prs_merged: shared helper used by tektonTasks/rpmLockfiles/versionLabels.
+# Args: $1=version $2=tracker $3=branch_name $4=space-separated "org/repo" list
+# Stdout: JSON {prs:[...]} on success. Stderr: human-readable status.
+_verify_prs_merged() {
+  local version="$1"
+  local tracker="$2"
+  local branch="$3"
+  local repos="$4"
+
+  if ! command -v gh &>/dev/null; then
+    echo "  gh not installed" >&2; return 2
+  fi
+
+  local all_merged=true
+  local any_open=false
+  local merged_urls=()
+  local open_urls=()
+
+  for repo in $repos; do
+    local pr_json pr_rc=0
+    pr_json=$(gh pr list --repo "$repo" --head "$branch" --state all \
+      --json number,state,mergedAt,url --limit 5 2>/dev/null) || pr_rc=$?
+    if [ "$pr_rc" -ne 0 ]; then
+      echo "  gh pr list failed for $repo (exit $pr_rc) — network or auth issue" >&2
+      return 2
+    fi
+
+    local merged_url
+    merged_url=$(printf '%s' "$pr_json" | \
+      jq -r '[.[] | select(.state=="MERGED")] | sort_by(.mergedAt) | last | .url // empty' \
+      2>/dev/null) || merged_url=""
+
+    if [ -n "$merged_url" ]; then
+      merged_urls+=("$merged_url")
+    else
+      local open_url
+      open_url=$(printf '%s' "$pr_json" | \
+        jq -r '[.[] | select(.state=="OPEN")] | last | .url // empty' 2>/dev/null) || open_url=""
+      if [ -n "$open_url" ]; then
+        echo "  PR open, not yet merged: $open_url" >&2
+        open_urls+=("$open_url")
+        any_open=true
+      else
+        echo "  No PR found on $repo (branch: $branch)" >&2
+      fi
+      all_merged=false
+    fi
+  done
+
+  if ! $all_merged; then
+    if $any_open; then
+      # Emit open (and any already-merged) URLs on stdout so the caller can
+      # post them to Jira. _add_comment cannot be called here because this
+      # function runs inside a $() subshell in try_auto_verify, where shell
+      # functions from the parent are not available.
+      local open_list merged_list=""
+      open_list=$(printf '%s\n' "${open_urls[@]}")
+      [ "${#merged_urls[@]}" -gt 0 ] && merged_list=$(printf '%s\n' "${merged_urls[@]}")
+      if [ -n "$merged_list" ]; then
+        printf 'PRs proposed for %s (some still open):\nOpen:\n%s\nMerged:\n%s' \
+          "$branch" "$open_list" "$merged_list"
+      else
+        printf 'PRs proposed for %s:\n%s' "$branch" "$open_list"
+      fi
+      return 3
+    fi
+    return 1
+  fi
+
+  # All merged — emit comment text on stdout for try_auto_verify to post to Jira.
+  # Tracker data recorded as '{}'; PR URLs are captured in the Jira comment.
+  local url_list
+  url_list=$(printf '%s\n' "${merged_urls[@]}")
+  printf 'All PRs merged for %s:\n%s' "$branch" "$url_list"
+  return 0
+}
+
+verify_tektonTasks() {
+  local version="$1"
+  local tracker="${2:-}"
+  local major_minor="${version%.*}"
+  local branch="fix-tekton-tasks-${major_minor}"
+  # 5 component repos + FBC repo (stolostron org)
+  local repos="submariner-io/submariner-operator submariner-io/submariner submariner-io/lighthouse submariner-io/shipyard submariner-io/subctl stolostron/submariner-operator-fbc"
+  _verify_prs_merged "$version" "$tracker" "$branch" "$repos"
+}
+
+verify_rpmLockfiles() {
+  local version="$1"
+  local tracker="${2:-}"
+  local branch="update-rpm-lockfiles-${version}"
+  # RPM lockfiles only apply to submariner and shipyard
+  local repos="submariner-io/submariner submariner-io/shipyard"
+  _verify_prs_merged "$version" "$tracker" "$branch" "$repos"
+}
+
+verify_versionLabels() {
+  local version="$1"
+  local tracker="${2:-}"
+  local major_minor="${version%.*}"
+  local branch="fix-version-labels-${major_minor}"
+  # Version labels apply to all 5 component repos
+  local repos="submariner-io/submariner-operator submariner-io/submariner submariner-io/lighthouse submariner-io/shipyard submariner-io/subctl"
+  _verify_prs_merged "$version" "$tracker" "$branch" "$repos"
+}
+
+# verify_cveFixes: detect CVE fix PR state across all 7 Go repos.
+#
+# CVE fix PRs are opened from a fork (the cve-fix skill uses fork-remote PR
+# creation), so `gh pr list --head <branch>` on the upstream org won't find
+# them — the head ref includes the fork username. Use `--search "fix-VERSION-cves
+# in:head"` instead, which matches the branch name substring regardless of fork
+# ownership, returning PRs from any fork targeting any base branch.
+#
+# "No PR found" for a repo means it was clean (no CVEs → no fix branch → no PR).
+# That is treated as verified for that repo.
+#
+# Exit codes (same contract as _verify_prs_merged):
+#   0  — all repos verified (all found PRs merged, or no PR needed)
+#   1  — no CVE PRs found in any repo (script hasn't run for this version yet)
+#   2  — gh not available or query failure
+#   3  — at least one repo has an open CVE fix PR (wait for merge)
+#
+# Stdout on rc=0: Jira comment text ("All CVE fix PRs merged for X...")
+# Stdout on rc=3: Jira comment text ("CVE fix PRs open for X...")
+# Stdout must be empty on rc=1 and rc=2 (verifier failure contract).
+verify_cveFixes() {
+  local version="$1"
+  local tracker="${2:-}"
+  # The cve-fix skill names branches fix-<major.minor>-cves-<date> (not full X.Y.Z).
+  # Use major.minor so the search matches e.g. "dfarrell07:fix-0.24-cves-20260825-v4".
+  local major_minor="${version%.*}"
+  local search_term="fix-${major_minor}-cves"
+  # All 7 Go repos scanned by cve-fixes-update.sh (matches its REPO_ORDER)
+  local repos="submariner-io/submariner-operator submariner-io/submariner submariner-io/lighthouse submariner-io/shipyard submariner-io/subctl submariner-io/admiral submariner-io/cloud-prepare"
+
+  if ! command -v gh &>/dev/null; then
+    echo "  gh not installed" >&2; return 2
+  fi
+
+  local any_open=false any_found=false
+  local merged_urls=() open_urls=()
+
+  for repo in $repos; do
+    local pr_json pr_rc=0
+    # --search finds PRs from any fork whose head branch contains the search
+    # term, across all states. GitHub search in:head matches the "<user>:<branch>"
+    # head ref string, so "fix-0.24-cves" matches e.g. "dfarrell07:fix-0.24-cves-20260825-v4".
+    pr_json=$(gh pr list --repo "$repo" \
+      --search "${search_term} in:head" \
+      --state all \
+      --json number,state,mergedAt,url --limit 5 2>/dev/null) || pr_rc=$?
+    if [ "$pr_rc" -ne 0 ]; then
+      echo "  gh pr list failed for $repo (exit $pr_rc) — network or auth issue" >&2
+      return 2
+    fi
+
+    local merged_url open_url
+    merged_url=$(printf '%s' "$pr_json" | \
+      jq -r '[.[] | select(.state=="MERGED")] | sort_by(.mergedAt) | last | .url // empty' \
+      2>/dev/null) || merged_url=""
+    open_url=$(printf '%s' "$pr_json" | \
+      jq -r '[.[] | select(.state=="OPEN")] | last | .url // empty' \
+      2>/dev/null) || open_url=""
+
+    # Check open before merged: a repo may have both (merged v1, open v2 re-run).
+    # Open takes priority — an open PR blocks completion regardless of prior merges.
+    if [ -n "$open_url" ]; then
+      any_found=true any_open=true
+      open_urls+=("$open_url")
+      [ -n "$merged_url" ] && merged_urls+=("$merged_url")
+      echo "  CVE fix PR open, not yet merged: $open_url" >&2
+    elif [ -n "$merged_url" ]; then
+      any_found=true
+      merged_urls+=("$merged_url")
+    fi
+    # No PR found → repo was clean (no CVEs → no fix branch → no PR). Verified.
+  done
+
+  if ! $any_found; then
+    # No CVE fix PRs in any repo — script hasn't run for this version yet.
+    return 1
+  fi
+
+  if $any_open; then
+    local open_list merged_list=""
+    open_list=$(printf '%s\n' "${open_urls[@]}")
+    [ "${#merged_urls[@]}" -gt 0 ] && merged_list=$(printf '%s\n' "${merged_urls[@]}")
+    if [ -n "$merged_list" ]; then
+      printf 'CVE fix PRs open for %s (some still open):\nOpen:\n%s\nMerged:\n%s' \
+        "$version" "$open_list" "$merged_list"
+    else
+      printf 'CVE fix PRs open for %s:\n%s' "$version" "$open_list"
+    fi
+    return 3
+  fi
+
+  # All found PRs are merged; repos with no PR were clean.
+  local url_list
+  url_list=$(printf '%s\n' "${merged_urls[@]}")
+  printf 'All CVE fix PRs merged for %s:\n%s' "$version" "$url_list"
+  return 0
+}
+
 # Map step keys to verifier functions (only steps with external verifiers)
 declare -A STEP_VERIFIER=(
   ["createBranches"]="verify_createBranches"
   ["upstreamRelease"]="verify_upstreamRelease"
   ["ecFixes"]="verify_ecFixes"
   ["fbcProdUrls"]="verify_fbcProdUrls"
+  ["tektonTasks"]="verify_tektonTasks"
+  ["rpmLockfiles"]="verify_rpmLockfiles"
+  ["versionLabels"]="verify_versionLabels"
+  ["cveFixes"]="verify_cveFixes"
 )
 
 # RELEASE_YAML_STEPS and DIRECT_PUSH_STEPS are defined in jira-tracker.sh
@@ -1239,7 +1461,7 @@ run_conductor() {
 
       gate|hint)
         # Chain past the step if an external verifier confirms it already happened.
-        # Capture exit code to distinguish: 0=verified, 1=not done, 2=precondition failure.
+        # Exit codes: 0=verified, 1=not done, 2=precondition failure, 3=work in progress.
         _tav_rc=0; try_auto_verify "$NEXT_STEP" || _tav_rc=$?
         if [ "$_tav_rc" -eq 0 ]; then
           step_statuses[$NEXT_STEP]='complete'
@@ -1273,11 +1495,27 @@ run_conductor() {
 
       run)
         # Same-step guard: the script ran (exit 0) but the tracker still shows the
-        # step incomplete. For these commit-producing steps that almost always
-        # means the step's own output hasn't propagated yet, so lead with that
-        # rather than the opaque "didn't mark complete", then offer both re-run
-        # and the manual-escape (--complete) for work already done out-of-band.
+        # step incomplete. First try the verifier — for review-level steps this
+        # checks that PRs are merged and auto-advances if so. Only fall through
+        # to the warning if the verifier says not done yet.
         if [ "$NEXT_STEP" = "$prev_step" ]; then
+          _tav_rc=0; try_auto_verify "$NEXT_STEP" || _tav_rc=$?
+          if [ "$_tav_rc" -eq 0 ]; then
+            step_statuses[$NEXT_STEP]='complete'
+            _AUTORELEASE_NOFETCH=1
+            continue
+          fi
+          if [ "$_tav_rc" -eq 2 ]; then
+            echo "  ⚠ Cannot verify ${STEP_TITLES[$NEXT_STEP]:-$NEXT_STEP} — check preconditions above" >&2
+            echo "  Re-run once done: /autorelease $VERSION" >&2
+            break
+          fi
+          if [ "$_tav_rc" -eq 3 ]; then
+            echo "" >&2
+            echo "⏳ ${STEP_TITLES[$NEXT_STEP]:-$NEXT_STEP}: PRs open, waiting for merge" >&2
+            echo "  Re-run after PRs merge: /autorelease $VERSION" >&2
+            break
+          fi
           echo "" >&2
           echo "⚠️  ${STEP_TITLES[$NEXT_STEP]:-$NEXT_STEP}: ran, but isn't complete yet" >&2
           echo "  Its changes likely need to propagate first — push any commits," >&2
@@ -1287,6 +1525,34 @@ run_conductor() {
           break
         fi
         prev_step="$NEXT_STEP"
+
+        # For in_progress steps with a verifier, check if the work is already
+        # done (e.g. PRs merged) before re-running the script. This handles the
+        # case where the conductor is re-invoked after a review-level step ran
+        # on a prior run — prev_step starts empty each fresh invocation, so the
+        # same-step guard above never fires, but we still must not re-run the
+        # script if the external state shows the step is complete.
+        local_status="${step_statuses[$NEXT_STEP]:-}"
+        if [ "$local_status" = "in_progress" ] && [ -n "${STEP_VERIFIER[$NEXT_STEP]:-}" ]; then
+          _tav_rc=0; try_auto_verify "$NEXT_STEP" || _tav_rc=$?
+          if [ "$_tav_rc" -eq 0 ]; then
+            step_statuses[$NEXT_STEP]='complete'
+            _AUTORELEASE_NOFETCH=1
+            continue
+          fi
+          if [ "$_tav_rc" -eq 2 ]; then
+            echo "  ⚠ Cannot verify ${STEP_TITLES[$NEXT_STEP]:-$NEXT_STEP} — check preconditions above" >&2
+            echo "  Re-run once done: /autorelease $VERSION" >&2
+            break
+          fi
+          if [ "$_tav_rc" -eq 3 ]; then
+            echo "" >&2
+            echo "⏳ ${STEP_TITLES[$NEXT_STEP]:-$NEXT_STEP}: PRs open, waiting for merge" >&2
+            echo "  Re-run after PRs merge: /autorelease $VERSION" >&2
+            break
+          fi
+          # Verifier returned 1: no PRs found yet — fall through to run the script.
+        fi
 
         local_script="${STEP_SCRIPT[$NEXT_STEP]:-}"
         local_args="${STEP_EXTRA_ARGS[$NEXT_STEP]:-}"
@@ -1300,10 +1566,10 @@ run_conductor() {
         local_exit=0
         if [ -n "$GIT_ROOT" ]; then
           # shellcheck disable=SC2086  # Intentional word splitting on local_args
-          (cd "$GIT_ROOT" && "$GIT_ROOT/$local_script" "$VERSION" $local_args) >&2 || local_exit=$?
+          (cd "$GIT_ROOT" && AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$GIT_ROOT/$local_script" "$VERSION" $local_args) >&2 || local_exit=$?
         else
           # shellcheck disable=SC2086
-          "$local_script" "$VERSION" $local_args >&2 || local_exit=$?
+          AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$local_script" "$VERSION" $local_args >&2 || local_exit=$?
         fi
 
         # Classify any push-log growth this step produced. Both kinds can occur
@@ -1318,6 +1584,19 @@ run_conductor() {
         [ -n "$_growth_flag" ] && printf -v "$_growth_flag" '%s' 1
 
         echo "" >&2
+        if [ "$local_exit" -eq 2 ]; then
+          # rc=2 means the script ran successfully but has nothing to commit:
+          # task versions and SHAs are already current, but EC is still failing.
+          # The script has already emitted a Konflux UI URL + EC log guidance.
+          # Stop the conductor here so we don't re-dispatch endlessly.
+          echo "⏸ ${local_title}: NOTHING TO UPDATE" >&2
+          echo "  Task versions and SHAs are already current." >&2
+          echo "  EC is failing for a reason other than stale task refs." >&2
+          echo "  See the Konflux UI URL above to download the EC log." >&2
+          echo "  After downloading the log, re-run: /autorelease $VERSION" >&2
+          break
+        fi
+
         if [ "$local_exit" -ne 0 ]; then
           echo "❌ ${local_title} failed (exit $local_exit)" >&2
           echo "  Fix the issue, then re-run: /autorelease $VERSION" >&2
