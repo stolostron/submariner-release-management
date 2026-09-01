@@ -146,8 +146,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-36927
             source: issues.redhat.com
-          - id: ACM-37192
-            source: issues.redhat.com
           - id: ACM-40464
             source: issues.redhat.com
       cves:
