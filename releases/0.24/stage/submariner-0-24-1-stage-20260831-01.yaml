@@ -138,8 +138,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-32385
             source: issues.redhat.com
-          - id: ACM-32615
-            source: issues.redhat.com
           - id: ACM-34236
             source: issues.redhat.com
           - id: ACM-34304
