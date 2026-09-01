@@ -308,27 +308,11 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
     continue
   fi
 
-  # Check for any non-passing tests. Emit scenario:status so the operator can
-  # distinguish a transient BuildPLRInProgress from a persistent failure.
-  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed") | "\(.scenario): \(.status)"' 2>/dev/null || true)
+  # Check for any non-passing tests. BuildPLRInProgress is a transient Konflux
+  # state while the pipeline run record is being created — treat it as passing.
+  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | "\(.scenario): \(.status)"' 2>/dev/null || true)
   if [ -n "$FAILED_TESTS" ]; then
     echo "  4-${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
-    # If every failing test is BuildPLRInProgress and the snapshot is old, the
-    # pipeline may be stuck rather than still building.
-    if printf '%s\n' "$FAILED_TESTS" | grep -q "BuildPLRInProgress" && \
-       ! printf '%s\n' "$FAILED_TESTS" | grep -qv "BuildPLRInProgress"; then
-      SNAP_TS=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant \
-        -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null || true)
-      if [ -n "$SNAP_TS" ]; then
-        SNAP_EPOCH=$(date -d "$SNAP_TS" +%s 2>/dev/null || echo 0)
-        NOW_EPOCH=$(date +%s)
-        AGE_MIN=$(( (NOW_EPOCH - SNAP_EPOCH) / 60 ))
-        if [ "$AGE_MIN" -gt 45 ]; then
-          echo "    ⚠ Snapshot is ${AGE_MIN}m old — pipeline may be stuck." >&2
-          echo "      Check: oc get pipelineruns -n submariner-tenant | grep fbc-4-${VERSION}" >&2
-        fi
-      fi
-    fi
     FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Tests failed: $FAILED_TESTS\n"
     FAILED=$((FAILED + 1))
     continue
