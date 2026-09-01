@@ -138,8 +138,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-32385
             source: issues.redhat.com
-          - id: ACM-32580
-            source: issues.redhat.com
           - id: ACM-32615
             source: issues.redhat.com
           - id: ACM-34236
@@ -295,4 +293,3 @@ spec:
           component: subctl-0-24
         - key: CVE-2026-66788
           component: submariner-operator-0-24
-
