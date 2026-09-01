@@ -206,15 +206,6 @@ spec:
           component: submariner-operator-0-24
         - key: CVE-2026-42502
           component: submariner-route-agent-0-24
-        # CVE-2026-49478
-        - key: CVE-2026-49478
-          component: submariner-operator-0-24
-        # CVE-2026-50162 (2 issues)
-        - key: CVE-2026-50162
-          component: submariner-operator-0-24
-        # CVE-2026-50274
-        - key: CVE-2026-50274
-          component: lighthouse-coredns-0-24
         # CVE-2026-56852
         - key: CVE-2026-56852
           component: subctl-0-24
@@ -304,6 +295,4 @@ spec:
           component: subctl-0-24
         - key: CVE-2026-66788
           component: submariner-operator-0-24
-        # CVE-2026-71235
-        - key: CVE-2026-71235
-          component: subctl-0-24
+
