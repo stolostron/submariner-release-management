@@ -53,8 +53,8 @@ fi
 # Source Shared Library
 # ============================================================================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$(cd "$SCRIPT_DIR/lib" && pwd)"
+ADD_RELEASE_NOTES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(cd "$ADD_RELEASE_NOTES_DIR/lib" && pwd)"
 
 # shellcheck source=lib/release-notes-common.sh
 source "$LIB_DIR/release-notes-common.sh"
@@ -89,9 +89,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "Phase 1: Collect raw data"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 if [[ -n "$STAGE_YAML_ARG" ]]; then
-  "$SCRIPT_DIR/release-notes/collect.sh" "$VERSION" --stage-yaml "$STAGE_YAML_ARG"
+  "$ADD_RELEASE_NOTES_DIR/release-notes/collect.sh" "$VERSION" --stage-yaml "$STAGE_YAML_ARG"
 else
-  "$SCRIPT_DIR/release-notes/collect.sh" "$VERSION"
+  "$ADD_RELEASE_NOTES_DIR/release-notes/collect.sh" "$VERSION"
 fi
 
 if [[ ! -f "$RELEASE_NOTES_DATA" ]]; then
@@ -105,7 +105,7 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Phase 2: Filter and group issues"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-"$SCRIPT_DIR/release-notes/prepare.sh"
+"$ADD_RELEASE_NOTES_DIR/release-notes/prepare.sh"
 
 if [[ ! -f "$RELEASE_NOTES_TOPICS" ]]; then
   echo "❌ ERROR: Phase 2 failed (no topics file)" >&2
@@ -118,7 +118,7 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Phase 3: Auto-apply release notes"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-"$SCRIPT_DIR/release-notes/auto-apply.sh"
+"$ADD_RELEASE_NOTES_DIR/release-notes/auto-apply.sh"
 
 echo ""
 
@@ -130,7 +130,7 @@ if [[ "$CVE_COUNT" -gt 0 ]]; then
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   STAGE_YAML=$(jq -r '.metadata.stage_yaml' "$RELEASE_NOTES_DATA")
-  if ! "$SCRIPT_DIR/release-notes/verify-cve-fixes.sh" "$STAGE_YAML"; then
+  if ! "$ADD_RELEASE_NOTES_DIR/release-notes/verify-cve-fixes.sh" "$STAGE_YAML"; then
     echo ""
     echo "⚠️  Some CVEs are NOT actually fixed - see verification output above"
     echo "Remove unfixed CVEs from commit: git commit --amend"
