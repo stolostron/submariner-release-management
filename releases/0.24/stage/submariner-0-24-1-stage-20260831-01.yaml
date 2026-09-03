@@ -31,8 +31,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-36912
             source: issues.redhat.com
-          - id: ACM-38029
-            source: issues.redhat.com
           - id: ACM-38289
             source: issues.redhat.com
           - id: ACM-38295
@@ -107,17 +105,9 @@ spec:
             source: issues.redhat.com
           - id: ACM-39568
             source: issues.redhat.com
-          - id: ACM-39866
-            source: issues.redhat.com
           - id: ACM-41039
             source: issues.redhat.com
-          - id: ACM-41503
-            source: issues.redhat.com
           - id: ACM-42640
-            source: issues.redhat.com
-          - id: ACM-42934
-            source: issues.redhat.com
-          - id: ACM-42948
             source: issues.redhat.com
           # Non-CVE Issues (16):
           - id: ACM-30182
