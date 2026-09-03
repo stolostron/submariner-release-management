@@ -109,8 +109,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-39866
             source: issues.redhat.com
-          - id: ACM-40733
-            source: issues.redhat.com
           - id: ACM-41039
             source: issues.redhat.com
           - id: ACM-41503
@@ -173,9 +171,6 @@ spec:
           component: submariner-operator-0-24
         - key: CVE-2026-42502
           component: submariner-route-agent-0-24
-        # CVE-2026-56852
-        - key: CVE-2026-56852
-          component: subctl-0-24
         # CVE-2026-62309
         - key: CVE-2026-62309
           component: lighthouse-coredns-0-24
