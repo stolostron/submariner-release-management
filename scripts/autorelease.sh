@@ -1766,9 +1766,15 @@ if [ "${_AUTORELEASE_TESTING:-}" != "true" ]; then
   fi
 
   if [ -z "$TRACKER" ]; then
-    echo "❌ No release tracker found for $VERSION" >&2
-    echo "   Create one first: /create-release-tracker $VERSION" >&2
-    exit 1
+    echo "No release tracker found for $VERSION — creating one now (~15s)..." >&2
+    _new_tracker=$(create_release_tracker "$VERSION" "$RELEASE_TYPE" "pyadav@redhat.com") || {
+      echo "❌ Failed to create release tracker for $VERSION" >&2
+      echo "   Run manually: /create-release-tracker $VERSION" >&2
+      exit 1
+    }
+    TRACKER="$_new_tracker"
+    echo "✓ Tracker created: $TRACKER" >&2
+    echo "" >&2
   fi
 
   # Validate --complete / --refresh step keys before use (fast-fail with helpful

@@ -13,7 +13,8 @@ gate, review, or manual steps. Re-run to advance.
 
 **Alternative:** `make create-release-tracker VERSION=<version>`
 
-Creates a Jira tracker with subtasks for each step below. Run at the start of every release.
+Usually handled automatically by `/autorelease`. Run manually only to pre-create the
+tracker before running autorelease, or to recreate an accidentally deleted one.
 Release scripts automatically update tracker subtasks as they complete.
 
 ## 1. Create Upstream Release Branch (Y-stream only)
