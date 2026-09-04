@@ -531,11 +531,23 @@ try_auto_verify() {
     # fbcProdUrls) emit JSON — detect by attempting jq parse.
     if [ -n "$vdata" ] && [ -n "$TRACKER" ]; then
       if ! printf '%s' "$vdata" | jq -e . >/dev/null 2>&1; then
+        # Plain text output: PR-merge verifiers (tektonTasks, rpmLockfiles, etc.)
         _add_comment "$TRACKER" "$vdata" || true
         update_subtask_description "$VERSION" "$step" \
           "$(printf '## PRs\n\n%s\n\n## Status\n\nAll PRs merged ✓' "$vdata")" \
           "$TRACKER" || true
         vdata="{}"
+      else
+        # JSON output: verifiers like ecFixes that include a `prs` field alongside
+        # structured data. Extract and post PR URLs as a Jira comment if present.
+        local _prs_text
+        _prs_text=$(printf '%s' "$vdata" | jq -r '.prs // empty' 2>/dev/null) || _prs_text=""
+        if [ -n "$_prs_text" ] && [ -n "$TRACKER" ]; then
+          _add_comment "$TRACKER" "$_prs_text" || true
+          update_subtask_description "$VERSION" "$step" \
+            "$(printf '## PRs\n\n%s\n\n## Status\n\nAll PRs merged, EC passed ✓' "$_prs_text")" \
+            "$TRACKER" || true
+        fi
       fi
     fi
     [ -n "$vdata" ] || vdata="{}"
@@ -623,17 +635,22 @@ verify_ecFixes() {
   # instead of re-running the script unnecessarily.  We reuse _verify_prs_merged
   # (same branch + repos as verify_tektonTasks) but only act on the "open"
   # signal; if it returns 0 (all merged) or 1 (no PRs), fall through to EC check.
+  local _merged_pr_text=""
   if command -v gh &>/dev/null; then
     local _pr_rc=0 _pr_out=""
     # Capture stdout: _verify_prs_merged emits PR URLs on stdout which would
     # corrupt verify_ecFixes's own stdout (JSON returned to try_auto_verify).
-    # Re-emit only on rc=3 so try_auto_verify can post the open URLs to Jira.
+    # Re-emit on rc=3 (open PRs); stash on rc=0 (all merged) for inclusion in
+    # the JSON returned to try_auto_verify so it can post a completion comment.
     _pr_out=$(_verify_prs_merged "$version" "" "fix-tekton-tasks-${version%.*}" \
       "submariner-io/submariner-operator submariner-io/submariner submariner-io/lighthouse submariner-io/shipyard submariner-io/subctl stolostron/submariner-operator-fbc" \
       2>/dev/null) || _pr_rc=$?
     if [ "$_pr_rc" -eq 3 ]; then
       printf '%s' "$_pr_out"
       return 3
+    fi
+    if [ "$_pr_rc" -eq 0 ] && [ -n "$_pr_out" ]; then
+      _merged_pr_text="$_pr_out"
     fi
   fi
 
@@ -729,7 +746,8 @@ verify_ecFixes() {
     snap_name="$latest_candidate"
   fi
   [ -n "$snap_name" ] && [ "$snap_name" != "null" ] || return 1
-  jq -cn --arg snap "$snap_name" --arg ver "$version" '{snapshot:$snap,version:$ver}'
+  jq -cn --arg snap "$snap_name" --arg ver "$version" --arg prs "$_merged_pr_text" \
+    '{snapshot:$snap, version:$ver, prs:($prs | if . == "" then null else . end)}'
 }
 
 verify_fbcProdUrls() {

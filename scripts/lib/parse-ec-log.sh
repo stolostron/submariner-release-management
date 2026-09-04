@@ -54,11 +54,13 @@ fi
 # The ec-cli task emits a block starting with "Success: " or "Failure: " that
 # contains the structured violation/warning counts. Extract lines between the
 # first occurrence of that marker and the debug output footer.
-EC_REPORT=$(sed -n '/^[[:space:]]*\(Success\|Failure\): /,/^----- DEBUG OUTPUT -----/p' "$LOG_FILE" 2>/dev/null | head -c 200000)
+# Use `|| true` to suppress SIGPIPE exit (141) when head -c closes early on large logs.
+# set -euo pipefail treats the sed SIGPIPE as a fatal error without the guard.
+EC_REPORT=$(sed -n '/^[[:space:]]*\(Success\|Failure\): /,/^----- DEBUG OUTPUT -----/p' "$LOG_FILE" 2>/dev/null | head -c 200000 || true)
 
 if [ -z "$EC_REPORT" ]; then
   # Try the simpler marker used in some log variants
-  EC_REPORT=$(sed -n '/^[[:space:]]*\(Passed\|Failed\)$/,/^$/p' "$LOG_FILE" 2>/dev/null | head -c 200000)
+  EC_REPORT=$(sed -n '/^[[:space:]]*\(Passed\|Failed\)$/,/^$/p' "$LOG_FILE" 2>/dev/null | head -c 200000 || true)
 fi
 
 if [ -z "$EC_REPORT" ]; then
@@ -69,45 +71,72 @@ if [ -z "$EC_REPORT" ]; then
 fi
 
 # ── Extract failing rule names ─────────────────────────────────────────────────
-# Rule names appear as "msg=<rule>" in JSON-formatted output, or as bare
-# "Name: <rule>" lines in the text summary. Collect both forms.
-RULES_FROM_MSG=$(printf '%s' "$EC_REPORT" | grep -oP '(?<="msg"|msg=")[^"]+' 2>/dev/null | grep -v "^$" | sort -u || true)
-RULES_FROM_NAME=$(printf '%s' "$EC_REPORT" | grep -oP '(?<=^|\s)Name:\s+\K\S+' 2>/dev/null | sort -u || true)
+# Rule names appear in three formats depending on which EC log section is present:
+#   1. JSON:   "msg":"rule.name" or msg="rule.name"
+#   2. Text:   "Name: rule.name"
+#   3. Text:   "✕ [Violation] rule.name"  (the primary format in STEP-VALIDATE output)
+#   4. JSON:   "code":"rule.name"
+# msg= fields contain human-readable text; filter to dotted rule-name tokens only
+RULES_FROM_MSG=$(printf '%s' "$EC_REPORT" | grep -oP '(?<="msg"|msg=")[^"]+' 2>/dev/null \
+  | grep -oE '^[a-z_]+\.[a-z_]+(\.[a-z_]+)*$' | sort -u || true)
+# Filter Name: matches to exclude component names (sha256 digests, image refs) but keep rule names
+RULES_FROM_NAME=$(printf '%s' "$EC_REPORT" | grep -oP '(?<=^|\s)Name:\s+\K\S+' 2>/dev/null \
+  | grep -v '@sha256\|sha256:\|quay\.io\|registry\.' | sort -u || true)
+# Primary format: "✕ [Violation] rule.name" lines in STEP-VALIDATE text output
+RULES_FROM_VIOLATION=$(printf '%s' "$EC_REPORT" | grep -oP '(?<=✕ \[Violation\] )\S+' 2>/dev/null | sort -u || true)
 # Also catch "code:" style rule identifiers (e.g. required_tasks.missing_required_task)
-RULES_FROM_CODE=$(printf '%s' "$EC_REPORT" | grep -oP '(?<="code"|code=")[^"]+' 2>/dev/null | grep '\.' | sort -u || true)
+RULES_FROM_CODE=$(printf '%s' "$EC_REPORT" | grep -oP '(?<="code"|code=")[^"]+' 2>/dev/null \
+  | grep '\.' | grep -v '@sha256\|sha256:' | sort -u || true)
 
-ALL_RULES=$(printf '%s\n%s\n%s\n' "$RULES_FROM_MSG" "$RULES_FROM_NAME" "$RULES_FROM_CODE" \
+ALL_RULES=$(printf '%s\n%s\n%s\n%s\n' "$RULES_FROM_MSG" "$RULES_FROM_NAME" "$RULES_FROM_VIOLATION" "$RULES_FROM_CODE" \
   | grep -v "^$" | sort -u || true)
 
 # ── Extract affected task names ────────────────────────────────────────────────
 # EC reports task names after "Term:" — these are tasks that are missing or at
-# the wrong version. This is the primary signal for which tasks to bump.
-AFFECTED_TASKS=$(printf '%s' "$EC_REPORT" | grep "Term:" | awk '{print $2}' | sort -u | grep -v "^$" || true)
+# the wrong version. Scope to Term: lines following Violation markers only, not
+# Warning blocks (which also have Term: lines for outdated-but-not-blocking tasks).
+AFFECTED_TASKS=$(printf '%s' "$EC_REPORT" \
+  | awk '/✕ \[Violation\]/{in_v=1} in_v && /^[[:space:]]*Term:/{print $2} /^[[:space:]]*$/{in_v=0}' \
+  | sort -u | grep -v "^$" || true)
+# Fall back to all Term: lines if the violation-scoped extraction produced nothing
+# (handles log variants that don't use the ✕ marker)
+if [ -z "$AFFECTED_TASKS" ]; then
+  AFFECTED_TASKS=$(printf '%s' "$EC_REPORT" | grep "Term:" | awk '{print $2}' | sort -u | grep -v "^$" || true)
+fi
 
 # ── Determine fixability ───────────────────────────────────────────────────────
 # "Fixable by version bump" means the failing rules are about task versions or
 # missing required tasks — the kinds ec-fix addresses. Rules about signatures,
-# SBOM, Dockerfile, or custom policies need different fixes.
+# SBOM, Dockerfile, operator content, or custom policies need different fixes.
+#
+# trusted_task.trusted and slsa_build_scripted_build.image_built_by_trusted_task
+# are also fixable by bumping the SHA reference — they mean an untrusted SHA is
+# in the pipeline, which pipeline-patcher corrects.
 TASK_RELATED_RULES=$(printf '%s' "$ALL_RULES" | grep -iE \
-  "required_tasks|missing_required_task|missing_required_step_runner|task.*version|tasks\." \
+  "required_tasks|missing_required_task|missing_required_step_runner|task.*version|tasks\.|trusted_task|slsa_build_scripted_build" \
   2>/dev/null || true)
 TASK_RELATED_RULES=$(printf '%s' "$TASK_RELATED_RULES" | grep -v "^$" || true)
 
 NON_TASK_RULES=$(printf '%s' "$ALL_RULES" | grep -ivE \
-  "required_tasks|missing_required_task|missing_required_step_runner|task.*version|tasks\." \
+  "required_tasks|missing_required_task|missing_required_step_runner|task.*version|tasks\.|trusted_task|slsa_build_scripted_build" \
   2>/dev/null || true)
 NON_TASK_RULES=$(printf '%s' "$NON_TASK_RULES" | grep -v "^$" || true)
 
+# Use AFFECTED_TASKS as a signal only when there are also rule violations to confirm it.
+# A passing log can have Term: lines in Warning blocks — AFFECTED_TASKS alone without
+# any failing rules should not cause a "yes" classification.
 if [ -z "$ALL_RULES" ] && [ -z "$AFFECTED_TASKS" ]; then
   FIXABLE="unknown"
-elif [ -n "$AFFECTED_TASKS" ] || [ -n "$TASK_RELATED_RULES" ]; then
+elif [ -n "$TASK_RELATED_RULES" ] || { [ -n "$AFFECTED_TASKS" ] && [ -n "$ALL_RULES" ]; }; then
   if [ -z "$NON_TASK_RULES" ]; then
     FIXABLE="yes"
   else
     FIXABLE="partial"  # some rules fixable, some need manual intervention
   fi
-else
+elif [ -n "$ALL_RULES" ]; then
   FIXABLE="no"
+else
+  FIXABLE="unknown"
 fi
 
 # ── Emit structured output ────────────────────────────────────────────────────
@@ -128,3 +157,13 @@ fi
 
 echo ""
 echo "FIXABLE_BY_VERSION_BUMP: $FIXABLE"
+
+if [ "$FIXABLE" = "partial" ] || [ "$FIXABLE" = "no" ]; then
+  echo ""
+  echo "NON_TASK_RULES (require manual fix):"
+  if [ -n "$NON_TASK_RULES" ]; then
+    printf '%s\n' "$NON_TASK_RULES" | sed 's/^/  /'
+  else
+    echo "  (none identified — check FAILING_RULES above)"
+  fi
+fi
