@@ -704,9 +704,35 @@ create_release_tracker() {
 
   # --- Create parent task ---
 
-  local desc_file
-  desc_file=$(mktemp)
-  _generate_parent_description "$version" "$release_type" "$ACM_VERSION" > "$desc_file"
+  local desc_text create_json_file
+  desc_text=$(_generate_parent_description "$version" "$release_type" "$ACM_VERSION")
+  create_json_file=$(mktemp --suffix=.json)
+
+  # Build create payload as JSON so we can include components (id=33720,
+  # "Multicluster Networking[ext]"). acli --from-json passes additionalAttributes
+  # keys straight through to the Jira REST API fields object.
+  # Description must be ADF; wrap each non-empty line as a paragraph node.
+  local adf_paragraphs
+  adf_paragraphs=$(printf '%s' "$desc_text" | while IFS= read -r line || [ -n "$line" ]; do
+    printf '%s' "$line" | jq -Rc '{type:"paragraph",content:[{type:"text",text:.}]}'
+  done | jq -sc '.')
+
+  jq -n \
+    --arg summary "Release Submariner $version" \
+    --arg assignee "@me" \
+    --argjson labels '["release-tracking","submariner","'"$version_label"'"]' \
+    --argjson paragraphs "$adf_paragraphs" \
+    '{
+      projectKey: "ACM",
+      type: "Task",
+      summary: $summary,
+      assignee: $assignee,
+      labels: $labels,
+      description: {type:"doc",version:1,content:$paragraphs},
+      additionalAttributes: {
+        components: [{id:"33720"}]
+      }
+    }' > "$create_json_file"
 
   local parent_output parent_key
   if [ "${JIRA_TRACKER_DRY_RUN:-}" = "true" ]; then
@@ -714,21 +740,16 @@ create_release_tracker() {
     parent_key="ACM-DRY-RUN"
   else
     parent_output=$(_acli jira workitem create \
-      --project ACM \
-      --type Task \
-      --summary "Release Submariner $version" \
-      --label "release-tracking,submariner,$version_label" \
-      --assignee "@me" \
-      --description-file "$desc_file" \
+      --from-json "$create_json_file" \
       --json </dev/null) || {
       echo "❌ ERROR: Failed to create parent task" >&2
-      rm -f "$desc_file"
+      rm -f "$create_json_file"
       return 1
     }
     parent_key=$(echo "$parent_output" | jq -r '.key // empty' 2>/dev/null) || parent_key=""
   fi
 
-  rm -f "$desc_file"
+  rm -f "$create_json_file"
 
   if [ -z "$parent_key" ]; then
     echo "❌ ERROR: Could not extract parent key from create response" >&2

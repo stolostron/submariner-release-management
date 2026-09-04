@@ -443,7 +443,7 @@ ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes verified (exit 0)" "$ec_exit" "0"
 assert_eq "verify_ecFixes emits snapshot+version" "$ec_out" \
-  '{"snapshot":"submariner-0-99-abc123","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-abc123","version":"0.99.1","prs":null}'
 
 # 22a: fallback path must reject PR builds. The only EC-passing snapshot is a
 # pull_request build (not a real main-branch build), so verify must decline —
@@ -461,7 +461,7 @@ ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes picks push over newer PR build (exit 0)" "$ec_exit" "0"
 assert_eq "verify_ecFixes selects the push snapshot" "$ec_out" \
-  '{"snapshot":"submariner-0-99-push-old","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-push-old","version":"0.99.1","prs":null}'
 
 # 22a3/22a4: the accepted main-branch event set is push OR incoming OR
 # retest-all-comment. Cover the two non-push types so dropping either clause
@@ -471,14 +471,14 @@ ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes accepts incoming-event snapshot (exit 0)" "$ec_exit" "0"
 assert_eq "verify_ecFixes selects the incoming snapshot" "$ec_out" \
-  '{"snapshot":"submariner-0-99-incoming","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-incoming","version":"0.99.1","prs":null}'
 
 _OC_SNAPSHOTS='{"items":[{"metadata":{"name":"submariner-0-99-retest","labels":{"pac.test.appstudio.openshift.io/event-type":"retest-all-comment"},"annotations":{"test.appstudio.openshift.io/status":"[{\"scenario\":\"submariner-enterprise-contract\",\"status\":\"TestPassed\"}]"}}}]}'
 ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes accepts retest-all-comment snapshot (exit 0)" "$ec_exit" "0"
 assert_eq "verify_ecFixes selects the retest snapshot" "$ec_out" \
-  '{"snapshot":"submariner-0-99-retest","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-retest","version":"0.99.1","prs":null}'
 
 # 22b-e: with a tracker, verify_ecFixes checks EC on the *bundleShas* snapshot
 # (reconcilable rule) instead of the latest EC-passing one.
@@ -490,7 +490,7 @@ ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" "FAKE-123" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes (tracker) verifies bundleShas snapshot" "$ec_exit" "0"
 assert_eq "verify_ecFixes (tracker) records bundleShas snapshot" "$ec_out" \
-  '{"snapshot":"submariner-0-99-BBB","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-BBB","version":"0.99.1","prs":null}'
 
 # 22d: bundleShas snapshot absent from the snapshot list → return 1 (can't verify).
 # The list DOES contain a valid fallback snapshot (push + EC-passing), so a
@@ -510,7 +510,7 @@ ec_exit=0
 ec_out=$(verify_ecFixes "0.99.1" "FAKE-123" 2>/dev/null) || ec_exit=$?
 assert_eq "verify_ecFixes (tracker, no bundleShas snapshot) falls back" "$ec_exit" "0"
 assert_eq "verify_ecFixes fallback records latest EC-passing" "$ec_out" \
-  '{"snapshot":"submariner-0-99-abc123","version":"0.99.1"}'
+  '{"snapshot":"submariner-0-99-abc123","version":"0.99.1","prs":null}'
 
 # 22f: FAILED bundleShas read (get_step non-zero) must NOT fall back to the
 # latest snapshot — that would verify/record EC against the wrong build. A valid

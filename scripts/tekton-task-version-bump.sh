@@ -412,6 +412,15 @@ ec_log_diagnosis() {
               echo "     appear current. The log may be stale (from a previous run)." >&2
               echo "     Download a fresh log from the URL above and re-run." >&2
             fi
+            if printf '%s' "$parse_out" | grep -q "NON_TASK_RULES"; then
+              local non_task_section
+              non_task_section=$(printf '%s' "$parse_out" | sed -n '/NON_TASK_RULES/,/^$/p' | grep -v "^$")
+              if printf '%s' "$non_task_section" | grep -qv "(none"; then
+                echo "" >&2
+                echo "  ⚠  Non-task violations require manual fixes:" >&2
+                printf '%s\n' "$non_task_section" | grep "^  " | sed 's/^/    /' >&2
+              fi
+            fi
           fi
         fi
       fi
