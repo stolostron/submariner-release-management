@@ -209,19 +209,26 @@ update_lockfiles() {
     fi
 
     set +e  # Disable errexit to capture exit code and cleanup
-    local LOCKFILE_PATTERN
+    local LOCKFILE_PATTERN _lockfile_log
+    _lockfile_log=$(mktemp)
     if [[ "$COMPONENT_FILTER" =~ $COMPONENT_PATTERN ]]; then
       LOCKFILE_PATTERN=".rpm-lockfiles/$COMPONENT_FILTER/rpms.lock.yaml"
       echo "Running: .rpm-lockfiles/update-lockfile.sh $FIX_BRANCH $COMPONENT_FILTER"
       echo ""
-      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" "$COMPONENT_FILTER"
+      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" "$COMPONENT_FILTER" > "$_lockfile_log" 2>&1
     else
       LOCKFILE_PATTERN=".rpm-lockfiles/*/rpms.lock.yaml"
       echo "Running: .rpm-lockfiles/update-lockfile.sh $FIX_BRANCH"
       echo ""
-      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH"
+      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" > "$_lockfile_log" 2>&1
     fi
     local LOCKFILE_EXIT=$?
+    # Show status lines and "No sources" warnings; suppress dnf/pip/skopeo setup noise
+    # and update-lockfile.sh's own manual-use "To commit/To push" instructions.
+    grep -E '^(--- |WARNING:rpm_lockfile: No sources)' "$_lockfile_log" || true
+    # On failure, dump the full log so the problem is diagnosable.
+    [ "$LOCKFILE_EXIT" -ne 0 ] && cat "$_lockfile_log" >&2
+    rm -f "$_lockfile_log"
     set -e
     rm -f .rpm-lockfiles/update-lockfile.sh
 
@@ -357,16 +364,8 @@ main() {
 
   print_summary
 
-  # update_step is called AFTER print_summary so that a push-log write failure
-  # (inside print_summary) leaves the tracker at 'in_progress' rather than 'complete'.
   # review level: script stays in_progress. User must push the lockfile changes and
-  # wait for Konflux to rebuild, then explicitly mark complete.
-  if [ -n "${TRACKER:-}" ] && [ "$COMPONENT_FILTER" = "all" ] && \
-     [ "${#REPOS_FAILED[@]}" -eq 0 ] && [ "$problem_skips" -eq 0 ]; then
-    local data
-    # shellcheck disable=SC2034
-    data=$(jq -n --arg count "${#REPOS_UPDATED[@]}" '{reposUpdated:($count|tonumber)}' | jq -c .) || data="{}"
-  fi
+  # wait for Konflux to rebuild, then explicitly mark complete via autorelease verifier.
 }
 
 main "$@"
