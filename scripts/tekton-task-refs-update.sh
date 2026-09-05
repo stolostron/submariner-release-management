@@ -23,9 +23,6 @@ set -euo pipefail
 
 # Resolve script location before any cd so lib paths work from any clone location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Capture the lib dir before sourcing: jira-tracker.sh (line 22) unconditionally
-# resets SCRIPT_DIR to its own directory (scripts/lib/). Using _LIB_DIR for all
-# subsequent lib sources prevents that contamination from corrupting our paths.
 _LIB_DIR="$SCRIPT_DIR/lib"
 
 # Source jira-tracker.sh early to provide FBC_REPO_DEFAULT before we assign

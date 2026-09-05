@@ -12,8 +12,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GIT_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel 2>/dev/null || echo "")"
-# Capture the lib dir before sourcing: each lib resets SCRIPT_DIR to its OWN
-# location, so reusing SCRIPT_DIR for later source lines would resolve to lib/lib.
 _LIB_DIR="$SCRIPT_DIR/lib"
 # shellcheck source=lib/jira-tracker.sh
 source "$_LIB_DIR/jira-tracker.sh"
