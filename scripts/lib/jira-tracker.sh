@@ -21,11 +21,11 @@ fi
 _JIRA_TRACKER_SOURCED=true
 
 # Source shared Jira helpers (query_jira, view_jira, calculate_acm_version)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_JIRA_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=release-notes-common.sh
-source "$SCRIPT_DIR/release-notes-common.sh" 2>/dev/null || true
+source "$_JIRA_LIB_DIR/release-notes-common.sh" 2>/dev/null || true
 # shellcheck source=fbc-scope.sh
-source "$SCRIPT_DIR/fbc-scope.sh"
+source "$_JIRA_LIB_DIR/fbc-scope.sh"
 
 # ============================================================================
 # Constants
@@ -719,14 +719,12 @@ create_release_tracker() {
 
   jq -n \
     --arg summary "Release Submariner $version" \
-    --arg assignee "@me" \
     --argjson labels '["release-tracking","submariner","'"$version_label"'"]' \
     --argjson paragraphs "$adf_paragraphs" \
     '{
       projectKey: "ACM",
       type: "Task",
       summary: $summary,
-      assignee: $assignee,
       labels: $labels,
       description: {type:"doc",version:1,content:$paragraphs},
       additionalAttributes: {
@@ -741,6 +739,7 @@ create_release_tracker() {
   else
     parent_output=$(_acli jira workitem create \
       --from-json "$create_json_file" \
+      --assignee "@me" \
       --json </dev/null) || {
       echo "❌ ERROR: Failed to create parent task" >&2
       rm -f "$create_json_file"

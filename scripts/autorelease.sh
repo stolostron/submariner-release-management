@@ -12,8 +12,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GIT_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel 2>/dev/null || echo "")"
-# Capture the lib dir before sourcing: each lib resets SCRIPT_DIR to its OWN
-# location, so reusing SCRIPT_DIR for later source lines would resolve to lib/lib.
 _LIB_DIR="$SCRIPT_DIR/lib"
 # shellcheck source=lib/jira-tracker.sh
 source "$_LIB_DIR/jira-tracker.sh"
@@ -1628,17 +1626,8 @@ run_conductor() {
         if [ "$local_level" = "review" ]; then
           echo "⏸ ${local_title}: REVIEW" >&2
           print_review_stop "$AUTORELEASE_PUSH_LOG" "$VERSION" >&2
-          # Verify the script self-marked the step complete. A silent Jira write
-          # failure leaves it at in_progress, causing the next run to re-dispatch
-          # instead of advancing. Only warn — don't block — since the script exit
-          # 0 is the authoritative signal.
-          _rstep_status=""
-          _rstep_status=$(get_step "$VERSION" "$NEXT_STEP" "$TRACKER" 2>/dev/null \
-            | jq -r '.status // empty' 2>/dev/null) || _rstep_status=""
-          if [ "${_rstep_status:-}" = "in_progress" ]; then
-            echo "  ⚠ Tracker still shows 'in_progress' — the write may have failed." >&2
-            echo "    If work is already done: /autorelease $VERSION --complete $NEXT_STEP" >&2
-          fi
+          # Review-level steps intentionally stay in_progress until the verifier
+          # confirms external state (PRs merged, etc.) — no write-failure check needed.
           break
         fi
 
