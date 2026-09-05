@@ -21,11 +21,11 @@ fi
 _JIRA_TRACKER_SOURCED=true
 
 # Source shared Jira helpers (query_jira, view_jira, calculate_acm_version)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_JIRA_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=release-notes-common.sh
-source "$SCRIPT_DIR/release-notes-common.sh" 2>/dev/null || true
+source "$_JIRA_LIB_DIR/release-notes-common.sh" 2>/dev/null || true
 # shellcheck source=fbc-scope.sh
-source "$SCRIPT_DIR/fbc-scope.sh"
+source "$_JIRA_LIB_DIR/fbc-scope.sh"
 
 # ============================================================================
 # Constants
