@@ -313,12 +313,13 @@ print_summary() {
       # our last fetch), and required if the branch was already pushed and the
       # conductor re-ran after a silent tracker write failure.
       echo "git push --force-with-lease $fork $fix_branch"
-      echo "gh pr create --base $branch --head $head_ref --title \"Update RPM lockfiles for v${version}\" --body \"Update RPM lockfiles to resolve package CVEs.\" --assignee @me --label ready-to-test"
-      echo "gh pr merge --auto --rebase $fix_branch"
+      # gh pr merge needs the PR number (branch name fails for fork PRs); capture from gh pr create output
+      echo "PR_URL=\$(gh pr create --base $branch --head $head_ref --title \"Update RPM lockfiles for v${version}\" --body \"Update RPM lockfiles to resolve package CVEs.\" --assignee @me --label ready-to-test)"
+      echo "gh pr merge --auto --rebase \"\${PR_URL##*/}\""
       # Append to push summary if conductor is running
       if [ -n "${AUTORELEASE_PUSH_LOG:-}" ]; then
-        printf '\n  cd %s/%s\n  git push --force-with-lease %s %s\n  gh pr create --base %s --head %s --title "Update RPM lockfiles for v%s" --body "Update RPM lockfiles to resolve package CVEs." --assignee @me --label ready-to-test\n  gh pr merge --auto --rebase %s\n' \
-          "$SUBMARINER_BASE" "$repo" "$fork" "$fix_branch" "$branch" "$head_ref" "$version" "$fix_branch" \
+        printf '\n  cd %s/%s\n  git push --force-with-lease %s %s\n  PR_URL=$(gh pr create --base %s --head %s --title "Update RPM lockfiles for v%s" --body "Update RPM lockfiles to resolve package CVEs." --assignee @me --label ready-to-test)\n  gh pr merge --auto --rebase "${PR_URL##*/}"\n' \
+          "$SUBMARINER_BASE" "$repo" "$fork" "$fix_branch" "$branch" "$head_ref" "$version" \
           >> "$AUTORELEASE_PUSH_LOG"
       fi
     done
