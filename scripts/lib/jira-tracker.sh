@@ -719,14 +719,12 @@ create_release_tracker() {
 
   jq -n \
     --arg summary "Release Submariner $version" \
-    --arg assignee "@me" \
     --argjson labels '["release-tracking","submariner","'"$version_label"'"]' \
     --argjson paragraphs "$adf_paragraphs" \
     '{
       projectKey: "ACM",
       type: "Task",
       summary: $summary,
-      assignee: $assignee,
       labels: $labels,
       description: {type:"doc",version:1,content:$paragraphs},
       additionalAttributes: {
@@ -741,6 +739,7 @@ create_release_tracker() {
   else
     parent_output=$(_acli jira workitem create \
       --from-json "$create_json_file" \
+      --assignee "@me" \
       --json </dev/null) || {
       echo "❌ ERROR: Failed to create parent task" >&2
       rm -f "$create_json_file"
