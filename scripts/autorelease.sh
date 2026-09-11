@@ -344,6 +344,33 @@ handle_step_override() {
     data=$(snapshot_step_data "$version" "$tracker")
   fi
 
+  # Release-YAML steps (componentStage, componentProd) need releaseName stored so
+  # downstream steps (fbcCatalogUpdate) can verify the release Succeeded. When
+  # completing by hand, auto-detect the newest YAML for the right type.
+  if [ "$action" = "complete" ]; then
+    local _rel_type=""
+    case "$step_key" in
+      componentStage) _rel_type="stage" ;;
+      componentProd)  _rel_type="prod" ;;
+    esac
+    if [ -n "$_rel_type" ]; then
+      local _ver_stream="${version%.*}"
+      local _rel_dir="$GIT_ROOT/releases/$_ver_stream/$_rel_type"
+      local _yaml=""
+      # shellcheck disable=SC2012  # ls -t needed for time-sort; no filenames with spaces
+      _yaml=$(ls -t "$_rel_dir"/submariner-*.yaml 2>/dev/null | head -1 || true)
+      if [ -n "$_yaml" ]; then
+        local _rel_name
+        _rel_name=$(basename "$_yaml" .yaml)
+        local _snap=""
+        _snap=$(awk '/^  snapshot:/ {print $2; exit}' "$_yaml" 2>/dev/null || true)
+        data=$(jq -n --arg name "$_rel_name" --arg snap "$_snap" --arg type "$_rel_type" \
+          '{releaseName:$name,snapshot:$snap,type:$type}' | jq -c .) || data="{}"
+        echo "  (releaseName: $_rel_name, snapshot: $_snap)" >&2
+      fi
+    fi
+  fi
+
   update_step "$version" "$step_key" "$action" "$data" "$tracker"
   echo "Step '$step_key' marked as $action for $version (tracker: $tracker)" >&2
 
