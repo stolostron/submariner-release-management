@@ -1,0 +1,147 @@
+{
+  "stage": {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "ReleasePlanAdmission",
+    "metadata": {
+      "labels": {
+        "release.appstudio.openshift.io/block-releases": "false",
+        "pp.engineering.redhat.com/business-unit": "hybrid-platforms"
+      },
+      "name": "submariner-fbc-stage",
+      "namespace": "rhtap-releng-tenant"
+    },
+    "spec": {
+      "applications": [
+        "submariner-fbc-5-0",
+        "submariner-fbc-4-14",
+        "submariner-fbc-4-15",
+        "submariner-fbc-4-16",
+        "submariner-fbc-4-17",
+        "submariner-fbc-4-18",
+        "submariner-fbc-4-19",
+        "submariner-fbc-4-20",
+        "submariner-fbc-4-21",
+        "submariner-fbc-4-22"
+      ],
+      "origin": "submariner-tenant",
+      "policy": "fbc-stage",
+      "data": {
+        "releaseNotes": {
+          "product_id": [
+            609
+          ],
+          "product_name": "Red Hat Advanced Cluster Management for Kubernetes",
+          "product_version": "fbc"
+        },
+        "fbc": {
+          "stagedIndex": true,
+          "fromIndex": "registry-proxy.engineering.redhat.com/rh-osbs/iib-pub-pending:{{ OCP_VERSION }}",
+          "targetIndex": "",
+          "publishingCredentials": "staged-index-fbc-publishing-credentials",
+          "requestTimeoutSeconds": 3000,
+          "buildTimeoutSeconds": 3000,
+          "allowedPackages": [
+            "submariner"
+          ]
+        },
+        "intention": "staging"
+      },
+      "pipeline": {
+        "pipelineRef": {
+          "resolver": "git",
+          "params": [
+            {
+              "name": "url",
+              "value": "https://github.com/konflux-ci/release-service-catalog.git"
+            },
+            {
+              "name": "revision",
+              "value": "production"
+            },
+            {
+              "name": "pathInRepo",
+              "value": "pipelines/managed/fbc-release/fbc-release.yaml"
+            }
+          ]
+        },
+        "serviceAccountName": "release-index-image-staging",
+        "timeouts": {
+          "pipeline": "1h0m0s",
+          "tasks": "1h0m0s"
+        }
+      }
+    }
+  },
+  "prod": {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "ReleasePlanAdmission",
+    "metadata": {
+      "labels": {
+        "release.appstudio.openshift.io/block-releases": "false",
+        "pp.engineering.redhat.com/business-unit": "hybrid-platforms"
+      },
+      "name": "submariner-fbc-prod",
+      "namespace": "rhtap-releng-tenant"
+    },
+    "spec": {
+      "applications": [
+        "submariner-fbc-5-0",
+        "submariner-fbc-4-14",
+        "submariner-fbc-4-15",
+        "submariner-fbc-4-16",
+        "submariner-fbc-4-17",
+        "submariner-fbc-4-18",
+        "submariner-fbc-4-19",
+        "submariner-fbc-4-20",
+        "submariner-fbc-4-21",
+        "submariner-fbc-4-22"
+      ],
+      "origin": "submariner-tenant",
+      "policy": "fbc-standard",
+      "data": {
+        "releaseNotes": {
+          "product_id": [
+            609
+          ],
+          "product_name": "Red Hat Advanced Cluster Management for Kubernetes",
+          "product_version": "fbc"
+        },
+        "fbc": {
+          "fromIndex": "registry-proxy.engineering.redhat.com/rh-osbs/iib-pub:{{ OCP_VERSION }}",
+          "targetIndex": "quay.io/redhat-prod/redhat----redhat-operator-index:{{ OCP_VERSION }}",
+          "publishingCredentials": "fbc-production-publishing-credentials-redhat-prod",
+          "requestTimeoutSeconds": 3000,
+          "buildTimeoutSeconds": 3000,
+          "allowedPackages": [
+            "submariner"
+          ]
+        },
+        "intention": "production"
+      },
+      "pipeline": {
+        "pipelineRef": {
+          "resolver": "git",
+          "params": [
+            {
+              "name": "url",
+              "value": "https://github.com/konflux-ci/release-service-catalog.git"
+            },
+            {
+              "name": "revision",
+              "value": "production"
+            },
+            {
+              "name": "pathInRepo",
+              "value": "pipelines/managed/fbc-release/fbc-release.yaml"
+            }
+          ]
+        },
+        "serviceAccountName": "release-index-image-prod",
+        "timeouts": {
+          "pipeline": "1h0m0s",
+          "tasks": "1h0m0s"
+        }
+      }
+    }
+  }
+}

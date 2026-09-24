@@ -1,49 +1,19 @@
-# Create FBC Prod Releases
+# Create FBC production releases
 
-**When:** After QE approval (Step 14 complete)
-
-> **Automated:** `/autorelease` handles this step automatically. Follow the manual
-> steps below only if debugging or running without the conductor.
-
-## Process
-
-Create production Release CRs by copying stage YAMLs and changing 2 fields.
-
-**Key concept:** Prod FBC releases use SAME snapshots as stage. Catalog already has bundle with quay.io URL which works for both
-stage and prod (bundle is mirrored). Catalog update to registry.redhat.io URL happens much later when quay.io images are cleaned up
-(months after release).
-
-**Repo:** `~/konflux/submariner-release-management`
-
-## Creating Prod YAMLs
-
-Agent creates prod YAML for each OCP version (4-16 through 4-22):
+After QE approves the staged artifacts:
 
 ```bash
-# Copy from stage
-cp releases/fbc/4-XX/stage/submariner-fbc-4-XX-stage-YYYYMMDD-01.yaml \
-   releases/fbc/4-XX/prod/submariner-fbc-4-XX-prod-YYYYMMDD-01.yaml
-
-# Edit 2 fields:
-#   metadata.name: submariner-fbc-4-XX-stage-YYYYMMDD-01 → submariner-fbc-4-XX-prod-YYYYMMDD-01
-#   spec.releasePlan: submariner-fbc-release-plan-stage-4-XX → submariner-fbc-release-plan-prod-4-XX
-# Keep spec.snapshot identical (same as stage)
+make create-fbc-releases VERSION=0.24.1 TYPE=prod
+# A scoped initial release:
+make create-fbc-releases VERSION=0.24.1 TYPE=prod OCP=5.0
 ```
 
-## Commit
+The helper reads the exact Submariner version's stage YAMLs across full OCP IDs
+and reuses their snapshot names. It must not select a newer snapshot built after
+QE validation. Review the stage records when several attempts exist; the helper
+selects the latest version-matched stage record per OCP version.
 
-```bash
-git add releases/fbc/
-git commit -s -m "Add FBC prod releases"
-```
-
-User reviews commit, then pushes.
-
-## Done When
-
-FBC prod YAMLs created, committed, and pushed. Ready for Step 18 to apply to cluster.
-
-```bash
-# Verify files pushed to remote (expect: 4-16 through 4-22)
-git ls-tree -r --name-only origin/main releases/fbc/*/prod/*.yaml
-```
+It validates and commits the production YAMLs and prints push/apply commands.
+Follow [release checking](check-fbc-releases.md) for those exact Release names.
+Only share public index URLs after bundle membership is confirmed with
+`make get-fbc-urls VERSION=0.24.1 PROD_INDEX=true` (optionally `OCP=5.0`).

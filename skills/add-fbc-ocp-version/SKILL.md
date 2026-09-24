@@ -1,56 +1,54 @@
 ---
 name: add-fbc-ocp-version
-description: Add FBC support for new OCP version in Konflux release data - creates overlays, tenant config, and RPA entries.
-version: 1.0.0
-argument-hint: "<ocp-version> <min-submariner-version>"
-user-invocable: true
+description: Prepare a new OCP version's Submariner FBC catalogs, Konflux tenant resources, and release admissions, including major-version transitions such as OCP 5.0. Use for OCP onboarding, not ordinary bundle updates.
+metadata:
+  version: "3.1.1"
 allowed-tools: Bash, Read, Glob
 ---
 
 # Add FBC OCP Version
 
-Adds FBC (File-Based Catalog) support for a new OCP version in Konflux release data.
+Resolve `scripts/run.sh` from this skill's absolute location, independently of cwd.
+For an installed copy, set `RELEASE_MANAGEMENT_REPO` to the backing checkout.
+Run the wrapper with **`--workflow` and read the returned file** for the canonical
+procedure. Both executable and documentation resolve from that verified checkout.
 
-**Usage:**
+Match the user's requested milestone:
 
-```bash
-/add-fbc-ocp-version 4.22 0.23
-/add-fbc-ocp-version 4-22 0.23  # Hyphenated format also accepted
+- **Plan/explore:** run the read-only default phase and report missing inputs.
+- **Add:** inspect the plan, then run `--phase prepare` and `--phase test-image`.
+  Preparation creates all three change sets and verifies them. Continue through
+  repository checks and authorized commits; printing a plan does not complete an
+  add request. Follow the workflow for review, reconciliation and live evidence.
+- **Resume:** reuse the same workspace and immutable source refs. Inspect its
+  changes, rerun preparation/verification, and continue from the unmet milestone.
+  A changed source base needs an explicit reviewed rebase or a fresh workspace.
+
+Example inputs (0.24 is illustrative, not a product-policy decision):
+
+```text
+5.0 --min-supported-sub 0.24 --phase plan
 ```
 
-**What it does:**
+`--min-supported-sub` is inclusive. The existing FBC map is a drop-through cutoff:
+minimum 0.24 means `"5.0": "0.23"`. Legacy second positional arguments retain their
+old cutoff meaning and print a warning. Never silently reinterpret them.
 
-- Auto-detects previous OCP version from existing overlays
-- Creates feature branch (subm-fbc-configure-4-22) from main
-- Creates 3 commits:
-  - Commit 1: 8 YAML overlay files (FBC overlay structure)
-  - Commit 2: 7 auto-generated Kustomize manifests + kustomization.yaml
-  - Commit 3: 2 FBC RPA files updated (applications list)
-- Verifies all changes before committing
-- Outputs push command, MR instructions, and Phase 2 instructions
+Use `--release-data-repo`, `--fbc-repo`, `--workspace`, and independent
+`--release-data-ref`/`--fbc-ref` pins. Follow both repositories' instructions.
+Preparation leaves changes uncommitted; preserve the user's commit authorization.
+Preserve existing branches, untracked files, and unrelated changes. A failed fetch is
+unknown remote state; it is not proof that a branch or bot PR does not exist.
 
-**Arguments:** $ARGUMENTS
-
----
-
-```bash
-#!/bin/bash
-set -euo pipefail
-
-# Find git repository root
-GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$GIT_ROOT" ]; then
-  echo "❌ ERROR: Not in a git repository"
-  exit 1
-fi
-
-# Verify orchestrator script exists
-if [ ! -x "$GIT_ROOT/scripts/add-fbc-ocp-version.sh" ]; then
-  echo "❌ ERROR: Required orchestrator script not found"
-  echo "This skill requires: scripts/add-fbc-ocp-version.sh"
-  exit 1
-fi
-
-# Delegate to orchestrator (passes all arguments)
-exec "$GIT_ROOT/scripts/add-fbc-ocp-version.sh" $ARGUMENTS
-```
+Select the minimum stream before catalog preparation. For missing inputs, if the
+user authorizes provisional defaults, use the template's populated default-channel stream and
+head, record the choice and bundle digest, and complete local preparation and
+image testing. This is provisional catalog input, not verified runtime support.
+Otherwise, an undecided minimum still permits `--phase prepare-config`; it needs
+only release-data. Catalog preparation needs only FBC. Select a compatible
+`--kustomize` when necessary.
+Do not claim OCP runtime support from a successful FBC image build, an ITS aggregate pass, or a
+snapshot's existence. Confirm the installed bundle, completed install tasks,
+and actual cluster version. New 5.x overlays use the reviewed 0.3 install path;
+profile access and actual installation still need evidence, and a released bundle
+can require an explicit-bundle QE test because the generic ITS can skip it.

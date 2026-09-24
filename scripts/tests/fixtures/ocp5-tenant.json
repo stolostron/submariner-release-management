@@ -1,0 +1,224 @@
+[
+  {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "Application",
+    "metadata": {
+      "annotations": {
+        "application.thumbnail": "1"
+      },
+      "name": "submariner-fbc-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "description": "Submariner FBC for OCP 5.0",
+      "displayName": "Submariner FBC for OCP 5.0"
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "Component",
+    "metadata": {
+      "annotations": {
+        "build.appstudio.openshift.io/pipeline": "{\"name\":\"fbc-builder\",\"bundle\":\"latest\"}"
+      },
+      "name": "submariner-fbc-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "application": "submariner-fbc-5-0",
+      "componentName": "submariner-fbc",
+      "containerImage": "quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-5-0",
+      "resources": {},
+      "source": {
+        "git": {
+          "dockerfileUrl": "catalog.Dockerfile",
+          "revision": "main",
+          "url": "https://github.com/stolostron/submariner-operator-fbc"
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "ImageRepository",
+    "metadata": {
+      "annotations": {
+        "image-controller.appstudio.redhat.com/update-component-image": "true"
+      },
+      "labels": {
+        "appstudio.redhat.com/application": "submariner-fbc-5-0",
+        "appstudio.redhat.com/component": "submariner-fbc-5-0"
+      },
+      "name": "imagerepository-submariner-fbc-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "image": {
+        "name": "submariner-tenant/submariner-fbc-5-0",
+        "visibility": "public"
+      },
+      "notifications": [
+        {
+          "config": {
+            "url": "https://bombino.api.redhat.com/v1/sbom/quay/push"
+          },
+          "event": "repo_push",
+          "method": "webhook",
+          "title": "SBOM-event-to-Bombino"
+        }
+      ]
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "ReleasePlan",
+    "metadata": {
+      "labels": {
+        "release.appstudio.openshift.io/author": "dfarrell",
+        "release.appstudio.openshift.io/auto-release": "false",
+        "release.appstudio.openshift.io/releasePlanAdmission": "submariner-fbc-prod",
+        "release.appstudio.openshift.io/standing-attribution": "true"
+      },
+      "name": "submariner-fbc-release-plan-prod-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "application": "submariner-fbc-5-0",
+      "data": {
+        "releaseNotes": {
+          "description": "File-based catalog for the Submariner Operator\n",
+          "synopsis": "{{ advisory.spec.product_name }} File-based Catalog\n",
+          "topic": "{{ advisory.spec.product_name }} File-based Catalog\n"
+        }
+      },
+      "target": "rhtap-releng-tenant"
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1alpha1",
+    "kind": "ReleasePlan",
+    "metadata": {
+      "labels": {
+        "release.appstudio.openshift.io/author": "dfarrell",
+        "release.appstudio.openshift.io/auto-release": "false",
+        "release.appstudio.openshift.io/releasePlanAdmission": "submariner-fbc-stage",
+        "release.appstudio.openshift.io/standing-attribution": "true"
+      },
+      "name": "submariner-fbc-release-plan-stage-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "application": "submariner-fbc-5-0",
+      "data": {
+        "releaseNotes": {
+          "description": "File-based catalog for the Submariner Operator\n",
+          "synopsis": "{{ advisory.spec.product_name }} File-based Catalog\n",
+          "topic": "{{ advisory.spec.product_name }} File-based Catalog\n"
+        }
+      },
+      "target": "rhtap-releng-tenant"
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1beta2",
+    "kind": "IntegrationTestScenario",
+    "metadata": {
+      "labels": {
+        "test.appstudio.openshift.io/optional": "false"
+      },
+      "name": "submariner-fbc-operator-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "application": "submariner-fbc-5-0",
+      "contexts": [
+        {
+          "description": "FBC operator testing",
+          "name": "component_submariner-fbc-5-0"
+        }
+      ],
+      "params": [
+        {
+          "name": "PACKAGE_NAME",
+          "value": "submariner"
+        },
+        {
+          "name": "CHANNEL_NAME",
+          "value": ""
+        },
+        {
+          "name": "OCI_REF",
+          "value": "quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-5-0"
+        },
+        {
+          "name": "CREDENTIALS_SECRET_NAME",
+          "value": "imagerepository-submariner-fbc-5-0-image-push"
+        },
+        {
+          "name": "CREDENTIALS_SECRET_KEY",
+          "value": ".dockerconfigjson"
+        }
+      ],
+      "resolverRef": {
+        "params": [
+          {
+            "name": "url",
+            "value": "https://github.com/konflux-ci/tekton-integration-catalog.git"
+          },
+          {
+            "name": "revision",
+            "value": "main"
+          },
+          {
+            "name": "pathInRepo",
+            "value": "pipelineruns/deploy-fbc-operator/0.2/deploy-fbc-operator-run.yaml"
+          }
+        ],
+        "resolver": "git"
+      }
+    }
+  },
+  {
+    "apiVersion": "appstudio.redhat.com/v1beta2",
+    "kind": "IntegrationTestScenario",
+    "metadata": {
+      "labels": {
+        "test.appstudio.openshift.io/optional": "false"
+      },
+      "name": "submariner-fbc-standard-5-0",
+      "namespace": "submariner-tenant"
+    },
+    "spec": {
+      "application": "submariner-fbc-5-0",
+      "contexts": [
+        {
+          "description": "FBC testing",
+          "name": "application"
+        }
+      ],
+      "params": [
+        {
+          "name": "POLICY_CONFIGURATION",
+          "value": "rhtap-releng-tenant/fbc-standard"
+        }
+      ],
+      "resolverRef": {
+        "params": [
+          {
+            "name": "url",
+            "value": "https://github.com/konflux-ci/build-definitions"
+          },
+          {
+            "name": "revision",
+            "value": "main"
+          },
+          {
+            "name": "pathInRepo",
+            "value": "pipelines/enterprise-contract.yaml"
+          }
+        ],
+        "resolver": "git"
+      }
+    }
+  }
+]

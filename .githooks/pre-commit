@@ -1,6 +1,11 @@
 #!/bin/bash
 # Pre-commit hook: Run make test before allowing commit
 
+# Tests use disposable repositories and linked worktrees. Do not let Git's
+# hook environment redirect their commands to the caller's repository/index.
+mapfile -t git_local_env < <(git rev-parse --local-env-vars)
+unset "${git_local_env[@]}"
+
 echo "Running make test before commit..."
 if ! make test; then
   echo ""

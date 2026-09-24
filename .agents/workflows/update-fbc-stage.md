@@ -15,7 +15,7 @@ Update catalog in FBC repo with bundle from completed stage release.
 
 ## Done When
 
-For each OCP version (4-16 through 4-22):
+For each applicable active OCP version:
 
 ```bash
 # 1. Check latest snapshot created after catalog update

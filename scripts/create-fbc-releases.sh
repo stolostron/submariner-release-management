@@ -12,13 +12,15 @@
 #   1: Failure (prerequisites, validation, or commit failed)
 
 set -euo pipefail
+# shellcheck source=lib/fbc-scope.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/fbc-scope.sh"
 
 # Global variables (set by parse_arguments)
 VERSION=""
 RELEASE_TYPE="stage"
+OCP_FILTER=""
 GIT_ROOT=""
 SCRIPTS_DIR=""
-RELEASES_DIR=""
 
 # Global variables (set by verify_release)
 declare -A SNAPSHOTS
@@ -35,6 +37,7 @@ check_prerequisites() {
 
   command -v oc &>/dev/null || MISSING_TOOLS+=("oc")
   command -v jq &>/dev/null || MISSING_TOOLS+=("jq")
+  command -v yq &>/dev/null || MISSING_TOOLS+=("yq")
   command -v curl &>/dev/null || MISSING_TOOLS+=("curl")
   command -v git &>/dev/null || MISSING_TOOLS+=("git")
 
@@ -88,7 +91,7 @@ check_prerequisites() {
     fi
   fi
 
-  echo "✓ Prerequisites verified: bash 4.0+, oc, jq, curl, git"
+  echo "✓ Prerequisites verified: bash 4.0+, oc, jq, yq, curl, git"
   if oc whoami &>/dev/null; then
     echo "✓ Authenticated with Konflux as: $(oc whoami)"
   fi
@@ -99,35 +102,19 @@ check_prerequisites() {
 # ============================================================================
 
 parse_arguments() {
-  # Parse arguments (version, stage|prod - order-independent)
-  local ARG1="${1:-}"
-  local ARG2="${2:-}"
-  local REST="${3:-}"
-
-  if [ -n "$REST" ]; then
-    echo "❌ ERROR: Too many arguments"
-    echo "Usage: $0 <version> [stage|prod]"
-    exit 1
-  fi
-
-  for arg in "$ARG1" "$ARG2"; do
-    [ -z "$arg" ] && continue
-
-    case "$arg" in
-      stage|prod)
-        RELEASE_TYPE="$arg"
-        ;;
-      [0-9].[0-9]|[0-9].[0-9].[0-9]|[0-9].[0-9][0-9]|[0-9].[0-9][0-9].[0-9]|[0-9].[0-9][0-9].[0-9][0-9])
-        VERSION="$arg"
-        ;;
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      stage|prod) RELEASE_TYPE="$1"; shift ;;
+      --ocp)
+        [ "$#" -ge 2 ] || { echo "--ocp requires major.minor" >&2; exit 1; }
+        OCP_FILTER=$(ocp_normalize "$2"); shift 2 ;;
       *)
-        echo "❌ ERROR: Unknown argument: $arg"
-        echo "Usage: $0 <version> [stage|prod]"
-        echo "Example: $0 0.22.1 stage"
-        exit 1
-        ;;
+        if [[ -z "$VERSION" && "$1" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+          VERSION="$1"; shift
+        else echo "Unexpected argument: $1" >&2; exit 1; fi ;;
     esac
   done
+  [[ "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]] && VERSION="$VERSION.0"
 
   if [ -z "$VERSION" ]; then
     echo "❌ ERROR: Version required"
@@ -164,7 +151,6 @@ parse_arguments() {
 
   # Set up paths relative to git root
   SCRIPTS_DIR="$GIT_ROOT/scripts"
-  RELEASES_DIR="$GIT_ROOT/releases"
 
   # Verify this is the correct repository by checking for required scripts
   if [ -x "$SCRIPTS_DIR/verify-fbc-release.sh" ] && \
@@ -216,20 +202,25 @@ verify_release() {
     echo ""
     local STAGE_DIR OCP_VERSION STAGE_YAML SNAPSHOT COUNT=0
     local VERSION_DASH="${VERSION//./-}"
-    for STAGE_DIR in "$GIT_ROOT"/releases/fbc/4-*/stage; do
+    for STAGE_DIR in "$GIT_ROOT"/releases/fbc/*-*/stage; do
       [ -d "$STAGE_DIR" ] || continue
       OCP_VERSION=$(basename "$(dirname "$STAGE_DIR")")  # 4-XX
+      [ -z "$OCP_FILTER" ] || [ "$OCP_FILTER" = "$OCP_VERSION" ] || continue
       # Latest stage YAML for this version and OCP version — filtering by VERSION_DASH
       # prevents silently picking up a stage YAML from a prior Z-stream cycle when
       # multiple releases have accumulated in the same per-OCP directory.
       STAGE_YAML=$(find "$STAGE_DIR" -name "submariner-fbc-${OCP_VERSION}-${VERSION_DASH}-stage-*.yaml" -type f | sort | tail -1)
       [ -z "$STAGE_YAML" ] && continue
-      # `|| true`: a corrupted/hand-edited stage YAML with no `snapshot:` line
-      # makes grep exit non-zero, which (with pipefail) would abort under set -e
-      # before the friendly guard below (matches the git-rev-parse fix at :159).
-      SNAPSHOT=$(grep "snapshot:" "$STAGE_YAML" | awk '{print $2}') || true
-      if [ -z "$SNAPSHOT" ]; then
-        echo "❌ ERROR: No snapshot found in stage YAML: $STAGE_YAML" >&2
+      # Parse the Release object, not a similarly named annotation or comment.
+      if ! SNAPSHOT=$(yq -o=json '.' "$STAGE_YAML" | jq -er \
+        --arg name "$(basename "$STAGE_YAML" .yaml)" \
+        --arg plan "submariner-fbc-release-plan-stage-${OCP_VERSION}" \
+        --arg prefix "submariner-fbc-${OCP_VERSION}-" '
+          select(.kind == "Release" and .apiVersion == "appstudio.redhat.com/v1alpha1"
+            and .metadata.name == $name and .metadata.namespace == "submariner-tenant"
+            and .spec.releasePlan == $plan) | .spec.snapshot
+          | select(type == "string" and startswith($prefix) and test("^[a-z0-9-]+$"))'); then
+        echo "❌ ERROR: Invalid stage Release identity or snapshot: $STAGE_YAML" >&2
         exit 1
       fi
       SNAPSHOTS["$OCP_VERSION"]="$SNAPSHOT"
@@ -267,7 +258,7 @@ verify_release() {
   # Call combined verification script (batched queries + parallel extraction)
   local COMBINED_JSON
   local VERIFY_EXIT=0
-  COMBINED_JSON=$("$SCRIPTS_DIR/verify-fbc-release.sh" "$VERSION" 2>&1) || VERIFY_EXIT=$?
+  COMBINED_JSON=$(env "FBC_OCP_VERSIONS=${OCP_FILTER:-$FBC_OCP_VERSIONS}" "$SCRIPTS_DIR/verify-fbc-release.sh" "$VERSION" 2>&1) || VERIFY_EXIT=$?
 
   if [ $VERIFY_EXIT -ne 0 ]; then
     echo "$COMBINED_JSON"
@@ -296,8 +287,8 @@ verify_release() {
   APPLICABLE=$(echo "$COMBINED_RESULT" | jq -r '.applicable_versions[]')
   for VERSION_NUM in $APPLICABLE; do
     local SNAPSHOT
-    SNAPSHOT=$(echo "$COMBINED_RESULT" | jq -r ".snapshots[\"4-${VERSION_NUM}\"]")
-    SNAPSHOTS["4-${VERSION_NUM}"]="$SNAPSHOT"
+    SNAPSHOT=$(echo "$COMBINED_RESULT" | jq -r ".snapshots[\"${VERSION_NUM}\"]")
+    SNAPSHOTS["${VERSION_NUM}"]="$SNAPSHOT"
   done
 
   echo ""
@@ -321,8 +312,8 @@ generate_yamls() {
   cd "$GIT_ROOT" || exit 1
 
   local COUNT=0
-  for VERSION_NUM in $(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sed 's/^4-//' | sort -n); do
-    local OCP_VERSION="4-${VERSION_NUM}"
+  for VERSION_NUM in $(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sort -t- -k1,1n -k2,2n); do
+    local OCP_VERSION="${VERSION_NUM}"
     local SNAPSHOT="${SNAPSHOTS[$OCP_VERSION]}"
 
     if [ -z "$SNAPSHOT" ] || [ "$SNAPSHOT" = "null" ]; then
@@ -402,7 +393,7 @@ commit_changes() {
   echo ""
 
   # Stage all created files using absolute path
-  git add "$RELEASES_DIR/fbc/" || {
+  git add -- "${CREATED_FILES[@]}" || {
     echo "❌ ERROR: Failed to stage files"
     exit 1
   }
@@ -417,7 +408,7 @@ commit_changes() {
   # (no re-derivation), so it lists that provenance instead.
   local COMMIT_MSG
   local OCP_LIST
-  OCP_LIST=$(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sort -t- -k2 -n | xargs)
+  OCP_LIST=$(echo "${!SNAPSHOTS[@]}" | tr ' ' '\n' | sort -t- -k1,1n -k2,2n | xargs)
   if [ "$RELEASE_TYPE" = "prod" ]; then
     COMMIT_MSG="Add FBC prod releases for $VERSION
 
@@ -435,7 +426,7 @@ Generated ${#CREATED_FILES[@]} Release CRs (${OCP_LIST}) with:
   fi
 
   # Create commit
-  git commit -s -m "$COMMIT_MSG" || {
+  git commit --only -s -m "$COMMIT_MSG" -- "${CREATED_FILES[@]}" || {
     echo "❌ ERROR: Failed to create commit"
     exit 1
   }

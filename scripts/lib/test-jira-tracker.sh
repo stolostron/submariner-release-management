@@ -622,7 +622,7 @@ assert_eq "all step keys have templates" "$fallback_found" "0"
 # OCP range in FBC subtask descriptions reflects FBC_OCP_VERSIONS (no hardcoded fallback)
 _first_ocp=$(echo "$FBC_OCP_VERSIONS" | awk '{print $1}')
 _last_ocp=$(echo "$FBC_OCP_VERSIONS" | awk '{print $NF}')
-_expected_ocp_range="4.$_first_ocp through 4.$_last_ocp"
+_expected_ocp_range="${_first_ocp//-/.} through ${_last_ocp//-/.}"
 ocp_range_ok=0
 for _fbc_step in fbcCatalogUpdate fbcStageReleases fbcProdReleases; do
   _desc=$(_generate_subtask_description "$_fbc_step" "0.24.0")
