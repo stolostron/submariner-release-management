@@ -1,5 +1,10 @@
 # OCP 5.0 FBC support: investigation and implementation plan
 
+Historical investigation of the pre-implementation baseline. Many defects and
+proposed changes below have since been addressed. Use the
+[implementation status](ocp-5-implementation-status.md) for completed work and the
+[skill completion plan](ocp-5-skill-completion-plan.md) for the current remaining work.
+
 Investigated on 2026-09-24. “OCP 5” is interpreted as OCP 5.0.
 
 The follow-up [onboarding skill/workflow audit](ocp-5-onboarding-workflows.md) adds reproduced failure cases and

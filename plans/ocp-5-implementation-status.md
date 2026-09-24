@@ -3,6 +3,11 @@
 Prepared 2026-09-24. Changes are committed locally and have not been pushed or applied.
 The supported Submariner stream for the real OCP 5.0 catalog is still undecided.
 
+The subsequent [skill completion audit and execution plan](ocp-5-skill-completion-plan.md)
+records additional confirmed validation gaps and the remaining implementation work.
+The passing checks below establish the exercised behavior, not coverage of those
+new cases or readiness for a live OCP 5 rollout.
+
 ## Review locations
 
 | Change | Checkout |
