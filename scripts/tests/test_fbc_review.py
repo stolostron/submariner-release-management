@@ -360,7 +360,7 @@ class GitSafety(unittest.TestCase):
             "-qm",
             "advance",
         )
-        with self.assertRaises(subprocess.CalledProcessError):
+        with self.assertRaisesRegex(ValueError, "rebase.*fresh --workspace"):
             mod.worktree(
                 self.root, target, mod.base_commit(self.root, "HEAD"), "candidate"
             )

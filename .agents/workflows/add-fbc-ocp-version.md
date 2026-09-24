@@ -4,6 +4,8 @@ Use the existing `add-fbc-ocp-version` skill or `scripts/add-fbc-ocp-version.sh`
 It accepts full OCP identities such as `4.22`, `4-22`, `5.0`, and `5-0`.
 Python 3 with PyYAML, Git, jq, yq, Kustomize, and the FBC build prerequisites are
 required. Repository paths are explicit options, not assumptions about cwd.
+For an installed skill, its wrapper's `--workflow` returns this document's path
+in the verified `RELEASE_MANAGEMENT_REPO` checkout.
 
 ## Plan and inputs
 
@@ -24,19 +26,47 @@ Review the base-image tag and architectures with registry inspection. OCP 5.0
 uses `registry.redhat.io/openshift5/ose-operator-registry-rhel9:v5.0`; do not
 change the RHEL generation merely because the OCP major changes.
 
+Pin the repositories independently with `--release-data-ref` and `--fbc-ref`.
+Both default to `origin/main`; `--base` is a shorthand only when the same ref name
+works in both repositories. A shared commit SHA normally cannot. The plan reports
+resolved SHAs, independently selected overlay/pipeline predecessors, and blockers.
+Use `--overlay-previous`/`--pipeline-previous` only to select a reviewed predecessor.
+Select the release-data-required Kustomize version with `--kustomize` if needed.
+
+## Complete an add or resume request
+
+After reviewing the plan and resolving the minimum stream, run the complete local
+sequence with the same repository paths, immutable refs and workspace:
+
+```bash
+./scripts/add-fbc-ocp-version.sh 5.0 --min-supported-sub 0.24 \
+  --release-data-ref <release-data-sha> --fbc-ref <fbc-sha> \
+  --workspace /path/to/ocp-5-work --phase prepare
+./scripts/add-fbc-ocp-version.sh 5.0 \
+  --workspace /path/to/ocp-5-work --phase test-image
+```
+
+`prepare` runs configuration, catalog preparation and local verification. The image
+phase explicitly selects the requested catalog and OCP base. Progress goes to stderr;
+successful phases emit JSON on stdout. Run repository checks, review the three diffs,
+and commit when authorized. An add request continues beyond a read-only plan.
+Reruns use the same workspace/refs; a base mismatch requires reviewing and rebasing
+the existing work or selecting a fresh workspace. No automated reset or overwrite.
+The separate phases below remain useful when policy or a repository is unavailable.
+
 ## Prepare configuration
 
 ```bash
 ./scripts/add-fbc-ocp-version.sh 5.0 --phase prepare-config \
   --workspace /path/to/ocp-5-work \
-  --release-data-repo /path/to/konflux-release-data \
-  --fbc-repo /path/to/submariner-operator-fbc
+  --release-data-repo /path/to/konflux-release-data
 ```
 
 This creates separate `tenant` and `admission` worktrees. It never switches the
 source checkout, deletes an existing branch, commits, pushes, or applies. Reruns
 reuse only matching worktrees and validate existing output instead of overwriting
 it. Choose a different workspace if an unrelated branch already exists.
+This phase needs no FBC checkout or minimum Submariner stream.
 
 The tenant change adds eight overlay files, registers the overlay, runs the
 repository's `build-manifests.sh` for this tenant, and validates seven generated
@@ -54,13 +84,17 @@ Confirm both live release plans match their admissions and retain autorelease of
 ## Prepare catalog and pipelines
 
 The FBC safety changes (isolated tests and staged builds) must be present in the
-selected `--base`. Use a populated supported stream already in the template.
+selected `--fbc-ref`. Use a populated supported stream already in the template.
 
 ```bash
 SKIP_AUTH_TESTS=true ./scripts/add-fbc-ocp-version.sh 5.0 \
   --min-supported-sub 0.24 --phase prepare-catalog \
   --workspace /path/to/ocp-5-work
 ```
+
+This phase needs no release-data checkout. It checks the selected base's four
+platforms before creating worktrees. For the final validation run authenticated
+FBC tests as well; explicitly skipped authentication tests are not evidence of access.
 
 The `fbc` worktree contains the cutoff map, rendered catalog, and push/PR pipeline
 pair, with all four build platforms, the exact catalog INPUT_DIR, matching

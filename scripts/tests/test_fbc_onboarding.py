@@ -2,6 +2,8 @@
 
 import argparse
 import importlib.util
+import io
+from contextlib import redirect_stdout
 import json
 import os
 from pathlib import Path
@@ -68,8 +70,12 @@ class Onboarding(unittest.TestCase):
     def test_legacy_cutoff_keeps_old_semantics(self):
         with patch.object(mod, "repo", side_effect=ValueError("stop after arguments")):
             with patch("sys.stderr") as stderr:
-                with self.assertRaisesRegex(ValueError, "stop after arguments"):
+                with redirect_stdout(io.StringIO()) as output:
                     mod.main(["5.0", "0.23"])
+                plan = json.loads(output.getvalue())
+                self.assertEqual(plan["minimum_inclusive"], "0.24")
+                self.assertEqual(plan["cutoff_exclusive"], "0.23")
+                self.assertEqual(plan["blockers"]["catalog"], ["stop after arguments"])
                 self.assertIn(
                     "inclusive minimum is 0.24",
                     "".join(call.args[0] for call in stderr.write.call_args_list),

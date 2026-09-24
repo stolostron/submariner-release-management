@@ -21,13 +21,14 @@ GENERATED = Path(
 PLATFORMS = ["linux/x86_64", "linux/arm64", "linux/ppc64le", "linux/s390x"]
 
 
-def run(*args, cwd=None, capture=True):
+def run(*args, cwd=None, capture=True, env=None):
     return subprocess.run(
         args,
         cwd=cwd,
+        env=env,
         check=True,
         text=True,
-        stdout=subprocess.PIPE if capture else None,
+        stdout=subprocess.PIPE if capture else sys.stderr,
     ).stdout
 
 
@@ -76,21 +77,40 @@ def base_commit(root, ref):
     return run("git", "rev-parse", "--verify", f"{ref}^{{commit}}", cwd=root).strip()
 
 
-def predecessor_at_ref(root, version, ref):
+def predecessor_at_ref(root, version, ref, pipelines=False):
     entries = run(
-        "git", "ls-tree", "--name-only", f"{ref}:{OVERLAYS}", cwd=root
+        "git",
+        "ls-tree",
+        "--name-only",
+        f"{ref}:{'.tekton' if pipelines else OVERLAYS}",
+        cwd=root,
     ).splitlines()
-    candidates = [
-        ocp(name.removesuffix("-overlay"))
-        for name in entries
-        if re.fullmatch(r"[1-9][0-9]*-(?:0|[1-9][0-9]*)-overlay", name)
-    ]
+    if pipelines:
+        candidates = [
+            name.removeprefix("submariner-fbc-").removesuffix("-push.yaml")
+            for name in entries
+            if re.fullmatch(
+                r"submariner-fbc-[1-9][0-9]*-(?:0|[1-9][0-9]*)-push.yaml", name
+            )
+            and name.replace("-push.yaml", "-pull-request.yaml") in entries
+        ]
+    else:
+        candidates = [
+            ocp(name.removesuffix("-overlay"))
+            for name in entries
+            if re.fullmatch(r"[1-9][0-9]*-(?:0|[1-9][0-9]*)-overlay", name)
+        ]
     prior = [
         candidate
         for candidate in candidates
         if tuple(map(int, candidate.split("-"))) < tuple(map(int, version.split("-")))
     ]
-    require(prior, "No preceding OCP overlay in the selected base")
+    require(
+        prior,
+        "No preceding OCP pipeline pair"
+        if pipelines
+        else "No preceding OCP overlay in the selected base",
+    )
     return max(prior, key=lambda value: tuple(map(int, value.split("-"))))
 
 
@@ -104,7 +124,7 @@ def repo(path, marker):
     return path
 
 
-def worktree(source, target, base, branch):
+def worktree(source, target, base, branch, check_only=False):
     """Never reset branches, switch a checkout, or overwrite an unrelated directory."""
     if target.exists():
         require(
@@ -128,7 +148,12 @@ def worktree(source, target, base, branch):
             run("git", "branch", "--show-current", cwd=target).strip() == branch,
             f"Worktree branch differs: {target}",
         )
-        run("git", "merge-base", "--is-ancestor", base, "HEAD", cwd=target)
+        try:
+            run("git", "merge-base", "--is-ancestor", base, "HEAD", cwd=target)
+        except subprocess.CalledProcessError as error:
+            raise ValueError(
+                f"{target} does not contain {base}; review and rebase its changes or choose a fresh --workspace"
+            ) from error
         return target
     # An existing branch can contain unique work: leave it for explicit reconciliation.
     refs = run(
@@ -137,6 +162,8 @@ def worktree(source, target, base, branch):
     require(
         not refs.strip(), f"Branch {branch} already exists; select another --workspace"
     )
+    if check_only:
+        return target
     target.parent.mkdir(parents=True, exist_ok=True)
     run(
         "git",
@@ -173,7 +200,7 @@ def add_resource(path, resource):
     )
 
 
-def prepare_tenant(root, version, previous):
+def prepare_tenant(root, version, previous, kustomize=None):
     source, dest = (
         root / OVERLAYS / f"{previous}-overlay",
         root / OVERLAYS / f"{version}-overlay",
@@ -214,7 +241,7 @@ def prepare_tenant(root, version, previous):
         changed.flush()
         run(
             "./build-manifests.sh",
-            shutil.which("kustomize") or "kustomize",
+            kustomize or shutil.which("kustomize") or "kustomize",
             changed.name,
             cwd=root / "tenants-config",
             capture=False,
@@ -860,6 +887,146 @@ def verify_live(args, base_image):
     return not result["errors"]
 
 
+def git_text(root, ref, path):
+    return run("git", "show", f"{ref}:{path}", cwd=root)
+
+
+def require_tools(*names):
+    missing = [name for name in names if not shutil.which(name)]
+    require(not missing, "Missing required tools: " + ", ".join(missing))
+
+
+def kustomize_binary(root, requested=None, ref=None):
+    binary = str(requested) if requested else shutil.which("kustomize")
+    require(
+        binary and shutil.which(binary),
+        "Kustomize is required; select it with --kustomize",
+    )
+    source = (
+        git_text(root, ref, "tenants-config/utils.sh")
+        if ref
+        else (root / "tenants-config/utils.sh").read_text()
+    )
+    required = re.search(r"KUSTOMIZE_VERSION=['\"]?(v[0-9]+\.[0-9]+\.[0-9]+)", source)
+    require(
+        required, "Cannot determine the selected repository's Kustomize requirement"
+    )
+    actual = re.search(r"v([0-9]+\.[0-9]+\.[0-9]+)", run(binary, "version"))
+    require(
+        actual
+        and tuple(map(int, actual[1].split(".")))
+        >= tuple(map(int, required[1][1:].split("."))),
+        f"Kustomize {required[1]} or newer required; use --kustomize /path/to/kustomize",
+    )
+    return str(Path(shutil.which(binary)).resolve())
+
+
+def catalog_inputs(template, mapping, version, minimum):
+    require(minimum, "Choose --min-supported-sub before catalog preparation")
+    cutoff = f"0.{int(minimum.split('.')[1]) - 1}"
+    dotted = version.replace("-", ".")
+    require(
+        dotted not in mapping or mapping[dotted] == cutoff,
+        f"Existing {dotted} cutoff conflicts with requested minimum",
+    )
+    channels = [
+        entry for entry in template["entries"] if entry.get("schema") == "olm.channel"
+    ]
+    require(
+        any(
+            entry["name"] == f"stable-{minimum}" and entry.get("entries")
+            for entry in channels
+        ),
+        f"No populated stable-{minimum} channel in template; add its bundles first",
+    )
+    packages = [
+        entry for entry in template["entries"] if entry.get("schema") == "olm.package"
+    ]
+    require(
+        len(packages) == 1 and packages[0]["name"] == "submariner",
+        "Expected one Submariner package",
+    )
+    default = packages[0]["defaultChannel"]
+    require(
+        any(
+            entry["name"] == default
+            and entry.get("entries")
+            and stream(entry["name"].removeprefix("stable-"))
+            and int(entry["name"].split(".")[-1]) >= int(minimum.split(".")[-1])
+            for entry in channels
+        ),
+        "The selected cutoff removes the populated default channel",
+    )
+    return cutoff
+
+
+def inspect_base_image(image):
+    require_tools("skopeo")
+    manifest = json.loads(run("skopeo", "inspect", "--raw", f"docker://{image}"))
+    arches = {
+        item.get("platform", {}).get("architecture")
+        for item in manifest.get("manifests", [])
+        if item.get("platform", {}).get("os") == "linux"
+    }
+    require(
+        {"amd64", "arm64", "ppc64le", "s390x"}.issubset(arches),
+        "Selected OPM base must provide amd64, arm64, ppc64le and s390x",
+    )
+    return sorted(arches)
+
+
+def verify_workspace(workspace, args, image):
+    result = {"tenant_resources": validate_tenant(workspace / "tenant", args.ocp)}
+    for env in ("stage", "prod"):
+        validate_rpa(
+            load(workspace / "admission" / RPA / f"submariner-fbc-{env}.yaml"),
+            args.ocp,
+            env,
+        )
+    validate_pipelines(workspace / "fbc", args.ocp, image)
+    result["bundles"] = validate_catalog(
+        workspace / "fbc", args.ocp, args.min_supported_sub
+    )
+    result.update(
+        local_ready=True,
+        deployed="unverified",
+        multiarch_build="unverified",
+        tested_on_ocp=args.ocp.replace("-", ".") + ": unverified",
+    )
+    return result
+
+
+def test_image(root, version, base_image):
+    require_tools("make", "podman")
+    inspect_base_image(base_image)
+    with tempfile.TemporaryDirectory(prefix="fbc-image-") as temporary:
+        image = "localhost/submariner-fbc-onboarding:" + Path(temporary).name
+        try:
+            run(
+                "make",
+                "test-image",
+                f"CATALOG=catalog-{version}",
+                f"OPM_IMAGE={base_image}",
+                f"IMG={image}",
+                cwd=root,
+                capture=False,
+            )
+        finally:
+            subprocess.run(
+                ["podman", "rmi", image],
+                stdout=sys.stderr,
+                stderr=sys.stderr,
+                check=False,
+            )
+    return {
+        "catalog": f"catalog-{version}",
+        "base_image": base_image,
+        "local_image_test": "passed",
+        "multiarch_build": "unverified",
+        "runtime": "unverified",
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("ocp", type=ocp)
@@ -876,7 +1043,15 @@ def main(argv=None):
     )
     parser.add_argument(
         "--phase",
-        choices=["plan", "prepare-config", "prepare-catalog", "verify", "verify-live"],
+        choices=[
+            "plan",
+            "prepare",
+            "prepare-config",
+            "prepare-catalog",
+            "verify",
+            "test-image",
+            "verify-live",
+        ],
         default="plan",
     )
     parser.add_argument(
@@ -888,19 +1063,29 @@ def main(argv=None):
         "--fbc-repo", type=Path, default=Path.home() / "konflux/submariner-operator-fbc"
     )
     parser.add_argument(
-        "--workspace", type=Path, help="new worktree parent (required for preparation)"
+        "--workspace",
+        type=Path,
+        help="worktree parent (required outside plan/live mode)",
     )
     parser.add_argument(
         "--base",
-        default="origin/main",
-        help="explicit existing base ref; no implicit fetch",
+        help="compatible shorthand for both repository refs; no implicit fetch",
     )
     parser.add_argument(
-        "--previous",
-        type=ocp,
-        help="pipeline/overlay template version (default: latest preceding overlay)",
+        "--release-data-ref", help="release-data ref or SHA (default origin/main)"
     )
+    parser.add_argument("--fbc-ref", help="FBC ref or SHA (default origin/main)")
+    parser.add_argument(
+        "--previous", type=ocp, help="compatible shorthand for both predecessors"
+    )
+    parser.add_argument("--overlay-previous", type=ocp)
+    parser.add_argument("--pipeline-previous", type=ocp)
     parser.add_argument("--base-image", help="operator-registry build image override")
+    parser.add_argument(
+        "--kustomize",
+        type=Path,
+        help="Kustomize binary for the selected release-data version",
+    )
     parser.add_argument(
         "--expected-commit", help="merged commit required for live verification"
     )
@@ -919,6 +1104,16 @@ def main(argv=None):
         not args.min_supported_sub or int(args.min_supported_sub.split(".")[1]) > 0,
         "Inclusive minimum must be above 0.0 for the drop-through map",
     )
+    for explicit in (args.release_data_ref, args.fbc_ref):
+        require(
+            not (args.base and explicit and args.base != explicit),
+            "Do not combine conflicting --base and repository refs",
+        )
+    for explicit in (args.overlay_previous, args.pipeline_previous):
+        require(
+            not (args.previous and explicit and args.previous != explicit),
+            "Do not combine conflicting --previous and predecessor options",
+        )
     dotted = args.ocp.replace("-", ".")
     image = (
         args.base_image
@@ -930,16 +1125,98 @@ def main(argv=None):
         return
     if args.phase != "plan":
         require(args.workspace, "--workspace is required outside plan mode")
-    if args.phase != "verify":
-        data = repo(args.release_data_repo, str(OVERLAYS / "base/kustomization.yaml"))
-        fbc = repo(args.fbc_repo, "drop-versions.json")
-        data_base = base_commit(data, args.base)
-        fbc_base = base_commit(fbc, args.base)
-        previous = args.previous or predecessor_at_ref(data, args.ocp, data_base)
-        require(
-            tuple(map(int, previous.split("-"))) < tuple(map(int, args.ocp.split("-"))),
-            "Previous OCP must precede the requested version",
-        )
+    workspace = args.workspace.expanduser().resolve() if args.workspace else None
+    if args.phase == "verify":
+        print(json.dumps(verify_workspace(workspace, args, image), indent=2))
+        return
+    if args.phase == "test-image":
+        validate_catalog(workspace / "fbc", args.ocp, args.min_supported_sub)
+        print(json.dumps(test_image(workspace / "fbc", args.ocp, image), indent=2))
+        return
+    sources = {}
+    issues = {"configuration": [], "catalog": []}
+    configuration = args.phase in ("plan", "prepare", "prepare-config")
+    catalog = args.phase in ("plan", "prepare", "prepare-catalog")
+    for kind, needed, path, marker, ref, previous in (
+        (
+            "configuration",
+            configuration,
+            args.release_data_repo,
+            str(OVERLAYS / "base/kustomization.yaml"),
+            args.release_data_ref or args.base or "origin/main",
+            args.overlay_previous or args.previous,
+        ),
+        (
+            "catalog",
+            catalog,
+            args.fbc_repo,
+            "drop-versions.json",
+            args.fbc_ref or args.base or "origin/main",
+            args.pipeline_previous or args.previous,
+        ),
+    ):
+        if not needed:
+            continue
+        try:
+            root = repo(path, marker)
+            sha = base_commit(root, ref)
+            previous = previous or predecessor_at_ref(
+                root, args.ocp, sha, pipelines=kind == "catalog"
+            )
+            require(
+                tuple(map(int, previous.split("-")))
+                < tuple(map(int, args.ocp.split("-"))),
+                "Previous OCP must precede the requested version",
+            )
+            sources[kind] = {
+                "root": str(root),
+                "ref": ref,
+                "commit": sha,
+                "previous": previous,
+            }
+            if kind == "configuration":
+                require_tools("git", "yq")
+                sources[kind]["kustomize"] = kustomize_binary(root, args.kustomize, sha)
+                names = run(
+                    "git",
+                    "ls-tree",
+                    "--name-only",
+                    f"{sha}:{OVERLAYS}/{previous}-overlay",
+                    cwd=root,
+                ).splitlines()
+                require(
+                    len([name for name in names if name.endswith(".yaml")]) == 8,
+                    "Unexpected predecessor overlay layout",
+                )
+                for env in ("stage", "prod"):
+                    admission = yaml.safe_load(
+                        git_text(root, sha, RPA / f"submariner-fbc-{env}.yaml")
+                    )
+                    app = f"submariner-fbc-{args.ocp}"
+                    if app not in admission["spec"]["applications"]:
+                        admission["spec"]["applications"].append(app)
+                    validate_rpa(admission, args.ocp, env)
+            else:
+                require_tools("git", "make", "jq", "yq", "podman", "curl", "csplit")
+                git_text(root, sha, "test/lib/isolate.sh")
+                for event in ("push", "pull-request"):
+                    git_text(
+                        root, sha, f".tekton/submariner-fbc-{previous}-{event}.yaml"
+                    )
+                template = yaml.safe_load(git_text(root, sha, "catalog-template.yaml"))
+                mapping = json.loads(git_text(root, sha, "drop-versions.json"))
+                catalog_inputs(template, mapping, args.ocp, args.min_supported_sub)
+        except (
+            ValueError,
+            KeyError,
+            TypeError,
+            OSError,
+            yaml.YAMLError,
+            subprocess.CalledProcessError,
+        ) as error:
+            if args.phase != "plan":
+                raise
+            issues[kind].append(str(error))
     if args.phase == "plan":
         print(
             json.dumps(
@@ -949,60 +1226,71 @@ def main(argv=None):
                     "cutoff_exclusive": f"0.{int(args.min_supported_sub.split('.')[1]) - 1}"
                     if args.min_supported_sub
                     else None,
-                    "previous": previous,
                     "base_image": image,
-                    "base_ref": args.base,
-                    "release_data_base": data_base,
-                    "fbc_base": fbc_base,
+                    "sources": sources,
+                    "blockers": issues,
+                    "previous": sources.get("configuration", {}).get("previous"),
                     "remote_freshness": "not checked; fetch explicitly before preparing",
-                    "phases": [
-                        "prepare-config (separate tenant and RPA worktrees)",
-                        "merge config and confirm reconciliation",
-                        "prepare-catalog (bot PR optional)",
-                        "verify (local evidence)",
-                        "verify merged push snapshot and actual OCP cluster separately",
+                    "base_image_availability": "unverified; inspected before catalog preparation",
+                    "next_phases": [
+                        "prepare (or prepare-config while policy is pending)",
+                        "test-image",
+                        "review/reconcile configuration and merged push build",
+                        "verify-live and actual install/QE",
                     ],
                 },
                 indent=2,
             )
         )
         return
-    require(args.workspace, "--workspace is required outside plan mode")
-    workspace = args.workspace.expanduser().resolve()
     prefix = re.sub(r"[^a-zA-Z0-9._-]", "-", workspace.name) + f"-ocp-{args.ocp}"
-    if args.phase == "prepare-config":
-        tenant = worktree(data, workspace / "tenant", data_base, prefix + "-tenant")
-        prepare_tenant(tenant, args.ocp, previous)
-        rpas = worktree(data, workspace / "admission", data_base, prefix + "-admission")
-        prepare_rpas(rpas, args.ocp)
-        print(
-            f"Tenant and admission changes prepared separately: {tenant}, {rpas}. Run repository tox checks in both before review."
+    targets = []
+    if configuration:
+        targets += [
+            ("configuration", "tenant", "tenant"),
+            ("configuration", "admission", "admission"),
+        ]
+    if catalog:
+        inspect_base_image(image)
+        targets.append(("catalog", "fbc", "catalog"))
+    # Check all existing targets/branches before creating the first worktree.
+    for kind, directory, suffix in targets:
+        source = sources[kind]
+        worktree(
+            Path(source["root"]),
+            workspace / directory,
+            source["commit"],
+            prefix + "-" + suffix,
+            check_only=True,
         )
-    elif args.phase == "prepare-catalog":
-        require(args.min_supported_sub, "--min-supported-sub is required")
-        catalog = worktree(fbc, workspace / "fbc", fbc_base, prefix + "-catalog")
-        prepare_catalog(catalog, args, previous, image)
-        print(
-            f"Catalog prepared: {catalog}. Changes are uncommitted; deployment and runtime compatibility are unverified."
+    for kind, directory, suffix in targets:
+        source = sources[kind]
+        worktree(
+            Path(source["root"]),
+            workspace / directory,
+            source["commit"],
+            prefix + "-" + suffix,
         )
-    else:
-        result = {"tenant_resources": validate_tenant(workspace / "tenant", args.ocp)}
-        for env in ("stage", "prod"):
-            admission = load(
-                workspace / "admission" / RPA / f"submariner-fbc-{env}.yaml"
-            )
-            validate_rpa(admission, args.ocp, env)
-        validate_pipelines(workspace / "fbc", args.ocp, image)
-        result["bundles"] = validate_catalog(
-            workspace / "fbc", args.ocp, args.min_supported_sub
+    if configuration:
+        prepare_tenant(
+            workspace / "tenant",
+            args.ocp,
+            sources["configuration"]["previous"],
+            sources["configuration"]["kustomize"],
         )
-        result.update(
-            local_ready=True,
-            deployed="unverified",
-            multiarch_build="unverified",
-            tested_on_ocp=dotted + ": unverified",
-        )
-        print(json.dumps(result, indent=2))
+        prepare_rpas(workspace / "admission", args.ocp)
+    if catalog:
+        prepare_catalog(workspace / "fbc", args, sources["catalog"]["previous"], image)
+    result = {
+        "ocp": args.ocp,
+        "workspace": str(workspace),
+        "sources": sources,
+        "prepared": [directory for _, directory, _ in targets],
+        "deployed": "unverified",
+    }
+    if args.phase == "prepare":
+        result.update(verify_workspace(workspace, args, image))
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
