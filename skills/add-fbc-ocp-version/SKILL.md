@@ -2,7 +2,7 @@
 name: add-fbc-ocp-version
 description: Prepare a new OCP version's Submariner FBC catalogs, Konflux tenant resources, and release admissions, including major-version transitions such as OCP 5.0. Use for OCP onboarding, not ordinary bundle updates.
 metadata:
-  version: "3.1.0"
+  version: "3.1.1"
 allowed-tools: Bash, Read, Glob
 ---
 
@@ -40,9 +40,13 @@ Preparation leaves changes uncommitted; preserve the user's commit authorization
 Preserve existing branches, untracked files, and unrelated changes. A failed fetch is
 unknown remote state; it is not proof that a branch or bot PR does not exist.
 
-Resolve the approved minimum stream before catalog preparation. While it is
-pending, use `--phase prepare-config`; it needs only release-data. Catalog
-preparation needs only FBC. Select a compatible `--kustomize` when necessary.
+Select the minimum stream before catalog preparation. For missing inputs, if the
+user authorizes provisional defaults, use the template's populated default-channel stream and
+head, record the choice and bundle digest, and complete local preparation and
+image testing. This is provisional catalog input, not verified runtime support.
+Otherwise, an undecided minimum still permits `--phase prepare-config`; it needs
+only release-data. Catalog preparation needs only FBC. Select a compatible
+`--kustomize` when necessary.
 Do not claim OCP runtime support from a successful FBC image build, an ITS aggregate pass, or a
 snapshot's existence. Confirm the installed bundle, completed install tasks,
 and actual cluster version. New 5.x overlays use the reviewed 0.3 install path;

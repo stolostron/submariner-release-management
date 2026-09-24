@@ -17,7 +17,12 @@ This command is read-only. The minimum is inclusive: `0.24` includes streams
 0.24 and newer. `drop-versions.json` retains its existing exclusive semantics,
 so the equivalent map entry is `"5.0": "0.23"`. A legacy positional `0.23`
 remains a cutoff and emits a warning. If the supported stream is undecided,
-omit it for planning and configuration; do not invent compatibility policy.
+omit it for planning and configuration. When the user explicitly authorizes
+provisional defaults, choose the populated default-channel stream and its head
+from the selected template; pass that minimum explicitly and record the bundle
+digest and provisional status in the change description. Reuse real catalog
+inputs and complete preparation and image testing. This does not establish
+product compatibility or require changing the bundle's compatibility metadata.
 
 The plan reports the local base commits and explicitly does not claim remote
 freshness. Fetch both repositories before preparation. A failed fetch blocks
