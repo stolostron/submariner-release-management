@@ -179,9 +179,19 @@ class ConfigurationContracts(unittest.TestCase):
 
     def test_base_override_must_work_with_the_deployed_release_version_filter(self):
         mod.validate_base_reference("registry.example/approved/base:v5.0", "5-0")
-        for image in (BASE.replace("v5.0", "v4.22"), BASE + "@sha256:" + "a" * 64):
+        for image in (
+            BASE.replace("v5.0", "v4.22"),
+            BASE + "@sha256:" + "a" * 64,
+            "registry.example:5000/base:v5.0",
+        ):
             with self.assertRaisesRegex(ValueError, "release version filter"):
                 mod.validate_base_reference(image, "5-0")
+        mod.validate_image_target({"config": {"Labels": {}}})
+        for target in ('["v4.22"]', '["v5.0"]'):
+            with self.assertRaisesRegex(ValueError, "target label"):
+                mod.validate_image_target(
+                    {"config": {"Labels": {"com.redhat.fbc.openshift.version": target}}}
+                )
 
     def test_both_admissions_are_checked_before_either_write(self):
         (self.root / mod.RPA).mkdir(parents=True)

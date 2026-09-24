@@ -108,6 +108,7 @@ class LiveEvidence(unittest.TestCase):
         }
         self.arches = ["amd64", "arm64", "ppc64le", "s390x"]
         self.child_base = BASE
+        self.child_labels = {}
         for name in (
             "require_merged_commit",
             "catalog_git_files",
@@ -127,6 +128,8 @@ class LiveEvidence(unittest.TestCase):
             self.assertNotIn("{{$value}}", args[-1])
             return self.secret_keys
         if args[0] == "skopeo":
+            if "--config" in args:
+                return json.dumps({"config": {"Labels": self.child_labels}})
             if args[-1].endswith("@sha256:" + "b" * 64):
                 return json.dumps(
                     {
@@ -235,16 +238,31 @@ class LiveEvidence(unittest.TestCase):
             lambda: self.arches.pop(),
             lambda: self.arches.append("s390x"),
             lambda: setattr(self, "child_base", BASE.replace("v5.0", "v4.22")),
+            lambda: setattr(
+                self, "child_labels", {"com.redhat.fbc.openshift.version": '["v4.22"]'}
+            ),
             lambda: self.build["spec"]["pipelineSpec"].update(tasks=[]),
         ]
         for index, mutate in enumerate(mutations):
             with self.subTest(index=index):
                 original = copy.deepcopy(
-                    (self.snapshot, self.build, self.arches, self.child_base)
+                    (
+                        self.snapshot,
+                        self.build,
+                        self.arches,
+                        self.child_base,
+                        self.child_labels,
+                    )
                 )
                 mutate()
                 self.assertFalse(self.verify()["build_ready"])
-                self.snapshot, self.build, self.arches, self.child_base = original
+                (
+                    self.snapshot,
+                    self.build,
+                    self.arches,
+                    self.child_base,
+                    self.child_labels,
+                ) = original
 
 
 class ImageContents(unittest.TestCase):

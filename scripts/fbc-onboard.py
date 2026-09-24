@@ -1625,6 +1625,16 @@ def verify_live(args, base_image):
                 == base_image,
                 f"Wrong/missing base annotation for {item['platform']['architecture']}",
             )
+            validate_image_target(
+                json.loads(
+                    run(
+                        "skopeo",
+                        "inspect",
+                        "--config",
+                        "docker://" + expected_repo + "@" + item["digest"],
+                    )
+                )
+            )
         result["catalog_content_verified"] = verify_catalog_images(
             image, children, expected_files, contract
         )
@@ -1718,8 +1728,19 @@ def validate_base_reference(image, version):
     # The deployed release filter derives OCP_VERSION from this exact tag when
     # there is no com.redhat.fbc.openshift.version label (our Dockerfile has none).
     require(
-        image.rsplit(":", 1)[-1] == "v" + version.replace("-", "."),
-        "OPM base must use the requested :vX.Y tag for the release version filter",
+        image.count(":") == 1
+        and image.rsplit(":", 1)[-1] == "v" + version.replace("-", "."),
+        "OPM base must use the requested :vX.Y tag without a port or digest for the release version filter",
+    )
+
+
+def validate_image_target(config):
+    # This reviewed pipeline family uses the base tag. A label takes precedence
+    # in release, and its array form is not supported by the pinned pruning task.
+    labels = config.get("config", {}).get("Labels") or {}
+    require(
+        "com.redhat.fbc.openshift.version" not in labels,
+        "Unreviewed OCP target label overrides the base; review pipeline and release label support",
     )
 
 
@@ -1736,6 +1757,9 @@ def inspect_base_image(image, version=None):
     require(
         {"amd64", "arm64", "ppc64le", "s390x"}.issubset(arches),
         "Selected OPM base must provide amd64, arm64, ppc64le and s390x",
+    )
+    validate_image_target(
+        json.loads(run("skopeo", "inspect", "--config", f"docker://{image}"))
     )
     return sorted(arches)
 

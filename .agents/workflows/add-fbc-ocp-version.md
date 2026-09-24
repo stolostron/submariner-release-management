@@ -25,9 +25,14 @@ claims of freshness; cached bases can still support a clearly identified draft.
 Review the base-image tag and architectures with registry inspection. OCP 5.0
 uses `registry.redhat.io/openshift5/ose-operator-registry-rhel9:v5.0`; do not
 change the RHEL generation merely because the OCP major changes.
-An override must retain the requested `:vX.Y` tag: the deployed release filter
+An override must retain the requested `:vX.Y` tag without a registry port: the deployed release filter
 derives the index version from the base annotation. A digest-only override cannot
-establish the release version with the current Dockerfile.
+establish the release version with the current Dockerfile. Target-version labels
+also need review: they override the base in release, and the pinned pruning task
+does not consume their array format. The helper rejects that unreviewed path.
+For another major transition, inspect the pinned build-task helpers as well as
+base availability. The [reviewed helper][version-helper] accepts 4.x/5.x and explicitly maps the
+predecessor of 5.0 to 4.22; a later major can require an upstream task update.
 
 Pin the repositories independently with `--release-data-ref` and `--fbc-ref`.
 Both default to `origin/main`; `--base` is a shorthand only when the same ref name
@@ -218,3 +223,5 @@ Do not edit the two input repositories while this runs: the test checks their
 complete file state afterward. Fixture commits and the temporary image are local
 and disposable. This test does not establish supported Submariner stream policy
 or operator compatibility on a running OCP 5 cluster.
+
+[version-helper]: https://github.com/konflux-ci/konflux-test/blob/2cd9f355216aebb72213c14118243ce9d66c181e/test/utils.sh

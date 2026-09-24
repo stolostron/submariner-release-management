@@ -1,204 +1,133 @@
 # OCP 5 FBC implementation status
 
-Prepared 2026-09-24. Changes are committed locally and have not been pushed or applied.
-The supported Submariner stream for the real OCP 5.0 catalog is still undecided.
+Updated 2026-09-24. The reusable skill and its local acceptance tests are complete.
+The real 5.0 tenant, admission and pipeline drafts are committed locally. **The real
+catalog is not populated and OCP 5.0 is not onboarded**: an approved minimum
+Submariner stream and initial bundle are still needed. Nothing was pushed or applied.
 
-The subsequent [skill completion audit and execution plan](ocp-5-skill-completion-plan.md)
-records additional confirmed validation gaps and the remaining implementation work.
-The passing checks below establish the exercised behavior, not coverage of those
-new cases or readiness for a live OCP 5 rollout.
+## Review locations and commits
 
-## Review locations
+| Change | Checkout | Commit |
+| --- | --- | --- |
+| Complete skill flow | `ocp-5-skill-work/release-management` | `11eb87f` |
+| Contract validation and source preservation | `ocp-5-skill-work/release-management` | `36e706a` |
+| Live provenance/content checks and 5.x ITS migration | `ocp-5-skill-work/release-management` | `4549e64` |
+| FBC build/test safety foundation | `ocp-5-skill-work/fbc-tooling` | `8b6e990` |
+| Requested-catalog image CI and workflow | `ocp-5-skill-work/fbc-tooling` | `8eac46a`, `f641fb9` |
+| Real 5.0 push/PR pipeline pair | `ocp-5-work/fbc` | `0641db0` |
+| Real 5.0 tenant, including the 0.3 install path | `ocp-5-work/tenant` | `ae77531d74`, `47eda9c5b1` |
+| Real 5.0 stage/prod admission entries | `ocp-5-work/admission` | `82ff6f2fc5` |
 
-| Change | Checkout |
-| --- | --- |
-| Release tooling, onboarding helper, skill, workflows, regression tests | `/home/dfarrell07/konflux/submariner-release-management` |
-| FBC build/test safety and major-version support | `/home/dfarrell07/konflux/ocp-5-work/submariner-operator-fbc` |
-| OCP 5.0 tenant overlay, generated resources, tenant instructions | `/home/dfarrell07/konflux/ocp-5-work/tenant` |
-| Stage/prod admission application entries | `/home/dfarrell07/konflux/ocp-5-work/admission` |
+Paths are relative to `/home/dfarrell07/konflux`. Release-tooling commits are also
+available from the original `submariner-release-management` checkout. Original FBC
+feature and operator checkouts remain intact. Configuration uses cached main
+`8c18efee295889f5d86b03d16930a2f11977fd58`; fetching GitLab still fails because
+`gitlab.cee.redhat.com` does not resolve. Refresh/rebase before remote review.
 
-The existing FBC Tekton feature branch and original release-data checkout were
-preserved. FBC tooling is based on freshly fetched main
-`b3bd5f3a449001e51d7d385a72f5d6f5cda4a7a1`. Configuration drafts use cached main
-`8c18efee295889f5d86b03d16930a2f11977fd58`; fetching GitLab failed because
-`gitlab.cee.redhat.com` could not resolve. Refresh/rebase those drafts before review.
+## Completed skill behavior
 
-Related local commits:
-
-- FBC build/test workflows: `8b6e9909ae7219a543b7ffbaf431987c1292248d`.
-- Tenant configuration: `ae77531d7496e7e20159fc63e08a051511f9f060`.
-- Release admissions: `82ff6f2fc5fa0e109e8ef98840fb487a1986c889`.
-
-## Implemented behavior
-
-- Complete OCP IDs (`4-22`, `5-0`) propagate through release generation, scope,
-  status, snapshot verification, production index checks, and Jira descriptions.
-  Historical minor inputs remain accepted by the shared normalization helper.
-- Modern records match the exact Submariner version; date matching applies only
-  to legacy filenames. Prod reuses the exact version-matched stage snapshot.
-- Onboarding defaults to a read-only plan. Preparation uses separate resumable
-  worktrees; it does not switch checkouts, delete branches, commit, push, or apply.
-- Inclusive `--min-supported-sub 0.24` maps to drop-through cutoff `0.23`.
-  Legacy positional cutoffs retain their meaning and print a warning. Missing
-  supported channels fail explicitly; cutoffs now remove every patch in a stream.
-- Tenant generation validates seven resource identities and relationships, keeps
-  autorelease off, and sets the new operator ITS to the package default channel.
-  Stage and prod admissions retain their existing policies and index templates.
-- FBC tests isolate candidate files, including uncommitted content. Reset refuses
-  ordinary working checkouts. Builds stage and validate output before publication,
-  preserve unrelated catalogs, and roll back published catalogs on failure.
-- Rendering accepts arbitrary checkout names and 5-only catalog sets. Retry
-  output cannot mix partial YAML or diagnostics into a successful render.
-- Pipeline preparation validates both events, full identities, four architectures,
-  OCP-specific base image, catalog input, CEL paths, service account, and PR policy.
-- Release verification rejects absent, malformed, skipped, or pending test
-  results and requires both standard and operator scenarios. Explicit expected
-  commits pin catalog reads and snapshot selection.
-- Live verification checks deployed configuration, matched admissions, successful
-  expected-commit push builds, test completion, image architectures, and base
-  annotations. It explicitly leaves actual OCP runtime compatibility unverified.
+- Plan/add/resume guidance, installed-copy execution and canonical workflow lookup;
+  independent immutable repository refs and predecessor selection; policy-free
+  configuration preparation; complete prepare, verify, target-image and live phases.
+- Full major/minor identities; inclusive minimum versus legacy drop-through cutoff;
+  preflight checks for channels, Kustomize, supported pipeline structure and base
+  architectures before creating worktrees. Overrides must retain the release
+  filter's requested `:vX.Y` tag; registry ports and overriding target-version labels
+  need upstream support review.
+- Scratch generation and checked publication preserve unrelated files and Git index
+  entries. YAML edits preserve comments and handle block/flow lists. Both RPAs and
+  both pipelines are validated before either pair is written. Conflicting resumes
+  fail without overwriting their output.
+- Fresh tenant rendering must match all seven stored resources. RPA destinations,
+  credentials and pipeline/account contracts are checked. New 5.x overlays use
+  the reviewed upstream 0.3 install pipeline wrapper, default catalog channel and
+  explicit `.dockerconfigjson` secret key. Existing 4.x overlays are unchanged.
+- Catalog verification derives its minimum from the map even without a CLI minimum;
+  package, channels, upgrade graph, bundle versions and digests must match the source
+  template. Preparation renders only the requested catalog and validates the full
+  candidate; the real OCP-base image is validated and served through gRPC.
+- Pipeline checks cover the reviewed OCI task family, effective source context,
+  enabled checks, build arguments, platform matrix, image index and result forwarding.
+  Unknown or unresolved definitions cannot pass as locally ready.
+- Live verification separates configuration, build and runtime claims. It checks
+  actual RPAs, account/secret bindings, merged-main ancestry, original push provenance,
+  complete snapshot tests, source/image linkage and four platform base annotations.
+  Every platform's extracted catalog must match the pinned Git files and catalog
+  contract. Runtime remains unverified until installation and cluster evidence exist.
+- Image CI retains `Image Build & Test`, selecting changed catalogs or all catalogs
+  for shared build changes. Public CI's upstream OPM is separate from the explicit
+  authenticated OCP-base test. The workflow checks both effective rulesets and
+  legacy protection at the exact PR head, including required app identities.
 
 ## Validation
 
-Passed:
+Passed in this completion:
 
-- Full release-management `make test`, plus focused checks after subsequent edits.
-- Thirty offline onboarding/major-transition regression tests.
-- Full authenticated FBC suite for the existing catalogs. A mixed 4.x/5.0
-  candidate containing the new pipelines also passed its suite with
-  authentication-dependent tests explicitly skipped.
-- Existing catalog validation, ShellCheck, Ruff, Markdown lint, and skill validation.
-- Real 5-only render/build using 0.24 as test data: default channel `stable-0.24`,
-  bundles 0.24.0 and 0.24.1, `opm validate` successful.
-- Native amd64 image built with the OCP 5.0 base; `/configs` validates and the gRPC
-  service returns the expected Submariner package. The test owns and cleans up its
-  container and random local port.
-- Tenant generation and semantic checks; all Submariner manifests regenerate
-  identically. After committing the tenant draft, the complete
-  `tox -e tenants-config-test` passed with **60,108 tests**, including both
-  static checks, full manifest regeneration, attribution, and onboarding checks.
-- Live/public probes correctly report no deployed 5.0 application and no 0.24.1
-  entry in the public OCP 5.0 index.
+- **55 focused regression tests**, Ruff, YAML/Shell/Markdown checks and skill metadata
+  validation. The normal commit hook ran the full release-management `make test`.
+- Installed-skill E2E using real Kustomize, OPM, Podman and the OCP 5.0 base: complete
+  preparation, native image validation/gRPC serving, reruns, conflicting-policy
+  rejection, source bytes/modes/Git-index preservation and 4.23 → 5.0 → 5.1 reuse.
+  The final run includes the 5.x install-path migration and target-only rendering.
+- Full authenticated FBC suite, all nine existing catalog validations and linting;
+  executable CI selection probes for a changed major, existing minor and shared
+  Dockerfile. E2E fixture suites explicitly skip their separate authenticated-fetch
+  tests; the authenticated suite was run independently.
+- Pinned build-task utility probes accept 5.0/5.1 and correctly cross from 5.0
+  to predecessor 4.22. The actual 5.0 base passes the tightened metadata check.
+- Real tenant builder and fresh seven-object validation after ITS migration; both
+  real admissions pass the complete contract. The post-commit
+  `tox -e tenants-config-test` passed **60,108 tests**, including full regeneration
+  of all 2,180 directories, attribution and allowed-onboarding checks.
 
-Release-data's `tenants-config-test` wrapper initially rejected the uncommitted
-draft because it requires a clean checkout. The post-commit run passed all phases.
-Both full repository `tox` runs completed. Main tests passed: **133,513** in the
-tenant draft and **132,516** in the admission draft. Ruff, YAML lint, ShellCheck,
-and CODEOWNERS checks passed in both. The only failing environment was `warnings`:
-the existing Red Hat Desktop ITS references missing policy
-`registry-red-hat-desktop-extensions-prod`. The same failure was reproduced on the
-untouched original checkout; it was not changed as part of this work. Consequently,
-full `tox` is not green, despite the affected checks passing.
+The 0.24 E2E catalog is explicitly **test data**, with bundles 0.24.0 and 0.24.1.
+It does not establish approved product policy or installation compatibility.
+The first completion E2E attempt failed on `/tmp` quota; the successful runs use a
+task-owned `TMPDIR` on the workspace disk. No unrelated temporary data was removed.
 
-## Remaining gates
+Full release-data `tox` is **not green**: the updated tenant passed **133,513** main tests,
+Ruff, YAML lint, ShellCheck and CODEOWNERS. Its sole failing environment remains
+`warnings` (6,256 passed; one unrelated failure).
+The existing warnings failure for missing policy
+`registry-red-hat-desktop-extensions-prod` was also reproduced on the untouched
+original checkout during the earlier review. It was not changed by this task.
 
-1. Choose the first supported Submariner stream. The real FBC map and active
-   release list do not yet include 5.0. The 0.24 catalogs above are test fixtures.
-2. Restore GitLab connectivity, refresh the configuration bases, and review the
-   local commits. Merge/reconcile tenant configuration and admissions.
-3. Prepare the actual catalog/pipeline change from the chosen populated stream;
-   required PR checks must pass at its exact head, followed by a merged push build
-   with all four manifest architectures and the required base annotations.
-4. Record operator installation and QE evidence on an actual OCP 5.0 cluster.
-   Current integration tooling can fall back to 4.x or skip installation. A local
-   image build or aggregate ITS pass cannot establish runtime compatibility.
-5. Verify a scoped stage release, promote its exact QE-approved snapshot, confirm
-   public-index membership, then activate `5-0` in the default release scope.
+## Remaining real rollout gates
 
-Use the [onboarding workflow](../.agents/workflows/add-fbc-ocp-version.md) and
-[skill](../skills/add-fbc-ocp-version/SKILL.md) for the repeatable commands.
+The [remaining execution plan](ocp-5-skill-completion-plan.md) contains the short
+resume sequence. The minimum stream and initial bundle question is still pending.
+The previously inspected 0.24.1 bundle declares `v4.15-v4.19`; catalog onboarding
+does not silently change that declaration. A bundle update is needed only if the
+approved initial bundle is missing or must change; a pending component snapshot is
+not a universal prerequisite to catalog onboarding.
 
-## Deep review follow-up
+Live verification against current merged FBC main correctly reports no 5.0
+Application and no merged 5.0 catalog. No original push build, four-platform 5.0
+artifact, installation or release is claimed. No OCP 5 onboarding PR was open at
+inspection. GitHub's effective ruleset requires six Actions checks (app 15368)
+and DCO (app 1861), despite the legacy protection endpoint returning 404.
 
-The second review found and fixed gaps missed by the original tests:
+Before rollout, refresh configuration, populate the approved catalog, review and
+merge/reconcile changes, verify the merged 5.0 build and run installation/QE on an
+observed 5.0.x cluster. Confirm access to the selected install profile; the generic
+ITS can skip a released bundle and then needs an explicit-bundle QE procedure.
+Stage/prod release and public-index membership remain separate gates. The default
+release scope remains 4.16–4.22 until those gates pass.
 
-- Reject duplicate build arguments, incorrect service accounts, wrong/disabled
-  event triggers, duplicate platforms, expiring push images (including inherited
-  defaults), and semantic tenant configuration errors.
-- Resolve predecessor overlays from the selected Git commit, ignore dirty input
-  overlays, and reject resuming a worktree from an unrelated/newer base.
-- Apply the same resource contract to local and live verification. Bind live
-  build evidence to the correct application, component, repository, main-branch
-  push, revision, and the snapshot's exact image digest. Release verification
-  independently proves GitHub main ancestry and the original push-pipeline
-  identity, including for retest events.
-- Restore all catalogs after an interrupted publication, including a signal
-  immediately after moving an original directory. Preserve recovery data if
-  rollback itself fails. A build no longer rewrites its source template.
-- Use Make's target directory (`CURDIR`) for tool installation. The previous
-  inherited `PWD` could install OPM/grpcurl in the caller's unrelated checkout;
-  the clean-tools E2E starts without binaries to exercise actual bootstrapping.
-- Reject stale catalogs absent from the build map or conflicting with the
-  requested minimum; require the Submariner package identity.
-- Parse stage Releases structurally, checking their identity and release plan.
-  Commit only generated releases, preserving unrelated staged changes.
-- Read bundle-update snapshots once, select push events from labels, require
-  completed passing results, and verify the image's exact `csv-version` before
-  changing catalogs. Restrict bundle-update commits to configured catalog paths.
-- Replace the obsolete live E2E fixture with the candidate template; assert every
-  configured catalog exists and has the correct included/pruned bundle behavior.
-- Clear repository-specific Git variables in the pre-commit test hook. Committing
-  exposed inherited index paths breaking linked-worktree tests; a real partial
-  commit regression checks worktree isolation and preserves unrelated staged edits.
+## Reproducible records
 
-The live E2E attempt was correctly blocked by snapshot
-`submariner-0-24-20260922-114334-000-d7`: its status is `BuildPLRInProgress` while
-its detail text says `Integration test passed with warnings`. No completed
-`TestPassed`-only push snapshot was found in the tenant at review time. The
-readiness checks do not infer success from that inconsistent text. The live
-5.0 application is still absent, so no OCP 5 Konflux build or runtime pass is
-claimed.
+Current logs are under `/tmp/ocp5-skill-implementation.se7efhg9/`:
 
-The actual 0.24.1 bundle inspected during review still carries
-`com.redhat.openshift.versions=v4.15-v4.19`. This declaration needs an explicit
-compatibility-policy decision and a rebuilt bundle as appropriate; it is not
-changed automatically by catalog onboarding. The user's operator checkout was
-left untouched.
+- `batch2-commit.log`, `batch3-commit.log`, `completion-commit.log`: full release hook checks.
+- `batch3-tests.log`: focused regressions.
+- `final-skill-e2e.log`: final installed-skill E2E.
+- `fbc-final-checks.log`, `fbc-ci-lint.log`: authenticated FBC suite and lint.
+- `real-tenant-build.log`, `real-tenant-tox.log`, `real-tenant-postcommit.log`:
+  tenant regeneration and repository checks.
+- `final-live-readiness.json` and `.log`: actual live non-readiness evidence.
+- `real-config-resume.json`, `real-onboarding-plan.json`: clean real configuration
+  resume and the remaining minimum-stream blocker.
 
-### Review validation records
-
-- Release-management full suite: `/tmp/ocp5-release-review-final-suite.log`.
-- Twenty-nine focused Python tests: `/tmp/ocp5-review-unit.log`.
-- Thirty focused Python tests including the commit-hook regression:
-  `/tmp/ocp5-hook-regression-after.log`.
-- Full release suite through the commit hook:
-  `/tmp/ocp5-release-commit-validation.log`.
-- FBC full suite including authenticated fetch (`SKIP_AUTH_TESTS=false`):
-  `/tmp/ocp5-fbc-review-full-auth-suite.log`.
-- Authenticated production-catalog fetch: `/tmp/ocp5-fbc-auth-final.log`;
-  failed-test cleanup regression: `/tmp/ocp5-isolation-cleanup.log`.
-- FBC ShellCheck and Markdown lint: `/tmp/ocp5-fbc-review-shellcheck.log` and
-  `/tmp/ocp5-fbc-review-markdown.log`.
-- Cross-repository CLI and image E2E: `/tmp/ocp5-onboarding-e2e-clean-tools.log`.
-- Complete post-commit tenant validation:
-  `/tmp/ocp5-tenant-postcommit-validation.log`.
-- Live bundle-update E2E gate: `/tmp/ocp5-live-workflow-e2e.log` (blocked as above).
-- Live OCP 5 readiness: `/tmp/ocp5-live-readiness-review.json` and `.log`
-  (blocked by absent application).
-- GitHub merged-main ancestry probe: `/tmp/ocp5-merged-main-check.log`.
-
-The first CLI E2E run completed both onboarding passes and artifact checks but
-correctly failed its final source-preservation assertion because review edits
-were still being made to its FBC input. A later run built and served the image
-successfully but exposed the Make `PWD` issue; it was interrupted during its repeat pass to correct that problem. The
-final clean-tools run uses stable inputs, bootstraps tools inside its worktree,
-and also builds/tests the OCP 5 image. Logs are local temporary evidence; the runner
-is repository source for reproduction, not a promise of deployed state.
-
-The previously skipped authenticated fetch test also found an obsolete checkout
-basename restriction. Its full-index filesystem export exhausted `/tmp` during
-review; package-only extraction avoids copying unrelated operator catalogs and
-the large image cache. Test cleanup now handles read-only extracted directories
-and preserves a failed child's exit status. Authenticated fetch checks the
-package, bundles, and populated default channel, not just output-file existence.
-The first cleanup/space failure was confined to disposable test directories.
-The concurrent catalog render retried successfully after space was reclaimed.
-
-The clean-tools onboarding E2E **passed**. It bootstrapped OPM and grpcurl inside
-its worktree, prepared all three change sets, validated ten OCP catalogs (4.14
-through 4.22 plus 5.0), built the OCP 5 image, validated `/configs`, served the
-expected gRPC package, repeated the phases without artifact changes, rejected a
-conflicting minimum, verified without source repositories, and proved both dirty
-fixture inputs and original input repositories were preserved. The image,
-container, and disposable repositories were cleaned up. The subsequent
-package-fetch/cleanup fixes were validated separately and in the full FBC suite.
+These local logs are temporary evidence. Committed tests and the
+[canonical workflow](../.agents/workflows/add-fbc-ocp-version.md) provide reproduction.
+Earlier implementation/review details remain in this file's Git history.
