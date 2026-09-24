@@ -14,12 +14,12 @@ help:
 	@echo "                         - Configure Konflux for new Submariner Y-stream version"
 	@echo "                           Creates overlays, tenant config, and RPAs in konflux-release-data repo"
 	@echo "                           Example: make configure-downstream VERSION=0.24"
-	@echo "  make add-fbc-ocp-version OCP_VERSION=... MIN_SUB=..."
+	@echo "  make add-fbc-ocp-version OCP_VERSION=... [MIN_SUPPORTED_SUB=...] [PHASE=plan]"
 	@echo "                         - Add FBC support for new OCP version in Konflux release data"
 	@echo "                           Creates overlays, tenant config, and RPA entries"
-	@echo "                           Example: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23"
+	@echo "                           Example: make add-fbc-ocp-version OCP_VERSION=5.0 MIN_SUPPORTED_SUB=0.24"
 	@echo "  make create-fbc-releases VERSION=... [TYPE=stage|prod]"
-	@echo "                         - Create FBC releases for all 7 OCP versions (requires oc login)"
+	@echo "                         - Create FBC releases for applicable OCP versions (requires oc login)"
 	@echo "                           Default TYPE is stage if not specified"
 	@echo "                           Example: make create-fbc-releases VERSION=0.22.1"
 	@echo "                           Example: make create-fbc-releases VERSION=0.22.1 TYPE=prod"
@@ -115,13 +115,16 @@ configure-downstream:
 	./scripts/configure-downstream.sh $(VERSION)
 
 add-fbc-ocp-version:
-	@test -n "$(OCP_VERSION)" || (echo "ERROR: OCP_VERSION parameter required. Usage: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23" && exit 1)
-	@test -n "$(MIN_SUB)" || (echo "ERROR: MIN_SUB parameter required. Usage: make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23" && exit 1)
-	./scripts/add-fbc-ocp-version.sh $(OCP_VERSION) $(MIN_SUB)
+	@test -n "$(OCP_VERSION)" || (echo "OCP_VERSION required (example: 5.0)"; exit 1)
+	./scripts/add-fbc-ocp-version.sh "$(OCP_VERSION)" $(if $(MIN_SUB),"$(MIN_SUB)") $(if $(MIN_SUPPORTED_SUB),--min-supported-sub "$(MIN_SUPPORTED_SUB)") --phase "$(if $(PHASE),$(PHASE),plan)" $(if $(WORKSPACE),--workspace "$(WORKSPACE)") $(if $(RELEASE_DATA_REPO),--release-data-repo "$(RELEASE_DATA_REPO)") $(if $(FBC_REPO),--fbc-repo "$(FBC_REPO)")
+
+.PHONY: test-fbc-onboarding
+test-fbc-onboarding:
+	python3 -m unittest discover -s scripts/tests -p 'test_fbc_*.py'
 
 create-fbc-releases:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-fbc-releases VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
-	./scripts/create-fbc-releases.sh $(VERSION) $(if $(TYPE),$(TYPE),stage)
+	./scripts/create-fbc-releases.sh "$(VERSION)" "$(if $(TYPE),$(TYPE),stage)" $(if $(OCP),--ocp "$(OCP)")
 
 create-component-release:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION parameter required. Usage: make create-component-release VERSION=0.22.1 [TYPE=stage|prod]" && exit 1)
@@ -209,7 +212,7 @@ test-parallel:
 test-parse-ec-log:
 	./scripts/lib/test-parse-ec-log.sh
 
-test: validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck test-autorelease test-conductor test-component test-tekton test-cve test-bundle test-drift test-prod-bundle test-fbc-scope test-tracker test-parallel test-parse-ec-log
+test: test-fbc-onboarding validate-yaml validate-fields validate-data validate-markdown gitlint shellcheck test-autorelease test-conductor test-component test-tekton test-cve test-bundle test-drift test-prod-bundle test-fbc-scope test-tracker test-parallel test-parse-ec-log
 
 test-remote:
 	@test -n "$(FILE)" || (echo "ERROR: FILE parameter required. Usage: make test-remote FILE=releases/..." && exit 1)

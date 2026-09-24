@@ -59,7 +59,9 @@ source "$(dirname "$0")/lib/fbc-scope.sh"
 # above) so status output can't drift behind the list (token count / first+last token).
 read -ra _OCP_VERSION_ARR <<< "$FBC_OCP_VERSIONS"
 readonly CURRENT_OCP_VERSION_COUNT=${#_OCP_VERSION_ARR[@]}
-readonly OCP_VERSION_RANGE="4.${FBC_OCP_VERSIONS%% *}-4.${FBC_OCP_VERSIONS##* }"
+_OCP_FIRST=${FBC_OCP_VERSIONS%% *}
+_OCP_LAST=${FBC_OCP_VERSIONS##* }
+readonly OCP_VERSION_RANGE="${_OCP_FIRST//-/.}-${_OCP_LAST//-/.}"
 
 # Submariner component repos (for branch checks)
 readonly SUBMARINER_REPOS="submariner-operator submariner lighthouse shipyard subctl admiral cloud-prepare"
@@ -253,6 +255,10 @@ find_fbc_yaml_by_date() {
   local target_date=$3
   local target_epoch
 
+  local exact
+  exact=$(find "releases/fbc/$ocp_version/$env" -name "submariner-fbc-$ocp_version-$FULL_VERSION_DASH-$env-*.yaml" 2>/dev/null | sort | tail -1) || true
+  if [ -n "$exact" ]; then echo "$exact"; return; fi
+
   [ -z "$target_date" ] && return
 
   # Convert target date to epoch for math
@@ -263,7 +269,7 @@ find_fbc_yaml_by_date() {
   local best_diff=999999
 
   # Search all YAMLs in directory
-  for yaml in releases/fbc/4-$ocp_version/$env/*.yaml; do
+  for yaml in releases/fbc/$ocp_version/$env/submariner-fbc-$ocp_version-$env-*.yaml; do
     [ ! -f "$yaml" ] && continue
 
     # Extract date from filename
@@ -310,7 +316,7 @@ report_fbc_scope() {
       # absent from this set — a later-introduced version and a pre-existing one
       # simply not re-cut inside the date window look identical — so make no
       # causal claim about when support was added.
-      echo "📄 FBC $env YAMLs: $yaml_count at release time (OCP 4-$scope)"
+      echo "📄 FBC $env YAMLs: $yaml_count at release time (OCP $scope)"
     else
       # For in-progress releases, incomplete scope is a blocker
       echo "⚠️  Incomplete: $yaml_count/$current_total FBC $env YAMLs"
@@ -520,10 +526,15 @@ check_fbc_release_status() {
   # Loop through OCP versions in scope
   for ocp_version in $scope; do
     local fbc_release
-    # FBC release CRs are named submariner-fbc-4-XX-{env}-YYYYMMDD-NN — they carry
-    # NO Submariner version segment (unlike component releases). Match date+sequence.
-    fbc_release=$(oc get release -n submariner-tenant --no-headers 2>/dev/null \
-      | grep -E "submariner-fbc-4-$ocp_version-$env-[0-9]{8}-[0-9]+" | tail -1 | awk '{print $1}' || true)
+    # Query the exact release recorded locally; date proximity is legacy-only.
+    local record component_date
+    component_date=$(get_component_yaml_date "$env")
+    record=$(find_fbc_yaml_by_date "$ocp_version" "$env" "$component_date")
+    fbc_release=""
+    if [ -n "$record" ]; then
+      fbc_release=$(yq -r '.metadata.name' "$record")
+      oc get release "$fbc_release" -n submariner-tenant >/dev/null 2>&1 || fbc_release=""
+    fi
 
     if [ -z "$fbc_release" ]; then
       not_applied=$((not_applied + 1))
@@ -972,7 +983,7 @@ check_step_11() {
     else
       # For in-progress or not-started: use latest snapshot (current verification)
       fbc_snapshot=$(oc get snapshots -n submariner-tenant --sort-by=.metadata.creationTimestamp 2>/dev/null \
-        | grep "^submariner-fbc-4-$ocp_version" | tail -1 | awk '{print $1}' || true)
+        | grep "^submariner-fbc-$ocp_version" | tail -1 | awk '{print $1}' || true)
     fi
 
     if [ -z "$fbc_snapshot" ]; then
@@ -986,7 +997,7 @@ check_step_11() {
           echo "❌ Missing FBC snapshots:"
         fi
       fi
-      echo "   - OCP 4.$ocp_version"
+      echo "   - OCP ${ocp_version//-/.}"
       FBC_MISSING=$((FBC_MISSING + 1))
     else
       # Check test status
@@ -1002,7 +1013,7 @@ check_step_11() {
           if [ "$FBC_FAILED" -eq 0 ]; then
             echo "❌ FBC snapshots with test failures:"
           fi
-          echo "   - OCP 4.$ocp_version: $fbc_all_passed/$fbc_total passed"
+          echo "   - OCP ${ocp_version//-/.}: $fbc_all_passed/$fbc_total passed"
           FBC_FAILED=$((FBC_FAILED + 1))
         fi
       fi
@@ -1508,7 +1519,7 @@ case "$CURRENT_PHASE" in
       # "component-prod" phase above, never here).
       echo "- FBC catalogs: None found"
     else
-      echo "- FBC catalogs: $prod_count (OCP 4-$prod_scope)"
+      echo "- FBC catalogs: $prod_count (OCP $prod_scope)"
     fi
     ;;
 

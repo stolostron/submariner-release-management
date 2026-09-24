@@ -56,12 +56,8 @@ die() {
 check_prerequisites() {
   local MISSING_TOOLS=()
 
-  if $PROD_INDEX; then
-    command -v skopeo &>/dev/null || MISSING_TOOLS+=("skopeo")
-    command -v jq &>/dev/null || MISSING_TOOLS+=("jq")
-  else
-    command -v oc &>/dev/null || MISSING_TOOLS+=("oc")
-  fi
+  command -v oc &>/dev/null || MISSING_TOOLS+=("oc")
+  command -v jq &>/dev/null || MISSING_TOOLS+=("jq")
 
   if [ "${#MISSING_TOOLS[@]}" -gt 0 ]; then
     die "Missing required tools: ${MISSING_TOOLS[*]}"
@@ -124,19 +120,10 @@ parse_arguments() {
   fi
 
   if [ -n "$OCP_FILTER" ]; then
-    # Normalize: accept 4.21 or 4-21, store minor version number
-    local V_NUM="${OCP_FILTER#4.}"
-    V_NUM="${V_NUM#4-}"
-    local VALID=false
-    for V in "${ALL_OCP_VERSIONS[@]}"; do
-      [ "$V_NUM" = "$V" ] && VALID=true
-    done
-    if ! $VALID; then
-      # Derive the valid-versions list from ALL_OCP_VERSIONS so it never drifts.
-      local valid_list
-      valid_list=$(printf '4.%s, ' "${ALL_OCP_VERSIONS[@]}")
-      die "Invalid OCP version: $OCP_FILTER" "Valid versions: ${valid_list%, }"
-    fi
+    # Normalize complete identities, including major-version transitions.
+    local V_NUM
+    V_NUM=$(ocp_normalize "$OCP_FILTER") || exit 1
+    # Explicit selection may inspect a newly onboarded version before activation.
     OCP_FILTER="$V_NUM"
   fi
 }
@@ -181,40 +168,27 @@ get_urls_from_prod_index() {
     echo "Checking prod registry for Submariner $VERSION..."
   fi
 
-  # Confirm the bundle shipped (tag-scheme-aware; sets PROD_BUNDLE_* on success)
-  # before advertising index URLs, distinguishing genuine absence from an
-  # unreachable registry so a flake doesn't read as "not released".
-  prod_bundle_shipped "$VERSION"
-  case "$PROD_BUNDLE_VERDICT" in
-    shipped) ;;
-    not-shipped) die "Submariner $VERSION not found in prod registry" \
-        "No exact tag v${VERSION} and floating v${VERSION%.*} points to another patch" ;;
-    *) die "Cannot verify Submariner $VERSION in prod registry" \
-        "skopeo could not inspect ${BUNDLE_REGISTRY} (check auth/network)" ;;
-  esac
-
-  local BUNDLE_DIGEST="$PROD_BUNDLE_DIGEST" BUNDLE_CREATED="$PROD_BUNDLE_CREATED"
-
-  if ! $RAW_URL; then
-    echo "✓ Found bundle ${PROD_BUNDLE_TAG} (${BUNDLE_DIGEST:7:12}, built ${BUNDLE_CREATED})"
-    echo ""
-    echo "=== Prod Operator Index URLs for Submariner $VERSION ==="
-    echo ""
-  fi
-
+  local count=0 verdict
   for V in "${VERSIONS[@]}"; do
-    local INDEX_URL="${INDEX_REGISTRY}:v4.${V}"
+    verdict=$(prod_index_has_bundle "$V" "$VERSION")
+    case "$verdict" in
+      present) count=$((count + 1)) ;;
+      absent) echo "OCP ${V//-/.}: bundle $VERSION absent from index" >&2; continue ;;
+      *) die "Cannot verify OCP ${V//-/.} index membership (auth/network failure)" ;;
+    esac
+    local INDEX_URL="${INDEX_REGISTRY}:v${V//-/.}"
     if $RAW_URL; then
       echo "$INDEX_URL"
     else
-      echo "OCP 4.${V}: $INDEX_URL"
+      echo "OCP ${V//-/.}: $INDEX_URL"
     fi
   done
 
   if ! $RAW_URL; then
     echo ""
-    echo "Found ${#VERSIONS[@]} OCP versions"
+    echo "Found $count OCP versions"
   fi
+  [ "$count" -gt 0 ]
 }
 
 # ━━━ SNAPSHOT FALLBACK ━━━
@@ -224,7 +198,7 @@ verify_snapshot_bundle() {
   local CATALOG_IMAGE="$2"
   local TARGET_VERSION="$3"
 
-  local EXTRACT_DIR="$TMPDIR/extract-4-${V}"
+  local EXTRACT_DIR="$TMPDIR/extract-${V}"
   mkdir -p "$EXTRACT_DIR"
 
   oc image extract "$CATALOG_IMAGE" \
@@ -264,17 +238,17 @@ get_urls_from_snapshots() {
   for V in "${VERSIONS[@]}"; do
     # Pick newest YAML across both stage and prod (filenames sort by date)
     local YAML_FILE=""
-    YAML_FILE=$(ls "$GIT_ROOT/releases/fbc/4-${V}"/{stage,prod}/*.yaml 2>/dev/null | sort | tail -1)
+    YAML_FILE=$(ls "$GIT_ROOT/releases/fbc/${V}"/{stage,prod}/*.yaml 2>/dev/null | sort | tail -1)
 
     if [ -z "$YAML_FILE" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
     local SNAPSHOT
     SNAPSHOT=$(awk '/^  snapshot:/ {print $2}' "$YAML_FILE")
     if [ -z "$SNAPSHOT" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
@@ -282,14 +256,14 @@ get_urls_from_snapshots() {
     CATALOG_IMAGE=$(oc get snapshot "$SNAPSHOT" -n "$NAMESPACE" \
       -o jsonpath='{.spec.components[0].containerImage}' 2>/dev/null)
     if [ -z "$CATALOG_IMAGE" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
     SNAPSHOT_MAP[$V]="$SNAPSHOT"
     CATALOG_MAP[$V]="$CATALOG_IMAGE"
 
-    run_parallel_job "verify-4-${V}" verify_snapshot_bundle "$V" "$CATALOG_IMAGE" "$VERSION"
+    run_parallel_job "verify-${V}" verify_snapshot_bundle "$V" "$CATALOG_IMAGE" "$VERSION"
   done
 
   if [ -f "$TMPDIR/pids.txt" ]; then
@@ -306,9 +280,9 @@ get_urls_from_snapshots() {
   for V in "${VERSIONS[@]}"; do
     [ -z "${CATALOG_MAP[$V]:-}" ] && continue
 
-    local RESULT_FILE="$TMPDIR/extract-4-${V}/result.txt"
+    local RESULT_FILE="$TMPDIR/extract-${V}/result.txt"
     if [ ! -f "$RESULT_FILE" ] || [ "$(cat "$RESULT_FILE")" != "match" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
@@ -316,14 +290,14 @@ get_urls_from_snapshots() {
       echo "${CATALOG_MAP[$V]}"
     else
       local SNAPSHOT="${SNAPSHOT_MAP[$V]}"
-      echo "${KONFLUX_UI}/ns/${NAMESPACE}/applications/submariner-fbc-4-${V}/snapshots/${SNAPSHOT}"
+      echo "${KONFLUX_UI}/ns/${NAMESPACE}/applications/submariner-fbc-${V}/snapshots/${SNAPSHOT}"
       echo "${CATALOG_MAP[$V]}"
       echo ""
     fi
 
     # Populate QE_CATALOG_URLS so Phase 3 writes the snapshot URLs to the Jira
     # subtask even when the primary Release-CR path found nothing (CRs GC'd).
-    QE_CATALOG_URLS+=("OCP 4.${V}: ${CATALOG_MAP[$V]} (pre-release snapshot)")
+    QE_CATALOG_URLS+=("OCP ${V//-/.}: ${CATALOG_MAP[$V]} (pre-release snapshot)")
 
     FOUND=$((FOUND + 1))
   done
@@ -368,11 +342,11 @@ get_urls() {
     # Get all succeeded releases for this OCP version (newest last)
     local RELEASES
     RELEASES=$(oc get releases -n "$NAMESPACE" --no-headers 2>/dev/null \
-      | grep "submariner-fbc-4-${V}-.*Succeeded" \
+      | grep "submariner-fbc-${V}-.*Succeeded" \
       | awk '{print $1}' || true)
 
     if [ -z "$RELEASES" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
@@ -386,7 +360,7 @@ get_urls() {
     done <<< "$(echo "$RELEASES" | tac)"
 
     if [ -z "$MATCH" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
 
@@ -395,10 +369,10 @@ get_urls() {
 
     # Capture the catalog fragment for the QE subtask (populated in main).
     if [ -z "$FBC_FRAG" ]; then
-      MISSING+=("4.$V")
+      MISSING+=("${V//-/.}")
       continue
     fi
-    QE_CATALOG_URLS+=("OCP 4.${V}: ${FBC_FRAG}")
+    QE_CATALOG_URLS+=("OCP ${V//-/.}: ${FBC_FRAG}")
 
     if $RAW_URL; then
       echo "$FBC_FRAG"
@@ -408,8 +382,8 @@ get_urls() {
       PLR_FULL=$(oc get release "$MATCH" -n "$NAMESPACE" -o jsonpath='{.status.managedProcessing.pipelineRun}')
       PLR="${PLR_FULL##*/}"
 
-      echo "${KONFLUX_UI}/ns/${NAMESPACE}/applications/submariner-fbc-4-${V}/snapshots/${SNAPSHOT}"
-      echo "${KONFLUX_UI}/ns/rhtap-releng-tenant/applications/submariner-fbc-4-${V}/pipelineruns/${PLR}?releaseName=${MATCH}"
+      echo "${KONFLUX_UI}/ns/${NAMESPACE}/applications/submariner-fbc-${V}/snapshots/${SNAPSHOT}"
+      echo "${KONFLUX_UI}/ns/rhtap-releng-tenant/applications/submariner-fbc-${V}/pipelineruns/${PLR}?releaseName=${MATCH}"
       echo "$FBC_FRAG"
       echo ""
     fi

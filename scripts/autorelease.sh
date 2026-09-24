@@ -462,8 +462,8 @@ try_auto_close() {
   for ocp in $scope; do
     verdict=$(prod_index_has_bundle "$ocp" "$version")
     case "$verdict" in
-      present) present+=("4.$ocp") ;;
-      *)       pending+=("4.$ocp($verdict)") ;;
+      present) present+=("${ocp//-/.}") ;;
+      *)       pending+=("${ocp//-/.}($verdict)") ;;
     esac
   done
 

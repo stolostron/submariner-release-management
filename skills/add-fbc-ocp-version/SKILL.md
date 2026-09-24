@@ -1,56 +1,37 @@
 ---
 name: add-fbc-ocp-version
-description: Add FBC support for new OCP version in Konflux release data - creates overlays, tenant config, and RPA entries.
-version: 1.0.0
-argument-hint: "<ocp-version> <min-submariner-version>"
-user-invocable: true
+description: Prepare a new OCP version's Submariner FBC catalogs, Konflux tenant resources, and release admissions, including major-version transitions such as OCP 5.0. Use for OCP onboarding, not ordinary bundle updates.
+metadata:
+  version: "2.0.0"
 allowed-tools: Bash, Read, Glob
 ---
 
 # Add FBC OCP Version
 
-Adds FBC (File-Based Catalog) support for a new OCP version in Konflux release data.
+Run `scripts/run.sh` beside this skill with the user's arguments. Resolve its
+absolute path from this skill's location; do not infer the release-management
+checkout from the caller's current Git directory. Installed copies can set
+`RELEASE_MANAGEMENT_REPO` to a verified checkout containing `scripts/fbc-onboard.py`.
 
-**Usage:**
+The default phase is a read-only JSON plan. Example arguments:
 
-```bash
-/add-fbc-ocp-version 4.22 0.23
-/add-fbc-ocp-version 4-22 0.23  # Hyphenated format also accepted
+```text
+5.0 --min-supported-sub 0.24 --phase plan
 ```
 
-**What it does:**
+`--min-supported-sub` is inclusive. The existing FBC map is a drop-through cutoff:
+minimum 0.24 means `"5.0": "0.23"`. Legacy second positional arguments retain their
+old cutoff meaning and print a warning. Never silently reinterpret them.
 
-- Auto-detects previous OCP version from existing overlays
-- Creates feature branch (subm-fbc-configure-4-22) from main
-- Creates 3 commits:
-  - Commit 1: 8 YAML overlay files (FBC overlay structure)
-  - Commit 2: 7 auto-generated Kustomize manifests + kustomization.yaml
-  - Commit 3: 2 FBC RPA files updated (applications list)
-- Verifies all changes before committing
-- Outputs push command, MR instructions, and Phase 2 instructions
+Read the [onboarding workflow](../../../.agents/workflows/add-fbc-ocp-version.md)
+for preparation and readiness gates. Follow both repositories' instructions.
+Use `--release-data-repo`, `--fbc-repo`, and `--workspace` for explicit checkouts.
+Preparation creates resumable worktrees and leaves changes uncommitted. Preserve
+existing branches, untracked files, and unrelated changes. A failed fetch is
+unknown remote state; it is not proof that a branch or bot PR does not exist.
 
-**Arguments:** $ARGUMENTS
-
----
-
-```bash
-#!/bin/bash
-set -euo pipefail
-
-# Find git repository root
-GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$GIT_ROOT" ]; then
-  echo "❌ ERROR: Not in a git repository"
-  exit 1
-fi
-
-# Verify orchestrator script exists
-if [ ! -x "$GIT_ROOT/scripts/add-fbc-ocp-version.sh" ]; then
-  echo "❌ ERROR: Required orchestrator script not found"
-  echo "This skill requires: scripts/add-fbc-ocp-version.sh"
-  exit 1
-fi
-
-# Delegate to orchestrator (passes all arguments)
-exec "$GIT_ROOT/scripts/add-fbc-ocp-version.sh" $ARGUMENTS
-```
+Resolve the first supported Submariner stream before catalog preparation. Work
+on tooling and tenant configuration can proceed independently. Do not claim OCP
+runtime support from a successful FBC image build, an ITS aggregate pass, or a
+snapshot's existence. Confirm the installed bundle, completed install tasks,
+and actual cluster version; the current cluster picker can fall back to 4.x.

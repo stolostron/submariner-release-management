@@ -32,20 +32,16 @@ make configure-downstream VERSION=0.23
 Add FBC support for new OCP version in Konflux release data
 
 ```bash
-/add-fbc-ocp-version 4.22 0.23
-make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23
+/add-fbc-ocp-version 5.0 --min-supported-sub 0.24
+make add-fbc-ocp-version OCP_VERSION=5.0 MIN_SUPPORTED_SUB=0.24
 ```
 
-**Requirements:** `konflux-release-data` repo at `~/konflux/konflux-release-data`, clean working tree on main
+**Requirements:** Python 3 with PyYAML and explicit or default FBC/release-data checkouts.
 
-**What it does:**
-
-1. Creates FBC overlay directory (8 YAML files)
-2. Enables overlay in tenant config (7 auto-generated files)
-3. Adds new application to FBC stage/prod RPAs
-4. Prints Phase 2 instructions for submariner-operator-fbc
-
-**After running:** Push branch, create GitLab MR, then handle bot PR per Phase 2 instructions
+The default is a read-only plan. Preparation uses separate, resumable tenant,
+admission, and FBC worktrees without committing or pushing. See the
+[workflow](../.agents/workflows/add-fbc-ocp-version.md) for phase commands,
+minimum-versus-cutoff semantics, bot fallback, and readiness evidence.
 
 ## /add-team-member
 
@@ -301,7 +297,7 @@ make create-fbc-releases VERSION=0.22.1 TYPE=prod    # Production
 1. Verifies GitHub catalog consistency (all 6 OCP versions have same bundle SHA)
 2. Verifies FBC snapshots (push events, tests passed, bundle SHAs match)
 3. Verifies component SHAs across 10 sources (operator repo → registry → FBC GitHub → 6 snapshots)
-4. Generates 6 Release YAMLs (one per OCP version: 4-16 through 4-21)
+4. Generates Release YAMLs for applicable active OCP versions
 5. Validates YAMLs with `make test-remote`
 6. Automatically commits with descriptive message
 

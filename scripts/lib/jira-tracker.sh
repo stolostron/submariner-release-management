@@ -439,7 +439,7 @@ _generate_subtask_description() {
   local _first _last
   read -r _first _ <<< "$_ocp"
   _last=$(echo "$_ocp" | awk '{print $NF}')
-  local _ocp_range="4.$_first through 4.$_last"
+  local _ocp_range="${_first//-/.} through ${_last//-/.}"
 
   case "$step_key" in
     cveFixes|ecFixes|rpmLockfiles|tektonTasks|versionLabels)
