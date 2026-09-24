@@ -145,6 +145,44 @@ class ConfigurationContracts(unittest.TestCase):
                     mod.sequence_item(result, ["resources"], "new"), result
                 )
 
+    def test_alias_cannot_modify_an_unrelated_sequence(self):
+        text = "unrelated: &shared [old]\nresources: *shared\n"
+        with self.assertRaises(ValueError):
+            mod.sequence_item(text, ["resources"], "new")
+
+    def test_ocp5_rejects_the_legacy_install_path_and_wrong_secret_key(self):
+        for legacy in (True, False):
+            docs = copy.deepcopy(self.objects)
+            its = next(
+                doc
+                for doc in docs
+                if doc["metadata"]["name"] == "submariner-fbc-operator-5-0"
+            )
+            if legacy:
+                next(
+                    item
+                    for item in its["spec"]["resolverRef"]["params"]
+                    if item["name"] == "pathInRepo"
+                )[
+                    "value"
+                ] = "pipelines/deploy-fbc-operator/0.1/deploy-fbc-operator.yaml"
+            else:
+                next(
+                    item
+                    for item in its["spec"]["params"]
+                    if item["name"] == "CREDENTIALS_SECRET_KEY"
+                )["value"] = "oci-storage-dockerconfigjson"
+            with self.assertRaisesRegex(ValueError, "OCP 5"):
+                mod.validate_tenant_objects(
+                    {(doc["kind"], doc["metadata"]["name"]): doc for doc in docs}, "5-0"
+                )
+
+    def test_base_override_must_work_with_the_deployed_release_version_filter(self):
+        mod.validate_base_reference("registry.example/approved/base:v5.0", "5-0")
+        for image in (BASE.replace("v5.0", "v4.22"), BASE + "@sha256:" + "a" * 64):
+            with self.assertRaisesRegex(ValueError, "release version filter"):
+                mod.validate_base_reference(image, "5-0")
+
     def test_both_admissions_are_checked_before_either_write(self):
         (self.root / mod.RPA).mkdir(parents=True)
         for env, data in self.admissions.items():

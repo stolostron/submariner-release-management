@@ -25,6 +25,9 @@ claims of freshness; cached bases can still support a clearly identified draft.
 Review the base-image tag and architectures with registry inspection. OCP 5.0
 uses `registry.redhat.io/openshift5/ose-operator-registry-rhel9:v5.0`; do not
 change the RHEL generation merely because the OCP major changes.
+An override must retain the requested `:vX.Y` tag: the deployed release filter
+derives the index version from the base annotation. A digest-only override cannot
+establish the release version with the current Dockerfile.
 
 Pin the repositories independently with `--release-data-ref` and `--fbc-ref`.
 Both default to `origin/main`; `--base` is a shorthand only when the same ref name
@@ -72,7 +75,11 @@ The tenant change adds eight overlay files, registers the overlay, runs the
 repository's `build-manifests.sh` for this tenant, and validates seven generated
 resource identities and their application/image/test relationships. The new
 operator ITS uses the package default channel, avoiding the nonexistent `stable`
-channel. Both release plans retain manual release. Admissions add the application
+channel. New 5.x overlays use the upstream `deploy-fbc-operator` 0.3 pipeline via
+`pipelineruns/deploy-fbc-operator/0.2/deploy-fbc-operator-run.yaml`, which supplies
+its workspace. They explicitly select the image-push secret's `.dockerconfigjson`
+key. The existing 4.x overlays keep their selected install path. Both release plans
+retain manual release. Admissions add the application
 to the existing stage/prod RPAs without changing shared policy or destinations.
 
 Follow `konflux-release-data/AGENTS.md`: run `tox` and the tenant checks in the
@@ -101,6 +108,11 @@ pair, with all four build platforms, the exact catalog INPUT_DIR, matching
 service account, event-specific tags/expiry, and both pipeline files in CEL
 triggers. Generation validates a populated default channel and runs the FBC
 checks. No fixed file/commit count is assumed.
+Preparation renders only the requested catalog, validates the complete candidate,
+and publishes only the requested files. Tenant generation runs in scratch space;
+fresh rendering must match the stored seven objects. Unrelated files and index
+entries remain intact. Unknown pipeline task families or unresolved references
+require review; they cannot be reported as locally ready.
 
 PAC may create an onboarding PR, but this has failed for prior versions. Search
 for an existing PR by component, branch, and contents; do not guess its title or
@@ -109,6 +121,23 @@ the preceding merged pipeline. Preserve `pipelineRef` versus `pipelineSpec`.
 Do not overwrite an existing pipeline pair: validate it and reconcile differences.
 Check a known catalog file through the GitHub contents API; directory responses
 are arrays, not objects with a `.name` field.
+
+For the selected PR, record `headRefOid` with `gh pr view`, then inspect both
+effective rules and legacy protection:
+
+```bash
+gh api repos/stolostron/submariner-operator-fbc/rules/branches/main
+gh api repos/stolostron/submariner-operator-fbc/branches/main/protection/required_status_checks
+gh api --paginate repos/stolostron/submariner-operator-fbc/commits/<head-sha>/check-runs
+gh api --paginate repos/stolostron/submariner-operator-fbc/commits/<head-sha>/statuses
+```
+
+Compare required contexts and their `integration_id`/`app_id` with the current
+head's check-run app IDs. A legacy protection 404 alone does not establish that
+there are no required checks; an inaccessible rules endpoint leaves this unknown.
+Recheck the head after updates. The `Image Build & Test` context exercises changed
+catalogs (all catalogs for shared build changes) with public upstream OPM. The
+skill's explicit target-base test and Konflux build provide the OCP-base evidence.
 
 ## Verify evidence
 
@@ -121,8 +150,12 @@ After deployment, run the read-only live checks with the expected merged SHA:
   --expected-commit <40-character-merged-commit>
 ```
 
-This checks live resource relationships, matched admissions, completed snapshot
-tests, the successful push build, all four image platforms, and base annotations.
+This checks live resource relationships, actual matched RPA contracts, build-account
+ownership and secret bindings, completed snapshot tests, and merged-main ancestry.
+It links the original push build to its snapshot and image, checks effective build
+arguments and all four base annotations, then extracts each platform's catalog and
+compares every file with the pinned merged source and template/cutoff contract.
+Configuration and build results remain separate when one check is unavailable.
 It still reports runtime compatibility as unverified. For scoped release creation,
 set `FBC_EXPECTED_COMMIT` to that merged SHA and pass `--ocp 5.0`.
 For remote readiness, record distinct evidence:
@@ -142,6 +175,19 @@ For remote readiness, record distinct evidence:
   and the provisioned cluster reports 5.0. A fallback 4.x cluster or no-op install
   does not establish OCP 5 support. Record QE evidence separately.
 
+For the 0.3 install path, confirm access to its configured OpenShift CI cluster
+profile (the upstream default is `aws-konflux-prod`) before provisioning. Inspect
+the resolved PipelineRun and TaskRuns for `get-unreleased-bundle`,
+`pick-cluster-params`, `provision-cluster` and `deploy-operator`: the selected bundle
+digest/channel must be the approved one and `deploy-operator` must have executed
+successfully. Use the provisioned cluster's `oc get clusterversion version -o json`
+to record its actual `status.desired.version`, alongside the installed CSV and
+bundle digest. The upstream pipeline still skips installation for PR events or
+when it finds no unreleased bundle. For an approved released bundle, use the
+existing explicit-bundle QE installation procedure on an observed 5.0.x cluster.
+Neither an aggregate ITS pass nor the requested provisioning version replaces
+that evidence. See the upstream [0.3 migration](https://github.com/konflux-ci/tekton-integration-catalog/blob/1251d2990cee3f562325b48fe3404bce4f8c857f/pipelines/deploy-fbc-operator/0.3/MIGRATION.md).
+
 Only after readiness is established, add `5-0` to the active list in
 `scripts/lib/fbc-scope.sh`. Syntax support alone must not activate release scope.
 Use `get-fbc-urls.sh --prod-index` to verify bundle membership before advertising
@@ -152,16 +198,20 @@ insufficient.
 
 The runner uses disposable repositories and 0.24 as explicit test data. It reads
 release-data from the selected Git ref, includes the FBC candidate's uncommitted
-changes, and runs the actual CLI phases twice. It verifies source preservation,
+changes, and enters through a copied installed skill. It runs complete preparation,
+image testing and repeat verification. It verifies source file and Git-index preservation,
 byte-for-byte repeatability, seven tenant objects, both admissions, both pipelines,
-real mixed-major catalog rendering, and image validation plus gRPC serving.
+real target catalog rendering, mixed-major validation, and image validation plus gRPC serving.
 It also rejects a conflicting minimum and verifies without the source repos.
+Synthetic 4.23, 5.0 and 5.1 generation checks reuse without asserting availability.
 Registry access, Podman, Kustomize >=5.7.1, and FBC build prerequisites are needed.
 
 ```bash
 python3 scripts/tests/e2e_fbc_onboarding.py \
   --release-data-repo /path/to/konflux-release-data \
-  --fbc-repo /path/to/submariner-operator-fbc
+  --release-data-ref <release-data-sha> \
+  --fbc-repo /path/to/submariner-operator-fbc \
+  --kustomize /path/to/kustomize
 ```
 
 Do not edit the two input repositories while this runs: the test checks their

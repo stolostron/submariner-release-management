@@ -153,6 +153,10 @@
         {
           "name": "CREDENTIALS_SECRET_NAME",
           "value": "imagerepository-submariner-fbc-5-0-image-push"
+        },
+        {
+          "name": "CREDENTIALS_SECRET_KEY",
+          "value": ".dockerconfigjson"
         }
       ],
       "resolverRef": {
@@ -167,7 +171,7 @@
           },
           {
             "name": "pathInRepo",
-            "value": "pipelines/deploy-fbc-operator/0.1/deploy-fbc-operator.yaml"
+            "value": "pipelineruns/deploy-fbc-operator/0.2/deploy-fbc-operator-run.yaml"
           }
         ],
         "resolver": "git"

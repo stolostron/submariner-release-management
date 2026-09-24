@@ -3,6 +3,7 @@
 
 import argparse
 import copy
+import hashlib
 import os
 import json
 import re
@@ -21,6 +22,8 @@ GENERATED = Path(
     "tenants-config/auto-generated/cluster/kflux-prd-rh02/tenants/submariner-tenant"
 )
 PLATFORMS = ["linux/x86_64", "linux/arm64", "linux/ppc64le", "linux/s390x"]
+
+OPERATOR_ITS_5 = "pipelineruns/deploy-fbc-operator/0.2/deploy-fbc-operator-run.yaml"
 
 
 def run(*args, cwd=None, capture=True, env=None):
@@ -262,6 +265,64 @@ def target_tenant_objects(documents, version):
     return objects
 
 
+def operator_its_patch(text, base, version):
+    """Carry reviewed ITS patches forward once; 5.x needs the 0.3 cluster picker."""
+    patches = yaml.safe_load(text)
+    require(
+        isinstance(patches, list) and all(isinstance(op, dict) for op in patches),
+        "Expected JSON patch list",
+    )
+    additions = []
+
+    def parameter(keys, name, value):
+        values = base
+        for key in keys:
+            values = values[key]
+        indices = [i for i, item in enumerate(values) if item.get("name") == name]
+        require(len(indices) == 1, f"Expected one base ITS parameter: {name}")
+        index = indices[0]
+        prefix = "/" + "/".join(keys) + f"/{index}"
+        existing = [op for op in patches if op.get("path") == prefix + "/value"]
+        if existing:
+            require(
+                len(existing) == 1
+                and existing[0].get("op") == "replace"
+                and existing[0].get("value") == value,
+                f"Conflicting ITS patch: {name}",
+            )
+        elif values[index]["value"] != value:
+            additions.extend(
+                [
+                    {"op": "test", "path": prefix + "/name", "value": name},
+                    {"op": "replace", "path": prefix + "/value", "value": value},
+                ]
+            )
+
+    parameter(["spec", "params"], "CHANNEL_NAME", "")
+    if int(version.split("-")[0]) >= 5:
+        parameter(["spec", "resolverRef", "params"], "pathInRepo", OPERATOR_ITS_5)
+        key = {"name": "CREDENTIALS_SECRET_KEY", "value": ".dockerconfigjson"}
+        if any(item.get("name") == key["name"] for item in base["spec"]["params"]):
+            parameter(["spec", "params"], key["name"], key["value"])
+        else:
+            existing = [
+                op
+                for op in patches
+                if isinstance(op.get("value"), dict)
+                and op["value"].get("name") == key["name"]
+            ]
+            expected = {"op": "add", "path": "/spec/params/-", "value": key}
+            if existing:
+                require(existing == [expected], "Conflicting ITS credential-key patch")
+            else:
+                additions.append(expected)
+    if additions:
+        text = (text.rstrip() + "\n" if patches else "---\n") + yaml.safe_dump(
+            additions, sort_keys=False
+        )
+    return text
+
+
 def prepare_tenant(root, version, previous, kustomize=None):
     binary = kustomize_binary(root, kustomize)
     # The repository builder can inject authors into unrelated changed files and
@@ -291,29 +352,8 @@ def prepare_tenant(root, version, previous, kustomize=None):
             base = load(
                 stage / OVERLAYS / "base/integration-test-scenario-fbc-operator.yaml"
             )
-            index = next(
-                i
-                for i, param in enumerate(base["spec"]["params"])
-                if param["name"] == "CHANNEL_NAME"
-            )
             path = dest / "integration-test-scenario-fbc-operator-patch.yaml"
-            patches = load(path)
-            channel = [
-                op for op in patches if op.get("path") == f"/spec/params/{index}/value"
-            ]
-            if not channel:
-                with path.open("a") as output:
-                    output.write(
-                        f"- op: test\n  path: /spec/params/{index}/name\n  value: CHANNEL_NAME\n"
-                        f'- op: replace\n  path: /spec/params/{index}/value\n  value: ""\n'
-                    )
-            else:
-                require(
-                    len(channel) == 1
-                    and channel[0].get("op") == "replace"
-                    and channel[0].get("value") == "",
-                    "Predecessor has conflicting channel patches",
-                )
+            path.write_text(operator_its_patch(path.read_text(), base, version))
         require(
             len(list(dest.glob("*.yaml"))) == 8,
             "Partial target overlay; review it or choose a fresh workspace",
@@ -512,6 +552,18 @@ def validate_tenant_objects(objects, version):
         "Wrong ITS secret",
     )
     require(params["CHANNEL_NAME"] == "", "ITS must use the catalog default channel")
+    if int(version.split("-")[0]) >= 5:
+        refs = named_values(
+            operator["spec"]["resolverRef"]["params"], "operator ITS resolver params"
+        )
+        require(
+            refs["pathInRepo"] == OPERATOR_ITS_5,
+            "OCP 5+ requires the reviewed 0.3 install pipeline wrapper",
+        )
+        require(
+            params.get("CREDENTIALS_SECRET_KEY") == ".dockerconfigjson",
+            "OCP 5+ ITS must select the image-push secret's .dockerconfigjson key",
+        )
     require(
         operator["spec"]["contexts"][0]["name"] == f"component_{app}",
         "Wrong ITS component context",
@@ -998,11 +1050,13 @@ def prepare_catalog(root, args, previous, base_image):
             ignore=shutil.ignore_patterns(".git", ".catalog-build*", "__pycache__"),
         )
         staged_mapping = dict(mapping, **{dotted: cutoff})
+        # Render only this addition; validate the full candidate map afterward.
+        (stage / "drop-versions.json").write_text(json.dumps({dotted: cutoff}) + "\n")
+        pipelines(stage, args.ocp, previous, base_image)
+        run("make", "build-catalogs", cwd=stage, capture=False)
         (stage / "drop-versions.json").write_text(
             json.dumps(staged_mapping, indent=2) + "\n"
         )
-        pipelines(stage, args.ocp, previous, base_image)
-        run("make", "build-catalogs", cwd=stage, capture=False)
         run("make", "validate-catalogs", cwd=stage, capture=False)
         run("make", "test", cwd=stage, capture=False)
         validate_catalog(stage, args.ocp, args.min_supported_sub)
@@ -1115,11 +1169,9 @@ def catalog_contract(root, version, minimum=None):
     return packages[0], channels, images
 
 
-def validate_catalog(root, version, minimum):
-    expected_package, expected_channels, expected_images = catalog_contract(
-        root, version, minimum
-    )
-    directory = root / f"catalog-{version}"
+def validate_catalog_contents(
+    directory, expected_package, expected_channels, expected_images
+):
     require(
         load(directory / "package.yaml") == expected_package,
         "Catalog package differs from the selected template",
@@ -1158,27 +1210,137 @@ def validate_catalog(root, version, minimum):
         images == expected_images,
         "Rendered bundle names/digests differ from the selected template and cutoff",
     )
-    run(str(root / "bin/opm"), "validate", str(directory), capture=False)
     return len(images)
 
 
+def validate_catalog(root, version, minimum):
+    directory = root / f"catalog-{version}"
+    count = validate_catalog_contents(
+        directory, *catalog_contract(root, version, minimum)
+    )
+    run(str(root / "bin/opm"), "validate", str(directory), capture=False)
+    return count
+
+
+def require_merged_commit(commit):
+    helper = Path(__file__).resolve().parent / "lib/fbc-snapshot.sh"
+    run(
+        "bash",
+        "-c",
+        'source "$1"; fbc_revision_on_main "$2"',
+        "fbc-onboarding",
+        str(helper),
+        commit,
+    )
+
+
+def catalog_git_files(commit, version):
+    tree = json.loads(
+        run(
+            "gh",
+            "api",
+            f"repos/stolostron/submariner-operator-fbc/git/trees/{commit}?recursive=1",
+        )
+    )
+    require(
+        tree.get("truncated") is False,
+        "GitHub tree is incomplete; cannot verify catalog contents",
+    )
+    prefix = f"catalog-{version}/"
+    expected = {}
+    for item in tree["tree"]:
+        if item["path"].startswith(prefix) and item["type"] == "blob":
+            require(
+                item["mode"] == "100644", "Catalog source must contain regular files"
+            )
+            expected[item["path"][len(prefix) :]] = item["sha"]
+    require(
+        "package.yaml" in expected
+        and any(name.startswith("bundles/") for name in expected)
+        and any(name.startswith("channels/") for name in expected),
+        "Merged commit has no complete requested catalog",
+    )
+    return expected
+
+
+def git_blob(data):
+    return hashlib.sha1(
+        f"blob {len(data)}\0".encode() + data, usedforsecurity=False
+    ).hexdigest()
+
+
+def merged_catalog_contract(commit, version, minimum=None):
+    with tempfile.TemporaryDirectory(prefix="fbc-source-contract-") as temporary:
+        root = Path(temporary)
+        for name in ("drop-versions.json", "catalog-template.yaml"):
+            text = run(
+                "gh",
+                "api",
+                "-H",
+                "Accept: application/vnd.github.raw+json",
+                f"repos/stolostron/submariner-operator-fbc/contents/{name}?ref={commit}",
+            )
+            (root / name).write_text(text)
+        return catalog_contract(root, version, minimum)
+
+
+def verify_catalog_images(image, manifests, expected, contract):
+    """Reuse oc image extraction, comparing every platform's complete catalog to Git."""
+    checked = []
+    with tempfile.TemporaryDirectory(prefix="fbc-live-content-") as temporary:
+        for manifest in manifests:
+            architecture = manifest["platform"]["architecture"]
+            directory = Path(temporary) / architecture
+            directory.mkdir()
+            reference = image.split("@")[0] + "@" + manifest["digest"]
+            run(
+                "oc",
+                "image",
+                "extract",
+                reference,
+                f"--filter-by-os=linux/{architecture}",
+                "--path",
+                f"/configs/submariner/:{directory}/",
+                "--confirm",
+                capture=False,
+            )
+            paths = list(directory.rglob("*"))
+            require(
+                not any(path.is_symlink() for path in paths),
+                "Image catalog contains symbolic links",
+            )
+            actual = {
+                str(path.relative_to(directory)): git_blob(path.read_bytes())
+                for path in paths
+                if path.is_file()
+            }
+            require(
+                actual == expected,
+                f"Published {architecture} catalog differs from the expected merged source",
+            )
+            validate_catalog_contents(directory, *contract)
+            checked.append(architecture)
+    return checked
+
+
 def verify_live(args, base_image):
-    """Report deployed build evidence; never infer runtime support from ITS pass."""
+    """Keep configuration, build/content, and actual runtime evidence separate."""
     require(
         args.expected_commit and re.fullmatch(r"[0-9a-f]{40}", args.expected_commit),
         "verify-live requires --expected-commit with the merged 40-character SHA",
     )
-    app = f"submariner-fbc-{args.ocp}"
-    namespace = "submariner-tenant"
+    app, namespace = f"submariner-fbc-{args.ocp}", "submariner-tenant"
     result = {
         "ocp": args.ocp,
         "expected_commit": args.expected_commit,
         "errors": [],
-        "runtime_on_requested_ocp": "unverified; inspect install task execution and actual cluster version",
+        "configuration_ready": False,
+        "build_ready": False,
+        "runtime_on_requested_ocp": "unverified; inspect install task execution, selected bundle and actual cluster version",
     }
 
-    def get(kind, name):
-        return json.loads(run("oc", "get", kind, name, "-n", namespace, "-o", "json"))
+    def get(kind, name, target=namespace):
+        return json.loads(run("oc", "get", kind, name, "-n", target, "-o", "json"))
 
     try:
         identities = [
@@ -1200,28 +1362,16 @@ def verify_live(args, base_image):
         for (kind, name), obj in objects.items():
             require(
                 obj["kind"] == kind and obj["metadata"]["name"] == name,
-                f"Unexpected live resource identity: {kind}/{name}",
+                f"Unexpected live resource: {kind}/{name}",
             )
         validate_tenant_objects(objects, args.ocp)
         for env in ("stage", "prod"):
-            plan = objects[
-                "ReleasePlan", f"submariner-fbc-release-plan-{env}-{args.ocp}"
-            ]
+            plan_name = f"submariner-fbc-release-plan-{env}-{args.ocp}"
+            plan = objects["ReleasePlan", plan_name]
+            matched = plan["status"]["releasePlanAdmission"]
             require(
-                plan["spec"]["application"] == app, f"Wrong {env} release application"
-            )
-            require(
-                plan["metadata"]["labels"].get(
-                    "release.appstudio.openshift.io/auto-release"
-                )
-                == "false",
-                f"{env} autorelease is enabled",
-            )
-            admission = plan["status"]["releasePlanAdmission"]
-            require(
-                admission.get("active") is True
-                and admission.get("name")
-                == f"rhtap-releng-tenant/submariner-fbc-{env}",
+                matched.get("active") is True
+                and matched.get("name") == f"rhtap-releng-tenant/submariner-fbc-{env}",
                 f"Wrong/inactive {env} admission",
             )
             require(
@@ -1229,21 +1379,77 @@ def verify_live(args, base_image):
                     c["type"] == "Matched" and c["status"] == "True"
                     for c in plan["status"]["conditions"]
                 ),
-                f"{env} release plan is unmatched",
+                f"Unmatched {env} ReleasePlan",
             )
-        get("serviceaccount", f"build-pipeline-{app}")
-        # Existence check only: never read or print secret data.
-        run(
+            admission = get(
+                "releaseplanadmission", f"submariner-fbc-{env}", "rhtap-releng-tenant"
+            )
+            validate_rpa(admission, args.ocp, env)
+            require(
+                any(
+                    plan.get("name") == f"{namespace}/{plan_name}"
+                    for plan in admission["status"]["releasePlans"]
+                ),
+                f"{env} admission has not matched this ReleasePlan",
+            )
+        account = get("serviceaccount", f"build-pipeline-{app}")
+        require(
+            any(
+                owner.get("kind") == "Component" and owner.get("name") == app
+                for owner in account["metadata"].get("ownerReferences", [])
+            ),
+            "Build account is not owned by this Component",
+        )
+        secret = f"imagerepository-{app}-image-push"
+        require(
+            secret in {item["name"] for item in account.get("secrets", [])},
+            "Image-push secret is not bound to the build account",
+        )
+        # Return only the secret type and key names, never credential values.
+        template = (
+            r'{{.type}}{{"\n"}}{{range $key, $value := .data}}{{$key}}{{"\n"}}{{end}}'
+        )
+        keys = run(
             "oc",
             "get",
             "secret",
-            f"imagerepository-{app}-image-push",
+            secret,
             "-n",
             namespace,
             "-o",
-            "name",
+            "go-template=" + template,
+        ).splitlines()
+        require(
+            keys and keys[0] in ("kubernetes.io/dockerconfigjson", "Opaque"),
+            "Unexpected image-push secret type",
+        )
+        operator = objects[
+            "IntegrationTestScenario", f"submariner-fbc-operator-{args.ocp}"
+        ]
+        params = named_values(operator["spec"]["params"], "operator ITS params")
+        credential_key = params.get("CREDENTIALS_SECRET_KEY", ".dockerconfigjson")
+        require(
+            credential_key in keys[1:],
+            "Operator ITS credential key is absent from its image-push secret",
         )
         result["configuration_ready"] = True
+    except (
+        ValueError,
+        KeyError,
+        TypeError,
+        OSError,
+        subprocess.CalledProcessError,
+    ) as error:
+        result["errors"].append("Configuration could not be verified: " + str(error))
+
+    try:
+        validate_base_reference(base_image, args.ocp)
+        require_merged_commit(args.expected_commit)
+        result["merged_on_main"] = True
+        expected_files = catalog_git_files(args.expected_commit, args.ocp)
+        contract = merged_catalog_contract(
+            args.expected_commit, args.ocp, getattr(args, "min_supported_sub", None)
+        )
         snapshots = json.loads(
             run(
                 "oc",
@@ -1258,22 +1464,26 @@ def verify_live(args, base_image):
             )
         )["items"]
         candidates = [
-            snap
-            for snap in snapshots
-            if snap["spec"]["application"] == app
-            and snap["metadata"]
+            snapshot
+            for snapshot in snapshots
+            if snapshot["spec"]["application"] == app
+            and snapshot["metadata"]
             .get("labels", {})
             .get("pac.test.appstudio.openshift.io/event-type")
             == "push"
-            and len(snap["spec"]["components"]) == 1
-            and snap["spec"]["components"][0].get("name") == app
-            and snap["spec"]["components"][0]
+            and snapshot["metadata"]
+            .get("labels", {})
+            .get("pac.test.appstudio.openshift.io/original-prname")
+            == f"{app}-on-push"
+            and len(snapshot["spec"]["components"]) == 1
+            and snapshot["spec"]["components"][0].get("name") == app
+            and snapshot["spec"]["components"][0]
             .get("source", {})
             .get("git", {})
             .get("revision")
             == args.expected_commit
         ]
-        require(candidates, "No merged push snapshot for the expected commit")
+        require(candidates, "No original push snapshot for the expected merged commit")
         snapshot = max(
             candidates, key=lambda snap: snap["metadata"]["creationTimestamp"]
         )
@@ -1291,10 +1501,10 @@ def verify_live(args, base_image):
             and all(test["status"] == "TestPassed" for test in tests),
             "Required snapshot tests are missing or incomplete",
         )
-        plr_name = snapshot["metadata"]["labels"][
-            "appstudio.openshift.io/build-pipelinerun"
-        ]
-        build = get("pipelinerun", plr_name)
+        build = get(
+            "pipelinerun",
+            snapshot["metadata"]["labels"]["appstudio.openshift.io/build-pipelinerun"],
+        )
         require(
             any(
                 c["type"] == "Succeeded" and c["status"] == "True"
@@ -1302,8 +1512,10 @@ def verify_live(args, base_image):
             ),
             "Build PipelineRun did not succeed",
         )
-        labels = build["metadata"].get("labels", {})
-        annotations = build["metadata"].get("annotations", {})
+        labels, annotations = (
+            build["metadata"].get("labels", {}),
+            build["metadata"].get("annotations", {}),
+        )
         require(
             all(
                 labels.get(f"appstudio.openshift.io/{key}") == app
@@ -1314,9 +1526,26 @@ def verify_live(args, base_image):
         require(
             annotations.get("pipelinesascode.tekton.dev/event-type") == "push"
             and annotations.get("build.appstudio.redhat.com/target_branch") == "main",
-            "Build is not a push to main",
+            "Build is not an original push to main",
+        )
+        require(
+            build["spec"]["taskRunTemplate"]["serviceAccountName"]
+            == f"build-pipeline-{app}",
+            "Wrong live build account",
         )
         params = named_values(build["spec"]["params"], "live build params")
+        definition = build["status"].get("pipelineSpec") or build["spec"].get(
+            "pipelineSpec"
+        )
+        require(
+            definition,
+            "Resolved build pipeline is unavailable; execution is unverified",
+        )
+        effective = validate_pipeline_execution(definition, params)
+        require(
+            effective.get("image-expires-after") == "",
+            "Live push images must not expire",
+        )
         require(
             params["git-url"].removesuffix(".git")
             == "https://github.com/stolostron/submariner-operator-fbc",
@@ -1330,11 +1559,29 @@ def verify_live(args, base_image):
             sorted(params["build-platforms"]) == sorted(PLATFORMS),
             "Build did not request all four platforms",
         )
+        require(params["dockerfile"] == "catalog.Dockerfile", "Wrong live Dockerfile")
+        arguments = params["build-args"]
+        require(
+            isinstance(arguments, list)
+            and all(isinstance(arg, str) and "=" in arg for arg in arguments),
+            "Malformed live build arguments",
+        )
+        build_args = dict(arg.split("=", 1) for arg in arguments)
+        require(
+            len(build_args) == len(arguments)
+            and build_args.get("INPUT_DIR") == f"catalog-{args.ocp}"
+            and build_args.get("OPM_IMAGE") == base_image,
+            "Wrong/duplicate live catalog or base-image arguments",
+        )
         image = snapshot["spec"]["components"][0]["containerImage"]
         expected_repo = f"quay.io/redhat-user-workloads/submariner-tenant/{app}"
         require(
             re.fullmatch(re.escape(expected_repo) + r"@sha256:[0-9a-f]{64}", image),
             "Snapshot image must have the expected repository and a SHA256 digest",
+        )
+        require(
+            params["output-image"] == f"{expected_repo}:{args.expected_commit}",
+            "Wrong live push image tag",
         )
         source = snapshot["spec"]["components"][0]["source"]["git"]
         require(
@@ -1349,27 +1596,28 @@ def verify_live(args, base_image):
             "Build image results do not match the snapshot",
         )
         manifest = json.loads(run("skopeo", "inspect", "--raw", f"docker://{image}"))
-        arches = {
-            item["platform"]["architecture"]
+        children = [
+            item
             for item in manifest["manifests"]
-            if item["platform"]["os"] == "linux"
-        }
+            if item.get("platform", {}).get("os") == "linux"
+        ]
+        arches = [item["platform"]["architecture"] for item in children]
         require(
-            {"amd64", "arm64", "ppc64le", "s390x"}.issubset(arches),
-            "Published image is missing build platforms",
+            len(manifest["manifests"]) == 4
+            and sorted(arches) == ["amd64", "arm64", "ppc64le", "s390x"],
+            "Published image has missing/duplicate/unexpected build platforms",
         )
-        for item in manifest["manifests"]:
-            if (
-                item["platform"]["os"] != "linux"
-                or item["platform"]["architecture"] not in arches
-            ):
-                continue
+        for item in children:
+            require(
+                re.fullmatch(r"sha256:[0-9a-f]{64}", item["digest"]),
+                "Malformed child-image digest",
+            )
             child = json.loads(
                 run(
                     "skopeo",
                     "inspect",
                     "--raw",
-                    "docker://" + image.split("@")[0] + "@" + item["digest"],
+                    "docker://" + expected_repo + "@" + item["digest"],
                 )
             )
             require(
@@ -1377,9 +1625,18 @@ def verify_live(args, base_image):
                 == base_image,
                 f"Wrong/missing base annotation for {item['platform']['architecture']}",
             )
+        result["catalog_content_verified"] = verify_catalog_images(
+            image, children, expected_files, contract
+        )
         result.update(build_ready=True, image=image, platforms=sorted(arches))
-    except (ValueError, KeyError, TypeError, subprocess.CalledProcessError) as error:
-        result["errors"].append(str(error))
+    except (
+        ValueError,
+        KeyError,
+        TypeError,
+        OSError,
+        subprocess.CalledProcessError,
+    ) as error:
+        result["errors"].append("Build/content could not be verified: " + str(error))
     print(json.dumps(result, indent=2))
     return not result["errors"]
 
@@ -1457,7 +1714,18 @@ def catalog_inputs(template, mapping, version, minimum):
     return cutoff
 
 
-def inspect_base_image(image):
+def validate_base_reference(image, version):
+    # The deployed release filter derives OCP_VERSION from this exact tag when
+    # there is no com.redhat.fbc.openshift.version label (our Dockerfile has none).
+    require(
+        image.rsplit(":", 1)[-1] == "v" + version.replace("-", "."),
+        "OPM base must use the requested :vX.Y tag for the release version filter",
+    )
+
+
+def inspect_base_image(image, version=None):
+    if version:
+        validate_base_reference(image, version)
     require_tools("skopeo")
     manifest = json.loads(run("skopeo", "inspect", "--raw", f"docker://{image}"))
     arches = {
@@ -1473,6 +1741,7 @@ def inspect_base_image(image):
 
 
 def verify_workspace(workspace, args, image):
+    validate_base_reference(image, args.ocp)
     result = {
         "tenant_resources": validate_tenant(
             workspace / "tenant", args.ocp, args.kustomize
@@ -1499,7 +1768,7 @@ def verify_workspace(workspace, args, image):
 
 def test_image(root, version, base_image):
     require_tools("make", "podman")
-    inspect_base_image(base_image)
+    inspect_base_image(base_image, version)
     with tempfile.TemporaryDirectory(prefix="fbc-image-") as temporary:
         image = "localhost/submariner-fbc-onboarding:" + Path(temporary).name
         try:
@@ -1759,7 +2028,7 @@ def main(argv=None):
             ("configuration", "admission", "admission"),
         ]
     if catalog:
-        inspect_base_image(image)
+        inspect_base_image(image, args.ocp)
         targets.append(("catalog", "fbc", "catalog"))
     # Check all existing targets/branches before creating the first worktree.
     for kind, directory, suffix in targets:
