@@ -39,9 +39,14 @@ def fingerprint(root):
         if ".git" in relative.parts or "__pycache__" in relative.parts:
             continue
         if path.is_file():
-            result[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
+            result[str(relative)] = (
+                path.stat().st_mode & 0o777,
+                hashlib.sha256(path.read_bytes()).hexdigest(),
+            )
     result["HEAD"] = mod.run("git", "rev-parse", "HEAD", cwd=root).strip()
     result["STATUS"] = mod.run("git", "status", "--porcelain=v1", cwd=root)
+    result["INDEX"] = mod.run("git", "ls-files", "--stage", "-z", cwd=root)
+    result["BRANCH"] = mod.run("git", "branch", "--show-current", cwd=root)
     return result
 
 
@@ -60,6 +65,7 @@ def main():
     parser.add_argument("--release-data-repo", type=Path, required=True)
     parser.add_argument("--release-data-ref", default="origin/main")
     parser.add_argument("--fbc-repo", type=Path, required=True)
+    parser.add_argument("--kustomize", type=Path)
     args = parser.parse_args()
     sources = [args.release_data_repo.resolve(), args.fbc_repo.resolve()]
     before = [fingerprint(path) for path in sources]
@@ -89,8 +95,15 @@ def main():
             ignore=shutil.ignore_patterns(".git", "bin", ".catalog-build*"),
         )
         assert not (fbc / "bin").exists()
-        initialize(data)
-        initialize(fbc)
+        for fixture in (data, fbc):
+            (fixture / "index-preservation").write_text("original\n")
+            initialize(fixture)
+            (fixture / "index-preservation").write_text("staged input\n")
+            run("git", "add", "index-preservation", cwd=fixture)
+            (fixture / "index-preservation").write_text("unstaged input\n")
+        installed = parent / "installed/add-fbc-ocp-version"
+        shutil.copytree(ROOT / "skills/add-fbc-ocp-version", installed)
+        wrapper = str(installed / "scripts/run.sh")
         # Both dirty input files and a plausible untracked predecessor must be ignored.
         (data / "untracked-input").write_text("preserve\n")
         (data / mod.OVERLAYS / "4-99-overlay").mkdir()
@@ -98,7 +111,7 @@ def main():
         (fbc / "README.md").write_text("dirty source input: preserve\n")
         fixture_before = [fingerprint(path) for path in (data, fbc)]
         command = [
-            str(ROOT / "scripts/add-fbc-ocp-version.sh"),
+            wrapper,
             "5.0",
             "--min-supported-sub",
             "0.24",
@@ -106,35 +119,68 @@ def main():
             str(data),
             "--fbc-repo",
             str(fbc),
-            "--base",
-            "HEAD",
+            "--release-data-ref",
+            mod.base_commit(data, "HEAD"),
+            "--fbc-ref",
+            mod.base_commit(fbc, "HEAD"),
             "--workspace",
             str(workspace),
         ]
-        environment = dict(os.environ, SKIP_AUTH_TESTS="true")
+        if args.kustomize:
+            command += ["--kustomize", str(args.kustomize.resolve())]
+        environment = dict(
+            os.environ, SKIP_AUTH_TESTS="true", RELEASE_MANAGEMENT_REPO=str(ROOT)
+        )
+        workflow = subprocess.check_output(
+            [wrapper, "--workflow"], cwd=parent, env=environment, text=True
+        ).strip()
+        assert Path(workflow).is_file() and Path(workflow).is_relative_to(ROOT)
         plan = json.loads(
             subprocess.check_output(command + ["--phase", "plan"], env=environment)
         )
         assert plan["previous"] == "4-22", plan
-        for phase in ("prepare-config", "prepare-catalog", "verify"):
-            run(*command, "--phase", phase, env=environment)
-        image = f"localhost/submariner-fbc-e2e:{parent.name}"
-        try:
-            run(
-                "make",
-                "test-image",
-                "CATALOG=catalog-5-0",
-                f"IMG={image}",
-                "OPM_IMAGE=registry.redhat.io/openshift5/ose-operator-registry-rhel9:v5.0",
-                cwd=workspace / "fbc",
+        result = json.loads(
+            subprocess.check_output(
+                command + ["--phase", "prepare"], cwd=parent, env=environment
             )
-        finally:
-            subprocess.run(["podman", "rmi", image], check=False)
+        )
+        assert result["local_ready"] and result["prepared"] == [
+            "tenant",
+            "admission",
+            "fbc",
+        ]
+        image_result = json.loads(
+            subprocess.check_output(
+                command + ["--phase", "test-image"], cwd=parent, env=environment
+            )
+        )
+        assert (
+            image_result["local_image_test"] == "passed"
+            and image_result["catalog"] == "catalog-5-0"
+        )
+        # Resume must not let the tenant builder edit unrelated authors or let the
+        # catalog renderer replace unrelated staged/unstaged catalog changes.
+        unrelated = (
+            workspace
+            / "tenant/tenants-config/cluster/kflux-prd-rh02/tenants/e2e-unrelated/release-plan.yaml"
+        )
+        unrelated.parent.mkdir(parents=True)
+        unrelated.write_text(
+            'kind: ReleasePlan\nmetadata:\n  name: unrelated\n  labels:\n    release.appstudio.openshift.io/standing-attribution: "true"\n'
+        )
+        catalog_input = workspace / "fbc/catalog-4-22/package.yaml"
+        catalog_input.write_text(
+            catalog_input.read_text() + "# unrelated staged change\n"
+        )
+        run("git", "add", "catalog-4-22/package.yaml", cwd=workspace / "fbc")
+        catalog_input.write_text(
+            catalog_input.read_text() + "# unrelated unstaged change\n"
+        )
         candidate_before = [
             fingerprint(workspace / name) for name in ("tenant", "admission", "fbc")
         ]
         # Resume every phase, verifying byte-for-byte idempotency and no new commits.
-        for phase in ("prepare-config", "prepare-catalog", "verify"):
+        for phase in ("prepare", "verify"):
             run(*command, "--phase", phase, env=environment)
         assert candidate_before == [
             fingerprint(workspace / name) for name in ("tenant", "admission", "fbc")
@@ -148,9 +194,9 @@ def main():
         assert candidate_before == [
             fingerprint(workspace / name) for name in ("tenant", "admission", "fbc")
         ]
-        # Verification remains possible after the original source checkouts go away.
-        run(
-            str(ROOT / "scripts/add-fbc-ocp-version.sh"),
+        # Verification does not need the original source checkout options.
+        verify = [
+            wrapper,
             "5.0",
             "--phase",
             "verify",
@@ -162,13 +208,39 @@ def main():
             "/does-not-exist",
             "--release-data-repo",
             "/does-not-exist",
-        )
+        ]
+        if args.kustomize:
+            verify += ["--kustomize", str(args.kustomize.resolve())]
+        run(*verify, env=environment)
+        # Synthetic future-version cases exercise reuse without asserting that
+        # those registry images or product support policies exist.
+        generic_data, generic_fbc = parent / "generic-data", parent / "generic-fbc"
+        shutil.copytree(data, generic_data, ignore=shutil.ignore_patterns(".git"))
+        shutil.copytree(fbc, generic_fbc, ignore=shutil.ignore_patterns(".git"))
+        previous = "4-22"
+        for version in ("4-23", "5-0", "5-1"):
+            base = f"registry.redhat.io/openshift{version.split('-')[0]}/ose-operator-registry-rhel9:v{version.replace('-', '.')}"
+            mod.prepare_tenant(generic_data, version, previous, args.kustomize)
+            mod.prepare_rpas(generic_data, version)
+            mod.pipelines(generic_fbc, version, previous, base)
+            files = list(
+                (generic_data / mod.OVERLAYS / f"{version}-overlay").glob("*.yaml")
+            )
+            files += list((generic_data / mod.RPA).glob("*.yaml"))
+            files += list((generic_fbc / ".tekton").glob(f"*{version}*.yaml"))
+            generated = {path: path.read_bytes() for path in files}
+            mod.prepare_tenant(generic_data, version, previous, args.kustomize)
+            mod.prepare_rpas(generic_data, version)
+            mod.pipelines(generic_fbc, version, previous, base)
+            assert generated == {path: path.read_bytes() for path in files}
+            assert len(mod.validate_tenant(generic_data, version, args.kustomize)) == 7
+            previous = version
         assert before == [fingerprint(path) for path in sources]
     print(
-        "PASS: real onboarding CLI, seven tenant resources, two RPAs, mixed-major catalogs,"
+        "PASS: installed skill, complete preparation/image phases, seven tenant resources, two RPAs, mixed-major catalogs,"
     )
     print(
-        "pipeline pair, repeatability, conflicting-policy rejection, source preservation."
+        "pipeline pair, repeatability, conflicting-policy rejection, source/index preservation, and 4.23/5.0/5.1 reuse."
     )
 
 

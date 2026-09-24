@@ -2,6 +2,8 @@
 """Prepare and inspect FBC onboarding without changing a caller's checkout."""
 
 import argparse
+import copy
+import os
 import json
 import re
 import shutil
@@ -179,92 +181,202 @@ def worktree(source, target, base, branch, check_only=False):
     return target
 
 
-def add_resource(path, resource):
-    data = load(path)
-    if resource not in data["resources"]:
-        # Preserve source formatting/comments by adding to the existing resources block.
-        text = path.read_text()
+def atomic_text(path, text):
+    """Publish a checked candidate without exposing a truncated YAML file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as output:
+        temporary = Path(output.name)
+        try:
+            output.write(text)
+            output.flush()
+            temporary.chmod(path.stat().st_mode & 0o777 if path.exists() else 0o644)
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def sequence_item(text, keys, item):
+    """Insert a scalar into block or flow YAML without rewriting comments."""
+    original = yaml.safe_load(text)
+    data, node = original, yaml.compose(text)
+    for key in keys:
+        data = data[key]
+        require(isinstance(node, yaml.MappingNode), "Expected YAML mapping")
+        matches = [value for name, value in node.value if name.value == key]
+        require(len(matches) == 1, f"Missing or duplicate YAML key: {key}")
+        node = matches[0]
+    require(
+        isinstance(data, list) and isinstance(node, yaml.SequenceNode),
+        "Expected YAML sequence",
+    )
+    require(data.count(item) <= 1, f"Duplicate list item: {item}")
+    if item in data:
+        return text
+    if node.flow_style:
+        start, end = node.start_mark.index, node.end_mark.index
         require(
-            re.search(r"^resources:\s*$", text, re.M), f"No resources block in {path}"
+            text[start] == "[" and text[end - 1] == "]",
+            "Unsupported anchored flow sequence",
         )
-        text = re.sub(
-            r"^(resources:\s*\n)",
-            lambda m: m[1] + f"  - {resource}\n",
-            text,
-            count=1,
-            flags=re.M,
-        )
-        path.write_text(text)
+        insert = json.dumps(item) + (", " if node.value else "")
+        candidate = text[: start + 1] + insert + text[start + 1 :]
+    else:
+        require(node.value, "Unsupported empty block sequence")
+        first = node.value[0].start_mark
+        start = text.rfind("\n", 0, first.index) + 1
+        match = re.match(r"([ ]*)- ", text[start:])
+        require(match, "Unsupported YAML sequence layout; use a block or flow list")
+        candidate = text[:start] + match[1] + "- " + item + "\n" + text[start:]
+    expected = json.loads(json.dumps(original))
+    values = expected
+    for key in keys:
+        values = values[key]
+    values.insert(0, item)
     require(
-        load(path)["resources"].count(resource) == 1, f"Duplicate resource: {resource}"
+        yaml.safe_load(candidate) == expected, "YAML insertion changed unrelated values"
     )
+    return candidate
 
 
-def prepare_tenant(root, version, previous, kustomize=None):
-    source, dest = (
-        root / OVERLAYS / f"{previous}-overlay",
-        root / OVERLAYS / f"{version}-overlay",
-    )
-    require(
-        len(list(source.glob("*.yaml"))) == 8,
-        f"Unexpected predecessor overlay: {source}",
-    )
-    if not dest.exists():
-        dest.mkdir()
-        for path in source.glob("*.yaml"):
-            text = (
-                path.read_text()
-                .replace(previous, version)
-                .replace(previous.replace("-", "."), version.replace("-", "."))
-            )
-            (dest / path.name).write_text(text)
-        # Empty CHANNEL_NAME means use the package's default channel. "stable" does
-        # not exist in current Submariner catalogs (stable-0.24 does).
-        base = load(
-            root / OVERLAYS / "base/integration-test-scenario-fbc-operator.yaml"
-        )
-        params = base["spec"]["params"]
-        index = next(i for i, p in enumerate(params) if p["name"] == "CHANNEL_NAME")
-        path = dest / "integration-test-scenario-fbc-operator-patch.yaml"
-        with path.open("a") as output:
-            output.write(
-                f"- op: test\n  path: /spec/params/{index}/name\n  value: CHANNEL_NAME\n"
-                f'- op: replace\n  path: /spec/params/{index}/value\n  value: ""\n'
-            )
-    add_resource(
-        root / TENANT / "kustomization.yaml",
-        f"overlay/application-submariner-fbc/{version}-overlay",
-    )
-    # Required repository builder, narrowed to this tenant, in an isolated worktree.
-    with tempfile.NamedTemporaryFile(mode="w") as changed:
-        changed.write("cluster/kflux-prd-rh02/tenants/submariner-tenant\n")
-        changed.flush()
-        run(
-            "./build-manifests.sh",
-            kustomize or shutil.which("kustomize") or "kustomize",
-            changed.name,
-            cwd=root / "tenants-config",
-            capture=False,
-        )
-    validate_tenant(root, version)
+def add_resource(path, resource):
+    before = path.read_text()
+    candidate = sequence_item(before, ["resources"], resource)
+    if candidate != before:
+        atomic_text(path, candidate)
 
 
-def validate_tenant(root, version):
+def target_tenant_objects(documents, version):
     objects = {}
-    for path in (root / GENERATED).glob("*.yaml"):
-        data = load(path)
+    for data in documents:
         require(
             isinstance(data, dict) and isinstance(data.get("metadata"), dict),
-            f"Malformed resource: {path}",
+            "Malformed tenant resource",
         )
         name = data["metadata"].get("name", "")
         if name.endswith(f"-{version}") and name.startswith(
             ("submariner-fbc-", "imagerepository-submariner-fbc-")
         ):
-            key = (data["kind"], data["metadata"]["name"])
+            key = (data["kind"], name)
             require(key not in objects, f"Duplicate generated object: {key}")
             objects[key] = data
-    return validate_tenant_objects(objects, version)
+    return objects
+
+
+def prepare_tenant(root, version, previous, kustomize=None):
+    binary = kustomize_binary(root, kustomize)
+    # The repository builder can inject authors into unrelated changed files and
+    # render other applications. Run it on a disposable copy and publish our files.
+    with tempfile.TemporaryDirectory(prefix="fbc-tenant-") as temporary:
+        stage = Path(temporary)
+        for relative in (TENANT, Path("tenants-config/lib")):
+            shutil.copytree(root / relative, stage / relative, symlinks=True)
+        for name in ("build-manifests.sh", "utils.sh", "ensure-releaseplan-authors.sh"):
+            shutil.copy2(
+                root / "tenants-config" / name, stage / "tenants-config" / name
+            )
+        source = stage / OVERLAYS / f"{previous}-overlay"
+        dest = stage / OVERLAYS / f"{version}-overlay"
+        require(
+            len(list(source.glob("*.yaml"))) == 8,
+            f"Unexpected predecessor overlay: {source}",
+        )
+        if not dest.exists():
+            dest.mkdir()
+            for path in source.glob("*.yaml"):
+                (dest / path.name).write_text(
+                    path.read_text()
+                    .replace(previous, version)
+                    .replace(previous.replace("-", "."), version.replace("-", "."))
+                )
+            base = load(
+                stage / OVERLAYS / "base/integration-test-scenario-fbc-operator.yaml"
+            )
+            index = next(
+                i
+                for i, param in enumerate(base["spec"]["params"])
+                if param["name"] == "CHANNEL_NAME"
+            )
+            path = dest / "integration-test-scenario-fbc-operator-patch.yaml"
+            patches = load(path)
+            channel = [
+                op for op in patches if op.get("path") == f"/spec/params/{index}/value"
+            ]
+            if not channel:
+                with path.open("a") as output:
+                    output.write(
+                        f"- op: test\n  path: /spec/params/{index}/name\n  value: CHANNEL_NAME\n"
+                        f'- op: replace\n  path: /spec/params/{index}/value\n  value: ""\n'
+                    )
+            else:
+                require(
+                    len(channel) == 1
+                    and channel[0].get("op") == "replace"
+                    and channel[0].get("value") == "",
+                    "Predecessor has conflicting channel patches",
+                )
+        require(
+            len(list(dest.glob("*.yaml"))) == 8,
+            "Partial target overlay; review it or choose a fresh workspace",
+        )
+        registration = TENANT / "kustomization.yaml"
+        add_resource(
+            stage / registration,
+            f"overlay/application-submariner-fbc/{version}-overlay",
+        )
+        changed = stage / "changed-tenants"
+        changed.write_text("cluster/kflux-prd-rh02/tenants/submariner-tenant\n")
+        run(
+            "./build-manifests.sh",
+            binary,
+            str(changed),
+            cwd=stage / "tenants-config",
+            capture=False,
+            env=dict(os.environ, GITLAB_CI="true"),
+        )
+        validate_tenant(stage, version, binary)
+        candidates = {registration: (stage / registration).read_text()}
+        for path in dest.glob("*.yaml"):
+            candidates[path.relative_to(stage)] = path.read_text()
+        for path in (stage / GENERATED).glob("*.yaml"):
+            if target_tenant_objects([load(path)], version):
+                candidates[path.relative_to(stage)] = path.read_text()
+        for relative, text in candidates.items():
+            existing = root / relative
+            if relative != registration and existing.exists():
+                require(
+                    existing.read_text() == text,
+                    f"Conflicting existing output: {existing}; review/regenerate it explicitly",
+                )
+        for relative, text in candidates.items():
+            path = root / relative
+            if not path.exists() or path.read_text() != text:
+                atomic_text(path, text)
+    validate_tenant(root, version, binary)
+
+
+def validate_tenant(root, version, kustomize=None):
+    objects = target_tenant_objects(
+        (load(path) for path in (root / GENERATED).glob("*.yaml")), version
+    )
+    names = validate_tenant_objects(objects, version)
+    registration = load(root / TENANT / "kustomization.yaml")
+    require(
+        registration["resources"].count(
+            f"overlay/application-submariner-fbc/{version}-overlay"
+        )
+        == 1,
+        "Target overlay is missing or duplicated in tenant registration",
+    )
+    binary = kustomize_binary(root, kustomize)
+    rendered = target_tenant_objects(
+        yaml.safe_load_all(run(binary, "build", str(root / TENANT))), version
+    )
+    validate_tenant_objects(rendered, version)
+    require(
+        rendered == objects,
+        "Generated tenant manifests differ from the current source; regenerate and review",
+    )
+    return names
 
 
 def validate_tenant_objects(objects, version):
@@ -294,6 +406,13 @@ def validate_tenant_objects(objects, version):
         if kind in ("Component", "IntegrationTestScenario", "ReleasePlan"):
             require(data["spec"]["application"] == app, f"Wrong application: {name}")
         if kind == "ReleasePlan":
+            labels = data["metadata"]["labels"]
+            require(
+                labels.get("release.appstudio.openshift.io/standing-attribution")
+                != "true"
+                or labels.get("release.appstudio.openshift.io/author"),
+                f"Standing-attribution ReleasePlan needs an author: {name}",
+            )
             require(
                 data["metadata"]["labels"].get(
                     "release.appstudio.openshift.io/auto-release"
@@ -332,6 +451,37 @@ def validate_tenant_objects(objects, version):
             == "false",
             f"Optional {scenario} scenario",
         )
+        require(
+            [context["name"] for context in its["spec"]["contexts"]]
+            == (["application"] if scenario == "standard" else [f"component_{app}"]),
+            f"Wrong {scenario} ITS contexts",
+        )
+        resolver = its["spec"]["resolverRef"]
+        refs = named_values(resolver["params"], f"{scenario} ITS resolver params")
+        require(resolver["resolver"] == "git", f"Wrong {scenario} ITS resolver")
+        require(
+            refs["revision"] == "main"
+            or re.fullmatch(r"[0-9a-f]{40}", refs["revision"]),
+            f"Unsupported {scenario} ITS revision; review the approved resolver",
+        )
+        if scenario == "standard":
+            require(
+                refs["url"].removesuffix(".git")
+                == "https://github.com/konflux-ci/build-definitions"
+                and refs["pathInRepo"] == "pipelines/enterprise-contract.yaml",
+                "Wrong standard ITS pipeline",
+            )
+        else:
+            require(
+                refs["url"].removesuffix(".git")
+                == "https://github.com/konflux-ci/tekton-integration-catalog"
+                and refs["pathInRepo"]
+                in (
+                    "pipelines/deploy-fbc-operator/0.1/deploy-fbc-operator.yaml",
+                    "pipelineruns/deploy-fbc-operator/0.2/deploy-fbc-operator-run.yaml",
+                ),
+                "Wrong or unreviewed operator ITS pipeline",
+            )
     standard = objects["IntegrationTestScenario", f"submariner-fbc-standard-{version}"]
     require(
         named_values(standard["spec"]["params"], "standard ITS params")[
@@ -355,6 +505,7 @@ def validate_tenant_objects(objects, version):
     )
     operator = objects["IntegrationTestScenario", f"submariner-fbc-operator-{version}"]
     params = named_values(operator["spec"]["params"], "operator ITS params")
+    require(params["PACKAGE_NAME"] == "submariner", "Wrong ITS package")
     require(params["OCI_REF"] == image, "Wrong ITS image")
     require(
         params["CREDENTIALS_SECRET_NAME"] == f"imagerepository-{app}-image-push",
@@ -369,25 +520,18 @@ def validate_tenant_objects(objects, version):
 
 
 def prepare_rpas(root, version):
+    candidates = {}
     for env in ("stage", "prod"):
         path = root / RPA / f"submariner-fbc-{env}.yaml"
-        data = load(path)
-        app = f"submariner-fbc-{version}"
-        if app not in data["spec"]["applications"]:
-            text = path.read_text()
-            require(
-                re.search(r"^  applications:\s*$", text, re.M),
-                f"No applications block: {path}",
-            )
-            text = re.sub(
-                r"^(  applications:\s*\n)",
-                lambda m: m[1] + f"    - {app}\n",
-                text,
-                count=1,
-                flags=re.M,
-            )
-            path.write_text(text)
-        validate_rpa(load(path), version, env)
+        text = sequence_item(
+            path.read_text(), ["spec", "applications"], f"submariner-fbc-{version}"
+        )
+        validate_rpa(yaml.safe_load(text), version, env)
+        candidates[path] = text
+    # Validate both environments before modifying either admission.
+    for path, text in candidates.items():
+        if path.read_text() != text:
+            atomic_text(path, text)
 
 
 def validate_rpa(data, version, env):
@@ -415,7 +559,11 @@ def validate_rpa(data, version, env):
     fbc = spec["data"]["fbc"]
     require(fbc["allowedPackages"] == ["submariner"], f"Wrong {env} allowed packages")
     require(
-        "{{ OCP_VERSION }}" in fbc["fromIndex"], f"Hardcoded {env} source index version"
+        fbc["fromIndex"]
+        == "registry-proxy.engineering.redhat.com/rh-osbs/"
+        + ("iib-pub-pending" if env == "stage" else "iib-pub")
+        + ":{{ OCP_VERSION }}",
+        f"Wrong {env} source index version or repository",
     )
     if env == "stage":
         require(
@@ -427,7 +575,8 @@ def validate_rpa(data, version, env):
     else:
         require(
             not fbc.get("stagedIndex", False)
-            and "{{ OCP_VERSION }}" in fbc["targetIndex"]
+            and fbc["targetIndex"]
+            == "quay.io/redhat-prod/redhat----redhat-operator-index:{{ OCP_VERSION }}"
             and spec["data"]["intention"] == "production",
             "Wrong prod destination",
         )
@@ -435,31 +584,277 @@ def validate_rpa(data, version, env):
         spec["pipeline"]["pipelineRef"]["params"], "admission pipeline params"
     )
     require(
-        params["url"].removesuffix(".git")
+        spec["pipeline"]["pipelineRef"]["resolver"] == "git"
+        and params["revision"] == "production"
+        and params["url"].removesuffix(".git")
         == "https://github.com/konflux-ci/release-service-catalog"
         and params["pathInRepo"] == "pipelines/managed/fbc-release/fbc-release.yaml",
         f"Wrong {env} admission pipeline",
     )
+    require(
+        spec["pipeline"]["serviceAccountName"]
+        == f"release-index-image-{'staging' if env == 'stage' else 'prod'}",
+        f"Wrong {env} release service account",
+    )
+    require(
+        fbc["publishingCredentials"]
+        == (
+            "staged-index-fbc-publishing-credentials"
+            if env == "stage"
+            else "fbc-production-publishing-credentials-redhat-prod"
+        ),
+        f"Wrong {env} publishing credentials",
+    )
+    require(
+        fbc["requestTimeoutSeconds"] == 3000
+        and fbc["buildTimeoutSeconds"] == 3000
+        and spec["pipeline"]["timeouts"] == {"pipeline": "1h0m0s", "tasks": "1h0m0s"},
+        f"Unexpected {env} release timeouts; review approved configuration",
+    )
+
+
+def pipeline_definition(root, data):
+    spec = data["spec"]
+    require(
+        ("pipelineSpec" in spec) != ("pipelineRef" in spec),
+        "Expected one pipeline definition",
+    )
+    if "pipelineSpec" in spec:
+        return spec["pipelineSpec"]
+    reference = spec["pipelineRef"]
+    require(
+        set(reference).issubset({"name", "apiVersion", "kind"})
+        and reference.get("name"),
+        "Unverified pipelineRef: resolve the referenced definition to a reviewed local Pipeline before claiming readiness",
+    )
+    definitions = []
+    for path in (root / ".tekton").glob("*.yaml"):
+        for doc in yaml.safe_load_all(path.read_text()):
+            if (
+                isinstance(doc, dict)
+                and doc.get("kind") == "Pipeline"
+                and doc.get("metadata", {}).get("name") == reference["name"]
+            ):
+                definitions.append(doc["spec"])
+    require(
+        len(definitions) == 1,
+        "Unverified pipelineRef: expected exactly one matching local Pipeline definition",
+    )
+    return definitions[0]
+
+
+def validate_pipeline_execution(definition, params):
+    """Validate the reviewed Submariner OCI-artifact task family, not arbitrary Tekton."""
+    defaults = definition.get("params", [])
+    require(
+        len({param["name"] for param in defaults}) == len(defaults),
+        "Duplicate pipeline parameter declarations",
+    )
+    effective = {
+        param["name"]: param["default"] for param in defaults if "default" in param
+    }
+    effective.update(params)
+    for name, expected in {
+        "path-context": ".",
+        "skip-checks": "false",
+        "build-image-index": "true",
+        "build-args-file": "",
+    }.items():
+        require(
+            effective.get(name) == expected,
+            f"Wrong effective {name}: expected {expected!r}",
+        )
+    family = {
+        "init": "init",
+        "clone-repository": "git-clone-oci-ta",
+        "run-opm-command": "run-opm-command-oci-ta",
+        "prefetch-dependencies": "prefetch-dependencies-oci-ta",
+        "build-images": "buildah-remote-oci-ta",
+        "build-image-index": "build-image-index",
+        "deprecated-base-image-check": "deprecated-image-check",
+        "apply-tags": "apply-tags",
+        "validate-fbc": "validate-fbc",
+        "fbc-target-index-pruning-check": "fbc-target-index-pruning-check",
+        "fbc-fips-check-oci-ta": "fbc-fips-check-oci-ta",
+    }
+    tasks = {task["name"]: task for task in definition.get("tasks", [])}
+    require(
+        set(tasks) == set(family)
+        and len(tasks) == len(definition.get("tasks", []))
+        and not definition.get("finally"),
+        "Unverified pipeline task family: review missing/extra/duplicate tasks",
+    )
+    checks = {
+        "deprecated-base-image-check",
+        "validate-fbc",
+        "fbc-target-index-pruning-check",
+        "fbc-fips-check-oci-ta",
+    }
+    for name, task in tasks.items():
+        require(
+            "taskSpec" not in task
+            and "taskRef" in task
+            and task.get("onError", "stopAndFail") == "stopAndFail",
+            f"Unsupported task execution: {name}",
+        )
+        ref = task["taskRef"]
+        refs = named_values(ref["params"], f"{name} task reference")
+        require(
+            ref["resolver"] == "bundles"
+            and refs.get("name") == family[name]
+            and refs.get("kind") == "task"
+            and re.fullmatch(
+                r"quay\.io/konflux-ci/tekton-catalog/task-"
+                + re.escape(family[name])
+                + r":[^@]+@sha256:[0-9a-f]{64}",
+                refs.get("bundle", ""),
+            ),
+            f"Unreviewed task reference: {name}",
+        )
+        allowed_guard = [
+            {"input": "$(params.skip-checks)", "operator": "in", "values": ["false"]}
+        ]
+        require(
+            not task.get("when") or (name in checks and task["when"] == allowed_guard),
+            f"Task may be skipped: {name}",
+        )
+        require(
+            name == "build-images" or not task.get("matrix"),
+            f"Unexpected task matrix: {name}",
+        )
+    bindings = {
+        "clone-repository": {
+            "url": "$(params.git-url)",
+            "revision": "$(params.revision)",
+        },
+        "run-opm-command": {
+            "SOURCE_ARTIFACT": "$(tasks.clone-repository.results.SOURCE_ARTIFACT)",
+            "OPM_ARGS": [],
+            "OPM_OUTPUT_PATH": "",
+            "IDMS_PATH": "",
+        },
+        "prefetch-dependencies": {
+            "SOURCE_ARTIFACT": "$(tasks.run-opm-command.results.SOURCE_ARTIFACT)"
+        },
+        "build-images": {
+            "IMAGE": "$(params.output-image)",
+            "DOCKERFILE": "$(params.dockerfile)",
+            "CONTEXT": "$(params.path-context)",
+            "BUILD_ARGS": ["$(params.build-args[*])"],
+            "BUILD_ARGS_FILE": "$(params.build-args-file)",
+            "SOURCE_ARTIFACT": "$(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)",
+            "COMMIT_SHA": "$(tasks.clone-repository.results.commit)",
+            "SOURCE_URL": "$(tasks.clone-repository.results.url)",
+            "IMAGE_APPEND_PLATFORM": "true",
+            "IMAGE_EXPIRES_AFTER": "$(params.image-expires-after)",
+        },
+        "build-image-index": {
+            "IMAGE": "$(params.output-image)",
+            "IMAGES": ["$(tasks.build-images.results.IMAGE_REF[*])"],
+            "ALWAYS_BUILD_INDEX": "$(params.build-image-index)",
+            "IMAGE_EXPIRES_AFTER": "$(params.image-expires-after)",
+        },
+    }
+    for name in (
+        "deprecated-base-image-check",
+        "apply-tags",
+        "validate-fbc",
+        "fbc-target-index-pruning-check",
+    ):
+        bindings[name] = {
+            "IMAGE_URL": "$(tasks.build-image-index.results.IMAGE_URL)",
+            "IMAGE_DIGEST": "$(tasks.build-image-index.results.IMAGE_DIGEST)",
+        }
+    bindings["fbc-target-index-pruning-check"].update(
+        {
+            "TARGET_INDEX": "registry.redhat.io/redhat/redhat-operator-index",
+            "RENDERED_CATALOG_DIGEST": "$(tasks.validate-fbc.results.RENDERED_CATALOG_DIGEST)",
+        }
+    )
+    bindings["fbc-fips-check-oci-ta"] = {
+        "image-url": "$(tasks.build-image-index.results.IMAGE_URL)",
+        "image-digest": "$(tasks.build-image-index.results.IMAGE_DIGEST)",
+    }
+    for name, expected in bindings.items():
+        values = named_values(tasks[name].get("params", []), f"{name} task params")
+        require(
+            all(values.get(key) == value for key, value in expected.items()),
+            f"Incorrect parameter forwarding: {name}",
+        )
+    require(
+        tasks["build-images"].get("matrix")
+        in (
+            {"params": [{"name": "PLATFORM", "value": ["$(params.build-platforms)"]}]},
+            {
+                "params": [
+                    {"name": "PLATFORM", "value": ["$(params.build-platforms[*])"]}
+                ]
+            },
+        ),
+        "Build platforms are not forwarded to the image matrix",
+    )
+    results = named_values(definition.get("results", []), "pipeline results")
+    for key, expected in {
+        "IMAGE_URL": "$(tasks.build-image-index.results.IMAGE_URL)",
+        "IMAGE_DIGEST": "$(tasks.build-image-index.results.IMAGE_DIGEST)",
+        "CHAINS-GIT_URL": "$(tasks.clone-repository.results.url)",
+        "CHAINS-GIT_COMMIT": "$(tasks.clone-repository.results.commit)",
+    }.items():
+        require(results.get(key) == expected, f"Wrong pipeline result: {key}")
+    return effective
 
 
 def pipelines(root, version, previous, base_image):
+    candidates = {}
     for event in ("push", "pull-request"):
         path = root / ".tekton" / f"submariner-fbc-{version}-{event}.yaml"
+        if path.exists():
+            candidates[path] = path.read_text()
+            continue
+        source = root / ".tekton" / f"submariner-fbc-{previous}-{event}.yaml"
+        require(
+            source.exists(),
+            f"No pipeline template: {source}; supply --pipeline-previous",
+        )
+        old_data = load(source)
+        old_args = named_values(old_data["spec"]["params"], "predecessor params")[
+            "build-args"
+        ]
+        old = [
+            arg.removeprefix("OPM_IMAGE=")
+            for arg in old_args
+            if arg.startswith("OPM_IMAGE=")
+        ]
+        require(len(old) == 1, "Expected one explicit predecessor OPM_IMAGE")
+        text = source.read_text()
+        require(text.count(old[0]) == 1, "Ambiguous predecessor base-image reference")
+        # Replace the actual argument first; an accepted digest override need not
+        # contain the previous version's default registry tag.
+        marker = "__FBC_ONBOARDING_BASE_IMAGE__"
+        require(marker not in text, "Unexpected base-image placeholder")
+        text = (
+            text.replace(old[0], marker)
+            .replace(previous, version)
+            .replace(marker, base_image)
+        )
+        candidate = yaml.safe_load(text)
+        require(
+            candidate["spec"].get("pipelineSpec")
+            == old_data["spec"].get("pipelineSpec")
+            and candidate["spec"].get("pipelineRef")
+            == old_data["spec"].get("pipelineRef"),
+            "Version replacement changed the pipeline definition; review it explicitly",
+        )
+        candidates[path] = text
+    with tempfile.TemporaryDirectory(prefix="fbc-pipelines-") as temporary:
+        stage = Path(temporary)
+        shutil.copytree(root / ".tekton", stage / ".tekton")
+        for path, text in candidates.items():
+            (stage / ".tekton" / path.name).write_text(text)
+        validate_pipelines(stage, version, base_image)
+    for path, text in candidates.items():
         if not path.exists():
-            source = root / ".tekton" / f"submariner-fbc-{previous}-{event}.yaml"
-            require(
-                source.exists(), f"No pipeline template: {source}; supply --previous"
-            )
-            # Literal identity replacement keeps comments, CEL, and inline or
-            # referenced pipeline structure intact. Params are validated below.
-            text = source.read_text().replace(previous, version)
-            old = f"registry.redhat.io/openshift{previous.split('-')[0]}/ose-operator-registry-rhel9:v{previous.replace('-', '.')}"
-            require(
-                text.count(old) == 1,
-                f"Expected one explicit base-image build arg in {source}",
-            )
-            path.write_text(text.replace(old, base_image))
-    validate_pipelines(root, version, base_image)
+            atomic_text(path, text)
 
 
 def validate_pipelines(root, version, base_image):
@@ -478,6 +873,8 @@ def validate_pipelines(root, version, base_image):
                 f"Wrong {label}: {path}",
             )
         params = named_values(data["spec"]["params"], "pipeline params")
+        definition = pipeline_definition(root, data)
+        validate_pipeline_execution(definition, params)
         require(
             data["metadata"].get("namespace") == "submariner-tenant",
             f"Wrong pipeline namespace: {path}",
@@ -537,9 +934,7 @@ def validate_pipelines(root, version, base_image):
             if "image-expires-after" not in params:
                 defaults = [
                     parameter.get("default")
-                    for parameter in data["spec"]
-                    .get("pipelineSpec", {})
-                    .get("params", [])
+                    for parameter in definition.get("params", [])
                     if parameter.get("name") == "image-expires-after"
                 ]
                 require(
@@ -589,80 +984,182 @@ def prepare_catalog(root, args, previous, base_image):
         (root / "test/lib/isolate.sh").is_file(),
         "Selected FBC base lacks isolated tests; land the safety changes first",
     )
-    require(
-        args.min_supported_sub,
-        "--min-supported-sub is required for catalog preparation",
+    mapping = json.loads((root / "drop-versions.json").read_text())
+    cutoff = catalog_inputs(
+        load(root / "catalog-template.yaml"), mapping, args.ocp, args.min_supported_sub
     )
-    minor = int(args.min_supported_sub.split(".")[1])
-    require(
-        minor > 0,
-        "Inclusive minimum 0.0 cannot be represented by the existing cutoff map",
-    )
-    cutoff = f"0.{minor - 1}"
-    template = load(root / "catalog-template.yaml")
-    channel = f"stable-{args.min_supported_sub}"
-    channels = [e for e in template["entries"] if e.get("schema") == "olm.channel"]
-    require(
-        any(e["name"] == channel and e.get("entries") for e in channels),
-        f"No populated {channel} channel in template; add its bundles first",
-    )
-    path = root / "drop-versions.json"
-    data = json.loads(path.read_text())
     dotted = args.ocp.replace("-", ".")
-    require(
-        dotted not in data or data[dotted] == cutoff,
-        f"Existing {dotted} cutoff conflicts with requested minimum",
-    )
-    data[dotted] = cutoff
-    path.write_text(json.dumps(data, indent=2) + "\n")
-    pipelines(root, args.ocp, previous, base_image)
-    run("make", "build-catalogs", cwd=root, capture=False)
-    run("make", "validate-catalogs", cwd=root, capture=False)
-    run("make", "test", cwd=root, capture=False)
+    with tempfile.TemporaryDirectory(prefix="fbc-catalog-") as temporary:
+        stage = Path(temporary) / "candidate"
+        shutil.copytree(
+            root,
+            stage,
+            symlinks=True,
+            ignore=shutil.ignore_patterns(".git", ".catalog-build*", "__pycache__"),
+        )
+        staged_mapping = dict(mapping, **{dotted: cutoff})
+        (stage / "drop-versions.json").write_text(
+            json.dumps(staged_mapping, indent=2) + "\n"
+        )
+        pipelines(stage, args.ocp, previous, base_image)
+        run("make", "build-catalogs", cwd=stage, capture=False)
+        run("make", "validate-catalogs", cwd=stage, capture=False)
+        run("make", "test", cwd=stage, capture=False)
+        validate_catalog(stage, args.ocp, args.min_supported_sub)
+        candidates = {
+            Path(".tekton") / f"submariner-fbc-{args.ocp}-{event}.yaml": (
+                stage / ".tekton" / f"submariner-fbc-{args.ocp}-{event}.yaml"
+            ).read_text()
+            for event in ("push", "pull-request")
+        }
+        catalog = Path(f"catalog-{args.ocp}")
+        for path in (stage / catalog).rglob("*"):
+            if path.is_file():
+                candidates[path.relative_to(stage)] = path.read_text()
+        if (root / catalog).exists():
+            actual = {
+                path.relative_to(root)
+                for path in (root / catalog).rglob("*")
+                if path.is_file()
+            }
+            expected = {path for path in candidates if path.parts[0] == str(catalog)}
+            require(
+                actual == expected,
+                "Existing target catalog file set differs; review conflicting output",
+            )
+        for relative, text in candidates.items():
+            path = root / relative
+            require(
+                not path.exists() or path.read_text() == text,
+                f"Conflicting existing catalog/pipeline: {path}; review it explicitly",
+            )
+        for relative, text in candidates.items():
+            if not (root / relative).exists():
+                atomic_text(root / relative, text)
+        if dotted not in mapping:
+            atomic_text(
+                root / "drop-versions.json", json.dumps(staged_mapping, indent=2) + "\n"
+            )
+        (root / "bin").mkdir(exist_ok=True)
+        for name in ("opm", "grpcurl"):
+            source = stage / "bin" / name
+            if source.is_file() and not (root / "bin" / name).exists():
+                shutil.copy2(source, root / "bin" / name)
     validate_catalog(root, args.ocp, args.min_supported_sub)
 
 
-def validate_catalog(root, version, minimum):
+def bundle_stream(name):
+    match = re.fullmatch(
+        r"submariner\.v([0-9]+)\.([0-9]+)\.[0-9]+(?:[+-][0-9A-Za-z.-]+)?", name
+    )
+    require(match, f"Unsupported Submariner bundle name: {name}")
+    return tuple(map(int, match.groups()))
+
+
+def catalog_contract(root, version, minimum=None):
     mapping = json.loads((root / "drop-versions.json").read_text())
     dotted = version.replace("-", ".")
     require(dotted in mapping, f"Catalog {dotted} is not registered in the build map")
-    if minimum:
-        require(
-            mapping[dotted] == f"0.{int(minimum.split('.')[1]) - 1}",
-            "Catalog build map conflicts with the requested minimum",
+    cutoff = stream(mapping[dotted])
+    retained = f"0.{int(cutoff.split('.')[1]) + 1}"
+    require(
+        not minimum or minimum == retained,
+        "Catalog build map conflicts with the requested minimum",
+    )
+    threshold = tuple(map(int, retained.split(".")))
+    template = load(root / "catalog-template.yaml")
+    catalog_inputs(template, mapping, version, retained)
+    packages = [
+        entry for entry in template["entries"] if entry.get("schema") == "olm.package"
+    ]
+    channels, bundles = {}, {}
+    for entry in template["entries"]:
+        if entry.get("schema") == "olm.channel":
+            match = re.fullmatch(r"stable-([0-9]+)\.([0-9]+)", entry["name"])
+            require(match, f"Unreviewed channel naming: {entry['name']}")
+            if tuple(map(int, match.groups())) < threshold:
+                continue
+            channel = copy.deepcopy(entry)
+            channel["entries"] = [
+                item
+                for item in channel["entries"]
+                if bundle_stream(item["name"]) >= threshold
+            ]
+            require(channel["entries"], f"Empty retained channel: {channel['name']}")
+            if len(channel["entries"]) == 1:
+                channel["entries"][0].pop("replaces", None)
+            require(channel["name"] not in channels, "Duplicate template channel")
+            channels[channel["name"]] = channel
+        elif entry.get("schema") == "olm.bundle":
+            require(entry["name"] not in bundles, "Duplicate template bundle")
+            bundles[entry["name"]] = entry
+    referenced = {
+        entry["name"] for channel in channels.values() for entry in channel["entries"]
+    }
+    require(
+        referenced and referenced.issubset(bundles),
+        "Template graph references missing bundles",
+    )
+    images = {}
+    for name in referenced:
+        image = re.sub(
+            r"^quay\.io/redhat-user-workloads/[^:@]+",
+            "registry.redhat.io/rhacm2/submariner-operator-bundle",
+            bundles[name]["image"],
         )
+        require(
+            re.fullmatch(r"[^@]+@sha256:[0-9a-f]{64}", image),
+            f"Unpinned template bundle: {name}",
+        )
+        images[name] = image
+    return packages[0], channels, images
+
+
+def validate_catalog(root, version, minimum):
+    expected_package, expected_channels, expected_images = catalog_contract(
+        root, version, minimum
+    )
     directory = root / f"catalog-{version}"
-    package = load(directory / "package.yaml")
     require(
-        package["schema"] == "olm.package" and package["name"] == "submariner",
-        "Catalog package must be submariner",
+        load(directory / "package.yaml") == expected_package,
+        "Catalog package differs from the selected template",
     )
-    channels = [load(p) for p in (directory / "channels").glob("*.yaml")]
+    channels = {}
+    for path in (directory / "channels").glob("*.yaml"):
+        channel = load(path)
+        require(channel["name"] not in channels, "Duplicate rendered channel")
+        channels[channel["name"]] = channel
     require(
-        channels
-        and any(
-            c["name"] == package["defaultChannel"] and c.get("entries")
-            for c in channels
-        ),
-        "Default channel is missing or empty",
+        channels == expected_channels,
+        "Catalog channels or upgrade graph differ from the cutoff/template",
     )
-    bundles = list((directory / "bundles").glob("*.yaml"))
-    require(bundles, "Catalog contains no bundles")
-    if minimum:
-        for path in bundles:
-            data = load(path)
-            version_value = next(
-                p["value"]["version"]
-                for p in data["properties"]
-                if p["type"] == "olm.package"
-            )
-            require(
-                tuple(map(int, version_value.split(".")[:2]))
-                >= tuple(map(int, minimum.split("."))),
-                f"Bundle below minimum: {path}",
-            )
+    images = {}
+    for path in (directory / "bundles").glob("*.yaml"):
+        data = load(path)
+        require(
+            data["schema"] == "olm.bundle" and data["package"] == "submariner",
+            f"Wrong bundle package: {path}",
+        )
+        name = data["name"]
+        require(name not in images, "Duplicate rendered bundle")
+        properties = [
+            item["value"]
+            for item in data["properties"]
+            if item["type"] == "olm.package"
+        ]
+        require(
+            len(properties) == 1
+            and properties[0]["packageName"] == "submariner"
+            and properties[0]["version"] == name.removeprefix("submariner.v"),
+            f"Bundle name/package/version mismatch: {path}",
+        )
+        images[name] = data["image"]
+    require(
+        images == expected_images,
+        "Rendered bundle names/digests differ from the selected template and cutoff",
+    )
     run(str(root / "bin/opm"), "validate", str(directory), capture=False)
-    return len(bundles)
+    return len(images)
 
 
 def verify_live(args, base_image):
@@ -976,7 +1473,11 @@ def inspect_base_image(image):
 
 
 def verify_workspace(workspace, args, image):
-    result = {"tenant_resources": validate_tenant(workspace / "tenant", args.ocp)}
+    result = {
+        "tenant_resources": validate_tenant(
+            workspace / "tenant", args.ocp, args.kustomize
+        )
+    }
     for env in ("stage", "prod"):
         validate_rpa(
             load(workspace / "admission" / RPA / f"submariner-fbc-{env}.yaml"),
@@ -1199,10 +1700,17 @@ def main(argv=None):
             else:
                 require_tools("git", "make", "jq", "yq", "podman", "curl", "csplit")
                 git_text(root, sha, "test/lib/isolate.sh")
-                for event in ("push", "pull-request"):
-                    git_text(
-                        root, sha, f".tekton/submariner-fbc-{previous}-{event}.yaml"
-                    )
+                with tempfile.TemporaryDirectory(prefix="fbc-preflight-") as temporary:
+                    stage = Path(temporary)
+                    (stage / ".tekton").mkdir()
+                    for name in run(
+                        "git", "ls-tree", "--name-only", f"{sha}:.tekton", cwd=root
+                    ).splitlines():
+                        if name.endswith(".yaml"):
+                            (stage / ".tekton" / name).write_text(
+                                git_text(root, sha, f".tekton/{name}")
+                            )
+                    pipelines(stage, args.ocp, previous, image)
                 template = yaml.safe_load(git_text(root, sha, "catalog-template.yaml"))
                 mapping = json.loads(git_text(root, sha, "drop-versions.json"))
                 catalog_inputs(template, mapping, args.ocp, args.min_supported_sub)
@@ -1297,6 +1805,7 @@ if __name__ == "__main__":
     try:
         main()
     except (
+        argparse.ArgumentTypeError,
         ValueError,
         KeyError,
         TypeError,

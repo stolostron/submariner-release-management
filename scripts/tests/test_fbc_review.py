@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import yaml
 import unittest
 import subprocess
 
@@ -38,7 +39,9 @@ def pipeline(event):
             },
         },
         "spec": {
-            "pipelineRef": {"name": "fbc-builder"},
+            "pipelineSpec": yaml.safe_load(
+                (ROOT / "scripts/tests/fixtures/fbc-pipeline-spec.yaml").read_text()
+            ),
             "taskRunTemplate": {"serviceAccountName": f"build-pipeline-{app}"},
             "params": [
                 {"name": "build-platforms", "value": mod.PLATFORMS},
@@ -77,7 +80,19 @@ class PipelineContract(unittest.TestCase):
             mod.save(self.root / ".tekton" / f"submariner-fbc-5-0-{event}.yaml", data)
         mod.validate_pipelines(self.root, "5-0", BASE)
 
-    def test_valid_pipeline_ref_pair(self):
+    def test_valid_inline_and_resolved_pipeline_pairs(self):
+        self.validate()
+        definition = self.pair["push"]["spec"].pop("pipelineSpec")
+        self.pair["push"]["spec"]["pipelineRef"] = {"name": "fbc-builder"}
+        mod.save(
+            self.root / ".tekton/fbc-builder.yaml",
+            {
+                "apiVersion": "tekton.dev/v1",
+                "kind": "Pipeline",
+                "metadata": {"name": "fbc-builder"},
+                "spec": definition,
+            },
+        )
         self.validate()
 
     def test_conflicting_build_args_rejected(self):
@@ -126,15 +141,17 @@ class PipelineContract(unittest.TestCase):
         spec["params"] = [
             p for p in spec["params"] if p["name"] != "image-expires-after"
         ]
-        with self.assertRaisesRegex(ValueError, "Cannot determine"):
-            self.validate()
-        del spec["pipelineRef"]
-        spec["pipelineSpec"] = {
-            "params": [{"name": "image-expires-after", "default": ""}]
-        }
         self.validate()
-        spec["pipelineSpec"]["params"][0]["default"] = "5d"
+        next(
+            p
+            for p in spec["pipelineSpec"]["params"]
+            if p["name"] == "image-expires-after"
+        )["default"] = "5d"
         with self.assertRaisesRegex(ValueError, "must not expire"):
+            self.validate()
+        del spec["pipelineSpec"]
+        spec["pipelineRef"] = {"name": "missing-builder"}
+        with self.assertRaisesRegex(ValueError, "Unverified pipelineRef"):
             self.validate()
 
 

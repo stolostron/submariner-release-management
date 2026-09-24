@@ -12,6 +12,7 @@ import unittest
 from unittest.mock import patch
 
 from test_fbc_onboarding import ROOT, mod
+from test_fbc_review import pipeline
 
 
 class SkillFlow(unittest.TestCase):
@@ -50,7 +51,10 @@ class SkillFlow(unittest.TestCase):
         (self.fbc / ".tekton").mkdir()
         for event in ("push", "pull-request"):
             (self.fbc / ".tekton" / f"submariner-fbc-4-22-{event}.yaml").write_text(
-                "{}\n"
+                json.dumps(pipeline(event))
+                .replace("5-0", "4-22")
+                .replace("openshift5/", "openshift4/")
+                .replace(":v5.0", ":v4.22")
             )
         (self.fbc / "test/lib").mkdir(parents=True)
         (self.fbc / "test/lib/isolate.sh").write_text("# fixture\n")
