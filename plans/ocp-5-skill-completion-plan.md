@@ -48,9 +48,9 @@ Files: `skills/add-fbc-ocp-version/`, `scripts/fbc-onboard.py`, `Makefile`, and
   shorthand with explicit conflict handling. Resolve and report immutable SHAs.
   Select overlay and pipeline predecessors independently from their own sources.
 - Make configuration and catalog preparation depend only on their own repository.
-  Keep workspace-only verification. Before writes, check required tools, source
+  Keep workspace-only verification. Before writes, check tool versions/paths, source
   layouts, target conflicts, populated channels and the selected base's capabilities.
-  A missing minimum/channel must appear in planning, not first fail after mutation.
+  Missing channels or an unsupported Kustomize must fail before mutation.
 - Reuse current worktree/resume behavior. Give a concrete refresh/rebase or fresh
   workspace instruction on conflicts. Keep progress out of promised JSON output;
   distinguish unavailable remote information from confirmed absence.
@@ -71,11 +71,16 @@ tests/fixtures. Make narrow FBC changes only where its existing build helpers ne
   settings against the selected approved configuration. Preserve unrelated fields
   and comments. YAML edits must handle supported list layouts and validate the
   candidate before writing; errors must not leave previously valid YAML corrupted.
+- Verify overlay registration and compare generated tenant objects with a fresh
+  scratch render. Stale output must not hide source errors. Contain the repository
+  builder's author injection so it cannot rewrite unrelated ReleasePlans on resume.
 - Bound pipeline validation to the reviewed predecessor/template family. Preserve
   task structure except intended version changes; require enabled checks, correct
   source context, build-argument/platform forwarding and image-index/results wiring.
   Inspect a supported referenced definition; unknown/unresolved definitions remain
   unverified with a clear next action. Do not implement a general Tekton interpreter.
+- Read the predecessor's actual OPM base argument rather than reconstructing its
+  default tag. Reuse accepted overrides; carry the default-channel patch forward once.
 - Keep existing full-ID, legacy-cutoff, trigger, expiry, rollback and source-preservation
   protections. Do not require new tasks or broad refactors to add another version.
 
@@ -123,7 +128,8 @@ workflow instructions; then the real tenant/admission/catalog change sets.
   fixtures test generation; they do not assert registry or product availability.
 - For 5.0, use real Kustomize and OPM, explicit target-base image validation and
   gRPC serving, rerun byte comparison, source/index preservation and conflicting
-  minimum rejection. Keep the existing 30 regressions and add focused failure tests.
+  minimum rejection. Compare index contents, not only Git status. Update existing
+  fixtures that currently bless unresolved/empty pipelines; add focused regressions.
 - Finish the short skill's invocation, argument, next-action and failure guidance
   alongside the implementation. Validate skill metadata and check realistic plan,
   add and resume requests; metadata validation alone does not prove skill behavior.
@@ -137,8 +143,7 @@ and release status separately until their existing workflows supply the evidence
 
 ## Required regression coverage
 
-The earlier audit reproduced the first five grouped failure cases below. This
-review also proved the YAML-list corruption case. Add these to the existing suite;
+Cover the reproduced failures and acceptance cases below in the existing suite;
 the detailed earlier audit remains in Git commit `15bf04b`.
 
 | Case | Required result |
@@ -149,14 +154,16 @@ the detailed earlier audit remains in Git commit `15bf04b`.
 | Shared SHA used across unrelated repos; unavailable 0.25 channel | Independent pins work; missing stream reported before writes |
 | Copied skill with backing-checkout override | Executable and workflow both resolve |
 | Valid indentless RPA list | Generate valid YAML; preserve input if preparation fails |
+| Missing overlay registration or changed source with stale generated files | Reject; compare with real Kustomize output |
+| Unrelated untracked ReleasePlan with missing author | Tenant preparation preserves its bytes and index |
+| Unsupported Kustomize; predecessor with accepted OPM override | Reject before writes; valid overrides remain reusable |
 | Plan/add/resume; dirty checkout; partial failure; conflicting resume | Complete requested phase with no unrelated file/index/branch loss |
 | Synthetic 4.23 → 5.0 → 5.1 | Correct identities/base inputs/predecessors; byte-identical reruns |
 | Wrong provenance/bundle/platform/base; skipped install or wrong cluster | Fail that claim; retain useful partial results |
 
-The generation probe in this review passed the three-version pipeline/admission
-sequence using real source formatting, without changing original inputs. It did
-not build those synthetic versions. The maintained E2E must extend that evidence
-to the complete skill path, tenant generation, catalogs and the real 5.0 image.
+Disposable probes passed three-version pipeline/admission generation and real
+Kustomize generation of seven 5.1 tenant objects from 5.0. These exercise reuse,
+not future-version availability. Extend E2E to the complete skill and real 5.0 image.
 
 Run checks appropriate to each batch and commit as they pass. At completion run
 release `make test` through the normal hook, skill validation, FBC validation/lint
@@ -207,6 +214,10 @@ are needed:
 - `/home/dfarrell07/konflux/ocp-5-skill-work/fbc-tooling` — `ocp-5-fbc-completion`, based on `8b6e990`.
 - Existing configuration drafts: `ocp-5-work/tenant` at `ae77531d74` and
   `ocp-5-work/admission` at `82ff6f2fc5`, kept separate.
+
+For local runs, prepend `/home/dfarrell07/konflux/ocp-5-work/bin` to `PATH`: its
+Kustomize is the required 5.7.1; the current default binary is 5.6.0. The skill must
+check the selected repository's tool requirements rather than rely on this path.
 
 See [implementation status](ocp-5-implementation-status.md) for the completed
 foundation and prior test records. This document is the remaining execution plan;
