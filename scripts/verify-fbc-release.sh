@@ -31,9 +31,13 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION_INPUT="$1"
+if [ -n "${FBC_EXPECTED_COMMIT:-}" ] && [[ ! "$FBC_EXPECTED_COMMIT" =~ ^[a-f0-9]{40}$ ]]; then
+  echo "ERROR: FBC_EXPECTED_COMMIT must be a 40-character commit SHA" >&2
+  exit 1
+fi
 
 # Extract major.minor (0.22.1 → 0.22)
-if [[ "$VERSION_INPUT" =~ ^[0-9]+\.[0-9]+ ]]; then
+if [[ "$VERSION_INPUT" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
   :  # Version format is valid
 else
   echo "❌ ERROR: Invalid version format: $VERSION_INPUT" >&2
@@ -44,6 +48,7 @@ fi
 # Extract version components
 MAJOR_MINOR=$(echo "$VERSION_INPUT" | grep -oP '^\d+\.\d+')
 FULL_VERSION="$VERSION_INPUT"
+[[ "$FULL_VERSION" =~ ^[0-9]+\.[0-9]+$ ]] && FULL_VERSION="$FULL_VERSION.0"
 MAJOR=$(echo "$MAJOR_MINOR" | cut -d. -f1)
 MINOR=$(echo "$MAJOR_MINOR" | cut -d. -f2)
 HYPHENATED="${MAJOR}-${MINOR}"  # 0-22
@@ -65,6 +70,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/parallel-jobs.sh"
 # shellcheck source=lib/fbc-scope.sh
 source "$SCRIPT_DIR/lib/fbc-scope.sh"
+# shellcheck source=lib/fbc-snapshot.sh
+source "$SCRIPT_DIR/lib/fbc-snapshot.sh"
 
 # ============================================================================
 # Step 1: Verify GitHub Catalog Consistency
@@ -73,39 +80,42 @@ source "$SCRIPT_DIR/lib/fbc-scope.sh"
 echo "Step 1: Verifying GitHub catalog consistency..." >&2
 
 declare -A BUNDLE_SHAS
-declare -a APPLICABLE_VERSIONS
+declare -a APPLICABLE_VERSIONS=()
 SKIPPED=0
 
-# Check all OCP versions that have ever been supported (including retired 4.14 and 4.15):
-# bundles that no longer exist return 404 and are skipped gracefully, so over-including
-# older versions is safe and prevents silently missing a catalog inconsistency.
-for VERSION in 14 15 $FBC_OCP_VERSIONS; do
-  CATALOG_URL="https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${VERSION}/bundles/bundle-v${FULL_VERSION}.yaml"
+# Check the requested active scope. Retired catalogs are not release targets.
+# Only a confirmed 404 means the bundle is not applicable to this catalog.
+for VERSION in $FBC_OCP_VERSIONS; do
+  CATALOG_URL="https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/${FBC_EXPECTED_COMMIT:-main}/catalog-${VERSION}/bundles/bundle-v${FULL_VERSION}.yaml"
 
   # Fetch bundle by HTTP status, not curl's -f exit code: -f collapses 404
   # (bundle legitimately absent for this OCP version → skip) and 429/5xx
   # (transient CDN/rate-limit error) into the same exit 22. Treating a transient
   # error as "absent" would silently drop an OCP version we should release.
-  CATALOG_FILE="$TMPDIR/catalog-4-${VERSION}.yaml"
+  CATALOG_FILE="$TMPDIR/catalog-${VERSION}.yaml"
   HTTP_CODE=$(curl -s -o "$CATALOG_FILE" -w '%{http_code}' "$CATALOG_URL") || HTTP_CODE="000"
   case "$HTTP_CODE" in
-    200) BUNDLE_SHA=$(grep "^image:" "$CATALOG_FILE" | head -1 | grep -oP 'sha256:\K[a-f0-9]+' || true) ;;
+    200)
+      BUNDLE_SHA=$(grep "^image:" "$CATALOG_FILE" | head -1 | grep -oP 'sha256:\K[a-f0-9]+' || true)
+      if [[ ! "$BUNDLE_SHA" =~ ^[a-f0-9]{64}$ ]]; then
+        echo "ERROR: Catalog $VERSION returned malformed bundle content" >&2; exit 1
+      fi ;;
     404) BUNDLE_SHA="" ;;
-    *)   echo "✗ ERROR: unexpected HTTP $HTTP_CODE fetching catalog for 4-${VERSION}" >&2
+    *)   echo "✗ ERROR: unexpected HTTP $HTTP_CODE fetching catalog for ${VERSION}" >&2
          echo "  ($CATALOG_URL)" >&2
          echo "  Refusing to silently drop an OCP version on a transient error." >&2
          exit 1 ;;
   esac
 
   if [ -z "$BUNDLE_SHA" ]; then
-    echo "  4-${VERSION}: - bundle not in catalog (skipped)" >&2
+    echo "  ${VERSION}: - bundle not in catalog (skipped)" >&2
     SKIPPED=$((SKIPPED + 1))
     continue
   fi
 
-  BUNDLE_SHAS["4-${VERSION}"]="$BUNDLE_SHA"
+  BUNDLE_SHAS["${VERSION}"]="$BUNDLE_SHA"
   APPLICABLE_VERSIONS+=("$VERSION")
-  echo "  4-${VERSION}: ${BUNDLE_SHA:0:12}..." >&2
+  echo "  ${VERSION}: ${BUNDLE_SHA:0:12}..." >&2
 done
 
 if [ ${#APPLICABLE_VERSIONS[@]} -eq 0 ]; then
@@ -121,7 +131,7 @@ if [ "$UNIQUE_SHAS" -ne 1 ]; then
   echo "" >&2
   echo "✗ ERROR: FBC catalog bundle SHA mismatch:" >&2
   for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
-    echo "  4-${VERSION}: ${BUNDLE_SHAS[4-${VERSION}]}" >&2
+    echo "  ${VERSION}: ${BUNDLE_SHAS[${VERSION}]}" >&2
   done
   echo "" >&2
   echo "Remediation:" >&2
@@ -132,7 +142,7 @@ if [ "$UNIQUE_SHAS" -ne 1 ]; then
 fi
 
 # Get the common SHA
-EXPECTED_BUNDLE_SHA="${BUNDLE_SHAS[4-${APPLICABLE_VERSIONS[0]}]}"
+EXPECTED_BUNDLE_SHA="${BUNDLE_SHAS[${APPLICABLE_VERSIONS[0]}]}"
 echo "" >&2
 echo "✓ Bundle SHA consistent across ${#APPLICABLE_VERSIONS[@]} GitHub catalogs (${SKIPPED} skipped): ${EXPECTED_BUNDLE_SHA:0:12}..." >&2
 
@@ -162,16 +172,21 @@ declare -A CATALOG_IMAGES
 declare -A EVENT_TYPES
 declare -A TEST_STATUSES
 
-declare -a RELEASABLE_VERSIONS
+declare -a RELEASABLE_VERSIONS=()
 SKIPPED_SNAPSHOTS=0
 
 for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   # Filter for this version, prefer push/incoming events (releasable), fall back to latest
   SNAPSHOT_DATA=""
   SNAPSHOT_DATA=$(echo "$ALL_SNAPSHOTS" | jq -r \
-    ".items[] | select(.metadata.name | startswith(\"submariner-fbc-4-${VERSION}\")) |
+    ".items[] | select(.metadata.name | startswith(\"submariner-fbc-${VERSION}-\")) |
+    select(.spec.application == \"submariner-fbc-${VERSION}\" and (.spec.components | length) == 1 and .spec.components[0].name == \"submariner-fbc-${VERSION}\") |
+    select(\"${FBC_EXPECTED_COMMIT:-}\" == \"\" or .spec.components[0].source.git.revision == \"${FBC_EXPECTED_COMMIT:-}\") |
     select(.metadata.creationTimestamp != null) |
     {name: .metadata.name,
+     revision: .spec.components[0].source.git.revision,
+     source_url: .spec.components[0].source.git.url,
+     pipeline: .metadata.labels[\"pac.test.appstudio.openshift.io/original-prname\"],
      event: .metadata.labels[\"pac.test.appstudio.openshift.io/event-type\"],
      tests: .metadata.annotations[\"test.appstudio.openshift.io/status\"],
      image: .spec.components[0].containerImage,
@@ -181,19 +196,40 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
     last')
 
   if [ -z "$SNAPSHOT_DATA" ] || [ "$SNAPSHOT_DATA" = "null" ]; then
-    echo "  4-${VERSION}: - no snapshot (skipped, no build pipeline)" >&2
-    SKIPPED_SNAPSHOTS=$((SKIPPED_SNAPSHOTS + 1))
-    continue
+    echo "ERROR: Active catalog ${VERSION} contains the bundle but has no snapshot" >&2
+    exit 1
+  fi
+
+  FBC_REVISION=$(echo "$SNAPSHOT_DATA" | jq -r '.revision // ""')
+  FBC_SOURCE_URL=$(echo "$SNAPSHOT_DATA" | jq -r '.source_url // ""')
+  FBC_PIPELINE=$(echo "$SNAPSHOT_DATA" | jq -r '.pipeline // ""')
+  if [ "$FBC_PIPELINE" != "submariner-fbc-${VERSION}-on-push" ]; then
+    echo "ERROR: Snapshot $VERSION is not the push pipeline (PR retests are not releasable)" >&2
+    exit 1
+  fi
+  if [[ ! "$FBC_REVISION" =~ ^[a-f0-9]{40}$ ]] || [[ "${FBC_SOURCE_URL%.git}" != "https://github.com/stolostron/submariner-operator-fbc" ]]; then
+    echo "ERROR: Invalid snapshot source for $VERSION" >&2; exit 1
+  fi
+  if [ -n "${FBC_EXPECTED_COMMIT:-}" ] && [ "$FBC_REVISION" != "$FBC_EXPECTED_COMMIT" ]; then
+    echo "ERROR: Snapshot $VERSION is not from expected commit $FBC_EXPECTED_COMMIT" >&2; exit 1
+  fi
+  if ! fbc_revision_on_main "$FBC_REVISION"; then
+    echo "ERROR: Cannot establish that snapshot $VERSION revision is merged on main" >&2
+    exit 1
   fi
 
   # Parse JSON into associative arrays
-  SNAPSHOTS["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.name')
-  CATALOG_IMAGES["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.image')
-  EVENT_TYPES["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.event // "unknown"')
-  TEST_STATUSES["4-${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.tests // "{}"')
+  SNAPSHOTS["${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.name')
+  CATALOG_IMAGES["${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.image')
+  if [[ ! "${CATALOG_IMAGES[$VERSION]}" =~ ^quay.io/redhat-user-workloads/submariner-tenant/submariner-fbc-${VERSION}@sha256:[a-f0-9]{64}$ ]]; then
+    echo "ERROR: Snapshot $VERSION has an incorrect or unpinned catalog image" >&2
+    exit 1
+  fi
+  EVENT_TYPES["${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.event // "unknown"')
+  TEST_STATUSES["${VERSION}"]=$(echo "$SNAPSHOT_DATA" | jq -r '.tests // "{}"')
 
   RELEASABLE_VERSIONS+=("$VERSION")
-  echo "  4-${VERSION}: ${SNAPSHOTS[4-${VERSION}]}" >&2
+  echo "  ${VERSION}: ${SNAPSHOTS[${VERSION}]}" >&2
 done
 
 if [ ${#RELEASABLE_VERSIONS[@]} -eq 0 ]; then
@@ -227,7 +263,7 @@ extract_single_bundle() {
     local FULL_VERSION="$4"
 
     # Each version gets own directory
-    local EXTRACT_DIR="$TMPDIR/extract-4-${VERSION}"
+    local EXTRACT_DIR="$TMPDIR/extract-${VERSION}"
     mkdir -p "$EXTRACT_DIR"
 
     # Extract bundle YAML (suppress output)
@@ -252,7 +288,7 @@ extract_single_bundle() {
     # Save SHA for later use
     echo "$SNAPSHOT_BUNDLE_SHA" > "$EXTRACT_DIR/bundle-sha.txt"
 
-    echo "  4-${VERSION}: ✓ ${SNAPSHOT_BUNDLE_SHA:0:12}..." >&2
+    echo "  ${VERSION}: ✓ ${SNAPSHOT_BUNDLE_SHA:0:12}..." >&2
 }
 
 # Export function and variables for subshells
@@ -261,8 +297,8 @@ export TMPDIR FULL_VERSION
 
 # Launch parallel extraction jobs
 for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
-    run_parallel_job "extract-4-${VERSION}" extract_single_bundle \
-        "$VERSION" "${SNAPSHOTS[4-${VERSION}]}" "${CATALOG_IMAGES[4-${VERSION}]}" "$FULL_VERSION"
+    run_parallel_job "extract-${VERSION}" extract_single_bundle \
+        "$VERSION" "${SNAPSHOTS[${VERSION}]}" "${CATALOG_IMAGES[${VERSION}]}" "$FULL_VERSION"
 done
 
 # Wait for all extractions to complete and check for errors
@@ -287,48 +323,47 @@ FAILED=0
 FAILED_DETAILS=""
 
 for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
-  SNAPSHOT="${SNAPSHOTS[4-${VERSION}]}"
-  EVENT_TYPE="${EVENT_TYPES[4-${VERSION}]}"
-  TESTS_JSON="${TEST_STATUSES[4-${VERSION}]}"
-  SNAPSHOT_BUNDLE_SHA=$(cat "$TMPDIR/extract-4-${VERSION}/bundle-sha.txt")
+  SNAPSHOT="${SNAPSHOTS[${VERSION}]}"
+  EVENT_TYPE="${EVENT_TYPES[${VERSION}]}"
+  TESTS_JSON="${TEST_STATUSES[${VERSION}]}"
+  SNAPSHOT_BUNDLE_SHA=$(cat "$TMPDIR/extract-${VERSION}/bundle-sha.txt")
 
-  # Verify event type (push, incoming, and retest-all-comment are main-branch builds; reject PR)
+  # These events are releasable only with the merged-main ancestry proved above.
   if [ "$EVENT_TYPE" != "push" ] && [ "$EVENT_TYPE" != "incoming" ] && [ "$EVENT_TYPE" != "retest-all-comment" ]; then
-    echo "  4-${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push', 'incoming', or 'retest-all-comment')" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Event type '$EVENT_TYPE' (not a main-branch build)\n"
+    echo "  ${VERSION}: ✗ Event type '$EVENT_TYPE' (must be 'push', 'incoming', or 'retest-all-comment')" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    ${VERSION}: Event type '$EVENT_TYPE' (not a main-branch build)\n"
     FAILED=$((FAILED + 1))
     continue
   fi
 
   # Verify tests passed
   if [ -z "$TESTS_JSON" ] || [ "$TESTS_JSON" = "{}" ]; then
-    echo "  4-${VERSION}: ✗ No test status" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: No test status\n"
+    echo "  ${VERSION}: ✗ No test status" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    ${VERSION}: No test status\n"
     FAILED=$((FAILED + 1))
     continue
   fi
 
-  # Check for any non-passing tests. BuildPLRInProgress is a transient Konflux
-  # state while the pipeline run record is being created — treat it as passing.
-  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | "\(.scenario): \(.status)"' 2>/dev/null || true)
-  if [ -n "$FAILED_TESTS" ]; then
-    echo "  4-${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Tests failed: $FAILED_TESTS\n"
+  # Empty, malformed, pending, skipped, and failed test results all block release.
+  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed") | "\(.scenario): \(.status)"' 2>/dev/null) || FAILED_TESTS="Malformed test status"
+  if ! echo "$TESTS_JSON" | fbc_tests_passed "$VERSION"; then
+    echo "  ${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    ${VERSION}: Tests failed: $FAILED_TESTS\n"
     FAILED=$((FAILED + 1))
     continue
   fi
 
   # Verify bundle SHA matches GitHub
   if [ "$SNAPSHOT_BUNDLE_SHA" != "$EXPECTED_BUNDLE_SHA" ]; then
-    echo "  4-${VERSION}: ✗ Bundle SHA mismatch (snapshot: ${SNAPSHOT_BUNDLE_SHA:0:12}, expected: ${EXPECTED_BUNDLE_SHA:0:12})" >&2
-    FAILED_DETAILS="${FAILED_DETAILS}    4-${VERSION}: Bundle SHA mismatch\n"
+    echo "  ${VERSION}: ✗ Bundle SHA mismatch (snapshot: ${SNAPSHOT_BUNDLE_SHA:0:12}, expected: ${EXPECTED_BUNDLE_SHA:0:12})" >&2
+    FAILED_DETAILS="${FAILED_DETAILS}    ${VERSION}: Bundle SHA mismatch\n"
     FAILED=$((FAILED + 1))
     continue
   fi
 
   # All checks passed
-  echo "  4-${VERSION}: ✓ $SNAPSHOT ($EVENT_TYPE, tests passed, bundle SHA verified)" >&2
-  VERIFIED_SNAPSHOTS["4-${VERSION}"]="$SNAPSHOT"
+  echo "  ${VERSION}: ✓ $SNAPSHOT ($EVENT_TYPE, tests passed, bundle SHA verified)" >&2
+  VERIFIED_SNAPSHOTS["${VERSION}"]="$SNAPSHOT"
 done
 
 if [ $FAILED -gt 0 ]; then
@@ -352,13 +387,13 @@ echo "✓ All ${#APPLICABLE_VERSIONS[@]} FBC snapshots ready for release" >&2
 echo "" >&2
 echo "Step 5: Extracting bundle source commit..." >&2
 
-# Get bundle image URL from FBC catalog (using first applicable version as representative - all verified identical)
+# Reuse the exact catalog response validated above; avoid rereading a moving branch.
 REPRESENTATIVE_VERSION="${APPLICABLE_VERSIONS[0]}"
-BUNDLE_IMAGE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" | grep "^image:" | head -1 | awk '{print $2}' || true)
+BUNDLE_IMAGE=$(grep "^image:" "$TMPDIR/catalog-${REPRESENTATIVE_VERSION}.yaml" | head -1 | awk '{print $2}' || true)
 
 if [ -z "$BUNDLE_IMAGE" ]; then
   echo "❌ ERROR: Failed to fetch bundle image URL from FBC catalog" >&2
-  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
+  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/${FBC_EXPECTED_COMMIT:-main}/catalog-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
   exit 1
 fi
 
@@ -379,7 +414,7 @@ SOURCE_COMMIT=$(skopeo inspect "docker://${BUNDLE_IMAGE}" 2>/dev/null | jq -r '.
 if [ -z "$SOURCE_COMMIT" ] || [ "$SOURCE_COMMIT" = "null" ]; then
   # Fallback: try quay.io workspace URL from template
   echo "  ⚠ Bundle not found at ${BUNDLE_IMAGE%%@*}, trying quay.io workspace..." >&2
-  BUNDLE_IMAGE_QUAY=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-template.yaml" | grep -A1 "name: submariner.v${FULL_VERSION}" | grep "image:" | awk '{print $2}' || true)
+  BUNDLE_IMAGE_QUAY=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/${FBC_EXPECTED_COMMIT:-main}/catalog-template.yaml" | grep -A1 "name: submariner.v${FULL_VERSION}" | grep "image:" | awk '{print $2}' || true)
 
   if [ -n "$BUNDLE_IMAGE_QUAY" ]; then
     SOURCE_COMMIT=$(skopeo inspect "docker://${BUNDLE_IMAGE_QUAY}" 2>/dev/null | jq -r '.Labels."org.opencontainers.image.revision"' || true)
@@ -417,10 +452,10 @@ fi
 echo "  ✓ Fetched operator CSV from commit ${SOURCE_COMMIT:0:7}" >&2
 
 # Fetch FBC bundle for comparison (using first applicable version as representative - all verified identical)
-FBC_BUNDLE=$(curl -sf "https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" || true)
+FBC_BUNDLE=$(cat "$TMPDIR/catalog-${REPRESENTATIVE_VERSION}.yaml")
 if [ -z "$FBC_BUNDLE" ]; then
   echo "❌ ERROR: Failed to fetch FBC bundle from GitHub" >&2
-  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/main/catalog-4-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
+  echo "URL: https://raw.githubusercontent.com/stolostron/submariner-operator-fbc/${FBC_EXPECTED_COMMIT:-main}/catalog-${REPRESENTATIVE_VERSION}/bundles/bundle-v${FULL_VERSION}.yaml" >&2
   exit 1
 fi
 
@@ -472,8 +507,8 @@ for COMP in submariner-operator submariner-gateway submariner-globalnet submarin
   # Verify all 7 FBC snapshots have same SHA as operator repo (using extracted bundles)
   SNAP_MISMATCH=0
   for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
-    SNAPSHOT="${SNAPSHOTS[4-${VERSION}]}"
-    BUNDLE_YAML="$TMPDIR/extract-4-${VERSION}/bundle-v${FULL_VERSION}.yaml"
+    SNAPSHOT="${SNAPSHOTS[${VERSION}]}"
+    BUNDLE_YAML="$TMPDIR/extract-${VERSION}/bundle-v${FULL_VERSION}.yaml"
 
     # Special case for nettest: match by image URL pattern
     if [ "$COMP" = "nettest" ]; then
@@ -536,7 +571,7 @@ SNAPSHOTS_JSON="{"
 FIRST=true
 for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   $FIRST || SNAPSHOTS_JSON+=","
-  SNAPSHOTS_JSON+="\"4-${VERSION}\":\"${VERIFIED_SNAPSHOTS[4-${VERSION}]}\""
+  SNAPSHOTS_JSON+="\"${VERSION}\":\"${VERIFIED_SNAPSHOTS[${VERSION}]}\""
   FIRST=false
 done
 SNAPSHOTS_JSON+="}"

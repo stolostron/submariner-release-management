@@ -272,6 +272,110 @@ OUT=$("$PARSE" "$MIXED_LOG")
 assert_contains "task extracted from mixed"      "$OUT" "git-clone-oci-ta"
 assert_contains "fixable=partial for mixed"      "$OUT" "FIXABLE_BY_VERSION_BUMP: partial"
 
+# ── Deny-rule and truncated-JSON fixtures ─────────────────────────────────────
+# Modeled on a real 0.23.4 log: every component fails trusted_task.trusted and
+# tasks.required_untrusted_task_found because EC denies the whole
+# quay.io/konflux-ci/konflux-vanguard/* catalog. The denial text lives in .msg.
+DENY_MSG='Untrusted version of PipelineTask \"rpms-signature-scan\" (Task \"rpms-signature-scan\") was included in build chain comprised of: rpms-signature-scan. The denial reason is: deny_rule\n  - oci://quay.io/konflux-ci/konflux-vanguard/*\nMessages:\n  - Tasks under konflux-vanguard are no longer trusted. Use the equivalent from quay.io/konflux-ci/tekton-catalog instead.\n'
+
+make_tekton_log_with_deny_rule() {
+  local f="$1"
+  cat > "$f" <<EOF
+STEP-REPORT-JSON
+{"success": false, "components": [
+  {"name": "widget-a-0-1", "containerImage": "quay.io/example/widget-a@sha256:aaa", "source": {"git": {"revision": "1111111111111111111111111111111111111111"}}, "success": false, "violations": [{"msg": "$DENY_MSG", "metadata": {"code": "trusted_task.trusted", "term": "rpms-signature-scan"}}, {"msg": "Required task rpms-signature-scan is untrusted", "metadata": {"code": "tasks.required_untrusted_task_found", "term": "rpms-signature-scan"}}]},
+  {"name": "widget-b-0-1", "containerImage": "quay.io/example/widget-b@sha256:bbb", "source": {"git": {"revision": "1111111111111111111111111111111111111111"}}, "success": false, "violations": [{"msg": "$DENY_MSG", "metadata": {"code": "trusted_task.trusted", "term": "rpms-signature-scan"}}]}
+]}
+STEP-SUMMARY
+{"successes": 5, "failures": 3, "warnings": 0, "result": "FAILURE"}
+EOF
+}
+
+# Same rule codes but a plain stale/unknown SHA: no "denial reason" text. This
+# must stay fixable by a refresh — the deny handling must not swallow it.
+make_tekton_log_with_stale_sha_only() {
+  local f="$1"
+  cat > "$f" <<'EOF'
+STEP-REPORT-JSON
+{"success": false, "components": [{"name": "widget-0-1", "containerImage": "quay.io/example/widget@sha256:abc", "source": {"git": {"revision": "1111111111111111111111111111111111111111"}}, "success": false, "violations": [{"msg": "Pipeline task \"git-clone-oci-ta\" uses an untrusted task bundle", "metadata": {"code": "trusted_task.trusted", "term": "git-clone-oci-ta"}}]}]}
+STEP-SUMMARY
+{"successes": 5, "failures": 1, "warnings": 0, "result": "FAILURE"}
+EOF
+}
+
+# JSON cut off mid-document (the UI download truncates multi-MB reports): two
+# components closed, a third unterminated.
+make_tekton_log_truncated() {
+  local f="$1" body="$2"
+  printf 'STEP-REPORT-JSON\n%s\nSTEP-SUMMARY\n{"successes": 1, "failures": 1, "warnings": 0}\n' "$body" > "$f"
+}
+TRUNC_FAIL_BODY='{"success": false, "components": [{"name": "widget-a-0-1", "containerImage": "quay.io/example/widget-a@sha256:aaa", "source": {"git": {"revision": "1111111111111111111111111111111111111111"}}, "success": false, "violations": [{"msg": "'"$DENY_MSG"'", "metadata": {"code": "trusted_task.trusted", "term": "rpms-signature-scan"}}], "successes": []}, {"name": "widget-b-0-1", "containerImage": "quay.io/example/widget-b@sha256:bbb", "source": {"git": {"revision": "1111111111111111111111111111111111111111"}}, "success": false, "violations": [{"msg": "'"$DENY_MSG"'", "metadata": {"code": "trusted_task.trusted", "term": "rpms-signature-scan"}}], "successes": []}, {"name": "widget-c-0-1", "containerImage": "quay.io/example/widget-c@sha256:ccc", "successes": [{"value": "schedule.weekday_restriction", "imageRef": "sha256:797b2dd8'
+TRUNC_PASS_BODY='{"success": true, "components": [{"name": "widget-a-0-1", "containerImage": "quay.io/example/widget-a@sha256:aaa", "success": true, "violations": [], "successes": []}, {"name": "widget-b-0-1", "containerImage": "quay.io/example/widget-b@sha256:bbb", "successes": [{"value": "x", "imageRef": "sha256:79'
+
+echo ""
+echo "=== Deny rule: reason surfaced, never 'fixable by bump' ==="
+
+DENY_LOG="$TMPDIR_TEST/deny.log"; make_tekton_log_with_deny_rule "$DENY_LOG"
+OUT=$("$PARSE" "$DENY_LOG")
+assert_contains "DENY_REASONS section present"          "$OUT" "DENY_REASONS:"
+assert_contains "denial names the task"                 "$OUT" "rpms-signature-scan: deny_rule"
+assert_contains "denial pattern shown"                  "$OUT" "konflux-vanguard/*"
+assert_contains "denial message shown"                  "$OUT" "no longer trusted"
+assert_contains "replacement catalog shown"             "$OUT" "quay.io/konflux-ci/tekton-catalog"
+assert_not_contains "must NOT claim fixable=yes"        "$OUT" "FIXABLE_BY_VERSION_BUMP: yes"
+assert_contains "fixable=unknown (deny_rule)"           "$OUT" "FIXABLE_BY_VERSION_BUMP: unknown (deny_rule"
+assert_contains "rule counts still reported"            "$OUT" "trusted_task.trusted (2)"
+assert_contains "failing component listed"              "$OUT" "widget-a-0-1 (rev 11111111)"
+
+echo ""
+echo "=== Stale SHA without a denial stays fixable ==="
+
+STALE_LOG="$TMPDIR_TEST/stale.log"; make_tekton_log_with_stale_sha_only "$STALE_LOG"
+OUT=$("$PARSE" "$STALE_LOG")
+assert_contains "stale SHA still fixable=yes"           "$OUT" "FIXABLE_BY_VERSION_BUMP: yes"
+assert_not_contains "no DENY_REASONS for stale SHA"     "$OUT" "DENY_REASONS:"
+
+echo ""
+echo "=== Truncated JSON: recover closed components ==="
+
+TRUNC_LOG="$TMPDIR_TEST/truncated.log"; make_tekton_log_truncated "$TRUNC_LOG" "$TRUNC_FAIL_BODY"
+RC=0; OUT=$("$PARSE" "$TRUNC_LOG") || RC=$?
+assert_eq "truncated log → exit 0"                      "$RC" "0"
+assert_contains "truncation noted with count"           "$OUT" "recovered 2 component(s)"
+assert_contains "rule counts recovered"                 "$OUT" "trusted_task.trusted (2)"
+assert_contains "deny reason recovered"                 "$OUT" "no longer trusted"
+assert_contains "failing component b recovered"         "$OUT" "widget-b-0-1 (rev 11111111)"
+assert_not_contains "unterminated component not listed" "$OUT" "widget-c-0-1"
+
+echo ""
+echo "=== Truncated JSON with no recovered violations is not 'clean' ==="
+
+TRUNCP_LOG="$TMPDIR_TEST/truncated-pass.log"; make_tekton_log_truncated "$TRUNCP_LOG" "$TRUNC_PASS_BODY"
+OUT=$("$PARSE" "$TRUNCP_LOG")
+assert_not_contains "must NOT report n/a when truncated" "$OUT" "n/a (no violations found)"
+assert_contains "falls back to unknown"                 "$OUT" "FIXABLE_BY_VERSION_BUMP: unknown"
+assert_contains "truncation noted"                      "$OUT" "was truncated"
+
+echo ""
+echo "=== Legacy text path: denial reason best-effort ==="
+
+LEGACY_DENY="$TMPDIR_TEST/legacy-deny.log"
+cat > "$LEGACY_DENY" <<'EOF'
+Some build output...
+  Failure: 1 EC violations found
+
+  Name: trusted_task
+  Violations: 1, Warnings: 0
+    Term: rpms-signature-scan
+  code="trusted_task.trusted" msg="Untrusted version ... The denial reason is: deny_rule - oci://quay.io/konflux-ci/konflux-vanguard/* Messages: - Tasks under konflux-vanguard are no longer trusted."
+
+----- DEBUG OUTPUT -----
+EOF
+OUT=$("$PARSE" "$LEGACY_DENY")
+assert_contains "legacy: DENY_REASONS present"          "$OUT" "DENY_REASONS:"
+assert_contains "legacy: reason text present"           "$OUT" "no longer trusted"
+assert_not_contains "legacy: not fixable=yes"           "$OUT" "FIXABLE_BY_VERSION_BUMP: yes"
+
 echo ""
 if [ "$FAIL" -eq 0 ]; then
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

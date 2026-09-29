@@ -15,9 +15,15 @@
 # downstream ecFixes verifier confirms Enterprise Contract passes once the PRs
 # merge and Konflux rebuilds.
 #
+# The patcher only checks the trusted list, so the result is also checked against
+# the EC trusted-task DENY rules (scripts/lib/deny-rules.sh): a denial whose
+# message names a replacement catalog is rewritten before the patcher re-pins it;
+# any other active denial is reported for a manual fix and fails the run.
+#
 # Exit codes:
 #   0: Success (every applicable repo bumped or already current)
-#   1: Failure (prerequisites, or one or more repos failed)
+#   1: Failure (prerequisites, one or more repos failed, or an EC deny rule needs
+#      a manual fix)
 
 set -euo pipefail
 
@@ -32,6 +38,8 @@ _LIB_DIR="$SCRIPT_DIR/lib"
 source "$_LIB_DIR/jira-tracker.sh" 2>/dev/null || true
 # shellcheck source=lib/git-utils.sh
 source "$_LIB_DIR/git-utils.sh" 2>/dev/null || true
+# shellcheck source=lib/deny-rules.sh
+source "$_LIB_DIR/deny-rules.sh"
 
 # ━━━ CONSTANTS ━━━
 
@@ -55,6 +63,8 @@ PATCHER_SCRIPT=""   # verified pipeline-patcher, downloaded once by main
 declare -a REPOS_UPDATED=()
 declare -a REPOS_SKIPPED=()
 declare -a REPOS_FAILED=()
+declare -a REPOS_DENIED=()      # repo:N-active-denials — needs a manual fix
+DENY_RULES_CHECKED=0            # 1 once policy-data was loaded (else: unchecked)
 
 # ━━━ HELPERS ━━━
 
@@ -89,14 +99,10 @@ repo_base_branch() {
 # The checkout is forced: a patcher that fails mid-edit leaves .tekton/ dirty, and
 # a plain `git checkout` would refuse ("local changes would be overwritten") and be
 # swallowed by `|| true`, stranding us on the fix branch — the very misroute above.
-# The dirty-tree guard in update_repo means the only uncommitted changes reachable
-# here are our own partial patcher edits, so discarding them with -f is safe.
+# Any pre-existing dirty state is auto-stashed before we start, so the only
+# uncommitted changes reachable here are our own partial patcher edits.
 _restore_repo() {
-  local original_ref="$1" drop_branch="${2:-}"
-  git checkout -f "$original_ref" >/dev/null 2>&1 || true
-  if [ -n "$drop_branch" ]; then
-    git branch -D "$drop_branch" >/dev/null 2>&1 || true
-  fi
+  restore_stashed_worktree "$PWD" "$@"
 }
 
 # ━━━ PREREQUISITES ━━━
@@ -189,15 +195,6 @@ update_repo() {
     return
   }
 
-  # Refuse to touch a dirty tree: we switch branches and restore afterwards,
-  # which is unsafe with uncommitted changes (and the patcher would fail anyway).
-  if ! git diff --quiet || ! git diff --cached --quiet; then
-    echo "  ✗ Working tree not clean (commit/stash first)"
-    REPOS_FAILED+=("$REPO:dirty-tree")
-    echo ""
-    return
-  fi
-
   # Remember where the repo was so we can leave it exactly as found. On a branch
   # this is the branch name (so we return *to the branch*, not a detached commit).
   # On a detached HEAD `--abbrev-ref` prints the literal "HEAD" (exit 0), so fall
@@ -225,10 +222,18 @@ update_repo() {
     fi
   fi
 
+  # Resolve prerequisites before stashing; every later exit must restore it.
+  local STASH_REF
+  if ! STASH_REF=$(stash_worktree "$PWD" "tekton-task-refs auto-stash"); then
+    REPOS_FAILED+=("$REPO:stash-failed")
+    return
+  fi
+
   # Create fix branch from base branch (still on ORIGINAL_REF if this fails)
   if ! git checkout -B "$FIX_BRANCH" "$BRANCH_REF" >/dev/null 2>&1; then
     echo "  ✗ Failed to create branch $FIX_BRANCH"
     REPOS_FAILED+=("$REPO:branch-create-failed")
+    _restore_repo "$ORIGINAL_REF" "" "$STASH_REF" || true
     echo ""
     return
   fi
@@ -236,9 +241,21 @@ update_repo() {
   if [ ! -d .tekton ]; then
     echo "  ✗ No .tekton/ directory on $BASE_BRANCH"
     REPOS_FAILED+=("$REPO:no-tekton")
-    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH"
+    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF" || true
     echo ""
     return
+  fi
+
+  # Follow denial messages that name a replacement catalog BEFORE the patcher: it
+  # cannot re-pin a ref from a catalog it no longer knows and aborts the run.
+  local moved_out="" moved_summary=""
+  if [ "$DENY_RULES_CHECKED" -eq 1 ]; then
+    moved_out=$(deny_rules_rewrite_moved ".")
+    [ -n "$moved_out" ] && printf '%s\n' "$moved_out"
+    # Two short lines per move: gitlint (enforced by the component repos' CI)
+    # rejects body lines over 80 characters.
+    moved_summary=$(printf '%s\n' "$moved_out" \
+      | sed -E '/^$/d; s#quay\.io/konflux-ci/##g; s/^ *↻ ([^ ]+) -> ([^ ]+) \(.*$/- \1\n  -> \2/')
   fi
 
   # Bump task refs. The patcher edits .tekton/ in place; capture output so a
@@ -247,36 +264,72 @@ update_repo() {
   if ! patcher_out=$(printf '%s' "$PATCHER_SCRIPT" | bash -s bump-task-refs 2>&1); then
     echo "  ✗ pipeline-patcher failed:"
     printf '%s\n' "$patcher_out" | sed 's/^/      /'
+    if printf '%s' "$patcher_out" | grep -q "Can't find"; then
+      echo "    Hint: a task ref is missing from the trusted list — often a denied or"
+      echo "    moved catalog. Check EC deny rules (scripts/lib/deny-rules.sh)."
+    fi
     REPOS_FAILED+=("$REPO:patcher-failed")
-    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH"
+    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF" || true
     echo ""
     return
   fi
 
+  # EC deny-rule check on the patched tree: the patcher only knows the trusted
+  # list. ACTIVE denials that survive need a manual fix; FUTURE ones only warn.
+  local deny_scan="" deny_active=0
+  if [ "$DENY_RULES_CHECKED" -eq 1 ]; then
+    deny_scan=$(deny_rules_scan "." 2>/dev/null || true)
+    deny_active=$(deny_rules_count_active "$deny_scan")
+    [ -n "$deny_scan" ] && deny_rules_report "$deny_scan" "  "
+  fi
+
   # Stage only .tekton changes. Skip the commit if the patcher was a no-op (refs
   # already latest, or a re-run) — an unconditional commit would fail.
-  git add .tekton/
+  if ! git add .tekton/; then
+    REPOS_FAILED+=("$REPO:stage-failed")
+    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF" || true
+    return
+  fi
   if git diff --cached --quiet; then
-    echo "  - Task refs already current"
-    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH"
-    REPOS_SKIPPED+=("$REPO:no-changes")
+    if [ "$deny_active" -gt 0 ]; then
+      echo "  ✗ No automatic fix for the EC deny rule(s) above — manual change needed"
+      REPOS_DENIED+=("$REPO:$deny_active")
+    elif _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF"; then
+      echo "  - Task refs already current"
+      REPOS_SKIPPED+=("$REPO:no-changes")
+    else
+      REPOS_FAILED+=("$REPO:restore-failed")
+    fi
+    [ "$deny_active" -gt 0 ] && { _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF" || REPOS_FAILED+=("$REPO:restore-failed"); }
     echo ""
     return
   fi
 
   # Commit
-  if git commit -s -m "Update Tekton task references to latest versions
+  local commit_msg="Update Tekton task references to latest versions
 
 Refreshes .tekton pipeline task bundle references so Konflux builds pass
-Enterprise Contract validation." >/dev/null 2>&1; then
+Enterprise Contract validation."
+  if [ -n "$moved_summary" ]; then
+    commit_msg="${commit_msg}
+
+Replaces task refs that EC denies because their catalog moved (the deny
+rule's message names the replacement); the patcher re-pinned the digest:
+${moved_summary}"
+  fi
+  if git commit -s -m "$commit_msg" >/dev/null 2>&1; then
     echo "  ✓ Committed"
     REPOS_UPDATED+=("$REPO#$FIX_BRANCH#$BASE_BRANCH")
+    if [ "$deny_active" -gt 0 ]; then
+      echo "  ⚠ Committed refresh does NOT clear the EC deny rule(s) above"
+      REPOS_DENIED+=("$REPO:$deny_active")
+    fi
     # Keep the fix branch (it holds the commit); restore the original ref.
-    _restore_repo "$ORIGINAL_REF"
+    _restore_repo "$ORIGINAL_REF" "" "$STASH_REF" || REPOS_FAILED+=("$REPO:restore-failed")
   else
     echo "  ✗ Commit failed"
     REPOS_FAILED+=("$REPO:commit-failed")
-    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH"
+    _restore_repo "$ORIGINAL_REF" "$FIX_BRANCH" "$STASH_REF" || true
   fi
 
   echo ""
@@ -326,7 +379,22 @@ print_summary() {
   print_section "Failed" "✗" REPOS_FAILED true
 
   local UPDATED_COUNT=${#REPOS_UPDATED[@]}
-  local FAILED_COUNT=${#REPOS_FAILED[@]}
+  local FAILED_COUNT=$(( ${#REPOS_FAILED[@]} + ${#REPOS_DENIED[@]} ))
+
+  if [ "${#REPOS_DENIED[@]}" -gt 0 ]; then
+    echo ""
+    echo "EC deny rules need a manual fix (${#REPOS_DENIED[@]}):"
+    local d
+    for d in "${REPOS_DENIED[@]}"; do
+      echo "  ✗ ${d%%:*} (${d##*:} active denial(s))"
+    done
+    echo "  Details are printed per repo above. Edit the .tekton/ refs, then re-run."
+  fi
+  if [ "$DENY_RULES_CHECKED" -eq 0 ]; then
+    echo ""
+    echo "⚠ EC deny rules were NOT checked (policy-data unavailable): a clean run"
+    echo "  here does not prove EC will pass."
+  fi
 
   if [ "$UPDATED_COUNT" -gt 0 ]; then
     echo ""
@@ -385,6 +453,13 @@ main() {
       "Check network connectivity and GitHub access"
   echo "✓ Pipeline-patcher checksum verified"
 
+  if deny_rules_load; then
+    DENY_RULES_CHECKED=1
+    echo "✓ EC deny rules loaded"
+  else
+    echo "⚠ EC deny rules NOT loaded — refs will not be checked against them"
+  fi
+
   # Tracker integration
   TRACKER_LIB="${TRACKER_LIB:-$_LIB_DIR/jira-tracker.sh}"
   # shellcheck source=/dev/null
@@ -407,7 +482,7 @@ main() {
   # explicitly mark complete: /autorelease --complete tektonTasks (or ecFixes). This prevents
   # auto-chaining to downstream steps before the Tekton changes are merged.
   # (Historically scripts marked themselves complete, which broke the review stop.)
-  if [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && [ "${#REPOS_FAILED[@]}" -eq 0 ]; then
+  if [ -n "${TRACKER:-}" ] && [ -z "$REPO_FILTER" ] && [ "${#REPOS_FAILED[@]}" -eq 0 ] && [ "${#REPOS_DENIED[@]}" -eq 0 ]; then
     local data
     # shellcheck disable=SC2034
     data=$(jq -n --arg count "${#REPOS_UPDATED[@]}" --arg ver "$VERSION" \

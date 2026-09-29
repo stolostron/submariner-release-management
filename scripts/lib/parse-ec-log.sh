@@ -14,7 +14,12 @@
 #   AFFECTED_TASKS:
 #     <task-name> ...
 #
-#   FIXABLE_BY_VERSION_BUMP: yes|no|unknown
+#   DENY_REASONS:          (only when EC reports a trusted-task deny rule)
+#     <task>: deny_rule - <pattern> Messages: - <text>
+#
+#   FIXABLE_BY_VERSION_BUMP: yes|no|partial|unknown|n/a
+#     A deny rule is never reported as "yes": the ref can be current and trusted
+#     yet denied (e.g. a whole catalog retired), which a refresh cannot fix.
 #
 # Exit codes:
 #   0 — parsed; may have zero or more violations
@@ -69,10 +74,32 @@ fi
 # When present this is the authoritative path — use jq to query only the
 # "violations" array so we never surface passing-rule codes as failures.
 IS_TEKTON_JSON=false
+TRUNCATED=false
+SALVAGED_COUNT=0
+DENY_REASONS=""
 EC_JSON=$(sed -n '/^STEP-REPORT-JSON$/,/^STEP-[A-Z]/p' "$LOG_FILE" 2>/dev/null \
   | grep -v "^STEP-" || true)
 if [ -n "$EC_JSON" ] && printf '%s' "$EC_JSON" | jq -e '.components' >/dev/null 2>&1; then
   IS_TEKTON_JSON=true
+elif [ -n "$EC_JSON" ]; then
+  # The Konflux UI download can cut the JSON off (multi-MB reports), leaving an
+  # unterminated document that jq rejects wholesale — which used to drop us onto
+  # the text path and lose per-rule counts, failing components and deny reasons.
+  # Recover every component object that closed before the cut: streaming parse,
+  # emit each complete .components[i] (depth-2 subtree). Whatever follows the cut
+  # is lost, so the result is flagged TRUNCATED and never treated as proof of a
+  # clean run.
+  SALVAGED=$(printf '%s' "$EC_JSON" \
+    | jq -cn --stream 'fromstream(2|truncate_stream(inputs))
+        | select(type == "object" and has("name") and has("containerImage"))' 2>/dev/null || true)
+  if [ -n "$SALVAGED" ]; then
+    EC_JSON=$(printf '%s\n' "$SALVAGED" | jq -cs '{components: .}' 2>/dev/null || true)
+    if [ -n "$EC_JSON" ] && printf '%s' "$EC_JSON" | jq -e '.components | length > 0' >/dev/null 2>&1; then
+      IS_TEKTON_JSON=true
+      TRUNCATED=true
+      SALVAGED_COUNT=$(printf '%s' "$EC_JSON" | jq '.components | length')
+    fi
+  fi
 fi
 
 # Legacy text format (ec-cli direct output / STEP-DETAILED-REPORT).
@@ -143,6 +170,26 @@ if [ "$IS_TEKTON_JSON" = "true" ]; then
     | jq -r '.components[] | select(.name | test("-sha256:")|not) | select(.success == false) |
         "\(.name) (rev \(.source.git.revision // "unknown" | .[0:8]))"' \
     2>/dev/null || true)
+
+  # Deny-rule reasons. EC phrases a trusted-task denial as "... The denial reason
+  # is: deny_rule\n - <pattern>\nMessages:\n - <text>"; keep task + reason so the
+  # operator sees WHY (e.g. "konflux-vanguard tasks are no longer trusted") instead
+  # of inferring it from a rule code that also covers plain stale-SHA failures.
+  DENY_REASONS=$(printf '%s' "$EC_JSON" \
+    | jq -r '[.components[].violations[]? | select((.msg // "") | test("denial reason is"))
+        | {task: (.metadata.term // "?"),
+           text: (.msg | gsub("\\s+"; " ") | sub("^.*The denial reason is: "; "") | sub(" +$"; ""))}]
+        | unique | .[] | "\(.task): \(.text)"' \
+    2>/dev/null || true)
+fi
+DENY_REASONS="${DENY_REASONS:-}"
+
+# Legacy/text path deny reasons (best effort: the task name is not reliably next to
+# the reason in this format, so it is reported as "?").
+if [ -z "$DENY_REASONS" ] && [ -n "$EC_REPORT_TEXT" ]; then
+  DENY_REASONS=$(printf '%s' "$EC_REPORT_TEXT" | tr '\n' ' ' \
+    | grep -oP 'The denial reason is: \K.{0,300}' 2>/dev/null \
+    | sed -E 's/[[:space:]]+/ /g; s/ +$//' | sort -u | sed 's/^/?: /' || true)
 fi
 
 # Also extract from legacy text section (may add context if JSON was absent/truncated)
@@ -195,7 +242,7 @@ NON_TASK_RULES=$(printf '%s' "$NON_TASK_RULES" | grep -v "^$" || true)
 # A passing log can have Term: lines in Warning blocks — AFFECTED_TASKS alone without
 # any failing rules should not cause a "yes" classification.
 if [ -z "$ALL_RULES" ] && [ -z "$AFFECTED_TASKS" ]; then
-  if [ "$IS_TEKTON_JSON" = "true" ] && [ "${RAW_VIOLATION_COUNT:-0}" = "0" ]; then
+  if [ "$IS_TEKTON_JSON" = "true" ] && [ "$TRUNCATED" = "false" ] && [ "${RAW_VIOLATION_COUNT:-0}" = "0" ]; then
     # violations[] is actually empty (not just unparseable) — confirmed clean/passing
     # log, not an indeterminate parse failure.
     FIXABLE="n/a (no violations found)"
@@ -215,6 +262,13 @@ elif [ -n "$ALL_RULES" ]; then
   FIXABLE="no"
 else
   FIXABLE="unknown"
+fi
+
+# A deny rule is not a stale-ref problem, so never advertise a plain refresh as the
+# fix. (trusted_task.trusted is otherwise classed as fixable: it usually means an
+# out-of-date SHA that pipeline-patcher re-pins — but not when the ref is denied.)
+if [ -n "$DENY_REASONS" ] && [ "$FIXABLE" = "yes" ]; then
+  FIXABLE="unknown (deny_rule: a refresh only helps if the denial is a minimum version — see DENY_REASONS)"
 fi
 
 # ── Emit structured output ────────────────────────────────────────────────────
@@ -238,6 +292,12 @@ else
   echo "  (none detected)"
 fi
 
+if [ -n "$DENY_REASONS" ]; then
+  echo ""
+  echo "DENY_REASONS:"
+  printf '%s\n' "$DENY_REASONS" | sed 's/^/  /'
+fi
+
 if [ -n "${FAILING_COMPONENTS:-}" ]; then
   echo ""
   echo "FAILING_COMPONENTS:"
@@ -255,6 +315,12 @@ if [ -n "${FAILING_COMPONENTS:-}" ]; then
     echo "    already have a fix, others don't) rather than a uniform failure."
     echo "    Check whether the older revision(s) predate a recent fix PR merge."
   fi
+fi
+
+if [ "$TRUNCATED" = "true" ]; then
+  echo ""
+  echo "NOTE: the EC JSON in this log was truncated; recovered $SALVAGED_COUNT component(s)."
+  echo "      Counts may be incomplete. Re-download the log if this matters."
 fi
 
 echo ""

@@ -38,7 +38,7 @@ echo "=== get_fbc_ocp_scope Tests ==="
 
 # Only the OCP versions with an FBC prod YAML inside the window are in scope.
 assert_eq "prod scope = in-window OCP versions" \
-  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "$OCP")" "19 20 21 22"
+  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "$OCP")" "4-19 4-20 4-21 4-22"
 
 # An OCP version whose newest prod YAML predates the window is excluded (so a
 # later release that dropped an EOL'd OCP version never blocks auto-close on it).
@@ -56,19 +56,28 @@ assert_eq "no stage tree -> empty" \
 # A newer in-window prod YAML added later for 4-18 pulls it into scope.
 mk releases/fbc/4-18/prod/submariner-fbc-4-18-prod-20260813-02.yaml
 assert_eq "in-window YAML pulls 4-18 into scope" \
-  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "$OCP")" "18 19 20 21 22"
+  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "$OCP")" "4-18 4-19 4-20 4-21 4-22"
 
 # Exactly-3-day boundary (259200s): the -le fix makes this in-scope;
 # reverting to -lt would make this fail (mutation-verifiable).
 mk releases/fbc/4-16/prod/submariner-fbc-4-16-prod-20260816-01.yaml
 assert_eq "exactly 3-day boundary included (4-16, 20260816 = 20260813 + 3d)" \
-  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "16")" "16"
+  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "16")" "4-16"
 # One day beyond the window is excluded.
 mk releases/fbc/4-17/prod/submariner-fbc-4-17-prod-20260817-01.yaml
 assert_eq "4-day gap excluded (4-17, 20260817 = 20260813 + 4d)" \
   "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod "17")" ""
 
 echo ""
+mk releases/fbc/5-0/prod/submariner-fbc-5-0-0-99-9-prod-20260101-01.yaml
+assert_eq "modern full ID works without component record" \
+  "$(get_fbc_ocp_scope "$ROOT" 0.99 0-99-9 prod '5-0')" "5-0"
+mk releases/fbc/5-0/prod/submariner-fbc-5-0-0-25-1-prod-20260813-01.yaml
+assert_eq "modern wrong version never matches by date" \
+  "$(get_fbc_ocp_scope "$ROOT" 0.24 0-24-1 prod '5-0')" ""
+assert_eq "mixed major versions sort numerically" "$(ocp_list_normalize '5.0 4.22 22 4-9')" "4-9 4-22 5-0"
+if ocp_normalize '5-00' >/dev/null 2>&1; then FAIL=$((FAIL + 1)); fi
+
 echo "=== get_release_ocp_scope Wrapper Argument-Mapping Tests ==="
 # get_release_ocp_scope in release-status.sh is a thin wrapper that delegates to
 # get_fbc_ocp_scope with positional arguments derived from globals.  An accidental
@@ -93,13 +102,15 @@ get_fbc_ocp_scope() { _spy_args="$*"; }
 MAJOR_MINOR="0.24"
 # shellcheck disable=SC2034  # consumed by get_release_ocp_scope via globals
 FULL_VERSION_DASH="0-24-1"
+# shellcheck disable=SC2034  # consumed by get_release_ocp_scope via globals
+RELEASE_ROOT="$ROOT"
 get_release_ocp_scope "prod" >/dev/null 2>&1 || true
 
 # Restore the original implementation.
 eval "$_saved_get_fbc_ocp_scope"
 
 # The spy must have been called with:
-#   arg1 = "."  (repo root — a literal dot)
+#   arg1 = "$ROOT"  (absolute release-management root)
 #   arg2 = "0.24"  (MAJOR_MINOR — NOT FULL_VERSION_DASH)
 #   arg3 = "0-24-1"  (FULL_VERSION_DASH — NOT MAJOR_MINOR)
 #   arg4 = "prod"  (the env passed to the wrapper)
@@ -109,7 +120,7 @@ _spy_arg2=$(echo "$_spy_args" | awk '{print $2}')
 _spy_arg3=$(echo "$_spy_args" | awk '{print $3}')
 _spy_arg4=$(echo "$_spy_args" | awk '{print $4}')
 
-assert_eq "get_release_ocp_scope: arg1 is repo root '.'" "$_spy_arg1" "."
+assert_eq "get_release_ocp_scope: arg1 is absolute repo root" "$_spy_arg1" "$ROOT"
 assert_eq "get_release_ocp_scope: arg2 is MAJOR_MINOR (0.24)" "$_spy_arg2" "0.24"
 assert_eq "get_release_ocp_scope: arg3 is FULL_VERSION_DASH (0-24-1)" "$_spy_arg3" "0-24-1"
 assert_eq "get_release_ocp_scope: arg4 is env (prod)" "$_spy_arg4" "prod"

@@ -9,9 +9,13 @@ allowed-tools: Read, Grep, Glob
 
 # Learn Submariner Release Process
 
-Teach users about the Submariner release process. Use $ARGUMENTS to determine what to explain.
+Teach users about the Submariner release process. Determine the requested mode
+from the user's invocation or message.
 
-$ARGUMENTS
+```text
+Claude: /release-management:learn-release overview
+Codex:  $release-management:learn-release overview
+```
 
 ---
 
@@ -58,10 +62,12 @@ Submariner releases 9 container images through Konflux to Red Hat's registry. Th
 **FBC (File-Based Catalog):**
 
 - **Purpose**: Makes Submariner installable via OLM. Publishes to Red Hat's operator index (appears in OperatorHub).
-- **Template**: `catalog-template.yaml` is source of truth. `make build-catalogs` generates 7 `catalog-4-XX/` directories.
+- **Template**: `catalog-template.yaml` is source of truth. `make build-catalogs` generates the
+  `catalog-major-minor/` directories configured in the cutoff map.
 - **Bundles**: Version entries (e.g., `submariner.v0.22.0`) containing bundle image SHA and `relatedImages` (7 components).
 - **Channels**: Update paths (e.g., `stable-0.22`). Users subscribe to a channel and get upgrades within it.
-- **Version pruning**: `drop-versions.json` maps OCP versions to minimum Submariner versions (e.g., OCP 4.20 drops anything before 0.20).
+- **Version pruning**: `drop-versions.json` maps OCP versions to drop-through Submariner streams:
+  cutoff 0.23 removes all 0.23 and older bundles, retaining 0.24 and newer.
 - **Image lifecycle**: Bundles use temporary `quay.io` URLs (~90 day TTL). Step 20 updates to `registry.redhat.io`.
 
 **Konflux resources (K8s CRDs):**
@@ -99,7 +105,7 @@ Submariner releases 9 container images through Konflux to Red Hat's registry. Th
 | 10 | Apply stage release to cluster via `make apply` | Y/Z |
 | 10b | Check Released=True, debug failures, retry if infra issue | Y/Z |
 | 11 | Update FBC catalogs with bundle SHA from stage registry | Y/Z |
-| 12 | Create 7 FBC stage release YAMLs (one per OCP 4.16-4.22) | Y/Z |
+| 12 | Create FBC stage release YAMLs for applicable active OCP versions | Y/Z |
 | 13 | Apply all 7 FBC stage releases to cluster | Y/Z |
 | 13b | Verify all 7 FBC pipelines succeeded | Y/Z |
 | 14 | Create Jira ticket with stage catalog URLs for QE | Y/Z |
@@ -147,18 +153,23 @@ Submariner releases 9 container images through Konflux to Red Hat's registry. Th
 
 Each step's workflow is in `.agents/workflows/<step-name>.md`. When it says "follow docs in X repo", read that repo's workflow docs.
 
+Resolve those paths against this plugin's release-management root: use the
+expanded `${CLAUDE_PLUGIN_ROOT}` when Claude provides it; otherwise use the
+checkout containing this skill and `.agents/workflows`. Do not resolve them
+against the caller's working directory.
+
 **Note:** Branch in parentheses (`devel` for submariner-io repos, `main` for others).
 
 | Repo | Local | Docs | Purpose |
 | ---- | ----- | ---- | ------- |
-| [This repo](https://github.com/stolostron/submariner-release-management) | `~/konflux/submariner-release-management` | `.agents/workflows/` (main) | Release orchestration |
+| [This repo](https://github.com/stolostron/submariner-release-management) | release-management root | `.agents/workflows/` (main) | Release orchestration |
 | [submariner-io/releases](https://github.com/submariner-io/releases) | `~/go/src/submariner-io/releases` | `README.md` (devel) | Branch creation, tags |
 | [submariner-io/submariner-operator](https://github.com/submariner-io/submariner-operator) | `~/go/src/submariner-io/submariner-operator` | `.agents/workflows/` (devel) | Operator + bundle |
 | [submariner-io/submariner](https://github.com/submariner-io/submariner) | `~/go/src/submariner-io/submariner` | `.agents/workflows/` (devel) | Gateway, globalnet, route-agent |
 | [submariner-io/lighthouse](https://github.com/submariner-io/lighthouse) | `~/go/src/submariner-io/lighthouse` | `.agents/workflows/` (devel) | Agent, coredns |
 | [submariner-io/shipyard](https://github.com/submariner-io/shipyard) | `~/go/src/submariner-io/shipyard` | `.agents/workflows/` (devel) | Nettest |
 | [submariner-io/subctl](https://github.com/submariner-io/subctl) | `~/go/src/submariner-io/subctl` | `.agents/workflows/` (devel) | Subctl CLI |
-| [stolostron/submariner-operator-fbc](https://github.com/stolostron/submariner-operator-fbc) | `~/konflux/submariner-operator-fbc` | `.agents/workflows/` (main) | FBC catalogs (7 OCP) |
+| [stolostron/submariner-operator-fbc](https://github.com/stolostron/submariner-operator-fbc) | `~/konflux/submariner-operator-fbc` | `.agents/workflows/` (main) | FBC catalogs (configured OCP versions) |
 | [konflux-release-data](https://gitlab.cee.redhat.com/releng/konflux-release-data) (GitLab) | `~/konflux/konflux-release-data` | `tenants-config/.../CLAUDE.md` (main) | Konflux tenant config |
 | [konflux-ci/docs](https://github.com/konflux-ci/docs) | `~/konflux/konflux-ci/docs` | `modules/` (main) | Konflux platform docs |
 | [rhtap-ec-policy](https://github.com/release-engineering/rhtap-ec-policy) | `~/konflux/konflux-ci/rhtap-ec-policy` | `data/` (main) | EC policy definitions |

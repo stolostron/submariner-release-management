@@ -674,8 +674,8 @@ Check current task versions against latest, update versions, and run pipeline pa
 ```bash
 # Pipeline patcher constants (for SHA verification later)
 # To update: curl -sL https://raw.githubusercontent.com/simonbaird/konflux-pipeline-patcher/${NEW_SHA}/pipeline-patcher | sha256sum
-PATCHER_SHA="b001763bb1cd0286a894cfb570fe12dd7f4504bd"
-EXPECTED_SHA256="080ad5d7cf7d0cee732a774b7e4dda0e2ccf26b58e08a8516a3b812bc73beb53"
+PATCHER_SHA="a43322f95a694dde91cb262a57aef975000a0946"
+EXPECTED_SHA256="6b5fb7a12bcbdf3b6f8841adf7c72ffe450a914bfca4de2645218b4d48e5a558"
 
 echo "=== Analyzing Task Versions ==="
 echo ""
@@ -1129,5 +1129,18 @@ gh pr create \
 | EC log not found | Download manually from Konflux UI test logs; save to ~/Downloads/ |
 | Pipeline patcher checksum fails | Security issue - do not proceed; report to team |
 | Violations persist after fix | Check EC report for other error types (not just outdated tasks); may need manual fixes |
+| `trusted_task.trusted` + "denial reason ... deny_rule" | Deny rule, not a stale SHA. See "EC deny rules" below |
+| Patcher: "Can't find ... in the trusted task list" | Denied or moved catalog. See "EC deny rules" below |
 | Build doesn't start | Comment `/retest branch:release-0.X` on merge commit in PR |
 | No changes to commit | Task versions already up to date; check if violations are from other issues |
+
+### EC deny rules
+
+EC applies deny rules from `quay.io/redhat-konflux/policy-data` on top of the trusted-task list. A task ref can be current and
+trusted yet denied, for example when a whole catalog is retired (`konflux-vanguard/*`, effective 2026-09-24) or a task falls
+below a minimum version. This skill's version bump and the pipeline patcher cannot fix that, and the patcher aborts on a ref
+from a catalog it no longer knows.
+
+- Run `scripts/tekton-task-version-bump.sh <version>`. It checks both deny groups, follows a denial whose message names a
+  replacement catalog, and reports anything else for a manual fix (it exits non-zero while a denial remains).
+- `scripts/lib/parse-ec-log.sh <log>` prints the reasons under `DENY_REASONS` and never calls a deny rule fixable by a refresh.

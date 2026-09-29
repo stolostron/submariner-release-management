@@ -136,15 +136,17 @@ assert_eq "noop: fix branch removed" \
   "$(cd "$TEST_REPO" && git show-ref --verify --quiet refs/heads/fix-tekton-tasks-0.99 && echo yes || echo no)" "no"
 assert_eq "noop: restored to original ref" "$(cd "$TEST_REPO" && git rev-parse --abbrev-ref HEAD)" "work"
 
-# 3: Dirty working tree → refused, no branch created, left untouched.
+# 3: Dirty working tree → auto-stashed, updated successfully, stash restored after.
 setup_repo dirty
 printf 'dirty\n' >> "$TMPROOT/repo-dirty/.tekton/pipe.yaml"
 PATCHER_SCRIPT='printf "task: v2\n" > .tekton/pipe.yaml'
 run_update
-assert_eq "dirty: recorded FAILED"  "${REPOS_FAILED[0]:-}" "testcomp:dirty-tree"
-assert_eq "dirty: still on original ref" "$(cd "$TEST_REPO" && git rev-parse --abbrev-ref HEAD)" "work"
-assert_eq "dirty: no fix branch created" \
-  "$(cd "$TEST_REPO" && git show-ref --verify --quiet refs/heads/fix-tekton-tasks-0.99 && echo yes || echo no)" "no"
+assert_eq "dirty: succeeded (not failed)" "${#REPOS_FAILED[@]}" "0"
+assert_eq "dirty: recorded UPDATED" "${REPOS_UPDATED[0]:-}" "testcomp#fix-tekton-tasks-0.99#release-0.99"
+assert_eq "dirty: restored to original ref" "$(cd "$TEST_REPO" && git rev-parse --abbrev-ref HEAD)" "work"
+# The unstaged dirty change was stashed before the branch switch; stash popped after restore.
+assert_eq "dirty: stash popped (unstaged change back)" \
+  "$(cd "$TEST_REPO" && git diff --name-only)" ".tekton/pipe.yaml"
 
 # 4: Base branch missing → failure (needs a fetch), not a silent skip.
 setup_repo nobranch
@@ -180,6 +182,134 @@ assert_eq "patcher-fail: fix branch removed" \
   "$(cd "$TEST_REPO" && git show-ref --verify --quiet refs/heads/fix-tekton-tasks-0.99 && echo yes || echo no)" "no"
 assert_eq "patcher-fail: partial edit discarded (tree clean)" \
   "$(cd "$TEST_REPO" && git status --porcelain)" ""
+
+# ── EC deny-rule handling (update_repo end-to-end) ─────────────────────────────
+echo ""
+echo "=== update_repo: EC deny rules ==="
+
+POLICY="$TMPROOT/policy.json"
+cat > "$POLICY" <<'EOF'
+{"rule_data":{"trusted_task_rules":{"deny":{
+  "konflux-defaults":[
+    {"pattern":"oci://quay.io/konflux-ci/tekton-catalog/task-buildah","versions":["<0.9"]},
+    {"effective_on":"2099-01-01T00:00:00Z","pattern":"oci://quay.io/konflux-ci/tekton-catalog/task-soonbad","versions":["<2.0"]}
+  ],
+  "konflux-defaults-deprecated":[
+    {"effective_on":"2026-09-24T00:00:00Z","message":"Tasks under konflux-vanguard are no longer trusted. Use the equivalent from quay.io/konflux-ci/tekton-catalog instead.\n","pattern":"oci://quay.io/konflux-ci/konflux-vanguard/*"}
+  ]
+}}}}
+EOF
+export DENY_RULES_NOW="2026-09-28T00:00:00Z"
+# Source the library directly (rather than relying on the script under test to have
+# done so), so a script that lacks the deny handling fails the assertions below
+# instead of crashing on a missing function.
+# shellcheck source=deny-rules.sh
+source "$SCRIPT_DIR/deny-rules.sh"
+REPOS_DENIED=()
+DENY_RULES_CHECKED=0
+DENY_RULES_FILE="$POLICY" deny_rules_load 2>/dev/null
+
+DG="sha256:$(printf 'b%.0s' $(seq 64))"
+setup_repo_with_ref() {  # $1=name $2="repo:tag" — a real bundle-resolver pipeline
+  setup_repo "$1"
+  (
+    cd "$TEST_REPO"
+    git checkout -q release-0.99
+    cat > .tekton/pipe.yaml <<EOF
+spec:
+  pipelineSpec:
+    tasks:
+      - name: t1
+        taskRef:
+          resolver: bundles
+          params:
+            - name: bundle
+              value: $2@$DG
+EOF
+    git add -A; git commit -qm "with ref"
+    git checkout -q work; git merge -q release-0.99 --ff-only 2>/dev/null || git checkout -q -B work release-0.99
+  )
+}
+run_update_deny() {
+  REPOS_UPDATED=(); REPOS_SKIPPED=(); REPOS_FAILED=(); REPOS_DENIED=()
+  DENY_RULES_CHECKED=1
+  update_repo testcomp >/dev/null 2>&1 || true
+  DENY_RULES_CHECKED=0
+  cd "$ORIG_DIR"
+}
+has_branch() { (cd "$TEST_REPO" && git show-ref --verify --quiet refs/heads/fix-tekton-tasks-0.99 && echo yes || echo no); }
+
+# 7: patcher is a no-op but a minimum-version denial remains → NOT "already
+# current": recorded DENIED, no fix branch left behind, repo restored and clean.
+setup_repo_with_ref denied1 "quay.io/konflux-ci/tekton-catalog/task-buildah:0.8"
+PATCHER_SCRIPT='true'
+run_update_deny
+assert_eq "denied+noop: recorded DENIED"        "${REPOS_DENIED[0]:-}" "testcomp:1"
+assert_eq "denied+noop: NOT reported as current" "${#REPOS_SKIPPED[@]}" "0"
+assert_eq "denied+noop: no updates"             "${#REPOS_UPDATED[@]}" "0"
+assert_eq "denied+noop: fix branch removed"     "$(has_branch)" "no"
+assert_eq "denied+noop: restored to original ref" "$(cd "$TEST_REPO" && git rev-parse --abbrev-ref HEAD)" "work"
+assert_eq "denied+noop: tree clean"             "$(cd "$TEST_REPO" && git status --porcelain)" ""
+
+# 8: patcher refreshes something else but the denial remains → the refresh is
+# committed (kept for review) AND the repo is flagged so it is not treated as fixed.
+setup_repo_with_ref denied2 "quay.io/konflux-ci/tekton-catalog/task-buildah:0.8"
+PATCHER_SCRIPT='sed -i "s/^spec:/spec:\n  refreshed: true/" .tekton/pipe.yaml'
+run_update_deny
+assert_eq "denied+refresh: committed"           "${REPOS_UPDATED[0]:-}" "testcomp#fix-tekton-tasks-0.99#release-0.99"
+assert_eq "denied+refresh: also flagged DENIED" "${REPOS_DENIED[0]:-}" "testcomp:1"
+assert_eq "denied+refresh: fix branch kept"     "$(has_branch)" "yes"
+
+# 9: a denial whose message names a replacement catalog is rewritten BEFORE the
+# patcher runs. The fake patcher aborts if it still sees the retired catalog —
+# what the real pipeline-patcher does — so success proves the ordering.
+setup_repo_with_ref moved "quay.io/konflux-ci/konflux-vanguard/task-rpms-signature-scan:0.2"
+PATCHER_SCRIPT='if grep -q konflux-vanguard .tekton/pipe.yaml; then echo "Can'"'"'t find vanguard ref. Aborting."; exit 1; fi'
+run_update_deny
+assert_eq "moved: patcher saw rewritten ref (no failure)" "${#REPOS_FAILED[@]}" "0"
+assert_eq "moved: committed"                    "${REPOS_UPDATED[0]:-}" "testcomp#fix-tekton-tasks-0.99#release-0.99"
+assert_eq "moved: nothing left denied"          "${#REPOS_DENIED[@]}" "0"
+assert_eq "moved: commit carries tekton-catalog ref" \
+  "$(cd "$TEST_REPO" && git show fix-tekton-tasks-0.99:.tekton/pipe.yaml | grep -c 'tekton-catalog/task-rpms-signature-scan:0.2@')" "1"
+MOVED_MSG=$(cd "$TEST_REPO" && git log -1 --format=%B fix-tekton-tasks-0.99)
+assert_contains "moved: commit message explains the replacement" "$MOVED_MSG" "Replaces task refs that EC denies"
+assert_contains "moved: commit message lists the old ref" "$MOVED_MSG" "- konflux-vanguard/task-rpms-signature-scan"
+assert_contains "moved: commit message lists the new ref"  "$MOVED_MSG" "  -> tekton-catalog/task-rpms-signature-scan:0.2"
+assert_eq "moved: no commit message line exceeds 80 characters (gitlint)" \
+  "$(printf '%s\n' "$MOVED_MSG" | awk 'length > 80' | wc -l | tr -d ' ')" "0"
+assert_eq "moved: commit has no vanguard ref"   \
+  "$(cd "$TEST_REPO" && git show fix-tekton-tasks-0.99:.tekton/pipe.yaml | grep -c konflux-vanguard || true)" "0"
+
+# 10: a future-dated denial only warns — no DENIED, still "already current".
+setup_repo_with_ref future "quay.io/konflux-ci/tekton-catalog/task-soonbad:1.0"
+PATCHER_SCRIPT='true'
+run_update_deny
+assert_eq "future: not DENIED"                  "${#REPOS_DENIED[@]}" "0"
+assert_eq "future: recorded SKIPPED (no changes)" "${REPOS_SKIPPED[0]:-}" "testcomp:no-changes"
+
+# 11: patcher failure on a missing trusted-list entry prints the deny-rule hint.
+setup_repo_with_ref hint "quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.3"
+PATCHER_SCRIPT='echo "Can'"'"'t find oci://x in the trusted task list. Aborting."; exit 1'
+REPOS_UPDATED=(); REPOS_SKIPPED=(); REPOS_FAILED=(); REPOS_DENIED=(); DENY_RULES_CHECKED=1
+HINT_OUT=$(update_repo testcomp 2>&1 || true); DENY_RULES_CHECKED=0; cd "$ORIG_DIR"
+assert_contains "hint: patcher failure names the likely cause" "$HINT_OUT" "denied or"
+
+# 12: with deny rules NOT loaded, behavior is unchanged and the summary says so.
+setup_repo_with_ref unchecked "quay.io/konflux-ci/tekton-catalog/task-buildah:0.8"
+PATCHER_SCRIPT='true'
+REPOS_UPDATED=(); REPOS_SKIPPED=(); REPOS_FAILED=(); REPOS_DENIED=(); DENY_RULES_CHECKED=0
+update_repo testcomp >/dev/null 2>&1 || true; cd "$ORIG_DIR"
+assert_eq "unchecked: denial not consulted → SKIPPED as before" "${REPOS_SKIPPED[0]:-}" "testcomp:no-changes"
+SUMMARY=$(print_summary 2>&1 || true)
+assert_contains "unchecked: summary warns deny rules were not checked" "$SUMMARY" "were NOT checked"
+
+# 13: summary lists denied repos and fails (exit status feeds the conductor).
+REPOS_UPDATED=(); REPOS_SKIPPED=(); REPOS_FAILED=(); REPOS_DENIED=("testcomp:2"); DENY_RULES_CHECKED=1
+RC=0; SUMMARY=$(print_summary 2>&1) || RC=$?
+DENY_RULES_CHECKED=0
+assert_contains "summary: denied section shown"  "$SUMMARY" "EC deny rules need a manual fix (1)"
+assert_contains "summary: repo and count shown"  "$SUMMARY" "testcomp (2 active denial(s))"
+assert_eq "summary: non-zero status when a denial needs a manual fix" "$([ "$RC" -ne 0 ] && echo nonzero || echo zero)" "nonzero"
 
 echo ""
 if [ "$FAIL" -eq 0 ]; then

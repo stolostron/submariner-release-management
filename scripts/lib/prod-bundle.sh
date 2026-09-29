@@ -35,6 +35,8 @@
 # Guard against double-sourcing.
 [ -n "${_PROD_BUNDLE_SOURCED:-}" ] && return 0
 _PROD_BUNDLE_SOURCED=1
+# shellcheck source=ocp-version.sh
+source "$(dirname "${BASH_SOURCE[0]}")/ocp-version.sh"
 
 : "${PROD_BUNDLE_REGISTRY:=registry.redhat.io/rhacm2/submariner-operator-bundle}"
 
@@ -132,10 +134,12 @@ index_lists_bundle() {
 # login). Echoes: present | absent | unreachable. Probe-failure != absence: an
 # extract failure (network/auth/missing tag) yields "unreachable" so callers
 # suppress rather than fabricate a shipped claim. Requires: oc.
-# Args: $1 OCP minor (e.g. 20 for 4.20), $2 full version X.Y.Z.
+# Args: $1 full OCP identity (5.0 or 5-0; historical minors accepted), $2 X.Y.Z.
 prod_index_has_bundle() {
   local ocp="$1" version="$2"
-  local image="${PROD_INDEX_REGISTRY}:v4.${ocp}"
+  local dotted
+  dotted=$(ocp_dot "$ocp") || { echo unreachable; return 0; }
+  local image="${PROD_INDEX_REGISTRY}:v${dotted}"
   local dir verdict
   dir=$(mktemp -d) || { echo unreachable; return 0; }
   if timeout 120 oc image extract "$image" --path "/configs/submariner/bundles/:$dir/" --confirm >/dev/null 2>&1; then
