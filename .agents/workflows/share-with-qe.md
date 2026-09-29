@@ -23,12 +23,13 @@ the CRs are garbage-collected), and populates the QE subtask description:
 
 ```bash
 echo "=== FBC Stage Catalog URLs for QE ==="
-for VERSION in 16 17 18 19 20 21 22; do
-  STAGE_YAML=$(ls releases/fbc/4-$VERSION/stage/*.yaml | tail -1)
+source scripts/lib/fbc-scope.sh
+for VERSION in $FBC_OCP_VERSIONS; do
+  STAGE_YAML=$(ls releases/fbc/$VERSION/stage/*.yaml | tail -1)
   SNAPSHOT=$(awk '/^  snapshot:/ {print $2}' "$STAGE_YAML")
   CATALOG=$(oc get snapshot "$SNAPSHOT" -n submariner-tenant \
     -o jsonpath='{.spec.components[0].containerImage}')
-  echo "OCP 4.$VERSION: $CATALOG"
+  echo "OCP ${VERSION//-/.}: $CATALOG"
 done
 ```
 
@@ -118,16 +119,17 @@ operator index (via skopeo) and prints the per-OCP `registry.redhat.io` index UR
 ```bash
 echo "Submariner 0.X.Y Prod FBC Released"
 echo ""
-for VERSION in 16 17 18 19 20 21 22; do
+source scripts/lib/fbc-scope.sh
+for VERSION in $FBC_OCP_VERSIONS; do
   RELEASE=$(oc get releases -n submariner-tenant --no-headers | \
-    grep "submariner-fbc-4-$VERSION-prod.*Succeeded" | tail -1 | awk '{print $1}')
+    grep "submariner-fbc-$VERSION-prod.*Succeeded" | tail -1 | awk '{print $1}')
 
   if [ -n "$RELEASE" ]; then
     INDEX=$(oc get release "$RELEASE" -n submariner-tenant -o yaml | \
       grep "index_image_resolved:" | head -1 | awk '{print $2}')
     PUBLIC_INDEX=$(echo "$INDEX" | \
       sed 's|registry-proxy.engineering.redhat.com/rh-osbs/iib-pub|registry.redhat.io/redhat/redhat-operator-index|')
-    echo "OCP 4.$VERSION: $PUBLIC_INDEX"
+    echo "OCP ${VERSION//-/.}: $PUBLIC_INDEX"
   fi
 done
 ```

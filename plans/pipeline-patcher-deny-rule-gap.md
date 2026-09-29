@@ -1,5 +1,30 @@
 # Pipeline-Patcher Deny Rule Gap
 
+> **Status: implemented** in `scripts/lib/deny-rules.sh`, wired into
+> `tekton-task-version-bump.sh` (ecFixes) and `tekton-task-refs-update.sh`
+> (tektonTasks). Tests: `make test-deny-rules test-version-bump test-tekton`.
+> The design below is the original proposal; it differs from what shipped in
+> these ways, all driven by the second incident (2026-09-24):
+>
+> - **Both deny groups are read**, not just `konflux-defaults`. EC also applies
+>   `konflux-defaults-deprecated`, which is where the `konflux-vanguard/*` denial
+>   lives.
+> - **Wildcards, missing `versions` and `message` are handled.** That rule is
+>   `oci://quay.io/konflux-ci/konflux-vanguard/*` with a message and no version
+>   list — invisible to a versions-only check.
+> - **Report and fail rather than silently rewrite**, except when the denial's own
+>   message says "use the equivalent from `quay.io/konflux-ci/...`": then the
+>   bundle repo is repointed (tag kept, `quay.io/konflux-ci/` targets only) before
+>   the patcher runs, since the patcher aborts on a ref from a catalog it no longer
+>   knows. Minimum-version denials are fixed by the existing version bump; the scan
+>   verifies the result.
+> - **Future-dated denials warn** so the next one shows up as a PR before EC fails.
+> - **A remaining ACTIVE denial fails the run** (exit 1) so the conductor does not
+>   treat a still-denied repo as fixed, and the parse-ec-log verdict is never "yes"
+>   for a deny rule.
+> - The **patcher pin** moved to a commit without the temporary vanguard special
+>   case, which made the old pin abort on any catalog ref for that task.
+
 ## Problem
 
 `pipeline-patcher bump-task-refs` only checks whether a task's current SHA is in

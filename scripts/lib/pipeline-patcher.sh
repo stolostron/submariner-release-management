@@ -11,8 +11,8 @@
 
 # Pinned upstream commit of simonbaird/konflux-pipeline-patcher and the sha256
 # of the pipeline-patcher script at that commit. Bump both together.
-PATCHER_SHA="b001763bb1cd0286a894cfb570fe12dd7f4504bd"
-EXPECTED_SHA256="080ad5d7cf7d0cee732a774b7e4dda0e2ccf26b58e08a8516a3b812bc73beb53"
+PATCHER_SHA="a43322f95a694dde91cb262a57aef975000a0946"
+EXPECTED_SHA256="6b5fb7a12bcbdf3b6f8841adf7c72ffe450a914bfca4de2645218b4d48e5a558"
 
 # Download the pinned pipeline-patcher script, verify its sha256, and print the
 # verified script to stdout for the caller to pipe into `bash -s`. All

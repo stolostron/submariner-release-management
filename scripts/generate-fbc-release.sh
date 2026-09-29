@@ -32,16 +32,10 @@ RELEASE_TYPE="$4"
 RELEASE_DATE="$5"
 VERSION_DASH="${VERSION//./-}"
 
-# Validate OCP version format. Regex is deliberately permissive (4-14 through
-# 4-29) so add-fbc-ocp-version can introduce new OCP versions without editing
-# this generator; the actively-shipped set is 4-16 through 4-22.
-if [[ "$OCP_VERSION" =~ ^4-(1[4-9]|2[0-9])$ ]]; then
-  :  # OCP version is valid
-else
-  echo "❌ ERROR: Invalid OCP version: $OCP_VERSION" >&2
-  echo "Expected: 4-14 through 4-29" >&2
-  exit 1
-fi
+# shellcheck source=lib/ocp-version.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/ocp-version.sh"
+OCP_VERSION=$(ocp_normalize "$OCP_VERSION")
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Expected full Submariner version X.Y.Z" >&2; exit 1; }
 
 # Validate release type
 if [[ "$RELEASE_TYPE" != "stage" && "$RELEASE_TYPE" != "prod" ]]; then

@@ -165,4 +165,4 @@ Tasks not tied to normal release workflow timing.
 
 @/add-fbc-ocp-version
 
-**Alternative:** `make add-fbc-ocp-version OCP_VERSION=4.22 MIN_SUB=0.23` or @.agents/workflows/add-fbc-ocp-version.md (manual workflow)
+**Alternative:** `make add-fbc-ocp-version OCP_VERSION=5.0 MIN_SUPPORTED_SUB=0.24` or @.agents/workflows/add-fbc-ocp-version.md (phased workflow)
