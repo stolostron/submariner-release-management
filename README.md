@@ -34,6 +34,14 @@ make bundle-image-update                              # Auto-detect from branch
 make bundle-image-update VERSION=0.21.2               # Version bump
 make bundle-image-update VERSION=0.21.2 SNAPSHOT=submariner-0-21-xxxxx
 
+# One-time setup for RPM lockfiles. Registers this machine with the team's shared
+# Red Hat credentials (sealed in secrets/entitlements.asc) and logs in to
+# registry.redhat.io. Asks for the team password once and can remember it.
+make setup-entitlements
+make check-entitlements                          # Verify only, changes nothing
+# Key holder only: create or rotate the sealed credentials, then commit the file.
+make seal-entitlements                           # NEW_PASSWORD=1 to also change the team password
+
 # Update RPM lockfiles (requires entitlements, registry auth)
 make rpm-lockfile-update                         # Auto-detect branch
 make rpm-lockfile-update BRANCH=0.21             # Specify branch

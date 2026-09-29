@@ -32,7 +32,7 @@ make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway  # Explicit branch
 
 **Filter options:** all, submariner, shipyard, gateway, globalnet, route-agent, nettest
 
-**Requirements:** Red Hat entitlements, `podman login registry.redhat.io`, `gh auth login`, Bash 4.0+
+**Requirements:** Red Hat entitlements and `registry.redhat.io` login (one-time: `make setup-entitlements`), `gh auth login`, Bash 4.0+
 
 ## Inputs and execution
 
