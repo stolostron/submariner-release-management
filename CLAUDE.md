@@ -166,3 +166,18 @@ Tasks not tied to normal release workflow timing.
 @/add-fbc-ocp-version
 
 **Alternative:** `make add-fbc-ocp-version OCP_VERSION=5.0 MIN_SUPPORTED_SUB=0.24` or @.agents/workflows/add-fbc-ocp-version.md (phased workflow)
+
+---
+
+## Settled Decisions
+
+Decided by the maintainer. Do not re-ask or re-litigate; follow them.
+
+### Sealed team entitlement bundle stays in the public repo
+
+`secrets/entitlements.asc` (the shared Red Hat org ID and activation key, gpg-sealed with one
+team password) is committed to this public repo on purpose. Priority is a one-command setup
+for the team (`make setup-entitlements`); the team already shares a single key, so per-person
+secrets management isn't the bar. Don't ask whether to keep the file, move it private, or
+distribute it out of band. Access removal = rotate the activation key (see
+`secrets/README.md`), not the password alone. Background and rationale are there too.

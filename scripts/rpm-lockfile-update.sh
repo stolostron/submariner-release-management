@@ -46,12 +46,12 @@ check_prerequisites() {
   [ -z "${BASH_VERSINFO[0]}" ] || [ "${BASH_VERSINFO[0]}" -lt 4 ] && \
     die "bash 4.0+ required" "macOS: brew install bash"
 
-  ls /etc/pki/entitlement/*.pem &>/dev/null || \
-    die "No Red Hat entitlements in /etc/pki/entitlement/" \
-        "Setup: https://github.com/submariner-io/shipyard/blob/devel/.rpm-lockfiles/README.md"
-
-  [ -s "${HOME}/.docker/config.json" ] || \
-    die "Not authenticated to registry" "Run: podman login registry.redhat.io"
+  # Entitlements, registry login and repo access, with the fix for whatever is missing
+  local PREREQ_REPORT
+  PREREQ_REPORT=$("$SCRIPT_DIR/setup-entitlements.sh" --check 2>&1) || {
+    echo "$PREREQ_REPORT"
+    die "RPM lockfile prerequisites not met" "Fix the items marked ✗ above (usually: make setup-entitlements)"
+  }
 
   gh auth status &>/dev/null || \
     die "Not authenticated to GitHub" "Run: gh auth login"
