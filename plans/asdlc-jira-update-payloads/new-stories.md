@@ -203,5 +203,7 @@ Status as of 2026-09-30, from the remediation tracker joined with live GitHub st
 * The 8 open PRs are the FIND-006 (subctl download integrity) draft series on devel and release-0.18 through release-0.24, gated on the subctl checksums PRs and a dapper-base rebuild
 * Follow-up: 9 PRs fix the CI helper pod manifests for OCP (8 merged, release-0.18 through release-0.25; the devel PR shipyard#2618 is still open)
 
+Related open issues (filed by the maintainer, cause not established): https://github.com/submariner-io/shipyard/issues/2633 (upgrade CI broken on release-0.22 after the dapper-base rebuild, 2026-09-24) and https://github.com/submariner-io/shipyard/issues/2635 (deploy-latest installs the wrong minor version for the upgrade test). The FIND-006 drafts are gated on the same dapper-base rebuild.
+
 Full per-finding PR list: plans/asdlc-jira-update-payloads/shipyard-audit-prs.md in stolostron/submariner-release-management.
 ```

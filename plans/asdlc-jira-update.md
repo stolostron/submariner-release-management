@@ -84,6 +84,11 @@ approximate; the audit-series count is exact (from the tracker).
 | Other (open shipyard#2582 and submariner#4191; merged rhtap-ec-policy#268) | 3 | 1 | 2 | 0 |
 | Reverts of lint-only changes | 3 | 3 | 0 | 0 |
 
+Other sources checked: the konflux-release-data clone has no commits by the maintainer on origin/main since 2026-08-04 (as of the last successful fetch, head
+2026-09-18; GitLab merge-request state cannot be queried from here), so the three local-only OCP 5.0 commits are the only work there. Two open GitHub issues
+filed by the maintainer relate to the audit's prerequisites: shipyard#2633 (upgrade CI broken on release-0.22 after the dapper-base rebuild) and shipyard#2635
+(deploy-latest installs the wrong minor version for the upgrade test); they are mentioned in the S5 progress comment.
+
 Beyond PRs, the period also has direct commits: 5 to cve-agent in claude-skills (unpushed, see item 6) and, earlier in the period, the cve-fix skill refactor in
 shipyard (2026-08-13).
 
