@@ -5,7 +5,7 @@
 Nothing here has been created in Jira. Field values were read from the existing siblings on 2026-09-29/30:
 
 * Project `ACM`, issue type `Story`, parent (Epic Link) `ACM-39728`, component id `33720` (Multicluster Networking[ext]).
-* Assignee: the maintainer (accountId `557058:44c6f4a5-12b8-46f8-8bd6-0ad2184beeaf`), same as the siblings.
+* Assignee: the maintainer's own Jira account (look it up with `atlassianUserInfo`), same as the siblings.
 * Activity Type is `customfield_10464`: siblings use `Future Sustainability` (option id `10606`) and the security-flavored ones use
   `Security & Compliance` (option id `10609`). It is set per story below. Do not use option `10608`, which the release-tracker script uses.
 * Priority ids seen on siblings: Major `10002`, Normal `10003`, Minor `10004`.
