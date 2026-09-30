@@ -202,8 +202,11 @@ class Onboarding(unittest.TestCase):
             ({}, 1),
             (passing[:1], 1),
             (passing + passing, 1),
+            # BuildPLRInProgress is a pass: push snapshots never move `standard` past it.
+            ([dict(passing[0], status="BuildPLRInProgress"), passing[1]], 0),
+            ([passing[0], dict(passing[1], status="BuildPLRInProgress")], 0),
         ]
-        for status in ("BuildPLRInProgress", "InProgress", "TestSkipped", "TestFailed"):
+        for status in ("InProgress", "TestSkipped", "TestFailed"):
             cases.append(([passing[0], dict(passing[1], status=status)], 1))
         for data, expected in cases:
             result = subprocess.run(
