@@ -24,8 +24,6 @@ spec:
             source: issues.redhat.com
           - id: ACM-34578
             source: issues.redhat.com
-          - id: ACM-43037
-            source: issues.redhat.com
       cves:
         # CVE-2026-32936
         - key: CVE-2026-32936
