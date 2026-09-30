@@ -73,13 +73,14 @@ source "$SCRIPT_DIR/lib/prod-bundle.sh"
 # shellcheck source=lib/fbc-scope.sh
 source "$SCRIPT_DIR/lib/fbc-scope.sh"
 
-# Count and "4.<first>-4.<last>" display range derived from FBC_OCP_VERSIONS (sourced
-# above) so status output can't drift behind the list (token count / first+last token).
+# FBC catalog/snapshot checks shared with the release gate (verify-fbc-release.sh).
+# shellcheck source=lib/fbc-snapshot.sh
+source "$SCRIPT_DIR/lib/fbc-snapshot.sh"
+
+# Count derived from FBC_OCP_VERSIONS (sourced above) so status output can't drift
+# behind the list.
 read -ra _OCP_VERSION_ARR <<< "$FBC_OCP_VERSIONS"
 readonly CURRENT_OCP_VERSION_COUNT=${#_OCP_VERSION_ARR[@]}
-_OCP_FIRST=${FBC_OCP_VERSIONS%% *}
-_OCP_LAST=${FBC_OCP_VERSIONS##* }
-readonly OCP_VERSION_RANGE="${_OCP_FIRST//-/.}-${_OCP_LAST//-/.}"
 
 # Submariner component repos (for branch checks)
 readonly SUBMARINER_REPOS="submariner-operator submariner lighthouse shipyard subctl admiral cloud-prepare"
@@ -325,7 +326,9 @@ report_fbc_scope() {
   local yaml_count=$2
   local scope=$3
   local step_num=$4
-  local current_total=$CURRENT_OCP_VERSION_COUNT
+  # A running release targets the OCP versions whose catalog lists its bundle (Step 11);
+  # only fall back to every active version when that isn't known.
+  local current_total=${FBC_APPLICABLE_COUNT:-$CURRENT_OCP_VERSION_COUNT}
 
   if [ "$yaml_count" -lt "$current_total" ]; then
     if [ "$RELEASE_STATE" = "complete" ]; then
@@ -972,11 +975,137 @@ check_step_10b() {
   echo "⏭️  Skipped (status in Step 8-10)"
 }
 
+# Step 11 while the release is running: is this release's bundle in the FBC catalog, and
+# does every OCP version it applies to have a passing push snapshot built from a revision
+# that contains it? Mirrors the gate (verify-fbc-release.sh), so a ✅ here means Step 12
+# will not refuse. The old check only looked at each OCP version's newest snapshot, so a
+# green snapshot from the previous release read as "catalog updated".
+#
+# Applicability comes from the catalog itself: the bundle file exists only in the catalogs
+# the release targets (0.23.x is not in 4-22/5-0), so the release's OCP set is not always
+# FBC_OCP_VERSIONS.
+# Sets: FBC_CATALOG_READY (true|false|unknown) and FBC_APPLICABLE_COUNT
+check_fbc_catalog_live() {
+  FBC_CATALOG_READY=false
+  FBC_APPLICABLE_COUNT=""
+  local ocp digest digests="" unreadable="" applicable=""
+
+  for ocp in $FBC_OCP_VERSIONS; do
+    if ! digest=$(fbc_catalog_bundle_digest "$ocp" "$VERSION"); then
+      unreadable="$unreadable ${ocp//-/.}"
+      continue
+    fi
+    [ -z "$digest" ] && continue
+    applicable="$applicable $ocp"
+    digests+="$digest"$'\n'
+  done
+  applicable=${applicable# }
+
+  if [ -n "$unreadable" ]; then
+    echo "⚠️  Could not read the FBC catalog for OCP${unreadable} (GitHub unreachable?)"
+    echo "   Step 11 unverified — re-run when reachable"
+    FBC_CATALOG_READY=unknown
+    return
+  fi
+  if [ -z "$applicable" ]; then
+    echo "❌ Bundle v$VERSION not in the FBC catalog on main"
+    echo "   ⮕ Next: Update FBC catalog (Step 11)"
+    return
+  fi
+  FBC_APPLICABLE_COUNT=$(count_words "$applicable")
+  if [ "$(printf '%s' "$digests" | sort -u | wc -l)" -gt 1 ]; then
+    echo "❌ FBC catalogs list different bundle digests for v$VERSION"
+    echo "   ⮕ Next: Re-run the FBC catalog update (Step 11)"
+    return
+  fi
+  local main_digest=${digests%%$'\n'*}
+
+  local all_snapshots
+  if ! all_snapshots=$(oc get snapshots -n submariner-tenant -o json 2>/dev/null) || [ -z "$all_snapshots" ]; then
+    echo "⚠️  Could not list snapshots (oc login?) — FBC snapshots unverified"
+    FBC_CATALOG_READY=unknown
+    return
+  fi
+
+  local no_snapshot="" stale="" not_passing="" unknown_rev="" snap name revision tests rev_digest reason
+  for ocp in $applicable; do
+    # Push builds only (never PR retests), like the gate. Newest first pick.
+    snap=$(jq -c --arg app "submariner-fbc-$ocp" '
+      [.items[]
+        | select(.spec.application == $app and (.spec.components | length) == 1 and .spec.components[0].name == $app)
+        | select(.metadata.labels["pac.test.appstudio.openshift.io/original-prname"] == ($app + "-on-push"))
+        | select(.metadata.labels["pac.test.appstudio.openshift.io/event-type"] as $e
+            | $e == "push" or $e == "incoming" or $e == "retest-all-comment")]
+      | sort_by(.metadata.creationTimestamp) | last // empty
+      | {name: .metadata.name, revision: (.spec.components[0].source.git.revision // ""),
+         tests: (.metadata.annotations["test.appstudio.openshift.io/status"] // "")}' <<< "$all_snapshots" 2>/dev/null || true)
+    if [ -z "$snap" ]; then
+      no_snapshot="$no_snapshot"$'\n'"   - OCP ${ocp//-/.}"
+      continue
+    fi
+    name=$(jq -r '.name' <<< "$snap")
+    revision=$(jq -r '.revision' <<< "$snap")
+    tests=$(jq -r '.tests' <<< "$snap")
+
+    if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+      not_passing="$not_passing"$'\n'"   - OCP ${ocp//-/.}: snapshot $name has no valid source revision"
+      continue
+    fi
+    # The snapshot must come from a revision whose catalog already lists this bundle;
+    # otherwise it is a build from before the catalog update.
+    if ! rev_digest=$(fbc_catalog_bundle_digest "$ocp" "$VERSION" "$revision"); then
+      unknown_rev="$unknown_rev ${ocp//-/.}"
+      continue
+    fi
+    if [ "$rev_digest" != "$main_digest" ]; then
+      stale="$stale"$'\n'"   - OCP ${ocp//-/.}: $name"
+      continue
+    fi
+
+    if ! printf '%s' "$tests" | fbc_tests_passed "$ocp"; then
+      if [ -z "$tests" ]; then
+        reason="no test status yet"
+      else
+        reason=$(printf '%s' "$tests" | jq -r '[.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress")
+          | "\(.scenario | sub("submariner-fbc-"; "")): \(.status)"] | join(", ")' 2>/dev/null || true)
+        [ -n "$reason" ] || reason="incomplete test results"
+      fi
+      not_passing="$not_passing"$'\n'"   - OCP ${ocp//-/.}: $reason"
+    fi
+  done
+
+  if [ -n "$unknown_rev" ]; then
+    echo "⚠️  Could not read the FBC catalog at snapshot revisions for OCP${unknown_rev} (GitHub unreachable?)"
+    echo "   Step 11 unverified — re-run when reachable"
+    FBC_CATALOG_READY=unknown
+    return
+  fi
+  if [ -n "$no_snapshot" ]; then
+    echo "❌ No FBC push snapshot yet:${no_snapshot}"
+    echo "   ⮕ Next: Wait for the FBC push build after the catalog update merges (~15-30 min)"
+  fi
+  if [ -n "$stale" ]; then
+    echo "⏳ Newest FBC snapshot predates the catalog update:${stale}"
+    echo "   ⮕ Next: Wait for the FBC rebuild after the catalog update merges (~15-30 min)"
+  fi
+  if [ -n "$not_passing" ]; then
+    echo "❌ FBC snapshots with tests not passing:${not_passing}"
+    echo "   ⮕ Next: Fix FBC tests and wait for rebuild"
+  fi
+  if [ -z "$no_snapshot$stale$not_passing" ]; then
+    echo "✅ Bundle v$VERSION in FBC catalog; snapshots ready (OCP ${applicable//-/.})"
+    FBC_CATALOG_READY=true
+  fi
+}
+
 # Step 11: FBC Catalog Update
 check_step_11() {
-  # State-aware snapshot selection:
-  # - Complete: Use historical snapshots (from YAMLs matched by date)
-  # - In-progress: Use latest snapshots (current cluster state)
+  if [ "$RELEASE_STATE" != "complete" ]; then
+    check_fbc_catalog_live
+    return
+  fi
+
+  # Completed releases: use historical snapshots (from YAMLs matched by date)
   FBC_MISSING=0
   FBC_FAILED=0
 
@@ -1038,28 +1167,14 @@ check_step_11() {
     fi
   done
 
-  # State-aware reporting
-  if [ "$RELEASE_STATE" = "complete" ]; then
-    # Completed releases: show historical verification results
-    if [ "$FBC_MISSING" -eq 0 ] && [ "$FBC_FAILED" -eq 0 ]; then
-      echo "✅ All FBC stage releases succeeded (verified in catalog)"
-    elif [ "$FBC_FAILED" -gt 0 ]; then
-      echo "⚠️  FBC stage snapshots had test failures at release time"
-      echo "   ℹ️  Note: Current FBC snapshots may differ (release is complete)"
-    fi
-    # Don't show warning for missing OCP versions - already reported above with ℹ️
-  else
-    # In-progress or not-started: show current verification with actionable next steps
-    if [ "$FBC_MISSING" -eq 0 ] && [ "$FBC_FAILED" -eq 0 ]; then
-      echo "✅ All FBC snapshots ready (OCP ${OCP_VERSION_RANGE})"
-    else
-      if [ "$FBC_FAILED" -gt 0 ]; then
-        echo "   ⮕ Next: Fix FBC tests and wait for rebuild"
-      else
-        echo "   ⮕ Next: Update FBC catalog (Step 11)"
-      fi
-    fi
+  # Completed releases: show historical verification results
+  if [ "$FBC_MISSING" -eq 0 ] && [ "$FBC_FAILED" -eq 0 ]; then
+    echo "✅ All FBC stage releases succeeded (verified in catalog)"
+  elif [ "$FBC_FAILED" -gt 0 ]; then
+    echo "⚠️  FBC stage snapshots had test failures at release time"
+    echo "   ℹ️  Note: Current FBC snapshots may differ (release is complete)"
   fi
+  # Don't show warning for missing OCP versions - already reported above with ℹ️
 }
 
 # Step 12-13: FBC Stage Releases
@@ -1324,6 +1439,8 @@ FBC_PROD_SUCCEEDED=0
 FBC_PROD_FAILED=0
 FBC_STAGE_YAML_COUNT=0       # Step 12-13: Number of stage FBC YAMLs
 FBC_PROD_YAML_COUNT=0        # Step 17-18: Number of prod FBC YAMLs
+FBC_CATALOG_READY=""         # Step 11 (running release): true|false|unknown; "" = not checked
+FBC_APPLICABLE_COUNT=""      # Step 11: OCP versions whose catalog lists this bundle ("" = unknown)
 
 # Detect release state (complete/in-progress/not-started) for conditional reporting
 RELEASE_STATE=$(detect_release_state)
@@ -1484,11 +1601,22 @@ case "$CURRENT_PHASE" in
   fbc-stage)
     if [ "$FBC_STAGE_YAML_COUNT" -eq 0 ]; then
       echo "Current Phase: Stage Release"
-      echo "Blocking: Component stage in progress or complete"
-      echo ""
-      echo "NEXT STEPS:"
-      echo "1. [Step 11] Update FBC catalog with stage bundle"
-      echo "2. [Step 12] Create FBC stage releases (${CURRENT_OCP_VERSION_COUNT} OCP versions)"
+      # Only name a count once Step 11 has established which OCP versions apply.
+      fbc_count_note=""
+      [ -n "$FBC_APPLICABLE_COUNT" ] && fbc_count_note=" ($FBC_APPLICABLE_COUNT OCP versions)"
+      if [ "$FBC_CATALOG_READY" = "true" ]; then
+        # Step 11 verified done: don't send the user back to it.
+        echo "Blocking: FBC stage releases not created"
+        echo ""
+        echo "NEXT STEPS:"
+        echo "1. [Step 12] Create FBC stage releases${fbc_count_note}"
+      else
+        echo "Blocking: FBC catalog update (Step 11) not complete"
+        echo ""
+        echo "NEXT STEPS:"
+        echo "1. [Step 11] Update FBC catalog with stage bundle (see Step 11 above)"
+        echo "2. [Step 12] Create FBC stage releases${fbc_count_note}"
+      fi
     else
       echo "Current Phase: Stage Release"
       echo "Blocking: FBC stage releases incomplete"
