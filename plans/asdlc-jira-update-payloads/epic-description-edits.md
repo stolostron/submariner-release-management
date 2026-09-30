@@ -44,7 +44,9 @@ New:
 Basis: the per-suite pass counts in a full `make test` of the merged tree sum to 1,008 before the entitlements suite (127 assertions, merged in the
 last PR), so about 1,135. The old figure counted the same kind of per-suite assertion lines, so the comparison is fair but approximate, hence "over 1,100".
 
-## Edit 3: releases in progress (decision needed first)
+## Edit 3: releases in progress
+
+Decided by the maintainer on 2026-09-30: 0.23.2 will not ship downstream (superseded by 0.23.4, which is in progress), so it is dropped from the line.
 
 Old:
 
@@ -52,15 +54,11 @@ Old:
 * **Production validation**: 0.24.1 released end-to-end via autorelease (Sep 2026) across 7 OCP versions (4.16–4.22); 0.23.2 in progress
 ```
 
-New (proposed):
+New:
 
 ```text
 * **Production validation**: 0.24.1 released end-to-end via autorelease (Sep 2026) across 7 OCP versions (4.16–4.22); 0.22.2 and 0.23.4 in progress
 ```
-
-Decision needed before applying: 0.23.2 had its component stage release and six FBC stage releases created on 2026-09-11 and has upstream tags, but it has no
-Jira release tracker and no prod release. If it was superseded by 0.23.4, the new text above is right. If it is still to ship, use
-`...; 0.22.2, 0.23.2 and 0.23.4 in progress` instead.
 
 ## Edit 4: release ownership transfer
 

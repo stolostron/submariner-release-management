@@ -64,7 +64,7 @@ release trackers, which already track them.
 2. **Status of finished stories.** Recommended: Resolved (transition id 131), matching the release-tracker subtasks the tooling already resolves. Closed (61) is the alternative.
    Both transitions show a screen and need a resolution.
 3. **Activity Type.** Copied from siblings: Future Sustainability for S1, S3, S4; Security & Compliance for S2 and S5.
-4. **0.23.2.** It has stage releases and tags but no tracker and no prod release. Edit 3 of the epic description depends on whether it was superseded by 0.23.4.
+4. **0.23.2 (decided 2026-09-30).** It will not ship downstream; it is superseded by 0.23.4, which is in progress. Edit 3 of the epic description drops it, and no 0.23.2 release tracker is needed.
 5. **Sprint.** Leave unset (the only open sprint is past its end date), or add the stories to Submariner Sprint 2026-58 (id 85613).
 
 ## 4. Preflight (do all of these, and stop on any surprise)
@@ -73,7 +73,7 @@ release trackers, which already track them.
 2. Confirm the description snippets in epic-description-edits.md still match exactly once each.
 3. Re-run the section 8 commands and confirm the counts in the payloads (105/8, 113, 40, 33, 107) still hold; update the payload text if not.
 4. Confirm #109 and #110 are still merged and 0ed2981 is on main.
-5. Confirm the maintainer's answers to section 3.
+5. Confirm the maintainer's answers to section 3 (the 0.23.2 question is already answered).
 
 ## 5. Execution order
 
@@ -92,7 +92,7 @@ Order matters: create stories first, then comments that reference them, then the
 6. Add the `Related` link (link type id 10077) from S1 to ACM-45508.
 7. Post the four existing-story comments in comments-existing.md, replacing `<S1>` to `<S5>` with the real keys. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 (append, never replace, and only after step 2 passes).
-8. Apply the epic description edits (Edit 3 last, after the 0.23.2 decision), verifying by re-reading after each.
+8. Apply the epic description edits, verifying by re-reading after each.
 9. Post the epic summary comment.
 
 ## 6. Verification and rollback
@@ -109,7 +109,7 @@ These came up while exploring and are not part of the aSDLC update. They may be 
 
 * Release-tracker hygiene: ACM-40644 (0.24.1) has all 15 subtasks Resolved or Closed and the release is finished, but the parent is still In Progress;
   ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24; ACM-44532 (0.23.4 EC compliance) is In Progress after the fixes merged
-  2026-09-29 and needs an EC status check; ACM-34592 is stale under the closed 0.21.3 release; 0.23.2 has no tracker.
+  2026-09-29 and needs an EC status check; ACM-34592 is stale under the closed 0.21.3 release.
 * ACM-45470 and ACM-45476 (containers to grade B, deadline 2026-09-30): the Tekton, EC and RPM lockfile PRs are relevant evidence.
 * Unpushed local work worth backing up: three commits in the konflux-release-data clone with the OCP 5.0 tenant and admission changes (no merge request yet),
   and the local Glasswing tracker repository under go/src/submariner-io (no remote).
