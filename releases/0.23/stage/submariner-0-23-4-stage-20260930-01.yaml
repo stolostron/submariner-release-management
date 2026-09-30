@@ -11,7 +11,29 @@ spec:
   snapshot: submariner-0-23-20260930-064533-000
   data:
     releaseNotes:
-      type: RHBA  # Change to RHSA if adding CVEs, RHEA for enhancements
+      type: RHSA
       issues:
-        fixed: []  # Fill with Step 9 workflow
-      cves: []     # Fill with Step 9 workflow (required if type=RHSA)
+        fixed:
+          # CVE Issues (2):
+          - id: ACM-34110
+            source: issues.redhat.com
+          - id: ACM-34588
+            source: issues.redhat.com
+          # Non-CVE Issues (5):
+          - id: ACM-28591
+            source: issues.redhat.com
+          - id: ACM-32615
+            source: issues.redhat.com
+          - id: ACM-34578
+            source: issues.redhat.com
+          - id: ACM-35360
+            source: issues.redhat.com
+          - id: ACM-43037
+            source: issues.redhat.com
+      cves:
+        # CVE-2026-32936
+        - key: CVE-2026-32936
+          component: lighthouse-coredns-0-23
+        # CVE-2026-35579
+        - key: CVE-2026-35579
+          component: lighthouse-coredns-0-23
