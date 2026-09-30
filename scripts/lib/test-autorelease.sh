@@ -434,6 +434,10 @@ echo "=== Verifier Evidence Tests ==="
 # Verifiers must emit the evidence they checked on stdout so the conductor can
 # record it as STEP_DATA (feeding snapshot-staleness rules + tracker legibility).
 
+# Stub gh: verify_ecFixes probes fix-tekton-tasks PRs in 6 repos via gh. Left real, each call
+# does ~9s of live network lookups and the result depends on GitHub state. Empty list = no PRs.
+gh() { echo '[]'; }
+
 # 21: verify_ecFixes emits {snapshot,version} for the latest EC-passing snapshot
 _orig_oc=$(declare -f oc 2>/dev/null || echo "")
 _OC_SNAPSHOTS=''
