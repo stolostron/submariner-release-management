@@ -6,6 +6,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RELEASE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Release YAMLs are permanent records that land on origin/main, but this checkout may be
+# on an unrelated branch (or behind) and would then report "No stage release YAML" for a
+# release that is already running. Overlay the working tree's releases/ on top of
+# origin/main's so both merged records and local not-yet-pushed YAMLs are seen.
+# Set RELEASE_STATUS_LOCAL_ONLY=1 to read only the working tree.
+if [ -z "${RELEASE_STATUS_LOCAL_ONLY:-}" ] \
+  && git -C "$RELEASE_ROOT" rev-parse --verify -q origin/main >/dev/null 2>&1; then
+  OVERLAY_DIR=$(mktemp -d)
+  trap 'rm -rf "$OVERLAY_DIR"' EXIT
+  if git -C "$RELEASE_ROOT" archive origin/main releases 2>/dev/null | tar -x -C "$OVERLAY_DIR" 2>/dev/null; then
+    [ -d "$RELEASE_ROOT/releases" ] && cp -a "$RELEASE_ROOT/releases/." "$OVERLAY_DIR/releases/"
+    RELEASE_ROOT="$OVERLAY_DIR"
+  fi
+fi
+
 # Parse arguments
 VERSION="${1:-}"
 
