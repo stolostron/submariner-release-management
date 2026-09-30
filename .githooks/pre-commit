@@ -7,6 +7,8 @@ mapfile -t git_local_env < <(git rev-parse --local-env-vars)
 unset "${git_local_env[@]}"
 
 echo "Running make test before commit..."
+# Parallel by default: targets are independent and take ~35s vs ~5min serial.
+export MAKEFLAGS="-j$(nproc) --output-sync=target"
 if ! make test; then
   echo ""
   echo "❌ make test failed. Commit aborted."
