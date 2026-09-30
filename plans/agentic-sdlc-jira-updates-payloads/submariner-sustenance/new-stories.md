@@ -13,7 +13,7 @@ Nothing here has been created in Jira. Field values were read from the existing 
   but not closed, and there is no future sprint. Leave unset unless the maintainer wants it.
 * Description format: markdown with `_Scope:_` and `_Acceptance criteria:_` italic headings, as on the siblings.
 * Progress comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as on the siblings.
-* Git Pull Request field is `customfield_10875` (see the main plan for the canary step before relying on it).
+* Git Pull Request field is `customfield_10875` (see Part A, section A5 of the plan, for the canary step before relying on it).
 
 The order of creation is: story 4 first as a canary, then 1, 2, 3, 5.
 
@@ -130,7 +130,7 @@ Progress comment (post after creation):
 ```text
 Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): 11 files, +1,310/-77.
 
-Real-world motivation, 2026-09-13 onward: 33 Enterprise Contract and Tekton task PRs across the component repos (32 merged). They include replacing the denied rpms-signature-scan vanguard ref and removing the policy-denied show-sbom task on the release branches. Since the epic started on 2026-08-04 there have been about 73 such PRs (63 merged). Related policy work: release-engineering/rhtap-ec-policy#268 (merged 2026-08-31) added Submariner 0.24 to the network policy RBAC exceptions. The full list since 2026-09-13 is plans/asdlc-jira-update-payloads/ec-tekton-prs.md in stolostron/submariner-release-management.
+Real-world motivation, 2026-09-13 onward: 33 Enterprise Contract and Tekton task PRs across the component repos (32 merged). They include replacing the denied rpms-signature-scan vanguard ref and removing the policy-denied show-sbom task on the release branches. Since the epic started on 2026-08-04 there have been about 73 such PRs (63 merged). Related policy work: release-engineering/rhtap-ec-policy#268 (merged 2026-08-31) added Submariner 0.24 to the network policy RBAC exceptions. The full list since 2026-09-13 is plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/ec-tekton-prs.md in stolostron/submariner-release-management.
 ```
 
 ## Story 3: Make release skills portable across Claude and Codex
@@ -205,5 +205,5 @@ Status as of 2026-09-30, from the remediation tracker joined with live GitHub st
 
 Related open issues (filed by the maintainer, cause not established): https://github.com/submariner-io/shipyard/issues/2633 (upgrade CI broken on release-0.22 after the dapper-base rebuild, 2026-09-24) and https://github.com/submariner-io/shipyard/issues/2635 (deploy-latest installs the wrong minor version for the upgrade test). The FIND-006 drafts are gated on the same dapper-base rebuild.
 
-Full per-finding PR list: plans/asdlc-jira-update-payloads/shipyard-audit-prs.md in stolostron/submariner-release-management.
+Full per-finding PR list: plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/shipyard-audit-prs.md in stolostron/submariner-release-management.
 ```

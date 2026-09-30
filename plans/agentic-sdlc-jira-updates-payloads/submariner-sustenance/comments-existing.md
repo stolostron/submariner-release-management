@@ -54,16 +54,16 @@ Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard
 ```text
 CVE remediation since the last update (2026-09-13 to 2026-09-30):
 
-* 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed as superseded by a later PR. Plus 3 merged reverts of lint-only changes. Full list: plans/asdlc-jira-update-payloads/cve-fix-prs.md in stolostron/submariner-release-management.
+* 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed as superseded by a later PR. Plus 3 merged reverts of lint-only changes. Full list: plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md in stolostron/submariner-release-management.
 * 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed after 2026-09-13, assignee the maintainer).
 * The skill hardening for the ai-helpers contribution is still open in https://github.com/submariner-io/shipyard/pull/2582.
 ```
 
-Optional extra bullet for this comment, to include only after the five cve-agent commits in dfarrell07/claude-skills are pushed (they are local only as of
-2026-09-30), with the real commit or PR links filled in:
+Optional extra bullet for this comment. The five cve-agent commits were validated and opened as <https://github.com/dfarrell07/claude-skills/pull/35> on
+2026-09-30; include the bullet once that PR is merged, linking it:
 
 ```text
-* cve-agent improvements, 2026-09-22 to 2026-09-25 (dfarrell07/claude-skills): verify shipped applicability and image provenance; fix the subctl source repo and the RHACM 2.13 CoreDNS shipped version; allow fixed, scan_limitation and source_fix together in validate-triage check 4b; fix a multi-arch digest false positive in the verify and closure-gate prompts; update the Go version table.
+* cve-agent improvements, 2026-09-22 to 2026-09-25 (https://github.com/dfarrell07/claude-skills/pull/35): verify shipped applicability and image provenance; fix the subctl source repo and the RHACM 2.13 CoreDNS shipped version; allow fixed, scan_limitation and source_fix together in validate-triage check 4b; fix a multi-arch digest false positive in the verify and closure-gate prompts; update the Go version table.
 ```
 
 ## ACM-39728 (epic): summary comment
