@@ -12,6 +12,10 @@ context: fork
 
 Diagnose and fix Konflux CI failures by updating Tekton task references to latest versions.
 
+**Only run this when Enterprise Contract or CI is actually failing.** If EC already passes on the latest snapshot, no Tekton task
+update is needed for the release; do not bump tasks proactively. See `.agents/workflows/skip-completed-steps.md` in the
+release-management repo.
+
 **Usage from a component repository:**
 
 - `/konflux-ci-fix` - current repo, current branch

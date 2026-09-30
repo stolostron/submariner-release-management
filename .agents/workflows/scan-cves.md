@@ -2,6 +2,9 @@
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2), before cutting release
 
+> **Skip if the upstream tag `v$VERSION` already exists** (retarget, re-release, retry). CVE fixes must land before the tag; after it
+> exists, more source changes cannot affect that version, so the scan is not redone. See `skip-completed-steps.md`.
+
 ## Process
 
 Fix CVEs in upstream source (Go mods and RPM lockfiles). Verify fixes by scanning downstream images.

@@ -2,6 +2,9 @@
 
 **When:** Y-stream (0.20 → 0.21) and Z-stream (0.20.1 → 0.20.2). Components mostly handled in Step 3 for Y-stream, FBC needs checking for both.
 
+> **Skip if Enterprise Contract already passes** on the latest snapshot (`TestPassed` or `BuildPLRInProgress`). Tekton task
+> updates exist only to fix EC violations; do not bump tasks proactively. See `skip-completed-steps.md`.
+
 ## Process
 
 Ensure all Konflux builds pass Enterprise Contract validation before cutting releases.

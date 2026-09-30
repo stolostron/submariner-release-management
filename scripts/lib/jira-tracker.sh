@@ -113,6 +113,8 @@ STEP_SCRIPT["tektonBundle"]="scripts/konflux-bundle-setup.sh"
 STEP_TITLES["cveFixes"]="CVE fixes"
 STEP_PHASE["cveFixes"]="Build Readiness"
 STEP_DEPENDENCIES["cveFixes"]=""
+# Advisory only. Not actionable once the upstream tag exists: CVE fixes land before the tag
+# and are not redone on a retarget/re-release/retry (.agents/workflows/skip-completed-steps.md).
 STALENESS_RULES["cveFixes"]="3d"
 AUTOMATION_LEVEL["cveFixes"]="review"
 STEP_SCRIPT["cveFixes"]="scripts/cve-fixes-update.sh"
@@ -451,6 +453,9 @@ _(populated by automation when PRs are created)_
 ## Status
 
 Waiting for skill to create PRs across repos on release-$major_minor branch.
+
+Skip when already done (retarget, re-release, retry): CVE fixes are not redone once the upstream tag exists, and Tekton task
+updates are needed only if Enterprise Contract fails. See .agents/workflows/skip-completed-steps.md.
 DESC
       ;;
     createBranches)
