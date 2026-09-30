@@ -54,6 +54,39 @@ All numbers are for 2026-09-13 to 2026-09-30 unless stated, and are reproducible
 4. **Enterprise Contract and Tekton task fixes:** 33 PRs (32 merged), which motivated the deny-rule detection.
 5. **Stale numbers in the epic description:** 56 scripts and 337 tests versus 51 scripts, 29 test files and over 1,100 tests today.
 
+6. **cve-agent work is unrecorded and not pushed.** The maintainer's claude-skills repository (public) has 5 commits on main, all after 2026-09-13
+   (2026-09-22 to 2026-09-25), that improve cve-agent: verify shipped applicability and image provenance; fix the subctl source repo and the RHACM 2.13 CoreDNS
+   shipped version; allow fixed, scan_limitation and source_fix together in validate-triage check 4b; fix a multi-arch digest false positive in the verify and
+   closure-gate prompts; update the Go version table. They are ahead of origin by 5 commits, so they exist only on this machine and cannot be linked from Jira
+   yet. ACM-39729 has no mention of them (its last update was 2026-09-04 and its PR links stop at claude-skills#27 from July).
+7. **Enterprise Contract policy work outside the component repos.** release-engineering/rhtap-ec-policy#268 (created 2026-08-27, merged 2026-08-31, "Add Submariner 0.24 to network
+   policy RBAC exceptions") and submariner-operator#4222 (opened and closed on 2026-08-27, NetworkPolicy RBAC for an EC rule, apparently replaced by the policy exception) are part of the 0.24.1 EC compliance effort and are not on
+   any story. They fit the evidence for new story S2.
+8. **Not worth new stories, already covered by release trackers:** 4 release-YAML PRs in this repo (#95, #100, #101, #105), 12 FBC-repo PRs (Tekton bumps,
+   bundle additions for 0.24.1 and 0.23.2, a docs fix), and the upstream "Advancing release" PRs. No action.
+
+### Epic-period totals (2026-08-04, the day the epic was created, to 2026-09-30)
+
+335 PRs by the maintainer across 12 repositories: 290 merged, 32 closed (mostly superseded by a later PR) and 13 open. Theme counts are by PR title and
+approximate; the audit-series count is exact (from the tracker).
+
+| Theme | PRs | Merged | Open | Closed |
+| --- | --- | --- | --- | --- |
+| Glasswing shipyard-audit remediation | 113 | 105 | 8 | 0 |
+| Enterprise Contract and Tekton | 73 | 63 | 1 | 9 |
+| CVE fixes | 68 | 49 | 0 | 19 |
+| Release steps (version labels, bundle SHAs) | 27 | 26 | 0 | 1 |
+| Release tooling (this repository) | 21 | 18 | 0 | 3 |
+| Glasswing follow-up (CI helper pods) | 9 | 8 | 1 | 0 |
+| RPM lockfile updates | 8 | 8 | 0 | 0 |
+| FBC catalog and pipelines | 6 | 5 | 1 | 0 |
+| Upstream release PRs | 4 | 4 | 0 | 0 |
+| Other (open shipyard#2582 and submariner#4191; merged rhtap-ec-policy#268) | 3 | 1 | 2 | 0 |
+| Reverts of lint-only changes | 3 | 3 | 0 | 0 |
+
+Beyond PRs, the period also has direct commits: 5 to cve-agent in claude-skills (unpushed, see item 6) and, earlier in the period, the cve-fix skill refactor in
+shipyard (2026-08-13).
+
 Nothing else from the 107 PRs opened in the period needs a new home: version-label updates (10), RPM lockfile updates (4) and bundle SHAs (1) are steps of the
 release trackers, which already track them.
 
@@ -107,6 +140,11 @@ Order matters: create stories first, then comments that reference them, then the
 
 These came up while exploring and are not part of the aSDLC update. They may be worth doing separately.
 
+* **At risk of loss (do first):** the 5 unpushed cve-agent commits in the claude-skills repository (section 2, item 6). Pushing them is the maintainer's call; once
+  pushed they can be linked from the ACM-39729 comment (an optional bullet for that is in comments-existing.md).
+* Related Jira items found while searching, not part of this epic: ACM-26999 (older story "Implement plugin/workflow/tools for CVEs management", New, under
+  ACM-26990) overlaps ACM-39729 and could be linked as Related or closed as superseded; ACM-45318 (migrate to ART golang builders, due 2026-10-15) will touch the
+  same Dockerfiles and Tekton pipelines.
 * Release-tracker hygiene: ACM-40644 (0.24.1) has all 15 subtasks Resolved or Closed and the release is finished, but the parent is still In Progress;
   ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24; ACM-44532 (0.23.4 EC compliance) is In Progress after the fixes merged
   2026-09-29 and needs an EC status check; ACM-34592 is stale under the closed 0.21.3 release.

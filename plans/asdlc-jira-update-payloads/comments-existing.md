@@ -59,10 +59,17 @@ CVE remediation since the last update (2026-09-13 to 2026-09-30):
 * The skill hardening for the ai-helpers contribution is still open in https://github.com/submariner-io/shipyard/pull/2582.
 ```
 
+Optional extra bullet for this comment, to include only after the five cve-agent commits in dfarrell07/claude-skills are pushed (they are local only as of
+2026-09-30), with the real commit or PR links filled in:
+
+```text
+* cve-agent improvements, 2026-09-22 to 2026-09-25 (dfarrell07/claude-skills): verify shipped applicability and image provenance; fix the subctl source repo and the RHACM 2.13 CoreDNS shipped version; allow fixed, scan_limitation and source_fix together in validate-triage check 4b; fix a multi-arch digest false positive in the verify and closure-gate prompts; update the Go version table.
+```
+
 ## ACM-39728 (epic): summary comment
 
 ```text
-Update since 2026-09-13. Work shipped under this epic since the last update, tracked in new child stories:
+Update since 2026-09-13. Since the epic was created on 2026-08-04 the maintainer has opened 335 PRs across 12 repositories (290 merged, 32 closed, mostly superseded, 13 open); the largest groups are the Glasswing shipyard-audit remediation (113), Enterprise Contract and Tekton fixes (about 73) and CVE fixes (about 68). Theme counts other than the audit series are by PR title and approximate. Work shipped under this epic since the last update, tracked in new child stories:
 
 * <S1> Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft): stolostron/submariner-release-management#109 merged; stolostron/submariner-operator-fbc#81 merged and #82 open. Not finished: konflux-release-data changes and real builds and install are unverified.
 * <S2> Detect Enterprise Contract deny rules during Tekton task updates: #109.

@@ -130,7 +130,7 @@ Progress comment (post after creation):
 ```text
 Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): 11 files, +1,310/-77.
 
-Real-world motivation, 2026-09-13 onward: 33 Enterprise Contract and Tekton task PRs across the component repos (32 merged). They include replacing the denied rpms-signature-scan vanguard ref and removing the policy-denied show-sbom task on the release branches. The full list is plans/asdlc-jira-update-payloads/ec-tekton-prs.md in stolostron/submariner-release-management.
+Real-world motivation, 2026-09-13 onward: 33 Enterprise Contract and Tekton task PRs across the component repos (32 merged). They include replacing the denied rpms-signature-scan vanguard ref and removing the policy-denied show-sbom task on the release branches. Since the epic started on 2026-08-04 there have been about 73 such PRs (63 merged). Related policy work: release-engineering/rhtap-ec-policy#268 (merged 2026-08-31) added Submariner 0.24 to the network policy RBAC exceptions. The full list since 2026-09-13 is plans/asdlc-jira-update-payloads/ec-tekton-prs.md in stolostron/submariner-release-management.
 ```
 
 ## Story 3: Make release skills portable across Claude and Codex
