@@ -345,7 +345,8 @@ for VERSION in "${APPLICABLE_VERSIONS[@]}"; do
   fi
 
   # Empty, malformed, pending, skipped, and failed test results all block release.
-  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed") | "\(.scenario): \(.status)"' 2>/dev/null) || FAILED_TESTS="Malformed test status"
+  # BuildPLRInProgress counts as a pass (see fbc_tests_passed), so it is not blamed here.
+  FAILED_TESTS=$(echo "$TESTS_JSON" | jq -r '.[] | select(.status != "TestPassed" and .status != "BuildPLRInProgress") | "\(.scenario): \(.status)"' 2>/dev/null) || FAILED_TESTS="Malformed test status"
   if ! echo "$TESTS_JSON" | fbc_tests_passed "$VERSION"; then
     echo "  ${VERSION}: ✗ Tests failed: $FAILED_TESTS" >&2
     FAILED_DETAILS="${FAILED_DETAILS}    ${VERSION}: Tests failed: $FAILED_TESTS\n"

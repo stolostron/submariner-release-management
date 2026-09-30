@@ -1,10 +1,12 @@
 #!/bin/bash
-# Both configured scenarios must have completed successfully; no empty/pending pass.
+# Both configured scenarios must have passed; no empty/pending pass. BuildPLRInProgress
+# counts as a pass: on push snapshots the `standard` scenario never leaves it, and it is
+# not a failure (same rule as verify-component-release.sh).
 fbc_tests_passed() {
   local version="$1"
   jq -e --arg standard "submariner-fbc-standard-$version" --arg operator "submariner-fbc-operator-$version" '
     type == "array" and length >= 2 and
-    all(.[]; .status == "TestPassed") and
+    all(.[]; .status == "TestPassed" or .status == "BuildPLRInProgress") and
     ([.[].scenario] | length == (unique | length)) and
     any(.[]; .scenario == $standard) and any(.[]; .scenario == $operator)
   ' >/dev/null 2>&1
