@@ -2,7 +2,7 @@
 
 # Plan: bring the agentic-SDLC Jira epics up to date
 
-Status: prepared, nothing has been changed in Jira. Prepared 2026-09-30.
+Status: prepared, nothing has been changed in Jira. Prepared 2026-09-30; refreshed later the same day (section A10).
 
 This one plan covers two epics of the agentic-SDLC effort. The parts are independent: each has its own preflight, execution order and verification, and either can be
 done without the other.
@@ -49,12 +49,14 @@ detail.
 | ACM-39730 | Agentic downstream release tracking in Jira | In Progress | Future Sustainability | Major | release-management#89 |
 | ACM-39731 | Orchestrate existing release skills into autorelease | In Progress | Future Sustainability | Major | release-management#90-93 |
 | ACM-39732 | Create FBC prod URL conversion skill | New | Future Sustainability | Normal | no |
-| ACM-39733 | Integrate upstream release into agentic release workflow | In Progress | Future Sustainability | Normal | releases#1444 |
+| ACM-39733 | Integrate upstream release into agentic release workflow (assignee: a teammate, not the maintainer) | In Progress | Future Sustainability | Normal | releases#1444 |
 | ACM-39734 | Agentic upstream issue and PR triage | New | Future Sustainability | Normal | no |
 | ACM-39735 | Evaluate AI-assisted bug fixing | New | Future Sustainability | Normal | no |
 | ACM-39736 | Release knowledge transfer to team | New | Future Sustainability | Major | no |
 | ACM-39737 | Start PIA approval for automated customer log analysis | New | Security & Compliance | Minor | no |
 | ACM-39738 | Contribute Submariner skills to openshift/ai-helpers | New | Future Sustainability | Major | ai-helpers#617 |
+
+ACM-39735 is unassigned and ACM-39737 belongs to a teammate. ACM-39738 has two children not listed above: ACM-39739 (go-fix-cves) and ACM-39740 (generalized CVE agent), both New, last touched 2026-09-17; the cve-agent PR (claude-skills#35) is relevant to ACM-39740.
 
 Child stories carry the component "Multicluster Networking[ext]" (id 33720), assignee the maintainer unless noted, and the Epic Link field.
 
@@ -129,7 +131,7 @@ release trackers, which already track them.
 
 1. Re-read ACM-39728 and its ten children. Confirm the table in section A1 still holds, especially statuses, and that no child was created or changed since 2026-09-30.
 2. Confirm the description snippets in epic-description-edits.md still match exactly once each.
-3. Re-run the section A8 commands and confirm the counts in the payloads (105/8, 113, 40, 33, 107) still hold; update the payload text if not.
+3. Re-run the section A8 commands and confirm the counts in the payloads (105/8, 113, 40, 33, and 110 since 2026-09-13) still hold; update the payload text if not.
 4. Confirm #109 and #110 are still merged and 0ed2981 is on main.
 5. Confirm the maintainer's answers to section A3 (the 0.23.2 question is already answered).
 
@@ -172,7 +174,7 @@ These came up while exploring and are not part of the aSDLC update. They may be 
   ACM-26990) overlaps ACM-39729 and could be linked as Related or closed as superseded; ACM-45318 (migrate to ART golang builders, due 2026-10-15) will touch the
   same Dockerfiles and Tekton pipelines.
 * Release-tracker hygiene: ACM-40644 (0.24.1) has all 15 subtasks Resolved or Closed and the release is finished, but the parent is still In Progress;
-  ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24; ACM-44532 (0.23.4 EC compliance) is In Progress after the fixes merged
+  ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24 (its parent 0.22.2 tracker ACM-45070 and EC subtask ACM-45075 are also still In Progress); ACM-44532 (0.23.4 EC compliance) is In Progress after the fixes merged
   2026-09-29 and needs an EC status check; ACM-34592 is stale under the closed 0.21.3 release.
 * ACM-45470 and ACM-45476 (containers to grade B, deadline 2026-09-30): the Tekton, EC and RPM lockfile PRs are relevant evidence.
 * Unpushed local work worth backing up: three commits in the konflux-release-data clone with the OCP 5.0 tenant and admission changes (no merge request yet),
@@ -182,7 +184,7 @@ These came up while exploring and are not part of the aSDLC update. They may be 
 ### A8. How the numbers were produced
 
 ```bash
-# PRs by the maintainer since the epic's last update (107)
+# PRs by the maintainer since the epic's last update (107 when first written, 110 at the refresh)
 gh search prs --author dfarrell07 --created ">=2026-09-13" --limit 1000 --json repository,number,title,state,url
 
 # Glasswing shipyard-audit PRs: the tracker lists 113 URLs; state of each from the API
@@ -208,6 +210,39 @@ Recorded so nobody repeats them.
 * The eight open FIND-006 PRs are intentional drafts gated on prerequisites, not stale duplicates.
 * ai-helpers#617 and shipyard#2582 are already linked on ACM-39738 and ACM-39729; they do not need a new home.
 * The Activity Type for these stories is Future Sustainability or Security & Compliance, not the option the release-tracker script uses.
+
+### A10. Refresh (2026-09-30, later the same day)
+
+Re-read Jira and GitHub after the plan was written. The payloads and the execution order are unchanged; these are the differences and additions.
+
+**Numbers.** The maintainer's PRs since 2026-09-13 are now 110, not 107 (added: claude-skills#35, this plan's PR #111, and submariner-operator#4284). The epic still has
+exactly the ten children of section A1, and neither epic ACM-39728 (last updated 2026-09-16) nor ACM-39729 (2026-09-17) has been touched since, so preflight step A4.1 should still
+pass. The count of 259 closed Vulnerability issues is unchanged.
+
+New since the plan was written:
+
+* submariner-operator#4284 ("Update bundle SHAs for 0.23.4") merged 2026-09-30. The 0.23.4 tracker (ACM-44527) has version labels, RPM lockfiles, CVE fixes and Tekton
+  updates Resolved; EC compliance (ACM-44532) is In Progress; bundle SHAs (ACM-44534) is still New although its PR merged, and QE testing (ACM-44539, a teammate) is In Progress.
+  This is the same hygiene pattern as ACM-45077 and is worth one line in the tracker cleanup, not a story.
+* stolostron/submariner-operator-fbc#82 (OCP 5.0 Konflux pipelines) is open, rebased on merged #81, with every GitHub check passing except the Konflux
+  `submariner-fbc-5-0-on-pull-request` PipelineRun, which failed. The run was not found on the cluster this session logs in to, so the cause is unknown. It matters for S1: its progress
+  comment lists #82 as open, and S1 should stay In Progress until that pipeline passes (this is already the plan's recommendation).
+* submariner-io/releases#1444 (the ACM-39733 upstream agentic release PR, owned by a teammate) is active again: CodeRabbit requested changes on 2026-09-10, 09-21 and 09-24
+  (the stale bot also marked it stale twice), and the owner re-requested a review on 2026-09-30. It is not the maintainer's work; the ACM-39733 line in section A1 should not
+  claim progress for it.
+* claude-skills#35 (cve-agent) is still open with no reviews. This plan's own PR #111 has no reviews yet and only self-approval from the bot; nothing in it is blocked by checks.
+
+Improvements to make when executing:
+
+1. **Do not describe ACM-39733 as the maintainer's work.** Its comment, if any, belongs to the assignee; leave it out of comments-existing.md (it already is) and mention it only in the epic summary as
+   in-progress upstream work.
+2. **Link the two ai-helpers children.** A one-line comment on ACM-39740 pointing at claude-skills#35 once merged is cheaper and more accurate than adding it to ACM-39729 alone; ACM-39729
+   keeps the hardening narrative. Add both to the optional bullet in comments-existing.md.
+3. **Fold tracker hygiene into one pass.** Six tracker items need a status decision (ACM-40644, ACM-45077, ACM-45075/45070, ACM-44534, ACM-44532, ACM-34592). Do it with
+   `/autorelease <version> --close` for finished releases rather than by hand, after S1 to S5 exist.
+4. **Timing.** The grade-B deadline stories (ACM-45470, ACM-45476, owned by teammates) end today. Their evidence is the Tekton, EC and RPM lockfile PRs in section A2; post that evidence as a comment
+   on ACM-45476 today if the maintainer wants it counted, since it is independent of everything else in Part A.
+5. **Preflight A4.3 counts** should read 110 PRs (not 107) when re-run.
 
 ## Part B: k8s-rebase automation (CORENET-7155)
 
