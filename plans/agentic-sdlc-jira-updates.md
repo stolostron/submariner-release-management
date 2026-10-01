@@ -132,7 +132,7 @@ release trackers, which already track them.
 1. Re-read ACM-39728 and its ten children. Confirm the table in section A1 still holds, especially statuses, and that no child was created or changed since 2026-09-30.
 2. Confirm the description snippets in epic-description-edits.md still match exactly once each.
 3. Re-run the section A8 commands and confirm the counts in the payloads (105/8, 113, 40, 33, and 110 since 2026-09-13) still hold; update the payload text if not.
-4. Confirm #109 and #110 are still merged and 0ed2981 is on main.
+4. Confirm #109 and #110 are still merged and 0ed2981 is on main. Also check #112, #113 and #114 (section A11): update the comments-existing.md payload if #114 has merged or changed.
 5. Confirm the maintainer's answers to section A3 (the 0.23.2 question is already answered).
 
 ### A5. Execution order
@@ -174,8 +174,8 @@ These came up while exploring and are not part of the aSDLC update. They may be 
   ACM-26990) overlaps ACM-39729 and could be linked as Related or closed as superseded; ACM-45318 (migrate to ART golang builders, due 2026-10-15) will touch the
   same Dockerfiles and Tekton pipelines.
 * Release-tracker hygiene: ACM-40644 (0.24.1) has all 15 subtasks Resolved or Closed and the release is finished, but the parent is still In Progress;
-  ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24 (its parent 0.22.2 tracker ACM-45070 and EC subtask ACM-45075 are also still In Progress); ACM-44532 (0.23.4 EC compliance) is In Progress after the fixes merged
-  2026-09-29 and needs an EC status check; ACM-34592 is stale under the closed 0.21.3 release.
+  ACM-45077 (0.22.2 bundle SHAs) is still In Progress although its PR merged 2026-09-24 (its parent 0.22.2 tracker ACM-45070 and EC subtask ACM-45075 are also still In Progress); ACM-44532 (0.23.4 EC compliance) was In Progress after the fixes merged
+  2026-09-29; EC was verified passing on 2026-09-30 and it is now Resolved (section A11); ACM-34592 is stale under the closed 0.21.3 release.
 * ACM-45470 and ACM-45476 (containers to grade B, deadline 2026-09-30): the Tekton, EC and RPM lockfile PRs are relevant evidence.
 * Unpushed local work worth backing up: three commits in the konflux-release-data clone with the OCP 5.0 tenant and admission changes (no merge request yet),
   and the local Glasswing tracker repository under go/src/submariner-io (no remote).
@@ -210,6 +210,8 @@ Recorded so nobody repeats them.
 * The eight open FIND-006 PRs are intentional drafts gated on prerequisites, not stale duplicates.
 * ai-helpers#617 and shipyard#2582 are already linked on ACM-39738 and ACM-39729; they do not need a new home.
 * The Activity Type for these stories is Future Sustainability or Security & Compliance, not the option the release-tracker script uses.
+* A `/retest` comment on a commit retriggers the build pipelines, not only the integration tests. To re-run just the tests, label the snapshot `test.appstudio.openshift.io/run=<scenario name>`
+  (a label, not an annotation). Both are in the Konflux docs; the first attempt at this used the wrong one.
 
 ### A10. Refresh (2026-09-30, later the same day)
 
@@ -224,6 +226,7 @@ New since the plan was written:
 * submariner-operator#4284 ("Update bundle SHAs for 0.23.4") merged 2026-09-30. The 0.23.4 tracker (ACM-44527) has version labels, RPM lockfiles, CVE fixes and Tekton
   updates Resolved; EC compliance (ACM-44532) is In Progress; bundle SHAs (ACM-44534) is still New although its PR merged, and QE testing (ACM-44539, a teammate) is In Progress.
   This is the same hygiene pattern as ACM-45077 and is worth one line in the tracker cleanup, not a story.
+  (Superseded on 2026-10-01: those 0.23.4 statuses were reconciled against live state; see section A11.)
 * stolostron/submariner-operator-fbc#82 (OCP 5.0 Konflux pipelines) is open, rebased on merged #81, with every GitHub check passing except the Konflux
   `submariner-fbc-5-0-on-pull-request` PipelineRun, which failed. The run was not found on the cluster this session logs in to, so the cause is unknown. It matters for S1: its progress
   comment lists #82 as open, and S1 should stay In Progress until that pipeline passes (this is already the plan's recommendation).
@@ -243,6 +246,65 @@ Improvements to make when executing:
 4. **Timing.** The grade-B deadline stories (ACM-45470, ACM-45476, owned by teammates) end today. Their evidence is the Tekton, EC and RPM lockfile PRs in section A2; post that evidence as a comment
    on ACM-45476 today if the maintainer wants it counted, since it is independent of everything else in Part A.
 5. **Preflight A4.3 counts** should read 110 PRs (not 107) when re-run.
+
+### A11. Refresh (2026-10-01): the 0.23.4 retarget, release-tooling fixes, and an open blocker
+
+Written after running the 0.23.4 release for two days. Payloads and execution order are unchanged except the two additions to comments-existing.md noted below. Nothing here has been posted to Jira beyond status
+comments and subtask updates on the 0.23.4 release tracker (ACM-44527).
+
+**New PRs, after the A10 refresh.** Not in the PR counts above; GitHub's search API was rate limited when this was written, so the total was not recomputed (re-run the A8 command; expect at least five more).
+
+| PR | State | What |
+| --- | --- | --- |
+| stolostron/submariner-release-management#112 | merged 2026-09-30 | `release-status` reads release YAMLs from origin/main as well as the working tree (it said "No stage release YAML" and listed the wrong next steps from another branch); the FBC release gate counts `BuildPLRInProgress` as passing; Step 11 checks the catalog on main, not the previous release's snapshot |
+| stolostron/submariner-release-management#113 | merged 2026-09-30 | pre-commit `make test` about 290 s to about 35 s: one test left `gh` unstubbed (about 9 s of live GitHub lookups per call, 181 s total, result dependent on GitHub state), and the hook now runs make in parallel via `MAKEFLAGS` |
+| stolostron/submariner-release-management#114 | open, CI green | "do not redo upstream work that is already done": once the upstream tag exists, CVE fixes and the upstream release are not repeated on a retarget, re-release or retry; Tekton task updates only when Enterprise Contract fails. Docs, skills, and `release-status`/`autorelease` messages (no more "rescan" or `--refresh` hints for CVE fixes after the tag) |
+| stolostron/submariner-operator-fbc#83 | merged 2026-09-30 | `update-bundle.sh` accepts `BuildPLRInProgress` as passing, as the release gate now does |
+| stolostron/submariner-operator-fbc#84 | merged 2026-09-30 | replaces bundle 0.23.2 with 0.23.4 in the catalogs (OCP 4.14 to 4.21; 0.23.x is not in 4.22 or 5.0) |
+
+**0.23.4 tracker (ACM-44527) reconciled against live state.** The A10 note on bundle SHAs, EC and QE is out of date. After the 0.23.2 to 0.23.4 retarget the subtask statuses and the newest step records
+disagreed with each other and with reality. Checked against the cluster and GitHub and fixed: component stage release (the release succeeded), release notes (present in the applied release), bundle SHAs, EC
+and version labels are now Resolved with matching step records; QE testing was reset to New (nothing has gone to QE for 0.23.4; the In Progress status was left over from the 0.23.2 round); the parent's key
+artifacts and the stage, notes and FBC subtask descriptions no longer say "pending". FBC catalog update stays In Progress. Worth a follow-up in the tooling: a retarget leaves stale step records, and the
+parent description's key artifacts are never updated by any script.
+
+**Open: 0.23.4 FBC stage releases are blocked.** The component stage release succeeded and the catalog change is merged, but the FBC operator integration test fails on all six push snapshots (OCP 4.16 to
+4.21), so the release gate correctly refuses them and step 12 cannot run.
+
+* **What fails.** The `get-unreleased-bundle` step cannot pull `registry.redhat.io/redhat/redhat-operator-index:v4.21` (`failed to fetch anonymous token ... 401 Unauthorized`, then "Make sure you have
+  ImagePullCredentials for registry.redhat.io"). The bundle is never installed, so this is not a bundle or catalog defect. Re-running the 4-21 test the documented way (label the snapshot) fails
+  identically 29 hours later, so it is persistent.
+* **Why.** The tests run as the `konflux-integration-runner` service account. Per the Konflux docs, only component-image registry secrets are linked to it automatically; credentials for any other registry
+  must be linked by hand. The live pod mounts 18 pull secrets and none has a `registry.redhat.io` entry. The tenant already has a valid one (`submariner-konflux-registry-redhat-io`), linked to all 72 build-pipeline
+  service accounts, and the builds that use it succeeded; it is simply not linked to the integration runner.
+* **What this test actually does (new, from reading the pipeline and helper code).** The passing push runs took 126 to 325 seconds (PR-event runs take about 21 seconds, a real cluster install would take far longer),
+  i.e. they ran `get-unreleased-bundle` to completion and stopped. Every later task (cluster provisioning, operator install) only runs when that step returns a bundle. It returns none for this tenant: the
+  scenario passes `CHANNEL_NAME=stable`, no catalog has a channel with that name (they are `stable-0.22`, `stable-0.23`, `stable-0.24`), so the helper finds no matching bundle and the step exits as a
+  no-op. So the "operator" scenario has only ever verified that the fragment parses and that the production index can be rendered; it has not installed anything. Restoring registry access should make it
+  pass again in about two to three minutes; it will not add install coverage. (The OCP 5.0 onboarding doc already says new overlays use the package default channel so the install actually runs, and those need
+  the OpenShift CI cluster profile as well.)
+* **Platform history (integration-service, local clone and GitHub).** `konflux-integration-runner` was introduced for integration pipelines in July 2025; since June 2026 the controller also creates it if missing,
+  with one default pull secret (`components-namespace-pull`, component-image registry only). Nothing in that code links any other registry's credentials, matching the docs (manual link required). No commit
+  from 2026-09-01 to 2026-10-01 touches this; the nearby changes are nudging, new component API groups and e2e hardening. A search of issues in `tekton-integration-catalog`, `konflux-test`,
+  `integration-service` and `build-definitions` for this error found nothing, and `konflux-test` (pinned v1.4.48) has no baked-in registry credentials.
+* **Ruled out.** All nine operator scenarios (4-14 to 4-22) are identical, with the same pipeline (`deploy-fbc-operator/0.1` via a git resolver on `main`) and params; 4-22 only looks healthy because it has had
+  no push since 2026-09-24, so there is no new result for it. `registry.redhat.io` has always required authentication (anonymous token requests return 401 for every repository), so there is no policy change to
+  blame. Upstream has not changed in a relevant way (the step action not since February; the pipeline's only recent change, 2026-09-23, was Slack task references, before the last pass on 2026-09-24).
+  No tenant secrets were created or deleted after 2026-09-15, the service account has no dangling secret references, and the tenant config in konflux-release-data has no commit touching it after 2026-09-04
+  (the local clone is from 2026-09-18; the fetch needs VPN).
+* **Unexplained.** Every push test through 2026-09-24 rendered the production index successfully (that is what the 126 to 325 second runs show) without credentials on that account, yet an anonymous render
+  fails now and `registry.redhat.io` has always required authentication. Candidates, none verified: (a) a platform-level credential (cluster-wide pull secret, or secret linking by a platform controller)
+  that was applied to these pods before and no longer is; (b) registry access that depended on where the cluster's traffic came from and no longer does. Nothing found in this tenant, in
+  `konflux-release-data` (stale local clone), or upstream shows which, or when it changed. The old passing runs are in the cluster archive, reachable only through the Konflux UI with a browser session; a log of a
+  passing run (for example the 2026-09-24 operator test) would settle it.
+* **Options, none applied.** (1) `oc secrets link konflux-integration-runner submariner-konflux-registry-redhat-io` (the documented manual step), then re-label the snapshots; a live change, reversible with
+  `oc secrets unlink`. (2) Make it permanent in konflux-release-data: other tenants there declare `ServiceAccount` manifests with `secrets:` lists, but this account is created and also edited by the
+  integration-service controller, so how the GitOps apply merges the two must be checked first. (3) Ask the Konflux platform team why the account lost access, with the log lines above.
+  Not applicable: an auth parameter on the scenario; no version of `deploy-fbc-operator` has one, and all 41 scenarios in konflux-release-data use the same pipeline.
+* **Related, not yet explained:** the open OCP 5.0 pipelines PR (stolostron/submariner-operator-fbc#82, A10) has a failing Konflux PR pipeline; it may or may not share a cause, since PR-event runs skip the
+  cluster install that fails here.
+
+**Payload additions.** Two optional bullets in comments-existing.md: the #112 to #114 and FBC PRs on ACM-39731, and a one-line retarget-hygiene note on ACM-39730.
 
 ## Part B: k8s-rebase automation (CORENET-7155)
 

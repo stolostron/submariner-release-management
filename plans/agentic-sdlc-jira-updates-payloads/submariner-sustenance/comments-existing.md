@@ -26,12 +26,25 @@ Autorelease hardening and script fixes since the Sep 13 update, found while usin
 make test now runs over 1,100 test cases (337 when the epic description was written), including fail-injection cases for every script that touches a user's checkout.
 ```
 
+Optional second comment, after the Sep 30 to Oct 1 work (fill in #114's state first; drop its bullet if it is still open and not wanted):
+
+```text
+Fixes found while retargeting the 0.23.x release (0.23.2 never shipped; now 0.23.4):
+
+* https://github.com/stolostron/submariner-release-management/pull/112 — release-status read only the checked-out branch and gave wrong next steps from any other branch; the FBC release gate rejected `BuildPLRInProgress`, which push snapshots keep after a passing run; Step 11 now checks the catalog on main
+* https://github.com/stolostron/submariner-release-management/pull/113 — pre-commit `make test` from about 5 minutes to about 35 seconds (a test hit live GitHub on every call, and the hook now runs make in parallel)
+* https://github.com/stolostron/submariner-release-management/pull/114 — do not redo CVE fixes or the upstream release once the upstream tag exists; Tekton task updates only when Enterprise Contract fails; the status tool and conductor stop suggesting otherwise
+* https://github.com/stolostron/submariner-operator-fbc/pull/83 and https://github.com/stolostron/submariner-operator-fbc/pull/84 — catalog update accepts `BuildPLRInProgress`; 0.23.2 replaced by 0.23.4
+```
+
 ## ACM-39730 (Agentic downstream release tracking in Jira)
 
 ```text
 Tracker fix since the last update: https://github.com/stolostron/submariner-release-management/pull/109 sets the Activity Type field on the tracker parent and its subtasks at creation, so creating a tracker no longer triggers the required-field bot email.
 
 The tracker is in use for the current Z-streams: ACM-45070 (0.22.2) and ACM-44527 (0.23.4).
+
+Retargeting a tracker (0.23.2 to 0.23.4) leaves step records and subtask statuses that disagree with each other and with the release; on 0.23.4 they were reconciled by hand against the cluster and GitHub. A retarget command that does this, and fills in the parent's key artifacts (no script updates them), is a follow-up.
 ```
 
 ## ACM-39736 (Release knowledge transfer to team)
