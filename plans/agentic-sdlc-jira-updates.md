@@ -228,7 +228,7 @@ New since the plan was written:
   This is the same hygiene pattern as ACM-45077 and is worth one line in the tracker cleanup, not a story.
   (Superseded on 2026-10-01: those 0.23.4 statuses were reconciled against live state; see section A11.)
 * stolostron/submariner-operator-fbc#82 (OCP 5.0 Konflux pipelines) is open, rebased on merged #81, with every GitHub check passing except the Konflux
-  `submariner-fbc-5-0-on-pull-request` PipelineRun, which failed. The run was not found on the cluster this session logs in to, so the cause is unknown. It matters for S1: its progress
+  `submariner-fbc-5-0-on-pull-request` PipelineRun, which failed. The run was not found on the cluster this session logs in to; the PR's own plan attributes it to a missing build service account (see section A11). It matters for S1: its progress
   comment lists #82 as open, and S1 should stay In Progress until that pipeline passes (this is already the plan's recommendation).
 * submariner-io/releases#1444 (the ACM-39733 upstream agentic release PR, owned by a teammate) is active again: CodeRabbit requested changes on 2026-09-10, 09-21 and 09-24
   (the stale bot also marked it stale twice), and the owner re-requested a review on 2026-09-30. It is not the maintainer's work; the ACM-39733 line in section A1 should not
@@ -301,8 +301,9 @@ parent description's key artifacts are never updated by any script.
   `oc secrets unlink`. (2) Make it permanent in konflux-release-data: other tenants there declare `ServiceAccount` manifests with `secrets:` lists, but this account is created and also edited by the
   integration-service controller, so how the GitOps apply merges the two must be checked first. (3) Ask the Konflux platform team why the account lost access, with the log lines above.
   Not applicable: an auth parameter on the scenario; no version of `deploy-fbc-operator` has one, and all 41 scenarios in konflux-release-data use the same pipeline.
-* **Related, not yet explained:** the open OCP 5.0 pipelines PR (stolostron/submariner-operator-fbc#82, A10) has a failing Konflux PR pipeline; it may or may not share a cause, since PR-event runs skip the
-  cluster install that fails here.
+* **Related, but a different cause:** the open OCP 5.0 pipelines PR (stolostron/submariner-operator-fbc#82, A10) has a failing Konflux PR pipeline. Its own plan (`plans/ocp-5-0-fbc-onboarding.md` on that branch)
+  explains it: the new pipelines name a build service account that does not exist until the tenant config for the 5-0 application merges in konflux-release-data (an ordering problem), and PR-event runs skip the
+  registry step that fails here. The same plan now records that the first 5-0 push test will hit this registry-access gap too.
 
 **Payload additions.** Two optional bullets in comments-existing.md: the #112 to #114 and FBC PRs on ACM-39731, and a one-line retarget-hygiene note on ACM-39730.
 
