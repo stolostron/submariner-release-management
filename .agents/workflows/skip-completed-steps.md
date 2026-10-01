@@ -33,10 +33,14 @@ The conductor still walks every step. Mark the ones you are skipping so it advan
 /autorelease 0.X.Y --complete tektonTasks       # EC passes, no task updates needed
 ```
 
-`upstreamRelease` verifies the tags itself and completes automatically when `v$VERSION` exists on all 5 repos. `ecFixes` verifies
-EC on the latest snapshot and completes automatically when it passes. Use `--complete` only for steps the conductor cannot verify
-on its own: `cveFixes` (no PR exists to find) and `tektonTasks` (no fix PR exists when EC already passes). Without it the conductor
-runs the CVE and Tekton task scripts for those steps.
+How the conductor decides each step is done:
+
+- `upstreamRelease` verifies the tags itself and completes when `v$VERSION` exists on all 5 repos. It runs only after its
+  dependencies (`cveFixes`, `ecFixes`, `rpmLockfiles`, `tektonTasks`, `versionLabels`) are complete, so mark skipped ones first.
+- `ecFixes` verifies EC on the latest snapshot and completes when it passes.
+- `cveFixes` and `tektonTasks` complete on their own only if the verifier finds earlier merged fix PRs (`fix-X.Y-cves*`,
+  `fix-tekton-tasks-X.Y`). With open PRs it waits. With none found it concludes the work was never done and **runs the script**.
+  When the work is deliberately skipped there is nothing to find, so use `--complete` for these two.
 
 Do **not** use `--refresh cveFixes` or `--refresh tektonTasks` on a release whose upstream tag already exists.
 

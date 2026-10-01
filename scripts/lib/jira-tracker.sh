@@ -453,9 +453,10 @@ _(populated by automation when PRs are created)_
 ## Status
 
 Waiting for skill to create PRs across repos on release-$major_minor branch.
-
-Skip when already done (retarget, re-release, retry): CVE fixes are not redone once the upstream tag exists, and Tekton task
-updates are needed only if Enterprise Contract fails. See .agents/workflows/skip-completed-steps.md.
+$(case "$step_key" in
+  cveFixes) printf '\nSkip on a retarget, re-release or retry: CVE fixes are not redone once the upstream tag exists.\nSee .agents/workflows/skip-completed-steps.md.' ;;
+  tektonTasks|ecFixes) printf '\nSkip if Enterprise Contract already passes: Tekton task updates are only needed to fix EC violations.\nSee .agents/workflows/skip-completed-steps.md.' ;;
+esac)
 DESC
       ;;
     createBranches)

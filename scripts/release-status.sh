@@ -763,9 +763,13 @@ check_step_5() {
   else
     # CVE fixes land before the upstream tag and are not redone once it exists
     # (retarget, re-release, retry). See .agents/workflows/skip-completed-steps.md.
-    local tag_ls=""
-    tag_ls=$(git ls-remote --tags "https://github.com/submariner-io/submariner-operator" "refs/tags/v$VERSION" 2>/dev/null) || tag_ls=""
-    if [ -n "$tag_ls" ]; then
+    local tag_ls="" tag_rc=0
+    tag_ls=$(git ls-remote --tags "https://github.com/submariner-io/submariner-operator" "refs/tags/v$VERSION" 2>/dev/null) || tag_rc=$?
+    if [ "$tag_rc" -ne 0 ]; then
+      # Unreachable is not "untagged": don't tell the operator to run a scan that may be unnecessary.
+      echo "⚠️  Could not check whether upstream v$VERSION is tagged (GitHub unreachable?)"
+      echo "   If it is tagged, skip CVE work: fixes land before the tag (see skip-completed-steps.md)"
+    elif [ -n "$tag_ls" ]; then
       echo "✅ Skip: upstream v$VERSION is already tagged — CVE fixes are done before the tag and not redone"
     else
       echo "ℹ️  CVE scanning requires manual review"
