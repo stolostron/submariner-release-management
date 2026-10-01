@@ -33,6 +33,19 @@ Additional argument forms:
 0.25.1 --close                   # After the release has shipped
 ```
 
+## Steps that are already done
+
+Do not redo upstream work on a retarget, re-release, or retry (maintainer decision; see
+`.agents/workflows/skip-completed-steps.md`):
+
+- **Upstream release (`upstreamRelease`)**: verifies `v$VERSION` on all 5 component repos and completes itself. Never re-cut a tag.
+- **CVE fixes (`cveFixes`)**: done before the tag; not redone. Run `--complete cveFixes` if the conductor offers to run it. The
+  3-day staleness warning is advisory; do not `--refresh cveFixes` once the tag exists.
+- **Tekton tasks (`tektonTasks`)**: needed only to fix EC violations. If EC passes, run `--complete tektonTasks`. `ecFixes`
+  verifies EC itself and completes automatically when it passes.
+
+Use `--dry-run` first to see which step the conductor would run next, then mark only the steps you verified.
+
 **Requires:** `acli jira auth login --web`, `jq`, `gh`, `oc` (logged in for verifier steps), `skopeo` (for auto-close registry probes)
 
 **Arguments:** the release version followed by any supported flags supplied by the

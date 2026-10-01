@@ -1686,6 +1686,23 @@ assert_contains "staleness: time-rule fires when stale" \
 assert_contains "staleness: time-rule includes --refresh suggestion" \
   "$_stale_err" "--refresh cveFixes"
 
+# Once upstreamRelease is complete the tag exists: CVE fixes are not redone, so the
+# age warning (and its --refresh suggestion) must not fire for cveFixes.
+_AUTORELEASE_QUIET=""
+declare -A step_statuses=([rpmLockfiles]=complete [versionLabels]=complete \
+  [tektonTasks]=complete [cveFixes]=complete [upstreamRelease]=complete)
+_stale_err=$(find_next_step "0.99.1" "z-stream" "FAKE-123" 2>&1 >/dev/null)
+assert_not_contains "staleness: no cveFixes age warning once upstream is tagged" \
+  "$_stale_err" "--refresh cveFixes"
+# ...but other time-rule steps keep their warning.
+step_timestamps=([rpmLockfiles]="2000-01-01T00:00:00Z")
+_stale_err=$(find_next_step "0.99.1" "z-stream" "FAKE-123" 2>&1 >/dev/null)
+assert_contains "staleness: rpmLockfiles age warning unaffected by upstream tag" \
+  "$_stale_err" "--refresh rpmLockfiles"
+step_timestamps=([cveFixes]="2000-01-01T00:00:00Z")
+declare -A step_statuses=([rpmLockfiles]=complete [versionLabels]=complete \
+  [tektonTasks]=complete [cveFixes]=complete)
+
 # Time-based staleness suppressed when _AUTORELEASE_QUIET=true.
 _AUTORELEASE_QUIET=true
 _stale_err=$(find_next_step "0.99.1" "z-stream" "FAKE-123" 2>&1 >/dev/null)

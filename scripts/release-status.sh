@@ -761,10 +761,22 @@ check_step_5() {
   if [ -z "$SNAPSHOT" ]; then
     echo "⏭️  Skipped (no snapshot)"
   else
-    echo "ℹ️  CVE scanning requires manual review"
-    echo "   - Upstream: grype scan on release-$MAJOR_MINOR (7 repos)"
-    echo "   - Downstream: Clair reports from snapshot $SNAPSHOT"
-    echo "   ⮕ Next: Run CVE scans and triage results (Step 5)"
+    # CVE fixes land before the upstream tag and are not redone once it exists
+    # (retarget, re-release, retry). See .agents/workflows/skip-completed-steps.md.
+    local tag_ls="" tag_rc=0
+    tag_ls=$(git ls-remote --tags "https://github.com/submariner-io/submariner-operator" "refs/tags/v$VERSION" 2>/dev/null) || tag_rc=$?
+    if [ "$tag_rc" -ne 0 ]; then
+      # Unreachable is not "untagged": don't tell the operator to run a scan that may be unnecessary.
+      echo "⚠️  Could not check whether upstream v$VERSION is tagged (GitHub unreachable?)"
+      echo "   If it is tagged, skip CVE work: fixes land before the tag (see skip-completed-steps.md)"
+    elif [ -n "$tag_ls" ]; then
+      echo "✅ Skip: upstream v$VERSION is already tagged — CVE fixes are done before the tag and not redone"
+    else
+      echo "ℹ️  CVE scanning requires manual review"
+      echo "   - Upstream: grype scan on release-$MAJOR_MINOR (7 repos)"
+      echo "   - Downstream: Clair reports from snapshot $SNAPSHOT"
+      echo "   ⮕ Next: Run CVE scans and triage results (Step 5)"
+    fi
   fi
 }
 
@@ -1497,9 +1509,13 @@ if [ -n "$TRACKER_KEY" ] && type get_release_summary &>/dev/null; then
   if [ -n "$TRACKER_SUMMARY" ] && [ "$TRACKER_SUMMARY" != "{}" ]; then
     # get_release_summary only ever marks rule-bearing steps "stale" (every other
     # step defaults to "fresh"), so selecting stale steps needs no key list here —
-    # this stays in sync with STALENESS_RULES automatically.
+    # this stays in sync with STALENESS_RULES automatically. cveFixes is excluded once the
+    # upstream tag exists: the 3d rule is not actionable after the tag (CVE fixes are not redone).
     STALE_STEPS=$(printf '%s' "$TRACKER_SUMMARY" \
-      | jq -r '[.steps | to_entries[] | select(.value.freshness == "stale") | .value.title] | join(", ")' 2>/dev/null || true)
+      | jq -r --arg tag "${TAG_EXISTS:-}" '[.steps | to_entries[]
+          | select(.value.freshness == "stale")
+          | select(.key != "cveFixes" or $tag == "")
+          | .value.title] | join(", ")' 2>/dev/null || true)
     [ -n "$STALE_STEPS" ] && echo "⚠️  Stale steps: $STALE_STEPS"
 
     # Tracker-vs-reality drift: reuse TRACKER_SUMMARY (no extra Jira query);

@@ -45,6 +45,9 @@ Release scripts automatically update tracker subtasks as they complete.
 
 **Alternative:** @.agents/workflows/fix-ec-violations.md (manual workflow)
 
+**Skip if EC already passes** — Tekton task updates exist only to fix EC violations. See
+@.agents/workflows/skip-completed-steps.md.
+
 ## 4b. Update RPM Lockfiles
 
 @/rpm-lockfile-update
@@ -58,6 +61,9 @@ Tekton task updates, before CVE scanning.
 
 @.agents/workflows/scan-cves.md
 
+**Skip if the upstream tag already exists** (retarget, re-release, retry): CVE fixes land before the tag and are not redone. See
+@.agents/workflows/skip-completed-steps.md.
+
 ## 5b. Update Component Version Labels (Z-stream only)
 
 @/update-version-labels
@@ -67,6 +73,8 @@ Tekton task updates, before CVE scanning.
 ## 6. Cut Upstream Release
 
 @.agents/workflows/cut-upstream-release.md
+
+**Skip if `v$VERSION` already exists** on all 5 component repos; never re-cut a tag.
 
 ## 7. Update Bundle SHAs
 
@@ -172,6 +180,13 @@ Tasks not tied to normal release workflow timing.
 ## Settled Decisions
 
 Decided by the maintainer. Do not re-ask or re-litigate; follow them.
+
+### Do not redo upstream work that is already done
+
+Once the upstream tag `v$VERSION` exists, do not re-run the CVE scan/fix workflow (Step 5) or re-cut the upstream release (Step 6)
+for a retarget, re-release, or retry. Tekton task updates (Step 4) are needed only when Enterprise Contract fails; if EC passes,
+skip them. Do not ask whether to redo these. Details and the `/autorelease --complete` commands are in
+`.agents/workflows/skip-completed-steps.md`.
 
 ### Sealed team entitlement bundle stays in the public repo
 

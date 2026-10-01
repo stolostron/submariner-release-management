@@ -250,6 +250,12 @@ find_next_step() {
       # knows to --refresh before proceeding.
       if [ "${_AUTORELEASE_QUIET:-}" != "true" ]; then
         local _rule="${STALENESS_RULES[$step]:-}"
+        # Once upstreamRelease is complete the tag exists, so CVE fixes are not redone
+        # (retarget/re-release/retry; see .agents/workflows/skip-completed-steps.md).
+        # A --refresh suggestion there would be wrong, so don't raise the age warning.
+        if [ "$step" = "cveFixes" ] && [ "${step_statuses[upstreamRelease]:-}" = "complete" ]; then
+          _rule=""
+        fi
         if [[ "$_rule" =~ ^[0-9]+d$ ]]; then
           local _ts="${step_timestamps[$step]:-}"
           if [ -n "$_ts" ]; then
