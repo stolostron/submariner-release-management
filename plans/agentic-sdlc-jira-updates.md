@@ -153,7 +153,7 @@ Prepared contribution approval chunk: three contribution comments from [portfoli
 
 Complete histories and issue-level Browse/Add Comments permissions were checked October 7. These comments add missing contribution deltas without repeating September remediation counts or initial adoption. Before each approved post, refresh its target and PR evidence, omit any newly recorded delta, set restricted visibility at creation and verify text/links/visibility before proceeding. No transitions, parent moves, new subtasks, marketplace PRs or upstream messages are part of this chunk.
 
-Next proposed CI approval chunk: two comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7171--research-acceptance-and-handoff).
+Prepared CI approval chunk: two comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7171--research-acceptance-and-handoff).
 
 | Order | Target | Comment to approve | Verified status / existing comments |
 | --- | --- | --- | --- |
@@ -161,6 +161,8 @@ Next proposed CI approval chunk: two comments from [portfolio-comments.md](agent
 | 2 | CORENET-7086 | Existing 27-task implementation split, original acceptance coverage and GHA/Prow scope reconciliation | To Do / 0 |
 
 October 7 full histories, original scopes and all 27 implementation descriptions were rechecked. Keep research acceptance separate from CI implementation; preserve the existing hierarchy and statuses. Refresh targets before any approved post and verify restricted visibility/text/links afterward. No new tasks, field edits, transitions or repository implementation are proposed; the contribution chunk above is also still pending.
+
+Next proposed approval chunk: one [CORENET-7615 planning comment](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7615--reconcile-planning-decisions). Its October 7 full view and complete history show To Do / zero comments; comment permissions and restricted-group membership were checked. Link both merged PR #2 and its October 1 merge discussion, acknowledge the decisions already recorded there, and request reconciliation of the decision index and original acceptance evidence. Refresh before an approved post and verify restricted visibility/text/links afterward. No related-issue edits, EVPN repository writes or transitions are part of this chunk; the contribution and CI chunks remain pending.
 
 Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
 They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
