@@ -10,7 +10,7 @@ No Dockerfile, dependency, pipeline, branch or external issue was changed by thi
 
 The three ticket-listed independent-product repositories have downstream builders in `release-0.22`, `release-0.23` and `release-0.24`.
 Their devel Dockerfiles use the shared Shipyard Dapper builder and Fedora/scratch output; these are separate upstream build paths.
-Changing only devel would leave the downstream Konflux builder references untouched.
+The ticket targets Brew/OSBS consumers of ART Go builders. The sampled downstream component Dockerfiles use UBI Go Toolset, not the named ART builder; no replacement is justified by the deadline alone. Inspect shared/transitive build inputs before identifying an affected component path.
 The rows below read an immutable branch head's Go directive and sample Konflux Dockerfile; that directive is a module floor, not the observed build compiler.
 
 | Repository | Stream | Root Go floor | Sample builder | Exact source |
@@ -29,7 +29,7 @@ The rows below read an immutable branch head's Go directive and sample Konflux D
 | subctl | 0.24 | `1.26.0` | UBI9 Go Toolset `latest` | [Dockerfile](https://github.com/submariner-io/subctl/blob/8a2d1298c2489dae7832cfc5dac7b2c489b2e9ad/package/Dockerfile.subctl.konflux) |
 
 All six 0.24 ticket-listed component Dockerfiles were read: both lighthouse components, all three submariner components and the operator use UBI9 Go Toolset.
-Older-stream rows sampled one component per repository; inspect every sibling before preparing those changes. They are not assumed byte-identical.
+Older-stream rows sampled one component per repository; inspect sibling and pipeline inputs before classifying any path as affected. No component-builder migration is proposed from these UBI samples alone.
 The operator also builds a tools module for controller-gen: inspect its own Go/toolchain directive and build path as well as the root module.
 
 The CLI is outside the four repositories named by the ticket but inside the independently released product. Its `subctl` rows above identify the same builder family;
@@ -62,14 +62,13 @@ Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all st
 
 1. Confirm the current supported streams, ticket scope and approved ART registry/tag family with the existing issue owner. Retain the module Go floors and higher toolchain requirements;
    do not choose one Go minor for all repositories merely because they share Submariner versions. Verify exact target-image availability, patch compiler, architectures and registry access.
-2. Start with an isolated addon change and an isolated independent-product change. Inspect pipeline `DOCKERFILE`/build-argument selection so each edit reaches the actual downstream build.
+2. Start with an isolated addon change for the verified Brew references. Inspect pipeline `DOCKERFILE`/build-argument selection so each edit reaches the affected build. Propose an independent-product change only if a named ART/Brew consumer is found in its Dockerfiles, shared builder or pipeline inputs; otherwise record no change required.
    Refresh branch heads first; keep upstream Dapper and downstream Konflux paths separately reviewable. Preserve source pins, runtime-base policy and image labels unless a reviewed requirement changes them.
-3. In independent-product builders, preserve and exercise existing `GOEXPERIMENT=strictfipsruntime`, `strictfipsruntime` build tags and CGO/platform handling.
-   A base substitution is not sufficient evidence of equivalent FIPS behavior. Check the target Go/crypto implementation and the accepted product build contract.
+3. Preserve each affected build's existing compiler, crypto, CGO and platform contract. Exercise `GOEXPERIMENT=strictfipsruntime` and related build tags where already configured or separately required. Check the target Go/crypto implementation against that applicable contract; preserve the addon's independent runtime-base policy.
 4. Trace RPM lockfiles and hermetic prefetch inputs against the new builder. Regenerate only affected data through the existing deterministic tools and inspect the result;
    record which dependencies/locks are unchanged instead of assuming a registry swap has no build implications.
 5. Run meaningful native builds/tests and the actual required multiarchitecture Konflux checks at each proposed head. Record the compiler used for root/tools modules,
-   platform images and strict-FIPS behavior. Keep source verification, local compilation and hosted build evidence distinct.
+   platform images and the applicable crypto behavior. Keep source verification, local compilation and hosted build evidence distinct.
 6. Review the future Y-stream propagation path: `konflux-component-setup.sh` copies the preceding stream's Dockerfile and adjusts version/branch labels.
    Updating only today's release branch can leave another predecessor or the next setup inheriting the old builder. Cover the accepted predecessor set without broadening product support.
 7. After authorized merge, verify built-image provenance and record exact evidence in ACM-45318. Builder migration does not establish ART ownership transfer, PQC runtime state,
@@ -78,5 +77,5 @@ Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all st
 ## Validation boundary and immediate next action
 
 This audit read GitHub source at pinned heads, not private registry manifests or running build containers. No target ART image or build was qualified.
-The concrete next handoff is scope/tag confirmation followed by isolated Dockerfile changes and compiler/FIPS/architecture verification.
+The concrete next handoff is supported-addon-branch/tag confirmation followed by isolated changes to verified Brew consumers and applicable compiler/crypto/architecture verification. Retain a no-change disposition for unaffected paths.
 Konflux authentication succeeds in the third October 7 pass. No migration build was submitted or qualified; approved image/scope selection and change review remain the next handoff.

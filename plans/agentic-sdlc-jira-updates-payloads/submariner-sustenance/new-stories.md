@@ -29,7 +29,7 @@ The order of creation is: story 4 first as a canary, then 1, 2, 3, 5.
 Description:
 
 ```text
-The RPM lockfile step needs Red Hat entitlements and a registry.redhat.io login. The team chose shared credentials delivered as a sealed bundle with a one-command setup; its rationale and limitations are recorded in secrets/README.md. This story delivers that setup, while ACM-39736 tracks another engineer completing a release.
+The RPM lockfile step needs Red Hat entitlements and a registry.redhat.io login. The team chose shared credentials delivered as a sealed bundle with a one-command setup; its rationale and limitations are recorded in secrets/README.md. This story delivers that setup, while ACM-39736 tracks multiple team members completing releases and feeding back gaps.
 
 _Scope:_
 
@@ -39,7 +39,7 @@ _Scope:_
 
 _Acceptance criteria:_
 
-* The supported one-command setup lets a releaser run the RPM lockfile step without creating a personal activation key; a second engineer completing a release is tracked separately in ACM-39736
+* The supported one-command setup lets a releaser run the RPM lockfile step without creating a personal activation key; multiple team members completing releases and feeding back gaps are tracked separately in ACM-39736
 * Teammates receive a rotated bundle with git pull and re-run make setup-entitlements FORCE=1 when registration must use the new activation key; password changes are shared out of band
 * Tests cover seal and open, wrong and stale passwords, rotation, tampering, and backup and restore on failed registration
 ```
@@ -180,12 +180,12 @@ Delivered in https://github.com/stolostron/submariner-release-management/pull/10
 Description:
 
 ```text
-A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). Five are Won't Fix (accepted risk, including the architecturally-required e2e-framework behaviour) and 17 are fixable. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files. The October 7 duplicate check found the broader closed Glasswing epic ACM-36285 with no children, plus related incident issues, but no matching shipyard-audit remediation story in the searched results. Reconcile that scope before creating this story; do not reopen or duplicate the broader epic.
+A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). The initial report classifies five as Won't Fix (including architectural e2e-framework behaviour) and 17 as fixable; those labels alone do not establish owner acceptance of the risk dispositions. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files. The October 7 duplicate check found the broader closed Glasswing epic ACM-36285 with no children, plus related incident issues, but no matching shipyard-audit remediation story in the searched results. Reconcile that scope before creating this story; do not reopen or duplicate the broader epic.
 
 _Scope:_
 
 * Wave 1: Dockerfile pinning and user, GitHub Actions interpolation and credentials, download integrity, security policy
-* Wave 2: test-pod hardening, validated with full e2e
+* Wave 2: test-pod hardening and consuming-repository E2E validation; verify the actual run scope rather than implying complete OCP coverage
 * Wave 3: subctl download integrity (blocked on subctl checksums and a dapper-base rebuild), eval to envsubst, image signing
 * Follow-up: CI helper pod manifest repair for OCP after the pod hardening broke admission under restricted SCC; devel repair remains open
 * Backports to release-0.18 through release-0.24 and companion PRs in lighthouse, subctl, submariner and submariner-operator

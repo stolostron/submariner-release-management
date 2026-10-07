@@ -12,12 +12,12 @@ These comments propose no transitions. Private security details and internal res
 Use this rollup if the parent needs a missing status delta; otherwise post the child-specific updates below and omit it.
 
 ```text
-The existing contribution children remain the right tracking scope:
+The existing CVE contribution children remain the right tracking scope for those skills:
 
 * ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Hosted checks are still running and GitHub reports changes requested; no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
-Neither child has met its ai-helpers merge acceptance criterion. Kubernetes rebase plugin qualification is tracked separately in CORENET-7155.
+Neither child has met its ai-helpers merge acceptance criterion. The parent's original criterion covers all generally relevant skills, so reconcile that inventory before parent acceptance. The k8s-rebase contribution remains open in https://github.com/openshift-eng/ai-helpers/pull/617; its qualification and upstreaming stay on existing CORENET-7155 tracking, without duplicate children here.
 ```
 
 ## ACM-39739 — CVE-fix contribution
@@ -57,7 +57,7 @@ Blockers: #82's published build fails before tasks start because its build accou
 ```text
 Source inventory is prepared for the October 15 builder migration. The inspected downstream component streams use UBI Go Toolset, while selected addon branches still use older Brew builders; Go floors and build paths differ by branch. Devel's Dapper builder and the addon's existing 5.0 PQC runtime selection are separate concerns.
 
-Next: confirm the intended supported branches and which builder paths are in this task's scope, then prepare reviewed changes with actual compiler, FIPS, registry and build evidence. No builder migration or shipped-image verification is claimed by the inventory.
+Next: confirm the supported branches and migrate verified Brew/OSBS builder consumers, beginning with the affected addon paths. Existing UBI Go Toolset use does not by itself require this ART migration. Inspect transitive build inputs before classifying another path as affected; prepare reviewed changes with the applicable compiler, crypto, registry and build evidence. No builder migration or shipped-image verification is claimed by the inventory.
 
 Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-release-management.
 ```

@@ -35,8 +35,8 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39731 | Record merged #109/#112/#113 and open #114 in one update | #114 is pending, not shipped |
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
-| ACM-39736 | Record shared setup and checkout-safety prerequisites | New; another engineer must complete a release and record the gaps |
-| ACM-39738 | One parent summary linking existing contribution children | New; existing k8s-rebase PR linkage is not completion of the CVE contribution scope |
+| ACM-39736 | Record shared setup and checkout-safety prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
+| ACM-39738 | One parent summary linking existing CVE contribution children and the plugin's existing epic | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
 | ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; hosted checks are running and changes requested remains. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
@@ -61,7 +61,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 
 | Issue | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
-| ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); choose approved stream/compiler/FIPS coverage and prove builds. Source inventory is preparatory evidence |
+| ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); migrate verified Brew/OSBS consumers on approved streams and prove the applicable builds; UBI Go Toolset alone is not evidence of an affected ART builder |
 | ACM-41119 | Defer completion; reconcile image coverage with builder work | Addon 5.0 PQC base selection is partial source evidence; main/5.1 differ and shipped-image policy remains unverified |
 | ACM-37426 | Description timeline correction after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
 | OPGM-364 | Answer the existing status request with blockers and remaining proof | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |

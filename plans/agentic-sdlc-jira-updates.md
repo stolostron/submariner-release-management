@@ -79,12 +79,12 @@ Child stories carry the component "Multicluster Networking[ext]" (id 33720), ass
 
 | Destination | Evidence and acceptance boundary |
 | --- | --- |
-| Existing ACM-39729/39730/39731/39736 | CVE tooling and September remediation; tracker fixes; merged conductor hardening and open #114; prerequisites for another releaser, not completed knowledge transfer |
-| Existing ACM-39738/39739/39740 | Parent contribution summary, open shipyard#2582 and merged cve-agent#35. Neither child has met its ai-helpers merge criterion; ACM-39740 also requires validation on another product |
+| Existing ACM-39729/39730/39731/39736 | CVE tooling and September remediation; tracker fixes; merged conductor hardening and open #114; shared prerequisites; multiple releasers and feedback remain required for knowledge transfer |
+| Existing ACM-39738/39739/39740 | Parent covers all generally relevant skills; reconcile that inventory. Open shipyard#2582 and merged cve-agent#35 do not meet either child's ai-helpers merge criterion; ACM-39740 also requires another product's validation |
 | S1 | OCP-major FBC onboarding: release-management#109 and FBC#81 merged; pipeline #82 and configuration/build/install/release gates remain. Relate existing OPGM-364 lifecycle work and ACM-45508 addon consumption without claiming their acceptance criteria |
 | S2 | Delivered EC deny-rule detection, supported by #109 and the EC/Tekton inventory |
 | S3 | Delivered Claude/Codex discovery and compatibility contract; five known overlapping konflux-ci-fix debt entries and installed-host execution remain |
-| S4 | Delivered RPM prerequisite setup in #110; another engineer completing a release remains ACM-39736 work |
+| S4 | Delivered RPM prerequisite setup in #110; multiple team members completing releases and feeding back gaps remain ACM-39736 work |
 | S5 | Glasswing shipyard audit: September inventory of 113 PRs, 105 merged. Eight FIND-006 drafts closed unmerged October 3; finding disposition and open OCP helper/upgrade repairs remain |
 
 The September inventories retain their original periods: 40 CVE-fix PRs (23 merged, 17 closed unmerged), three lint-only reverts,
