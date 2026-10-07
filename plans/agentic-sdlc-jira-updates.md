@@ -143,7 +143,7 @@ Completed first approved chunk: one comment on each existing story, using the [f
 
 All four comments were created on October 7 at 18:23 UTC with restricted visibility set in the initial request; exact ADF text, clickable links, group visibility and unchanged issue statuses were verified after each write. No issue fields or statuses were changed, and no new issues were created. The CVE comment uses refreshed Shipyard head 3b67af1a and its current changes-requested review. For later updates, re-read complete comments and refresh mutable evidence; if a write has an uncertain result, inspect Jira before retrying.
 
-Next proposed approval chunk: three contribution comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md), independent of S/K story creation.
+Prepared contribution approval chunk: three contribution comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md), independent of S/K story creation.
 
 | Order | Target | Comment to approve | Verified status / existing comments |
 | --- | --- | --- | --- |
@@ -152,6 +152,15 @@ Next proposed approval chunk: three contribution comments from [portfolio-commen
 | 3 | ACM-39738 | Roll up the existing children and flag the broader contribution inventory; keep Kubernetes tracking on CORENET-7155 | New / 0 |
 
 Complete histories and issue-level Browse/Add Comments permissions were checked October 7. These comments add missing contribution deltas without repeating September remediation counts or initial adoption. Before each approved post, refresh its target and PR evidence, omit any newly recorded delta, set restricted visibility at creation and verify text/links/visibility before proceeding. No transitions, parent moves, new subtasks, marketplace PRs or upstream messages are part of this chunk.
+
+Next proposed CI approval chunk: two comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7171--research-acceptance-and-handoff).
+
+| Order | Target | Comment to approve | Verified status / existing comments |
+| --- | --- | --- | --- |
+| 1 | CORENET-7171 | Existing research/rationale, created subtasks, post-merge AI boundary and implementation handoffs | In Progress / 2 |
+| 2 | CORENET-7086 | Existing 27-task implementation split, original acceptance coverage and GHA/Prow scope reconciliation | To Do / 0 |
+
+October 7 full histories, original scopes and all 27 implementation descriptions were rechecked. Keep research acceptance separate from CI implementation; preserve the existing hierarchy and statuses. Refresh targets before any approved post and verify restricted visibility/text/links afterward. No new tasks, field edits, transitions or repository implementation are proposed; the contribution chunk above is also still pending.
 
 Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
 They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
