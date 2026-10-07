@@ -25,7 +25,7 @@ done without the other.
 Rules that apply to both parts:
 
 * The first four existing-story comments are posted, with verified ids in A5. Other payloads remain pending; post only newly approved missing deltas.
-* An existing-issue comment must add a missing delivery, blocker/evidence, specific correction or answer to an explicit request. Keep audit instructions and repeated criteria in the plan; omit parent rollups that only repeat children. New-story comments establish their evidence baseline; epic summaries primarily introduce the new tracking keys.
+* An existing-issue comment must add a missing delivery, blocker/evidence, specific correction or answer to an explicit request. Keep audit instructions and repeated criteria in the plan; omit parent rollups that only repeat children. New-story comments establish their evidence baseline. Creating child tracking does not itself warrant an epic comment; propose one only for a separate missing decision, delivery or blocker.
 * Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify them on read-back; PR-field edits remain a separate action.
 * The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
   and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
@@ -47,13 +47,12 @@ Exact text to post, all under [agentic-sdlc-jira-updates-payloads/](agentic-sdlc
 | Part | File | Content |
 | --- | --- | --- |
 | A | [new-stories.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/new-stories.md) | Five new child stories with fields, description, acceptance criteria, progress comment |
-| A | [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md) | Comments for four existing stories and an epic summary |
+| A | [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md) | Four posted existing-story comments and an optional URL-conversion draft |
 | A | [epic-description-edits.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-description-edits.md) | Five independent old-to-new edits to the epic description |
 | A | [shipyard-audit-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/shipyard-audit-prs.md) | 113 PRs of the Glasswing shipyard-audit remediation, state read 2026-09-30 |
 | A | [cve-fix-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md) | 43 CVE-related PRs since 2026-09-13 |
 | A | [ec-tekton-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/ec-tekton-prs.md) | 33 Enterprise Contract and Tekton task PRs since 2026-09-13 |
 | B | [epic-and-stories.md](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) | The epic description (currently empty) and five child stories with fields and progress comments |
-| B | [epic-comment.md](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-comment.md) | A summary comment for the epic |
 
 ## Part A: Submariner Sustenance Automation (ACM-39728)
 
@@ -150,7 +149,7 @@ All four comments were created on October 7 at 18:23 UTC with restricted visibil
 
 The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Start with the short CORENET-7171 correction, then the two CVE contribution children, then EVPN planning. Parent rollups and the older CVE progress comment are deferred pending a distinct decision or delivery. Deadline/status and release-evidence groups follow, with engineering priorities proceeding in parallel. Each group requires its own approval and fresh target/evidence read; set restricted visibility at creation and verify text/links/visibility before the next write. Earlier audits and preparation do not authorize posting.
 
-Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional stale-count cleanup. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. Summary comments wait for real keys and verified writes; closure reviews remain separate from progress reporting.
+Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional stale-count cleanup. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. No automatic epic summary is proposed; closure reviews remain separate from progress reporting.
 
 Each creation or field write is read back before the next. Skip completed deltas.
 
@@ -169,7 +168,6 @@ Each creation or field write is read back before the next. Skip completed deltas
 7. The four existing-story updates are already posted (ids above); reconcile their read-backs and post only newly approved missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
 8. Apply only approved epic description edits not already performed in group 6, verifying each by read-back; omit completed deltas.
-9. Post the epic summary comment.
 
 ### A6. Verification and rollback
 
@@ -302,7 +300,7 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
 
 ### B6. Execution order
 
-The epic description is an independent group-6 edit after its own scope/ADF review; it needs no new story keys. The sequence below handles approved K-story creation and the dependent summary. Omit an already-applied description delta.
+The epic description is an independent group-6 edit after its own scope/ADF review; it needs no new story keys. The sequence below handles approved K-story creation. Omit an already-applied description delta.
 
 1. Create K1 as a canary with writable create fields: `parent` CORENET-7155, its own Activity Type/priority, approved Story Points and sprint, assignee and description. Verify the default/approved reporter on read-back. CORENET create metadata does not expose legacy Epic Link, Original story points or Git Pull Request; do not send those fields in the create request. Read back membership and rendered content.
    Fetch K1 edit metadata, then set approved Original story points and read it back. Existing Story edit metadata supports that field, but the new canary must confirm it. Do not transition to In Progress until it is set and verified; do not silently omit the automation prerequisite.
@@ -314,7 +312,6 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 5. Transition K1–K5 to In Progress only if included in the approved group, after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
 6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic CORENET-7155") and read it back.
-7. Post the epic summary comment (epic-comment.md) with the real story keys and verify its text and restricted visibility.
 
 ### B7. Verification and rollback
 

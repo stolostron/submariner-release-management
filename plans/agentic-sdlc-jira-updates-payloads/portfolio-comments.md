@@ -135,7 +135,7 @@ Reference: [MCH#4109](https://github.com/stolostron/multiclusterhub-operator/pul
 
 ## Group 8 — new tracking
 
-Approve [ACM stories](submariner-sustenance/new-stories.md) in order S4, S2, S3, S1, S5 and [CORENET stories](k8s-rebase/epic-and-stories.md) separately. Epic summaries wait for approved creations and real keys; status changes require acceptance/workflow review.
+Approve [ACM stories](submariner-sustenance/new-stories.md) in order S4, S2, S3, S1, S5 and [CORENET stories](k8s-rebase/epic-and-stories.md) separately. Omit epic summaries that repeat the child tracking; status changes require acceptance/workflow review.
 
 ## Group 9 — acceptance reviews
 
