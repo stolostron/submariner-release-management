@@ -101,7 +101,7 @@ Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-r
 ```text
 Status: At Risk.
 
-Remaining work: merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, build the existing valid lifecycle fragment, and issue its FBC release with advisory/snapshot/IIB or catalog proof. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81; that is not publication evidence.
+Remaining work: merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, build the existing valid lifecycle fragment, and issue its FBC release with an advisory/snapshot/IIB reference. Confirm package membership in redhat-operator-index:v5.0 or post the allowed team IIB/catalog proof. Do not add OpenShift 5 / 5.0 compatibility statements. Keep this existing lifecycle publication separate from the broader OCP 5 rollout. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81; that is not publication evidence.
 
 Blockers: #82's published build fails before tasks start because its build account is missing; the October 7 tenant read also finds the Application and Component absent. Local tenant/admission drafts need fresh-base review and reconciliation. Registry access for the push test and current publication proof remain unverified.
 ```

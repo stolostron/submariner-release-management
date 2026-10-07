@@ -138,6 +138,7 @@ Description:
 Adding an OCP version to the Submariner FBC and Konflux tenant configuration was a manual, error-prone process that only handled 4.x. OCP 5.0 is the first major-version transition. This adds a resumable onboarding CLI that prepares isolated catalog, tenant and admission changes, validates their contracts, builds and serves the target catalog image, and checks live build provenance separately, without touching unrelated work.
 
 Dev and test consumption of ART 5.0 builds is tracked separately in ACM-45508; this story covers the release and FBC side.
+OPGM-364 separately tracks publication of existing valid lifecycle data without adding OpenShift 5 compatibility statements; its allowed IIB/catalog proof does not require this story's runtime acceptance.
 
 _Scope:_
 
