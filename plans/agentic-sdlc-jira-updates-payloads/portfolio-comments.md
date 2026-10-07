@@ -21,6 +21,8 @@ CORENET-7086: no parent comment proposed. Its hierarchy already exposes the task
 
 ## Group 2 — CVE contributions
 
+Reviewed October 7, 2026 at 23:11 UTC; two child comments only, in the order below. Both issues remain New. Refresh targets and mutable PR evidence before posting; verify each restricted comment, including its rendered text/links, before the next write.
+
 ### ACM-39740 — CVE-agent contribution
 
 One contribution update; keep the already-posted adoption/remediation progress on ACM-39729/39736. Include the agent's cve-jira-triage dependencies in its configuration review rather than creating a duplicate task.
@@ -36,9 +38,9 @@ Per-product configuration still needs extraction, including component/image mapp
 One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
 
 ```text
-The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is now at 4fa703b3c4302d559023963071aec4e0187e127a. At the latest October 7 read, all returned hosted checks pass or skip; a review requests changes on this head, four current threads remain unresolved and no current-head approval is recorded.
+The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 remains open at 453dbbb47ad189b86d811aeff0c18b71115126e1. At the October 7, 23:11 UTC read, all returned hosted checks pass or skip; the latest changes-requested review is on the previous head, two current threads remain unresolved and no current-head approval is recorded.
 
-Source supports repository-registry configuration and native-command overrides. Project-level configuration without hardcoded Submariner values and the go-fix-cves contribution to ai-helpers remain unfinished.
+This PR implements per-repository .cve-fix.yaml overrides and repository-registry configuration. Remaining Submariner-specific defaults and the go-fix-cves merge into ai-helpers still need resolution against this story’s acceptance criteria.
 ```
 
 ACM-39738: no parent rollup proposed. Post the two child updates only; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
