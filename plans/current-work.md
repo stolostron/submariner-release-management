@@ -6,6 +6,7 @@ Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
+Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates; it starts with CI research, then CVE contributions and EVPN planning. FBC recovery, private CVE triage and deadline work retain their engineering priority.
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).

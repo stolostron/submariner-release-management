@@ -5,76 +5,11 @@
 Prepared October 7, 2026; none posted. These drafts are independent of creating S/K stories.
 Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
 Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
-These comments propose no transitions. Private security details and internal research are excluded.
+The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
 
-## ACM-39738 — contribution parent
+## Group 1 — CI research handoff
 
-Prepared contribution chunk: post the two child updates first, then this parent rollup if its delta is still missing. All three are comments only; preserve their current statuses, parents and subtask membership.
-
-```text
-Contribution progress remains on the existing CVE subtasks:
-
-* ACM-39739: the maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open. Project-neutral go-fix-cves packaging and merge into ai-helpers remain required.
-* ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged in the maintained source repository. Product configuration extraction, ai-helpers merge and non-Submariner CVE validation remain required.
-
-The original parent criterion covers all generally relevant skills. Reconcile the broader candidate inventory, including the release tooling, before parent acceptance; do not treat these two subtasks as the complete list. Kubernetes plugin work remains on CORENET-7155 with draft https://github.com/openshift-eng/ai-helpers/pull/617. Reuse existing tracking and preserve the current hierarchy.
-```
-
-## ACM-39739 — CVE-fix contribution
-
-One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
-
-```text
-The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The October 7 read finds hosted checks still running, one unresolved current YAML review thread and no review/approval on that head. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
-
-The source now supports repository-registry configuration and native-command overrides. Remaining work is to accept the prerequisite and package the contribution under the original criteria: go-fix-cves merged into ai-helpers, configurable through a project-level file, with no hardcoded Submariner values.
-```
-
-## ACM-39740 — CVE-agent contribution
-
-One contribution update; keep the already-posted adoption/remediation progress on ACM-39729/39736. Include the agent's cve-jira-triage dependencies in its configuration review rather than creating a duplicate task.
-
-```text
-Preparatory CVE-agent work merged October 6 in https://github.com/dfarrell07/claude-skills/pull/35: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling.
-
-This is the maintained source merge. Product-specific component/image mappings, version references and Jira scope still need extraction into per-product configuration, including the cve-jira-triage dependencies used by the agent. Remaining original criteria are a configurable agent merged into ai-helpers and validation against at least one non-Submariner product's CVE issues. No such validation is established by the Submariner source merge or initial team adoption.
-```
-
-## OPGM-364 — requested lifecycle status
-
-```text
-Status: At Risk.
-
-Remaining work: merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, build the existing valid lifecycle fragment, and issue its FBC release with advisory/snapshot/IIB or catalog proof. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81; that is not publication evidence.
-
-Blockers: #82's published build fails before tasks start because its build account is missing; the October 7 tenant read also finds the Application and Component absent. Local tenant/admission drafts need fresh-base review and reconciliation. Registry access for the push test and current publication proof remain unverified.
-```
-
-## ACM-45318 — builder migration inventory
-
-```text
-Source inventory is prepared for the October 15 builder migration. The inspected downstream component streams use UBI Go Toolset, while selected addon branches still use older Brew builders; Go floors and build paths differ by branch. Devel's Dapper builder and the addon's existing 5.0 PQC runtime selection are separate concerns.
-
-Next: confirm the supported branches and migrate verified Brew/OSBS builder consumers, beginning with the affected addon paths. Existing UBI Go Toolset use does not by itself require this ART migration. Inspect transitive build inputs before classifying another path as affected; prepare reviewed changes with the applicable compiler, crypto, registry and build evidence. No builder migration or shipped-image verification is claimed by the inventory.
-
-Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-release-management.
-```
-
-## CORENET-7086 — parent CI handoff
-
-Prepared CI chunk: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
-
-```text
-Research is tracked in CORENET-7171, with 27 implementation subtasks already under this parent (CORENET-7173 through CORENET-7199). The earlier proposal to create them is superseded.
-
-Original parent criteria remain unit tests, coverage, formatting/lint, license headers and API compatibility. The linked research proposal already recommends goheader and CRD/Go API compatibility checks. Confirm their implementation coverage: CORENET-7195 checks dependency licenses, and CORENET-7174 checks API conventions; neither substitutes for headers or backward compatibility. Reconcile these criteria within existing tracking before accepting the parent.
-
-The proposed GHA/Prow split also needs alignment with CORENET-7083's Prow presubmit/postsubmit/periodic scope and CORENET-7087's Prow image-build scope. CORENET-7196/7197/7198 specify post-merge AI automation; preserve that boundary.
-
-All 27 implementation subtasks remain To Do. Research and task creation do not establish configured or passing CI. Kubernetes plugin qualification stays on CORENET-7155.
-```
-
-## CORENET-7171 — research acceptance and handoff
+### CORENET-7171 — research acceptance and handoff
 
 One missing handoff delta; omit another tool-survey list or research link already present in the May comments. No resolution is proposed.
 
@@ -86,9 +21,60 @@ The proposal and CORENET-7196/7197/7198 specify post-merge AI security/RBAC/rele
 Review the existing proposal against this subtask's original research-and-rationale criterion. Parent handoffs remain explicit coverage of license-header/API-compatibility checks and alignment of the proposed GHA/Prow split with CORENET-7083/7087. These implementation decisions do not add acceptance criteria to this research subtask. No deployed or passing CI is established by the research records.
 ```
 
-## CORENET-7615 — reconcile planning decisions
+### CORENET-7086 — parent CI handoff
 
-Next approval chunk: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
+Group 1: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
+
+```text
+Research is tracked in CORENET-7171, with 27 implementation subtasks already under this parent (CORENET-7173 through CORENET-7199). The earlier proposal to create them is superseded.
+
+Original parent criteria remain unit tests, coverage, formatting/lint, license headers and API compatibility. The linked research proposal already recommends goheader and CRD/Go API compatibility checks. Confirm their implementation coverage: CORENET-7195 checks dependency licenses, and CORENET-7174 checks API conventions; neither substitutes for headers or backward compatibility. Reconcile these criteria within existing tracking before accepting the parent.
+
+The proposed GHA/Prow split also needs alignment with CORENET-7083's Prow presubmit/postsubmit/periodic scope and CORENET-7087's Prow image-build scope. CORENET-7196/7197/7198 specify post-merge AI automation; preserve that boundary.
+
+All 27 implementation subtasks remain To Do. Research and task creation do not establish configured or passing CI. Kubernetes plugin qualification stays on CORENET-7155.
+```
+
+## Group 2 — CVE contributions
+
+### ACM-39740 — CVE-agent contribution
+
+One contribution update; keep the already-posted adoption/remediation progress on ACM-39729/39736. Include the agent's cve-jira-triage dependencies in its configuration review rather than creating a duplicate task.
+
+```text
+Preparatory CVE-agent work merged October 6 in https://github.com/dfarrell07/claude-skills/pull/35: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling.
+
+This is the maintained source merge. Product-specific component/image mappings, version references and Jira scope still need extraction into per-product configuration, including the cve-jira-triage dependencies used by the agent. Remaining original criteria are a configurable agent merged into ai-helpers and validation against at least one non-Submariner product's CVE issues. No such validation is established by the Submariner source merge or initial team adoption.
+```
+
+### ACM-39739 — CVE-fix contribution
+
+One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
+
+```text
+The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The October 7 read finds hosted checks still running, one unresolved current YAML review thread and no review/approval on that head. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
+
+The source now supports repository-registry configuration and native-command overrides. Remaining work is to accept the prerequisite and package the contribution under the original criteria: go-fix-cves merged into ai-helpers, configurable through a project-level file, with no hardcoded Submariner values.
+```
+
+### ACM-39738 — contribution parent
+
+Group 2: post ACM-39740, then ACM-39739, then this parent rollup if its delta is still missing. All three are comments only; preserve their current statuses, parents and subtask membership.
+
+```text
+Contribution progress remains on the existing CVE subtasks:
+
+* ACM-39739: the maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open. Project-neutral go-fix-cves packaging and merge into ai-helpers remain required.
+* ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged in the maintained source repository. Product configuration extraction, ai-helpers merge and non-Submariner CVE validation remain required.
+
+The original parent criterion covers all generally relevant skills. Reconcile the broader candidate inventory, including the release tooling, before parent acceptance; do not treat these two subtasks as the complete list. Kubernetes plugin work remains on CORENET-7155 with draft https://github.com/openshift-eng/ai-helpers/pull/617. Reuse existing tracking and preserve the current hierarchy.
+```
+
+## Group 3 — EVPN planning handoff
+
+### CORENET-7615 — reconcile planning decisions
+
+Group 3: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
 
 ```text
 The planning context merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. Its [merge discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records a preliminary artifact-graph review, selection of the OpenShift FRR image and frr-metrics with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
@@ -98,7 +84,59 @@ Product home, Konflux cluster and AMI channel remain pending in that discussion;
 Next: record owner/date/evidence for decisions already made, reconcile CORENET-7501/7504/7505 through owner corrections or attributed resolution, and confirm release gates and responsibilities against the original criteria. Pending decisions need not all be settled for the decision-recording criterion. Keep this issue open for that acceptance review; source imports and static CI are separate implementation work.
 ```
 
-## ACM-26999 — older CVE scope
+## Group 4 — deadline and requested status
+
+### ACM-45318 — builder migration inventory
+
+```text
+Source inventory is prepared for the October 15 builder migration. The inspected downstream component streams use UBI Go Toolset, while selected addon branches still use older Brew builders; Go floors and build paths differ by branch. Devel's Dapper builder and the addon's existing 5.0 PQC runtime selection are separate concerns.
+
+Next: confirm the supported branches and migrate verified Brew/OSBS builder consumers, beginning with the affected addon paths. Existing UBI Go Toolset use does not by itself require this ART migration. Inspect transitive build inputs before classifying another path as affected; prepare reviewed changes with the applicable compiler, crypto, registry and build evidence. No builder migration or shipped-image verification is claimed by the inventory.
+
+Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-release-management.
+```
+
+### OPGM-364 — requested lifecycle status
+
+```text
+Status: At Risk.
+
+Remaining work: merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, build the existing valid lifecycle fragment, and issue its FBC release with advisory/snapshot/IIB or catalog proof. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81; that is not publication evidence.
+
+Blockers: #82's published build fails before tasks start because its build account is missing; the October 7 tenant read also finds the Application and Component absent. Local tenant/admission drafts need fresh-base review and reconciliation. Registry access for the push test and current publication proof remain unverified.
+```
+
+## Group 5 — release evidence
+
+### ACM-44527 — remaining FBC blocker
+
+The existing parent already records component-stage success; omit another copy. Post this delta once on the parent if still missing, rather than repeating it on six subtasks.
+
+```text
+The October 7 retained-snapshot check recovers all six 4.16–4.21 FBC snapshot/scenario identities at source 2e6b489e65620738d68504d9158418fe463e2073. All six have finished aggregate Failed verdicts and completed operator TestFail results; standard-test warnings do not override those failures. The exact map is recorded in plans/fbc-failure-recovery.md in stolostron/submariner-release-management.
+
+The registry Secret remains absent from the integration runner's credential lists. Verify credential usability, field ownership and intended catalog content before a separately authorized repair/rerun. Component-stage success is confirmed separately; FBC stage/QE/production are still gated on their own successful evidence.
+```
+
+### ACM-45070 — candidate evidence reconciliation
+
+Use only if this candidate is relevant to the intended release; the inspection does not select or approve it.
+
+```text
+The retained nine-component candidate submariner-0-22-20261002-125823-000-lz has aggregate TestSucceeded=True and completed integration results with warnings. Its bundle image has version v0.22.2 and CSV version 0.22.2 at digest sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3, built from operator source da81d438c0456f367bc5e83e671362181a47ab63.
+
+All seven CSV related-image digests differ from the mapped snapshot operands. Registry copying can change manifest digests; this comparison alone does not establish invalid content. The snapshot operator inspects as v0.22.2, while the embedded production operator could not be inspected. Reconcile source/content and registry identity before accepting the candidate, completing EC/bundle tracking or filling parent artifact references. No release completion is claimed.
+```
+
+## Group 6 — independent epic descriptions
+
+Use [ACM epic edits](submariner-sustenance/epic-description-edits.md) in order 4, 3, 5, then optional 1/2; review the [Kubernetes epic description](k8s-rebase/epic-and-stories.md#epic-corenet-7155-add-a-description-it-is-currently-empty) separately. Neither needs new story keys.
+
+## Group 7 — scope and conditional corrections
+
+The optional [ACM-39732 candidate note](submariner-sustenance/comments-existing.md#acm-39732-optional-progress-on-the-existing-url-conversion-story) belongs here; it is fork-only progress, not shipped functionality.
+
+### ACM-26999 — older CVE scope
 
 ```text
 The existing May progress comment already records production CVE tooling. Current hardening is tracked in ACM-39729, with upstream contribution split between ACM-39739 (go-fix-cves) and ACM-39740 (CVE agent).
@@ -108,7 +146,20 @@ Preparatory shipped-image/provenance improvements merged in https://github.com/d
 Please reconcile this older issue's remaining scope with those existing stories before choosing acceptance or supersession. There is no need to recreate the production tooling or file duplicate contribution stories.
 ```
 
-## ACM-37426 — OLMv1 target correction
+### ACM-25779 — proposed description correction
+
+This is a replacement description after reviewing the full original ADF; preserve useful existing links and other required fields.
+Its May comment already explains deferral, so another copy of that comment is unnecessary.
+
+```text
+Complete the agreed Submariner pipeline migration to konflux-build-catalog. The console-specific template is unrelated to this issue; migration instructions remain https://github.com/stolostron/konflux-build-catalog.
+
+The May update records addon adoption and explains that the five upstream component repositories and FBC use inline pipelineSpec with existing release automation. Confirm current branch coverage before changing pipelines.
+
+The remaining decision is ownership and maintenance responsibility: adopting the ACM abstraction requires reconciling the existing Submariner pipeline-generation and release tooling. Keep the migration open pending that decision, consistent with the May comment. Confirm the adopted scope and supported branches before implementation; changing the task to assessment-only or marking it superseded requires a separate scope decision.
+```
+
+### ACM-37426 — OLMv1 target correction
 
 Apply only after the issue owner confirms the July 24 target is still ACM 5.1 (February 2027). Update the title and description together; make no status change or duplicate timeline comment. Save the original ADF, preserve its analysis-document link on `analysis doc` below, and retain other useful reference nodes. Confirm fresh-install/migration scope with the owner; do not silently transfer the old 5.0 contract to 5.1.
 
@@ -125,40 +176,15 @@ The earlier ACM 5.0 analysis scoped fresh installs only and left upgrade migrati
 Reference: [MCH#4109](https://github.com/stolostron/multiclusterhub-operator/pull/4109).
 ```
 
-## ACM-25779 — proposed description correction
+## Group 8 — new tracking
 
-This is a replacement description after reviewing the full original ADF; preserve useful existing links and other required fields.
-Its May comment already explains deferral, so another copy of that comment is unnecessary.
+Approve [ACM stories](submariner-sustenance/new-stories.md) in order S4, S2, S3, S1, S5 and [CORENET stories](k8s-rebase/epic-and-stories.md) separately. Epic summaries wait for approved creations and real keys; status changes require acceptance/workflow review.
 
-```text
-Complete the agreed Submariner pipeline migration to konflux-build-catalog. The console-specific template is unrelated to this issue; migration instructions remain https://github.com/stolostron/konflux-build-catalog.
+## Group 9 — acceptance reviews
 
-The May update records addon adoption and explains that the five upstream component repositories and FBC use inline pipelineSpec with existing release automation. Confirm current branch coverage before changing pipelines.
+ACM-34592 and ACM-40644 retain acceptance-review dispositions in the [queue](../jira-update-queue.md). They have no unconditional closure payload.
 
-The remaining decision is ownership and maintenance responsibility: adopting the ACM abstraction requires reconciling the existing Submariner pipeline-generation and release tooling. Keep the migration open pending that decision, consistent with the May comment. Confirm the adopted scope and supported branches before implementation; changing the task to assessment-only or marking it superseded requires a separate scope decision.
-```
-
-## ACM-44527 — remaining FBC blocker
-
-The existing parent already records component-stage success; omit another copy. Post this delta once on the parent if still missing, rather than repeating it on six subtasks.
-
-```text
-The October 7 retained-snapshot check recovers all six 4.16–4.21 FBC snapshot/scenario identities at source 2e6b489e65620738d68504d9158418fe463e2073. All six have finished aggregate Failed verdicts and completed operator TestFail results; standard-test warnings do not override those failures. The exact map is recorded in plans/fbc-failure-recovery.md in stolostron/submariner-release-management.
-
-The registry Secret remains absent from the integration runner's credential lists. Verify credential usability, field ownership and intended catalog content before a separately authorized repair/rerun. Component-stage success is confirmed separately; FBC stage/QE/production are still gated on their own successful evidence.
-```
-
-## ACM-45070 — candidate evidence reconciliation
-
-Use only if this candidate is relevant to the intended release; the inspection does not select or approve it.
-
-```text
-The retained nine-component candidate submariner-0-22-20261002-125823-000-lz has aggregate TestSucceeded=True and completed integration results with warnings. Its bundle image has version v0.22.2 and CSV version 0.22.2 at digest sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3, built from operator source da81d438c0456f367bc5e83e671362181a47ab63.
-
-All seven CSV related-image digests differ from the mapped snapshot operands. Registry copying can change manifest digests; this comparison alone does not establish invalid content. The snapshot operator inspects as v0.22.2, while the embedded production operator could not be inspected. Reconcile source/content and registry identity before accepting the candidate, completing EC/bundle tracking or filling parent artifact references. No release completion is claimed.
-```
-
-## ACM-34593 — original build-failure acceptance review
+### ACM-34593 — original build-failure acceptance review
 
 The September closure request already exists. Add this new build evidence only if not recorded, then separately review the original DNF/RPM criteria and fix attribution before proposing a resolution.
 
