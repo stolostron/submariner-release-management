@@ -27,7 +27,7 @@ The October 7 authenticated read checked `submariner-tenant`. The 5.0 Applicatio
 the existing Docker-config Secret remains unlinked to the integration runner. No PipelineRuns are retained; the [work map](current-work.md#release-recovery-and-time-sensitive-work) owns the current snapshot total.
 The six exact failed 4.x [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) are recovered;
 re-read their identities and verify intended catalog content before reruns. Credential usability and controller ownership remain unverified.
-The earlier GitLab read failed DNS; fresh-base access has not been re-established.
+The refreshed GitLab main read still fails DNS. The published failed PipelineRun is no longer retained; its GitHub check preserves the missing-account error, corroborated by the current tenant read.
 The original plan's cluster findings remain dated observations. Native image/E2E validation is recorded in
 [implementation status](ocp-5-implementation-status.md); those runs were not repeated during this consolidation.
 The September 24 status document describes an earlier state, including before #81 merged.
@@ -35,6 +35,7 @@ The September 24 status document describes an earlier state, including before #8
 The catalog on current FBC main uses provisional minimum Submariner stream **0.24**, default channel **stable-0.24**,
 and bundles **0.24.0 / 0.24.1**. The unchanged bundle compatibility declaration reported in the implementation record is `v4.15-v4.19`.
 Catalog validation and a native OCP-base image test establish packaging behavior, not operator compatibility on OCP 5.
+OPGM-364 requires publication of existing valid lifecycle data without new OpenShift 5 / 5.0 compatibility statements; team IIB/catalog proof is an allowed alternative to public-index membership. The program’s October 7 parent guidance separately requires a fully supported 4.22/5.0 version at GA. Lifecycle publication alone does not establish that support qualification.
 
 ## 1. Refresh and reconcile configuration
 
@@ -110,7 +111,7 @@ Compare both pipelines with their reviewed predecessor: `catalog-5-0` input, the
 event-specific tags and CEL filters, lifecycle task ordering/result forwarding, and all four platforms.
 Existing local lifecycle injection and native-image reports are supporting evidence; require the actual Konflux run as well.
 
-The October 6 allowlist audit found all **12 unique task refs** from the push/PR pair in the acceptable-bundles data. Four matching entries expire:
+The October 7 refresh finds all **12 unique task refs** from the push/PR pair in current acceptable-bundles data. Five matching entries expire; the earlier October 6 artifact recorded four:
 
 | Task | Pinned digest prefix | Allowlist expiry (UTC) |
 | --- | --- | --- |
@@ -118,14 +119,15 @@ The October 6 allowlist audit found all **12 unique task refs** from the push/PR
 | run-opm-command-oci-ta | `edc7d8263a73` | 2026-10-30 00:00 |
 | validate-fbc | `4b635b529a29` | 2026-10-30 00:00 |
 | fbc-inject-lifecycle-oci-ta | `a80834195fca` | 2026-10-31 00:00 |
+| deprecated-image-check | `0ccc688a77e9` | 2026-11-06 00:00 |
 
 The lifecycle pin is therefore **not non-expiring**, contrary to #82's existing description. Refresh task trust and deny-rule checks before merging/running;
 allowlist membership alone is not a complete Enterprise Contract verdict. Keep a repo-wide task bump separately reviewable if it touches 4.x pipelines.
-The source artifact is `quay.io/konflux-ci/tekton-catalog/data-acceptable-bundles@sha256:693fcd1ade400a64844e93dfa7d031afde64a3ca42336a45bafdf25f288bfb72`,
-with YAML layer `sha256:391d61ce92a7d70de02fa6e310955a30415bdbcdeeb7dd5ba8625b7bb647f7c0`. To reproduce the dated read:
+The refreshed source artifact is `quay.io/konflux-ci/tekton-catalog/data-acceptable-bundles@sha256:5c50ac7864a2e7c30e211278f4d7a6d718b9061df904059d216b06927053ea34`,
+with YAML layer `sha256:8d02b6b687936335df2ff6b53e0db6f28eb27c182e08855c758e95e0c2037a3f`. To reproduce this dated read:
 
 ```bash
-oras blob fetch quay.io/konflux-ci/tekton-catalog/data-acceptable-bundles@sha256:391d61ce92a7d70de02fa6e310955a30415bdbcdeeb7dd5ba8625b7bb647f7c0 --output /path/to/task-trust.yaml
+oras blob fetch quay.io/konflux-ci/tekton-catalog/data-acceptable-bundles@sha256:8d02b6b687936335df2ff6b53e0db6f28eb27c182e08855c758e95e0c2037a3f --output /path/to/task-trust.yaml
 ```
 
 Read effective rulesets and current-head checks with app IDs. The inspected rules require six Actions contexts (app 15368) and DCO (app 1861);
