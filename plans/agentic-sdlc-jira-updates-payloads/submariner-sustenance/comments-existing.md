@@ -70,7 +70,7 @@ Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard
 ```text
 CVE remediation since the last update (2026-09-13 to 2026-09-30):
 
-* 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. Full list: plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md in stolostron/submariner-release-management.
+* 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. [Full PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md).
 * 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-06).
 * The skill hardening for the ai-helpers contribution is still open in https://github.com/submariner-io/shipyard/pull/2582.
 ```
@@ -103,11 +103,11 @@ Before posting, replace all keys and reconcile every status/count with the refre
 ```text
 Update for 2026-08-04 to 2026-09-30 at 05:00 UTC, reconstructed and verified on 2026-10-06. The sweep recorded 335 PRs by the maintainer across 12 repositories (290 merged, 32 closed without merging, 13 open); the largest groups are the Glasswing shipyard-audit remediation (113), Enterprise Contract and Tekton fixes (74) and CVE fixes (about 68). Theme membership other than the audit series is classified by PR title and repository; the inventory records each assignment. Shipped and ongoing work is tracked in new child stories:
 
-* <S1> Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft): stolostron/submariner-release-management#109 merged; stolostron/submariner-operator-fbc#81 merged and #82 open. Not finished: konflux-release-data changes and real builds and install are unverified.
-* <S2> Detect Enterprise Contract deny rules during Tekton task updates: #109.
-* <S3> Deliver shared Claude/Codex skill discovery and compatibility contract: #109. Five known konflux-ci-fix debt entries and installed-host validation remain.
-* <S4> One-command setup for RPM lockfile prerequisites: #110 merged.
-* <S5> Remediate Glasswing shipyard audit findings: September inventory of 113 PRs (105 merged); all eight FIND-006 drafts closed without merging on October 3. Their finding needs a disposition, and coordinated upgrade-test repair PRs shipyard#2654/subctl#1944 remain open.
+* <S1> Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft): [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged; [operator-fbc#81](https://github.com/stolostron/submariner-operator-fbc/pull/81) merged and [operator-fbc#82](https://github.com/stolostron/submariner-operator-fbc/pull/82) open. Not finished: konflux-release-data changes and real builds and install are unverified.
+* <S2> Detect Enterprise Contract deny rules during Tekton task updates: [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged.
+* <S3> Deliver shared Claude/Codex skill discovery and compatibility contract: [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged. Five known konflux-ci-fix debt entries and installed-host validation remain.
+* <S4> One-command setup for RPM lockfile prerequisites: [release-management#110](https://github.com/stolostron/submariner-release-management/pull/110) merged.
+* <S5> Remediate Glasswing shipyard audit findings: September inventory of 113 PRs (105 merged); all eight FIND-006 drafts closed without merging on October 3. Their finding needs a disposition, and coordinated upgrade-test repair PRs [shipyard#2654](https://github.com/submariner-io/shipyard/pull/2654) and [subctl#1944](https://github.com/submariner-io/subctl/pull/1944) remain open.
 
 Existing stories updated: ACM-39731 (autorelease hardening), ACM-39730 (tracker), ACM-39736 (ownership transfer prerequisites), ACM-39729 (CVE remediation, 40 PRs and 259 issues).
 ```

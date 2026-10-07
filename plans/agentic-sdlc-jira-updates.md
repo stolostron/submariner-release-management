@@ -25,6 +25,7 @@ done without the other.
 Rules that apply to both parts:
 
 * Nothing here has been posted or edited in Jira; every payload is exact text to post after the preflight passes.
+* Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify them on read-back; PR-field edits remain a separate action.
 * The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
   and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
 * These are proposed text payloads, not raw Jira REST requests. Jira Cloud descriptions, comments and the Git Pull Request field use Atlassian Document Format (ADF).
