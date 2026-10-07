@@ -13,13 +13,13 @@ Use this order for the remaining Jira work. Start with small comments supported 
 
 | Order | Logical group | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
-| 1 | CI research handoff | CORENET-7171 → CORENET-7086 | Documented research and existing task split; keep implementation handoffs separate from research acceptance |
-| 2 | CVE contributions | ACM-39740 → ACM-39739 → ACM-39738 | Merged source first, mutable PR second, parent last; preserve each contribution criterion |
+| 1 | CI research correction | CORENET-7171 | Correct the obsolete task-creation and PR-review statements; defer the parent comment |
+| 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
 | 3 | EVPN planning handoff | CORENET-7615 | Recorded decisions and remaining review; comment only |
 | 4 | Deadline and requested status | ACM-45318 → OPGM-364 | Refresh branch/build scope and live blockers; no completion claim |
 | 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Mutable artifact evidence needs refresh; no candidate selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional count edits 1/2. CORENET-7155 description separately | Substantive corrections before optional metrics; preserve ADF; no new keys required |
-| 7 | Scope and conditional corrections | ACM-26999; ACM-25779; ACM-37426; optional ACM-39732 | Scope/owner decisions remain; fork-only progress is optional |
+| 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
 | 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; retain project canaries/read-back; summaries wait for keys. Terminal transitions wait for group 9 |
 | 9 | Acceptance and closure reviews | ACM-34592; ACM-34593; ACM-40644; any proposed finished-story transitions | Original criteria, attribution, artifact/QE proof and workflow required; no automatic closure |
 
@@ -52,13 +52,13 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
-| ACM-39738 | Group 2: parent rollup after both CVE subtask comments, with the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; a88023ad checks pass/skip, but its current-head review requests changes and three current threads remain unresolved. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
+| ACM-39738 | Defer a duplicate child-progress rollup; settle the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
+| ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; 4fa703b3 checks are still running, aggregate changes requested comes from older heads, and two current threads remain unresolved. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
 | ACM-39740 | Group 2 first: source #35 merge and agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
 The first four posted existing-story updates and pending epic text are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).
-The contribution parent/child comments below are independent of S-story creation. Keep ACM-39733 with its existing owner;
+The two contribution-child comments are independent of S-story creation; no parent rollup is proposed. Keep ACM-39733 with its existing owner;
 ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or comment is proposed for those three here.
 
 ## Releases — 17
@@ -82,7 +82,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 | ACM-37426 | Coordinated title/description timeline correction using the prepared draft after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
 | OPGM-364 | Answer the existing status request with blockers and remaining proof | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |
 | ACM-25779 | Replace the stale console-specific description with the actual Submariner pipeline scope | Existing May comment already explains ownership-dependent deferral. Do not repost it or treat inline pipelines as an unrecorded failure |
-| ACM-26999 | Reconcile older CVE scope/links with ACM-39729/39739/39740 | Existing May comment already says production tooling exists. Link remaining upstream contribution rather than repeat the original delivery; closure/supersession needs a scope decision |
+| ACM-26999 | Defer another progress comment; reconcile older CVE scope with ACM-39729/39739/39740 | The May comment already records production tooling and remaining contribution. Closure/supersession needs a scope decision |
 | ACM-34592 | Closure review with existing five PRs | All five directly read PRs merged May 28. Parent ACM-34591 is Closed and the comment asks for closure; review issue criteria and current transition/resolution before resolving |
 | ACM-34593 | Closure review of the original build failure | October 2 route-agent push build succeeds at 82adbacd; retained snapshot exists, while its EC scenario fails. Confirm the original DNF/RPM criteria and fix attribution before resolving; EC failure is a separate investigation |
 
@@ -95,8 +95,8 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | Assigned issues | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
 | CORENET-7155 | Reviewed description, K-story split and one summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
-| CORENET-7086 | Group 1: parent handoff after the research comment | To Do; the original May draft's "will split into subtasks" is obsolete. It is separate from the Kubernetes plugin |
-| CORENET-7171 | Group 1 first: research acceptance and implementation handoff | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
+| CORENET-7086 | Defer a parent comment until a concrete implementation or ownership decision | To Do; task membership is already visible. Header/API coverage and GHA/Prow scope remain implementation questions |
+| CORENET-7171 | Group 1: correct obsolete task-creation and PR-review statements | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
 | CORENET-7615 | Group 3: link merged planning PR #2 and its substantive merge discussion; reconcile recorded decisions and remaining acceptance | To Do / no comments. Discussion records the FRR/exporter choice and transit-VIF resolution, but the published decision index remains unreconciled. Confirm release gates/responsibilities and owner-recorded criteria resolutions; pending decisions need not all be settled. Imports and CI remain separate |
@@ -122,7 +122,7 @@ Resolved recent release steps stay as evidence on their parents; routine timesta
 ## Apply a reviewed update
 
 Re-read the target's description, complete comments, PR field, parent and available transitions; preserve the original rich text.
-Post only a missing factual delta, with comment visibility `Red Hat Employee` set at creation and verified on read-back.
+Post only a missing delivery, blocker/evidence, correction or answer to an explicit request. Keep audit instructions and repeated criteria in this plan; omit duplicate rollups. Set comment visibility `Red Hat Employee` at creation and verify it on read-back.
 Descriptions/PR fields need ADF or a converting client. Read back each write and record its issue/comment id before continuing.
 Status reviews are separate from comments and require acceptance evidence, resolution metadata and any project points/sprint requirements. Live metadata confirms required resolution on terminal transitions; the existing closure candidates remain reviews, not approved transitions. CORENET Original story points/PR fields need post-create edits; see the epic plan.
 No branch push, PR update, Jira write, cluster change or release is authorized by this planning document.
