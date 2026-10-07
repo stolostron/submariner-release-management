@@ -16,7 +16,7 @@ Text blocks are Markdown for a converting client/UI; direct Jira Cloud REST writ
 * Progress comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as on the siblings.
 * Git Pull Request field is `customfield_10875`, an ADF rich-text document (see Part A, section A5 of the plan, for the canary step).
 
-The order of creation is: story 4 first as a canary, then 1, 2, 3, 5.
+The order of creation is: story 4 first as a canary, then 2, 3, 1, 5: delivered scopes before unfinished rollout/remediation. Approve the split and fields first; proposed resolution remains an acceptance review.
 
 ## Story 4 (canary): One-command setup for RPM lockfile prerequisites
 
@@ -56,52 +56,6 @@ Delivered in https://github.com/stolostron/submariner-release-management/pull/11
 
 Per the PR description, a full rpm-lockfile-update run on release-0.24 regenerated the gateway, globalnet, route-agent and nettest lockfiles using this setup.
 ```
-
-## Story 1: Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft)
-
-* Summary: `Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft)`
-* Priority: Major (`10002`)
-* Activity Type: Future Sustainability (`10606`)
-* Target status: In Progress; discover the issue's available transition. This is not finished.
-* Links: related-issue links to ACM-45508 (dev/test consumption of ART 5.0 builds) and OPGM-364 (existing lifecycle publication), using the currently available link type; check existing links and read back each addition.
-* Git Pull Request: `https://github.com/stolostron/submariner-release-management/pull/109`, `https://github.com/stolostron/submariner-operator-fbc/pull/81`, `https://github.com/stolostron/submariner-operator-fbc/pull/82`
-
-Description:
-
-```text
-Adding an OCP version to the Submariner FBC and Konflux tenant configuration was a manual, error-prone process that only handled 4.x. OCP 5.0 is the first major-version transition. This adds a resumable onboarding CLI that prepares isolated catalog, tenant and admission changes, validates their contracts, builds and serves the target catalog image, and checks live build provenance separately, without touching unrelated work.
-
-Dev and test consumption of ART 5.0 builds is tracked separately in ACM-45508; this story covers the release and FBC side.
-
-_Scope:_
-
-* scripts/fbc-onboard.py with phases plan, prepare-config, prepare-catalog, prepare and test-image, plus tests, fixtures and an end-to-end harness
-* Full OCP identities (4.x and 5.x) carried through release scope, generation, status, snapshot checks and prod-index verification
-* /add-fbc-ocp-version skill and FBC workflow rewrite, with rollout evidence requirements
-* OCP 5.0 catalog and pipelines in submariner-operator-fbc, and tenant and admission configuration in konflux-release-data
-
-_Acceptance criteria:_
-
-* Onboarding is reproducible for OCP 4.23, 5.0 and 5.1 (done in an end-to-end run with real Kustomize, OPM and Podman)
-* OCP 5.0 catalog and pipelines merged, and Konflux builds pass on all four platforms
-* Tenant and admission changes merged in konflux-release-data, and the live release plans match the admissions
-* Installation verified on a real OCP 5 cluster (not done yet; the catalog inputs, minimum Submariner stream 0.24 and channel head 0.24.1, are provisional)
-```
-
-Progress comment (post after creation):
-
-```text
-October 7 read:
-
-* https://github.com/stolostron/submariner-release-management/pull/109 and https://github.com/stolostron/submariner-operator-fbc/pull/81 are merged: onboarding CLI, regression coverage, OCP-major workflow support and a provisional OCP 5.0 catalog.
-* https://github.com/stolostron/submariner-operator-fbc/pull/82 remains open; its published build fails before tasks start because the build account is missing. The tenant read also found the Application and Component absent.
-* Registry repair, tenant and managed-admission drafts exist locally and require fresh-base review. Tenant reconciliation provisions the build account; admissions gate later releases.
-
-Still required: registry credential usability, merged configuration/pipelines, actual four-platform build/provenance, release matching, catalog proof and applicable real-cluster installation. Task trust expires October 30/31 at the pinned audit; re-read current allow/deny policy before execution and replace expired or denied refs when required. Existing OPGM-364 tracks lifecycle publication; ACM-45508 tracks addon consumption. Neither establishes OCP 5 runtime support.
-```
-
-Rollout evidence and remaining gates: [OCP 5.0 FBC rollout plan](../../ocp-5-0-fbc-rollout.md).
-Before posting, refresh the progress comment from that plan, including registry access, target-index membership and task-trust expiry.
 
 ## Story 2: Detect Enterprise Contract deny rules during Tekton task updates
 
@@ -168,6 +122,52 @@ Progress comment (post after creation):
 ```text
 Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): shared skill discovery and the compatibility contract. On October 7, make test-skills passes all 19 checks with five known debt entries, all in konflux-ci-fix. Passing the debt ratchet does not establish zero debt or complete installed-host execution. Keep that follow-up explicit in plans/claude-codex-skill-compatibility.md.
 ```
+
+## Story 1: Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft)
+
+* Summary: `Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft)`
+* Priority: Major (`10002`)
+* Activity Type: Future Sustainability (`10606`)
+* Target status: In Progress; discover the issue's available transition. This is not finished.
+* Links: related-issue links to ACM-45508 (dev/test consumption of ART 5.0 builds) and OPGM-364 (existing lifecycle publication), using the currently available link type; check existing links and read back each addition.
+* Git Pull Request: `https://github.com/stolostron/submariner-release-management/pull/109`, `https://github.com/stolostron/submariner-operator-fbc/pull/81`, `https://github.com/stolostron/submariner-operator-fbc/pull/82`
+
+Description:
+
+```text
+Adding an OCP version to the Submariner FBC and Konflux tenant configuration was a manual, error-prone process that only handled 4.x. OCP 5.0 is the first major-version transition. This adds a resumable onboarding CLI that prepares isolated catalog, tenant and admission changes, validates their contracts, builds and serves the target catalog image, and checks live build provenance separately, without touching unrelated work.
+
+Dev and test consumption of ART 5.0 builds is tracked separately in ACM-45508; this story covers the release and FBC side.
+
+_Scope:_
+
+* scripts/fbc-onboard.py with phases plan, prepare-config, prepare-catalog, prepare and test-image, plus tests, fixtures and an end-to-end harness
+* Full OCP identities (4.x and 5.x) carried through release scope, generation, status, snapshot checks and prod-index verification
+* /add-fbc-ocp-version skill and FBC workflow rewrite, with rollout evidence requirements
+* OCP 5.0 catalog and pipelines in submariner-operator-fbc, and tenant and admission configuration in konflux-release-data
+
+_Acceptance criteria:_
+
+* Onboarding is reproducible for OCP 4.23, 5.0 and 5.1 (done in an end-to-end run with real Kustomize, OPM and Podman)
+* OCP 5.0 catalog and pipelines merged, and Konflux builds pass on all four platforms
+* Tenant and admission changes merged in konflux-release-data, and the live release plans match the admissions
+* Installation verified on a real OCP 5 cluster (not done yet; the catalog inputs, minimum Submariner stream 0.24 and channel head 0.24.1, are provisional)
+```
+
+Progress comment (post after creation):
+
+```text
+October 7 read:
+
+* https://github.com/stolostron/submariner-release-management/pull/109 and https://github.com/stolostron/submariner-operator-fbc/pull/81 are merged: onboarding CLI, regression coverage, OCP-major workflow support and a provisional OCP 5.0 catalog.
+* https://github.com/stolostron/submariner-operator-fbc/pull/82 remains open; its published build fails before tasks start because the build account is missing. The tenant read also found the Application and Component absent.
+* Registry repair, tenant and managed-admission drafts exist locally and require fresh-base review. Tenant reconciliation provisions the build account; admissions gate later releases.
+
+Still required: registry credential usability, merged configuration/pipelines, actual four-platform build/provenance, release matching, catalog proof and applicable real-cluster installation. Task trust expires October 30/31 at the pinned audit; re-read current allow/deny policy before execution and replace expired or denied refs when required. Existing OPGM-364 tracks lifecycle publication; ACM-45508 tracks addon consumption. Neither establishes OCP 5 runtime support.
+```
+
+Rollout evidence and remaining gates: [OCP 5.0 FBC rollout plan](../../ocp-5-0-fbc-rollout.md).
+Before posting, refresh the progress comment from that plan, including registry access, target-index membership and task-trust expiry.
 
 ## Story 5: Remediate the Glasswing shipyard audit findings
 
