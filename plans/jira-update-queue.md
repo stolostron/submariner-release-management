@@ -31,7 +31,8 @@ FBC recovery, the four private CVE cases and October 15 builder work retain thei
 
 The unrestricted, paginated `assignee = currentUser()` search returned **703 unique issues across nine projects**:
 80 active, 623 terminal. Of these, 483 are Vulnerability issues: four active and 479 terminal.
-All 220 other assigned issues were fully re-read, alongside nine related non-Vulnerability issues and the four active private vulnerabilities. The pre-post audit found assigned keys/statuses and inspected full-view update fields unchanged.
+The latest non-Vulnerability refresh read 228 full documents: all 220 other assigned issues plus eight related targets. The four active private vulnerabilities were inspected in the earlier comprehensive sweep.
+The repeated audit found assigned keys/statuses, inspected scope fields and complete target comment histories unchanged.
 The tables below account for **all 76 active non-Vulnerability issues**. Terminal issues default to no update.
 The September 13 onward non-Vulnerability update search returned 118 issues, including 53 terminal ones;
 an `updated` timestamp alone does not establish new engineering work.

@@ -277,7 +277,12 @@ Source review confirms the verifier omits snapshot aggregate conditions and choo
 stage generation repeats that selection. The recovery plan now requires fresh finished/successful verdicts, returned scope/name comparison and generated-YAML identity review.
 No script, snapshot, release or posted comment changed.
 
+The pending lifecycle-status comment now retains the original prohibition on new OpenShift 5 compatibility statements, distinguishes the release reference
+from package-publication proof and preserves the permitted team IIB/catalog alternative. S1 explicitly keeps that existing publication acceptance separate
+from its broader runtime scope. The queue's refresh count now matches the latest 220 assigned plus eight related documents;
+private vulnerability inspection remains attributed to the earlier comprehensive sweep.
+
 ## Documentation validation
 
-The grouping revision and its commit hook passed full `make test` and commit lint. Final-review validation covers full repository checks, 143 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Only the pending CVE-fix comment and epic deny-rule wording change fenced payload text; all four posted blocks remain unchanged. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
+The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 145 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending CVE-fix and lifecycle comments, epic deny-rule wording and S1's lifecycle boundary change fenced payload text; all four posted blocks remain unchanged. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
