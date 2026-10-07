@@ -17,13 +17,11 @@ Existing comments cover the conductor/refactor PRs and September 13 fixes. Refre
 ```text
 Autorelease updates since September 13:
 
-* [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) (merged September 29): retry/reuse RPM lockfile PRs, serialize Tekton updates, harden checkout restoration and failure checks, strengthen release-note evidence/resume/apply, and add team-onboarding and OCP-major identity handling.
-* [release-management#112](https://github.com/stolostron/submariner-release-management/pull/112) (merged): fix cross-branch release status, accept the retained BuildPLRInProgress marker after passing checks, and inspect the Step 11 catalog on main.
+* [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) (merged September 29): retry/reuse RPM lockfile PRs, serialize Tekton updates, harden checkout restoration and failure checks, strengthen release-note evidence/resume/apply.
+* [release-management#112](https://github.com/stolostron/submariner-release-management/pull/112) (merged): fix cross-branch release status, adjust EC handling of retained BuildPLRInProgress markers, and inspect the Step 11 catalog on main.
 * [release-management#113](https://github.com/stolostron/submariner-release-management/pull/113) (merged): parallelize the test hook and remove a repeated live-GitHub lookup from the tests.
 * [operator-fbc#83](https://github.com/stolostron/submariner-operator-fbc/pull/83) and [operator-fbc#84](https://github.com/stolostron/submariner-operator-fbc/pull/84) (merged): accept BuildPLRInProgress in catalog updates and retarget 0.23.2 to 0.23.4.
-* [release-management#114](https://github.com/stolostron/submariner-release-management/pull/114) remains an open proposal: skip completed CVE/upstream-release work once the upstream tag exists, make Tekton updates conditional on EC failure, and align status/conductor messages. These changes are not on main.
-
-The repository suite reports over 1,100 shell assertions and Python test cases, including checkout/worktree failure injection. This aggregate is not a count of unique test functions.
+* [release-management#114](https://github.com/stolostron/submariner-release-management/pull/114) remains open: document skipping CVE/upstream-release work when the upstream tag exists and skipping Tekton updates when EC passes, and adjust status/staleness messages. These changes are not on main.
 ```
 
 ## ACM-39730 (Agentic downstream release tracking in Jira)
@@ -33,7 +31,7 @@ Tracker fix since the last update: https://github.com/stolostron/submariner-rele
 
 The tracker is in use for the current Z-streams: ACM-45070 (0.22.2) and ACM-44527 (0.23.4).
 
-Retargeting a tracker (0.23.2 to 0.23.4) leaves step records and subtask statuses that disagree with each other and with the release; on 0.23.4 they were reconciled by hand against the cluster and GitHub. A retarget command that does this, and fills in the parent's key artifacts (no script updates them), is a follow-up.
+The 0.23.2-to-0.23.4 retarget required manual reconciliation of step records, subtask statuses and artifact references against cluster and GitHub evidence. Automated retarget/reconciliation and refresh of the parent’s Key Artifacts remain follow-ups; the current tracker integration records step data but does not refresh that parent section.
 ```
 
 ## ACM-39736 (Release knowledge transfer to team)
@@ -46,7 +44,7 @@ Shared setup and checkout-safety prerequisites have improved:
 * https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key.
 * https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch-safety hardening, add-team-member hardening, and shared Claude/Codex skill discovery. Installed-host execution remains separate qualification.
 
-Still needed for this story's original acceptance criteria: multiple team members each complete a full downstream release using the skills and workflow docs, with the maintainer available for questions but not driving. Document their gaps and feed them back into skill/doc improvements. A first volunteer's release is a milestone, not completion of this story.
+Still needed for this story's original acceptance criteria: multiple team members each complete a full downstream release using the skills and workflow docs, with the maintainer available for questions but not driving. Document their gaps and feed them back into skill/doc improvements.
 ```
 
 ## ACM-39729 (Harden autonomous CVE remediation)
@@ -57,9 +55,9 @@ Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard
 CVE remediation during the September 13–30 reporting window, plus current skill work:
 
 * 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. [Full PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md).
-* 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-06).
+* 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-07).
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
-* https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c3a429d86624c9302b4f4f01276115ad8, with a clean matching local checkout. Returned hosted checks pass or skip, but the new current-head review requests changes on four current threads; no current-head approval is recorded. The PR reports 1,372 regression checks and focused/live OpenShift validation with explicit limits; those runs were not repeated here.
+* https://github.com/submariner-io/shipyard/pull/2582 remains open at ab10cebfe8e72cef5d443cb852abf1f1e0249afb. At the October 7, 17:50 UTC read, hosted checks are still running; one unresolved current review thread remains, and no review or approval is recorded on this new head. The PR’s regression and live OpenShift validation claims are author-reported and were not repeated by this audit. Robustness and daily-use acceptance remain to be reviewed before contribution.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.
