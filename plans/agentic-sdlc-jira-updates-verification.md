@@ -320,6 +320,18 @@ backing up unrelated working-tree changes first. Source preservation remains req
 loaded-runtime and retained-budget checks remain required before fresh qualification. Story descriptions, baseline comments and acceptance criteria are unchanged.
 No plugin backup, push, test or qualification was performed by this documentation review.
 
+## Canary completion and PR-field review
+
+The creation sequences previously created the remaining stories before posting the canary's restricted baseline comment, and later PR-field steps
+unconditionally resumed writes after a comment-only fallback. Both sequences now finish canary field/comment read-backs before further creations;
+then finish each story's approved field/comment writes before the next. Unsupported PR fields retain their links in restricted comments;
+failed or mismatched writes still stop for reconciliation. Field edits preserve existing rich text and links, and mandatory CORENET points remain required.
+
+Fresh October 7 create metadata again returns 81 ACM and 21 CORENET fields; CORENET's PR and Original story points fields remain absent at creation.
+Both sampled Story edit-metadata reads expose the PR field with `set` only. The installed CLI still offers default comment visibility without a restriction flag.
+New issues require their own metadata and actual canary read-backs; this review performed no create, comment, field edit or transition.
+All story/epic payload blocks, posted records and historical inventories remain unchanged.
+
 ## Documentation validation
 
 The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
