@@ -44,7 +44,7 @@ The latest content pass repeated the complete 703-issue inventory and read 88 ac
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline. All four active private Vulnerability full views were also refreshed, without shipped-image triage.
 All comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
-The 39 direct PR reads include the five legacy-closeout PRs and the OLMv1 reference. Published heads/states are unchanged apart from this planning PR. Shipyard returns 46 successful and three skipped check records; its body gained an automated CodeRabbit summary, without changing the author-reported validation claims.
+The 39 direct PR reads include the five legacy-closeout PRs and the OLMv1 reference. Published heads/states are unchanged apart from this planning PR and EVPN #6’s new 629d9e67 head. Its verify check initially returned pending and now passes; tide remains pending and the import is still open. Shipyard returns 46 successful and three skipped check records; its body gained an automated CodeRabbit summary, without changing the author-reported validation claims.
 A subsequent complete review/thread read finds a new 17:13 UTC CodeRabbit changes-requested review on that head, with four unresolved current requests; it still has no approval. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
@@ -120,7 +120,7 @@ The [published Kubernetes v1.37.1 release](https://github.com/kubernetes/kuberne
 ## Field and infrastructure evidence
 
 The proposed-action audit read both projects' complete Story create metadata (ACM 81 fields, CORENET 21), project permissions,
-and edit/transition metadata for 20 existing targets. All reads succeeded. Current project permissions allow create/edit/comment/link/assign/transition/resolve;
+and edit/transition metadata for 21 existing targets. All reads succeeded. Current project permissions allow create/edit/comment/link/assign/transition/resolve;
 those permissions do not authorize writes on the user's behalf. Both Story type ids are 10009.
 Reporter is required with a default; verify the approved/default reporter after creation.
 
@@ -185,7 +185,7 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 | ACM-37426 timeline correction | Exact title and description drafts are prepared; apply together only after confirming the 5.1 target and install/migration contract, preserving original reference links |
 | Deferred/other-owned/private work | No bulk comment, duplicate task creation, reopening, other-owner transition or vulnerability closure is proposed |
 
-Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk does not depend on story creation or the PR-field canary. Its autorelease draft is consolidated; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates.
+Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk does not depend on story creation or the PR-field canary. Its autorelease and CVE drafts each contain one complete comment; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates. The Kubernetes epic describes evidence gates as a design contract, with enforcement and installed-runtime qualification still required.
 
 The content passes corrected these scope/claim problems:
 
@@ -205,10 +205,6 @@ read-only verification cannot establish that a future write or transition succee
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 64 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 57 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
-
-The first commit-hook attempt hit an existing sign-off assertion despite the earlier full-suite pass.
-A private two-commit fixture reproduced the assertion's `git log | grep -q` race: Git exited 141 (SIGPIPE) while grep matched successfully.
-The focused release-note suite then passed all 48 checks. No test implementation was changed; publication still requires a passing normal commit hook.

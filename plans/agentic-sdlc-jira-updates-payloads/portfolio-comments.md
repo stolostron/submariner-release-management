@@ -22,7 +22,7 @@ Neither child has met its ai-helpers merge acceptance criterion. The parent's or
 
 ## ACM-39739 — CVE-fix contribution
 
-Use this in place of the optional maintenance paragraph in `submariner-sustenance/comments-existing.md`; post once.
+Use one focused contribution update on this target, keeping ACM-39729’s remediation progress on that story.
 
 ```text
 The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Returned hosted checks pass or skip; GitHub reports changes requested, and no current-head approval is recorded. The [October 7 current-head review](https://github.com/submariner-io/shipyard/pull/2582#pullrequestreview-5445744394) requests changes on four current threads covering exit-status classification, active-worker cleanup, self-fix cleanup and YAML fix-state parsing. Four older unresolved threads are outdated. Triage the current requests against source; author responses do not establish acceptance.
@@ -34,7 +34,7 @@ Remaining for this story: acceptance of the prerequisite, configurable project-n
 
 ## ACM-39740 — CVE-agent contribution
 
-Use this in place of the optional standalone cve-agent bullet in `submariner-sustenance/comments-existing.md`; post once.
+Use one focused contribution update on this target, keeping ACM-39729’s remediation progress on that story.
 
 ```text
 Preparatory CVE-agent work merged October 6: https://github.com/dfarrell07/claude-skills/pull/35. It improves shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling.
@@ -89,7 +89,7 @@ The EVPN CI/CD planning context landed October 1 in https://github.com/openshift
 
 Remaining acceptance: confirm the artifact graph, release gates and responsibilities with reviewers; record an owner and date for each decision when it is made, beginning with product home, cluster, payload and AMI channel; and obtain owner-recorded resolution of the three acceptance conflicts (CORENET-7501, CORENET-7504, CORENET-7505). Pending decisions need not all be settled for the decision-recording criterion.
 
-Current repository work has moved beyond planning: public-safety checks [EVPN #4](https://github.com/openshift/evpn-gateway-appliance/pull/4) and a build-root [EVPN #5](https://github.com/openshift/evpn-gateway-appliance/pull/5) merged October 5; appliance import [EVPN #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) and Ansible imports [EVPN #3](https://github.com/openshift/evpn-gateway-appliance/pull/3) and [EVPN #7](https://github.com/openshift/evpn-gateway-appliance/pull/7) remain open. #6 verify passes and #7 verify fails at the inspected heads. These are separate implementation handoffs; neither the planning merge nor static verification establishes product build/support acceptance. The current decision index still proposes owners, and 7501/7504/7505 retain the conflicting criteria without resolution comments. Keep this issue open pending its original acceptance review.
+Current repository work has moved beyond planning: public-safety checks [EVPN #4](https://github.com/openshift/evpn-gateway-appliance/pull/4) and a build-root [EVPN #5](https://github.com/openshift/evpn-gateway-appliance/pull/5) merged October 5; appliance import [EVPN #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) and Ansible imports [EVPN #3](https://github.com/openshift/evpn-gateway-appliance/pull/3) and [EVPN #7](https://github.com/openshift/evpn-gateway-appliance/pull/7) remain open. #6 verify passes at its new October 7 head 629d9e671a94e6303ff46c2e97c78b310c672c63; tide is pending. #7 verify fails at 55d471e0336fa3c6812fdf88a4ce38732bb7533b. These are separate implementation handoffs; neither the planning merge nor static verification establishes product build/support acceptance. The current decision index still proposes owners, and 7501/7504/7505 retain the conflicting criteria without resolution comments. Keep this issue open pending its original acceptance review.
 ```
 
 ## ACM-26999 — older CVE scope

@@ -39,7 +39,7 @@ Field to set: `description` (ADF, converted from the Markdown below). Nothing el
 ```text
 Bumping the Kubernetes minor version across the CoreNet Go repositories is repetitive and error-prone: align dependencies across modules, regenerate code, update version references, and fix build, lint and test breakage. This epic builds agents that automate the bump, packaged as the k8s-rebase plugin for the openshift-eng/ai-helpers marketplace (Claude Code and Codex).
 
-The design is a state machine above the agent: scripts do the repeatable work, the agent repairs breakage, and 32 verification gates decide when a step may advance, so the workflow cannot report success for work it did not verify.
+The design is a state machine above the agent: scripts do the repeatable work, the agent repairs breakage, and 32 verification gates are designed to require retained evidence before a step advances. Enforcement and installed-runtime qualification remain acceptance work.
 
 _Scope:_
 

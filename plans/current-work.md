@@ -148,7 +148,7 @@ PR #617 still has WIP, invalid-OWNERS and needs-ok-to-test labels; preserve thos
 | MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress; implementation stories remain To Do in the assigned-work query | Retain their existing scope; shared tooling ideas do not make them Kubernetes-plugin deliverables |
 
 EVPN main is `306b8fe8a68cd878a9b8272b5329e5a6b8ac1e92` (October 5). Its current `make verify` runs the planning/public-safety checks, not appliance build or AWS qualification.
-[Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) has a passing verify check at `a461e563a9fc8565655d9816a554a648928502c1`;
+[Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) has a passing verify check at the new October 7 head `629d9e671a94e6303ff46c2e97c78b310c672c63`; tide is pending and the PR remains open;
 [Ansible #7](https://github.com/openshift/evpn-gateway-appliance/pull/7) fails verify at `55d471e0336fa3c6812fdf88a4ce38732bb7533b`.
 [Earlier Ansible #3](https://github.com/openshift/evpn-gateway-appliance/pull/3) is also open; reconcile the overlapping import scope with its owners rather than assuming supersession.
 Keep these other-contributor handoffs outside assigned-issue totals and the Kubernetes plugin epic.
