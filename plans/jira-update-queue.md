@@ -5,15 +5,15 @@
 Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
 The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
 Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Remaining actions are pending. Re-read each target and omit anything already recorded before posting.
+Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
 
 ## Approval order
 
-Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four completed comments remain completed.
+Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments and group 1 remain completed.
 
 | Order | Logical group | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
-| 1 | CI research correction | CORENET-7171 | Correct the obsolete task-creation and PR-review statements; defer the parent comment |
+| 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
 | 3 | EVPN planning handoff | CORENET-7615 | Recorded decisions and remaining review; comment only |
 | 4 | Deadline and requested status | ACM-45318 → OPGM-364 | Refresh branch/build scope and live blockers; no completion claim |
@@ -32,7 +32,7 @@ FBC recovery, the four private CVE cases and October 15 builder work retain thei
 The unrestricted, paginated `assignee = currentUser()` search returned **703 unique issues across nine projects**:
 80 active, 623 terminal. Of these, 483 are Vulnerability issues: four active and 479 terminal.
 The latest non-Vulnerability refresh read 228 full documents: all 220 other assigned issues plus eight related targets. The four active private vulnerabilities were inspected in the earlier comprehensive sweep.
-The repeated audit found assigned keys/statuses, inspected scope fields and complete target comment histories unchanged.
+The pre-posting refresh found assigned keys/statuses, inspected scope fields and complete target comment histories unchanged.
 The tables below account for **all 76 active non-Vulnerability issues**. Terminal issues default to no update.
 The September 13 onward non-Vulnerability update search returned 118 issues, including 53 terminal ones;
 an `updated` timestamp alone does not establish new engineering work.
@@ -96,7 +96,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | --- | --- | --- |
 | CORENET-7155 | Reviewed description and K-story split; defer a duplicate child-tracking summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
 | CORENET-7086 | Defer a parent comment until a concrete implementation or ownership decision | To Do; task membership is already visible. Header/API coverage and GHA/Prow scope remain implementation questions |
-| CORENET-7171 | Group 1: correct obsolete task-creation and PR-review statements | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
+| CORENET-7171 | Posted comment 18824859: May task creation and post-merge AI scope | In Progress, unchanged. Review the original research/rationale deliverable; implementation tracking does not establish research acceptance |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
 | CORENET-7615 | Group 3: link merged planning PR #2 and its substantive merge discussion; reconcile recorded decisions and remaining acceptance | To Do / no comments. Discussion records the FRR/exporter choice and transit-VIF resolution, but the published decision index remains unreconciled. Confirm release gates/responsibilities and owner-recorded criteria resolutions; pending decisions need not all be settled. Imports and CI remain separate |

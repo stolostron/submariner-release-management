@@ -2,7 +2,7 @@
 
 # Additional existing-issue updates
 
-Prepared October 7, 2026; none posted. These drafts are independent of creating S/K stories.
+Group 1 posted and verified October 7, 2026 at 22:59 UTC; other groups remain pending. These updates are independent of creating S/K stories.
 Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
 Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
 The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
@@ -11,7 +11,7 @@ The [approval order](../jira-update-queue.md#approval-order) is authoritative; g
 
 ### CORENET-7171 — correct the May handoff
 
-One comment correcting two obsolete statements; preserve status. Parent coverage/ownership questions remain in the implementation plan.
+Completed: comment `18824859`, created October 7 at 22:59 UTC with initial `Red Hat Employee` visibility. Approved text, rendered links and unchanged In Progress status were verified. The block below is a fixed posted record; do not repost it. Parent coverage/ownership questions remain in the implementation plan.
 
 ```text
 Implementation subtasks CORENET-7173 through CORENET-7199 were created on May 20, 2026 and are tracked under CORENET-7086. CORENET-7196/7197/7198 scope AI security/RBAC review and release-note suggestions to post-merge workflows (push to main), correcting the earlier PR-review wording.
