@@ -129,6 +129,10 @@ oc label snapshot <verified-snapshot-name> test.appstudio.openshift.io/run=<veri
 
 The controller consumes/removes the label. Confirm that the new PipelineRun references the intended snapshot/scenario and that
 `get-unreleased-bundle` successfully rendered the authenticated index. Retain its logs, task results and complete snapshot test verdict.
+Require fresh `AppStudioIntegrationStatus=True` with reason `Finished` and `AppStudioTestSucceeded=True` after the rerun,
+with completed standard/operator results and the new operator run's success.
+The current `fbc_tests_passed` helper accepts `BuildPLRInProgress` for either scenario without inspecting completion or aggregate conditions;
+those markers alone cannot establish this recovery gate. The retained standard-test warnings are completed historical results, not an exemption for unfinished tests.
 A `/retest` comment starts a build; it does not rerun the selected snapshot's integration tests.
 
 The existing 4.x channel mismatch remains a separate coverage issue. An empty returned bundle and skipped install can be an aggregate ITS pass;
@@ -139,7 +143,11 @@ Once all applicable snapshots satisfy the existing test/content/provenance check
 FBC_EXPECTED_COMMIT=2e6b489e65620738d68504d9158418fe463e2073 ./scripts/verify-fbc-release.sh 0.23.4
 ```
 
-Confirm this is still the intended source revision before using the pin. This command validates release evidence; it does not authorize stage or production release.
+Confirm this is still the intended source revision before using the pin. Save the verifier's JSON and compare its `applicable_versions` and `snapshots`
+against the six recovered identities above. The commit pin restricts source revision, but the script selects the latest matching snapshot per Application;
+it does not pin snapshot names. Stop on a scope/name mismatch and reconcile the intended candidate before release preparation.
+Review generated stage YAMLs against the same map: the generator reruns verification and can select a different snapshot if another build appears.
+Keep the finished-run evidence alongside the verifier result; exit 0 alone does not establish test completion, installation or QE. Release authorization remains separate.
 
 ### Rollback
 
