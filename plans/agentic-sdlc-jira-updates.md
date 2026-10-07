@@ -149,7 +149,7 @@ Create stories before comments that reference their keys. Each write is verified
    Set each Git Pull Request field as in new-stories.md and read it back before the next write.
 5. After checking their acceptance criteria, transition finished stories (S2, S3, S4) to Resolved with the appropriate resolution;
    move S1 and S5 to In Progress. Use each issue's available transition metadata.
-6. Add the relationship from S1 to ACM-45508 using the currently available related-issue link type, confirmed in preflight.
+6. Add related-issue links from S1 to ACM-45508 (addon consumption) and OPGM-364 (lifecycle publication), using the link type confirmed in preflight. Check for an existing link first and read back each new relationship.
 7. Reconcile the four existing-story updates and their recorded write ids; post only missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
 8. Apply the epic description edits, verifying by re-reading after each.

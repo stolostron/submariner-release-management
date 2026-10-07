@@ -2,7 +2,7 @@
 
 # Jira planning verification
 
-Evidence audit: October 6–7, 2026; latest pass re-read the complete assignment population, issue documents, public work and retained tenant artifacts.
+Evidence audit: October 6–7, 2026; includes the complete assignment population, issue documents, public work and retained tenant artifacts.
 [current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
 and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. No Jira write, transition, PR post, cluster change or release was performed.
 Private raw exports and pre-edit plan copies are retained outside this public checkout.
@@ -44,8 +44,8 @@ The latest content pass repeated the complete 703-issue inventory and read 88 ac
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline. All four active private Vulnerability full views were also refreshed, without shipped-image triage.
 All comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
-The 39 direct PR reads include the five legacy-closeout PRs and the OLMv1 reference. Published heads/states are unchanged apart from this planning PR and EVPN #6’s new 629d9e67 head. Its verify check initially returned pending and now passes; tide remains pending and the import is still open. Shipyard returns 46 successful and three skipped check records; its body gained an automated CodeRabbit summary, without changing the author-reported validation claims.
-A subsequent complete review/thread read finds a new 17:13 UTC CodeRabbit changes-requested review on that head, with four unresolved current requests; it still has no approval. Historical inventories retain their explicit cutoff and are separate from today's work.
+The latest 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. Shipyard returns 46 successful and three skipped check records, with unchanged author-reported validation claims.
+The complete October 7 review/thread read records the 17:13 UTC CodeRabbit changes-requested review on that head, with four unresolved current requests and no approval. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
@@ -129,7 +129,7 @@ Reporter is required with a default; verify the approved/default reporter after 
 | ACM creation | Component 33720, proposed priorities/Activity Types, `parent`, PR field, both point fields and sprint are writable. Use one membership path and read back the canary |
 | CORENET creation | `parent`, proposed priority/Activity Type, Story Points and sprint are writable; legacy Epic Link, Original story points and Git Pull Request are absent. Set the latter two only in a subsequent edit after the new Story confirms support |
 | CORENET edit support | Existing Stories 7062/7171/7615 expose Original story points and PR fields. Epic 7155 does not expose the PR field for editing; no epic PR-field edit is proposed |
-| Related links | `Related`, id 10077, supports the proposed S1/ACM-45508 and K2/CORENET-7062 relationships. Check existing links before adding |
+| Related links | `Related`, id 10077, supports the proposed S1/ACM-45508, S1/OPGM-364 and K2/CORENET-7062 relationships. Check existing links before adding |
 | Terminal transitions | Inspected closure-review targets require resolution. The epic and Story workflows differ; no transition id is reused, and no new Story's transitions can be verified before it exists |
 | Comments | The authenticated account belongs to `Red Hat Employee`. REST supports initial restricted visibility; current `acli comment create` only exposes project-default visibility, so it is not the execution client for these comments |
 | Sprint and points | Sprints 87579 and 87581 still report active. Story-point values and the story split remain proposed choices, not inferred approvals |
@@ -185,7 +185,7 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 | ACM-37426 timeline correction | Exact title and description drafts are prepared; apply together only after confirming the 5.1 target and install/migration contract, preserving original reference links |
 | Deferred/other-owned/private work | No bulk comment, duplicate task creation, reopening, other-owner transition or vulnerability closure is proposed |
 
-Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk does not depend on story creation or the PR-field canary. Its autorelease and CVE drafts each contain one complete comment; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates. The Kubernetes epic describes evidence gates as a design contract, with enforcement and installed-runtime qualification still required.
+Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk does not depend on story creation or the PR-field canary. Its autorelease and CVE drafts each contain one complete comment; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates. The Kubernetes epic describes evidence gates as a design contract, with enforcement and installed-runtime qualification still required. S1’s execution order now includes the already-planned lifecycle relationship alongside addon consumption, with duplicate-link checks and read-back; the audit draft links the open helper-pod prerequisite directly.
 
 The content passes corrected these scope/claim problems:
 
@@ -205,6 +205,6 @@ read-only verification cannot establish that a future write or transition succee
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 57 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 41 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.

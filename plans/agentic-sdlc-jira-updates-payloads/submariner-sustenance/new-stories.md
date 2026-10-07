@@ -63,7 +63,7 @@ Per the PR description, a full rpm-lockfile-update run on release-0.24 regenerat
 * Priority: Major (`10002`)
 * Activity Type: Future Sustainability (`10606`)
 * Target status: In Progress; discover the issue's available transition. This is not finished.
-* Link: a related-issue link to ACM-45508 (dev/test consumption of ART 5.0 builds), using the currently available link type.
+* Links: related-issue links to ACM-45508 (dev/test consumption of ART 5.0 builds) and OPGM-364 (existing lifecycle publication), using the currently available link type; check existing links and read back each addition.
 * Git Pull Request: `https://github.com/stolostron/submariner-release-management/pull/109`, `https://github.com/stolostron/submariner-operator-fbc/pull/81`, `https://github.com/stolostron/submariner-operator-fbc/pull/82`
 
 Description:
@@ -205,9 +205,9 @@ Status as of 2026-09-30, from the remediation tracker joined with live GitHub st
 * 113 PRs, all authored by the maintainer: shipyard 65, lighthouse 16, subctl 16, submariner 8, submariner-operator 8
 * 105 merged between 2026-08-20 and 2026-09-14 (most on 2026-09-10); 8 open
 * The 8 open PRs are the FIND-006 (subctl download integrity) draft series on devel and release-0.18 through release-0.24, gated on the subctl checksums PRs and a dapper-base rebuild
-* Follow-up: 9 PRs fix the CI helper pod manifests for OCP (8 merged, release-0.18 through release-0.25; the devel PR shipyard#2618 is still open)
+* Follow-up: 9 PRs fix the CI helper pod manifests for OCP (8 merged, release-0.18 through release-0.25; the devel PR [shipyard#2618](https://github.com/submariner-io/shipyard/pull/2618) is still open)
 
-Current refresh, October 7: all eight FIND-006 drafts closed without merging on October 3. They need an explicit disposition and refreshed prerequisite checks; closure is not remediation. The September counts above remain historical. shipyard#2618 remains open with passing/skipped returned checks and an approval on current head 682127c8424d8f6a1614e0bf789bb7d17ea10af9. Its aggregate changes-requested state originates in an older review; zero current unresolved threads were returned. Current-head OCP admission/install evidence still needs review, and the PR body incorrectly retains a hostUsers claim removed from the actual manifests.
+Current refresh, October 7: all eight FIND-006 drafts closed without merging on October 3. They need an explicit disposition and refreshed prerequisite checks; closure is not remediation. The September counts above remain historical. [shipyard#2618](https://github.com/submariner-io/shipyard/pull/2618) remains open with passing/skipped returned checks and an approval on current head 682127c8424d8f6a1614e0bf789bb7d17ea10af9. Its aggregate changes-requested state originates in an older review; zero current unresolved threads were returned. Current-head OCP admission/install evidence still needs review, and the PR body incorrectly retains a hostUsers claim removed from the actual manifests.
 
 https://github.com/submariner-io/shipyard/issues/2633 is closed; https://github.com/submariner-io/shipyard/issues/2635 remains open. Coordinated fixes are https://github.com/submariner-io/shipyard/pull/2654 (open, published checks pass or skip) and https://github.com/submariner-io/subctl/pull/1944 (draft, dependency/upgrade/Go/vulnerability checks fail). The Go check specifically reports gofumpt formatting at cmd/subctl/upgrade_test.go:135; the scan reports high-severity gRPC/x/crypto module findings. Prepare the formatting fix and reconcile existing CVE work now. Both upgrade jobs complete baseline deployment but fail the subsequent isolated-baseline executable guard before the upgrade stage. Merge and publish the Shipyard runtime, verify the consumer at its exact head, and complete applicable maintained-stream backports before closing #2635. Do not infer download-integrity remediation from upgrade-test success.
 
