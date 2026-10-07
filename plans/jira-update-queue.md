@@ -20,7 +20,7 @@ Use this order for the remaining Jira work. Start with small comments supported 
 | 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Mutable artifact evidence needs refresh; no candidate selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
-| 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; retain project canaries/read-back; summaries wait for keys. Terminal transitions wait for group 9 |
+| 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; retain project canaries/read-back; omit duplicate epic summaries. Terminal transitions wait for group 9 |
 | 9 | Acceptance and closure reviews | ACM-34592; ACM-34593; ACM-40644; any proposed finished-story transitions | Original criteria, attribution, artifact/QE proof and workflow required; no automatic closure |
 
 Exact existing-issue drafts follow the same grouping in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md). The [epic plan](agentic-sdlc-jira-updates.md) owns creation/field procedures; the [verification record](agentic-sdlc-jira-updates-verification.md) owns the dated evidence. Refresh only the targets and prerequisites of the approved group before writing; omit facts already present and verify restricted visibility/text/links afterward.
@@ -45,7 +45,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 
 | Issue | Proposed update | Completion/status boundary |
 | --- | --- | --- |
-| ACM-39728 | Apply reviewed description edits independently; post the summary after S stories exist | Keep In Progress; preserve original ADF, verify edits and use real keys in the summary |
+| ACM-39728 | Apply reviewed description edits independently; defer a duplicate child-tracking summary | Keep In Progress; preserve original ADF and verify each approved edit |
 | ACM-39729 | Posted comment 18820449: September remediation, merged CVE-agent work, open CVE-fix work and initial teammate adoption | Do not equate tooling merges or issue counts with complete remediation |
 | ACM-39730 | Posted comment 18820431: Activity Type fix and observed retarget/artifact gaps | Parent artifact refresh/retarget automation remains a follow-up |
 | ACM-39731 | Posted comment 18820423: merged hardening, open #114 and initial teammate adoption | #114 is pending, not shipped |
@@ -56,7 +56,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; 4fa703b3 checks pass/skip, its current-head review requests changes, and four current threads remain unresolved. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
 | ACM-39740 | Group 2 first: source #35 merge and agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
-The first four posted existing-story updates and pending epic text are recorded in
+The first four posted existing-story updates and optional URL-conversion draft are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).
 The two contribution-child comments are independent of S-story creation; no parent rollup is proposed. Keep ACM-39733 with its existing owner;
 ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or comment is proposed for those three here.
@@ -94,7 +94,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 
 | Assigned issues | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
-| CORENET-7155 | Reviewed description, K-story split and one summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
+| CORENET-7155 | Reviewed description and K-story split; defer a duplicate child-tracking summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
 | CORENET-7086 | Defer a parent comment until a concrete implementation or ownership decision | To Do; task membership is already visible. Header/API coverage and GHA/Prow scope remain implementation questions |
 | CORENET-7171 | Group 1: correct obsolete task-creation and PR-review statements | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |

@@ -1,12 +1,11 @@
 <!-- markdownlint-disable MD013 -->
 
-# Comments for existing ACM-39728 stories and the epic (exact payloads)
+# Comments for existing ACM-39728 stories (exact payloads)
 
-The first four existing-story comments were posted and verified on October 7, 2026 at 18:23 UTC. The optional URL-conversion comment and epic summary remain unposted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
+The first four existing-story comments were posted and verified on October 7, 2026 at 18:23 UTC. The optional URL-conversion comment remains unposted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
 The four posted blocks are fixed historical records; keep their text, dates and source pins unchanged. Any later comment is a separately approved missing delta after target-specific preflight.
-The epic summary uses `<S1>` to `<S5>` and must wait for the reviewed stories and real keys.
 
-Historical counts retain their September cutoff; the retarget note is from October 1. Refresh evidence and follow the plan’s preflight for the unposted drafts only; replace their placeholders before posting.
+Historical counts retain their September cutoff; the retarget note is from October 1. Refresh evidence and follow the plan’s preflight for the unposted draft only.
 
 Use one concise comment per target for an approved missing delta. The posted records below do not authorize reposting.
 
@@ -86,17 +85,4 @@ This is not an additional story or part of the four required comments. Re-read t
 A fork-only candidate at 3cabf0e1f7526d3ef554571ffbb0a95db33bf013 adds scripts/update-fbc-prod-urls.sh plus conductor wiring/tests. It is absent from main, and no PR for its branch was found on October 7.
 
 The candidate assumes one OCP production release establishes all-target completion and does not isolate unrelated/untracked work. Those defects remain before review.
-```
-
-## ACM-39728 (epic): summary comment
-
-Post after approved creations: replace every key and refresh delivery/blocker states. This summary introduces the tracking; detailed inventories and evidence stay on the children.
-
-```text
-Work is now tracked in these new stories:
-
-* <S4> RPM lockfile prerequisite setup: delivered in https://github.com/stolostron/submariner-release-management/pull/110 (merged).
-* <S2> EC deny-rule detection and <S3> shared Claude/Codex discovery: delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged). Installed-host portability remains separate follow-up.
-* <S1> OCP 5 FBC onboarding: CLI/catalog preparation merged; https://github.com/stolostron/submariner-operator-fbc/pull/82 remains blocked on its build account, with live configuration/build/install acceptance unfinished.
-* <S5> Shipyard audit remediation: FIND-006 drafts closed without merging; disposition and helper-pod/upgrade-test repairs remain unfinished.
 ```
