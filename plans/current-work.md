@@ -117,7 +117,9 @@ The [autorelease roadmap](autorelease-step-automation.md) now contains the curre
 Current source has review-level build-readiness/component scripts, external verifiers on several scripted steps,
 an extracted/tested `run_conductor`, tag-age snapshot warnings and original-ref restoration.
 Completed-phase pseudocode and shelved apply/parallel designs are retired; historical implementation remains in Git.
-Remaining write acknowledgement, snapshot identity and recovery risks are review questions, not reproduced failures from this pass.
+Remaining write acknowledgement and recovery risks need focused follow-up. A synthetic probe reproduces the FBC helper accepting two
+`BuildPLRInProgress` markers without completion evidence; it does not reproduce a complete release-verifier failure. The [recovery gate](fbc-failure-recovery.md#rerun-the-same-release-snapshots)
+now requires finished verdicts and exact snapshot-name comparisons alongside verification, including generated stage YAMLs.
 
 ## Kubernetes plugin qualification and publication
 

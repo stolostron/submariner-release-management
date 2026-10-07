@@ -265,6 +265,18 @@ Twenty-two direct PR reads and complete Shipyard review-thread pagination supers
 
 The execution plan now separates creation from terminal acceptance, handles uncertain write results before retrying and checks changed baselines before edits/rollback. Posted payloads remain fixed historical records. The epic deny-rule wording now distinguishes minimum-version repair from catalog replacement. Independent recomputation confirms the 335-entry historical totals and all three PR-list memberships; runtime claims retain their original evidence limits.
 
+## Second plan review
+
+The repeated October 7 read again returned 703 assigned issues, 228 full non-Vulnerability documents and all 315 comments across 27 complete histories.
+Compared issue scope/status fields, histories, epic membership and duplicate-search totals are unchanged. Authenticated restricted-group membership remains confirmed.
+Direct FBC main/PR reads confirm the recovery source and #82 head/checks remain unchanged; the PR's reported base object is not used as current-main evidence.
+
+A read-only synthetic probe of `fbc_tests_passed` accepts just the two required `BuildPLRInProgress` markers without completion evidence (exit 0).
+The existing focused suite also passes all 16 checks. This demonstrates helper acceptance, not an end-to-end verifier or live release failure.
+Source review confirms the verifier omits snapshot aggregate conditions and chooses the latest matching snapshot, even with a source pin;
+stage generation repeats that selection. The recovery plan now requires fresh finished/successful verdicts, returned scope/name comparison and generated-YAML identity review.
+No script, snapshot, release or posted comment changed.
+
 ## Documentation validation
 
 The grouping revision and its commit hook passed full `make test` and commit lint. Final-review validation covers full repository checks, 143 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Only the pending CVE-fix comment and epic deny-rule wording change fenced payload text; all four posted blocks remain unchanged. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
