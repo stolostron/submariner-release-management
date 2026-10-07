@@ -37,7 +37,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Record shared setup and checkout-safety prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | One parent summary linking existing CVE contribution children and the plugin's existing epic | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; returned hosted checks are complete (45 successful, three skipped) and changes requested remains. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
+| ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; returned hosted checks pass or skip, but a new current-head review requests changes on four current threads. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
 The first four existing-story updates and epic text remain in
@@ -63,7 +63,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 | --- | --- | --- |
 | ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); migrate verified Brew/OSBS consumers on approved streams and prove the applicable builds; UBI Go Toolset alone is not evidence of an affected ART builder |
 | ACM-41119 | Defer completion; reconcile image coverage with builder work | Addon 5.0 PQC base selection is partial source evidence; main/5.1 differ and shipped-image policy remains unverified |
-| ACM-37426 | Description timeline correction after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
+| ACM-37426 | Coordinated title/description timeline correction using the prepared draft after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
 | OPGM-364 | Answer the existing status request with blockers and remaining proof | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |
 | ACM-25779 | Replace the stale console-specific description with the actual Submariner pipeline scope | Existing May comment already explains ownership-dependent deferral. Do not repost it or treat inline pipelines as an unrecorded failure |
 | ACM-26999 | Reconcile older CVE scope/links with ACM-39729/39739/39740 | Existing May comment already says production tooling exists. Link remaining upstream contribution rather than repeat the original delivery; closure/supersession needs a scope decision |
@@ -79,7 +79,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | Assigned issues | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
 | CORENET-7155 | Reviewed description, K-story split and one summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
-| CORENET-7086 | One parent comment or concise description update linking existing research and implementation subtasks | To Do; the original May draft's "will split into subtasks" is obsolete. It is separate from the Kubernetes plugin |
+| CORENET-7086 | One parent comment linking existing research and implementation subtasks | To Do; the original May draft's "will split into subtasks" is obsolete. It is separate from the Kubernetes plugin |
 | CORENET-7171 | Research/recommendation update, then acceptance review | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
