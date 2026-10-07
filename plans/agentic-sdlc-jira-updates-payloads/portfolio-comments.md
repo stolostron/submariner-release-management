@@ -14,7 +14,7 @@ Use this rollup if the parent needs a missing status delta; otherwise post the c
 ```text
 The existing contribution children remain the right tracking scope:
 
-* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 remains open. The October 7 published head has passing/skipped returned checks, but GitHub still reports changes requested. Author responses do not replace reviewer acceptance. The newer follow-up is committed locally at 8f4871ef, outside the published PR and unvalidated by this audit.
+* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 remains open. The October 7 published head has passing/skipped returned checks, but GitHub still reports changes requested. Author responses do not replace reviewer acceptance. Two newer commits are local at 36afbd1e, outside the published PR and not validated by this audit.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
 Neither child has met its ai-helpers merge acceptance criterion. Kubernetes rebase plugin qualification is tracked separately in CORENET-7155.
@@ -27,7 +27,7 @@ Use this in place of the optional maintenance paragraph in `submariner-sustenanc
 ```text
 The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass or skip; GitHub review disposition still reports changes requested. Four outdated unresolved threads have author responses, which do not establish reviewer acceptance.
 
-The PR reports 1,315 regression checks and additional OpenShift repository validation with partial workflows and no cluster E2E claimed. Those runs were not repeated by this planning audit. A newer five-file follow-up is now committed locally at 8f4871efdb18c5447ace2f49a05c983dd05b645c, with a clean checkout. It preserves repair versions, rollback metadata and module outcomes. The published PR still points to 56e7233a; this audit did not validate the newer commit or repeat the PR's reported checks.
+The PR reports 1,315 regression checks and additional OpenShift repository validation with partial workflows and no cluster E2E claimed. Those runs were not repeated by this planning audit. Two local follow-up commits now end at 36afbd1eca881a326ae6b948a096b273bfab59cf in a clean checkout. They preserve repair versions/rollback/module outcomes and accept OpenShift main/master and explicit repo/branch arguments in either order. The newest commit reports 1,372 regression checks, not repeated by this audit. The published PR still points to 56e7233a; its older checks do not validate these newer commits.
 
 Remaining for this story: acceptance of the prerequisite, configurable project-neutral go-fix-cves packaging, and merge into openshift-eng/ai-helpers. Keep the contribution open until its own criteria are met.
 ```
@@ -117,4 +117,34 @@ The May update records addon adoption and explains that the five upstream compon
 The remaining decision is ownership and maintenance responsibility: adopting the ACM abstraction requires reconciling the existing Submariner pipeline-generation and release tooling. Keep the migration open pending that decision, consistent with the May comment. Confirm the adopted scope and supported branches before implementation; changing the task to assessment-only or marking it superseded requires a separate scope decision.
 ```
 
-Release/closure reviews and private security follow-up remain in the [queue](../jira-update-queue.md); no success payload is drafted from Jira status alone.
+## ACM-44527 — remaining FBC blocker
+
+The existing parent already records component-stage success; omit another copy. Post this delta once on the parent if still missing, rather than repeating it on six subtasks.
+
+```text
+The October 7 retained-snapshot check recovers all six 4.16–4.21 FBC snapshot/scenario identities at source 2e6b489e65620738d68504d9158418fe463e2073. All six have finished aggregate Failed verdicts and completed operator TestFail results; standard-test warnings do not override those failures. The exact map is recorded in plans/fbc-failure-recovery.md in stolostron/submariner-release-management.
+
+The registry Secret remains absent from the integration runner's credential lists. Verify credential usability, field ownership and intended catalog content before a separately authorized repair/rerun. Component-stage success is confirmed separately; FBC stage/QE/production are still gated on their own successful evidence.
+```
+
+## ACM-45070 — candidate evidence reconciliation
+
+Use only if this candidate is relevant to the intended release; the inspection does not select or approve it.
+
+```text
+The retained nine-component candidate submariner-0-22-20261002-125823-000-lz has aggregate TestSucceeded=True and completed integration results with warnings. Its bundle image has version v0.22.2 and CSV version 0.22.2 at digest sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3, built from operator source da81d438c0456f367bc5e83e671362181a47ab63.
+
+All seven CSV related-image digests differ from the mapped snapshot operands. Registry copying can change manifest digests; this comparison alone does not establish invalid content. The snapshot operator inspects as v0.22.2, while the embedded production operator could not be inspected. Reconcile source/content and registry identity before accepting the candidate, completing EC/bundle tracking or filling parent artifact references. No release completion is claimed.
+```
+
+## ACM-34593 — original build-failure acceptance review
+
+The September closure request already exists. Add this new build evidence only if not recorded, then separately review the original DNF/RPM criteria and fix attribution before proposing a resolution.
+
+```text
+A newer route-agent-0-21 push build succeeded October 2 at source 82adbacdd58e1edaf4c11a8f2d07a94e3b3b84fc: https://github.com/submariner-io/submariner/runs/110847099550. Its retained snapshot is submariner-0-21-20261002-125839-000.
+
+This supports reviewing acceptance of the original DNF/RPM build failure. Confirm the relevant fix/source and build criteria before resolving. The candidate's separate EC scenario fails; the successful push build does not establish release or compliance acceptance, and that failure needs its own investigation.
+```
+
+Other release/closure reviews and private security follow-up remain in the [queue](../jira-update-queue.md); no success payload is drafted from Jira status alone.

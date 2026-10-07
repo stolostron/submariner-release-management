@@ -130,6 +130,9 @@ known portability debt and time-sensitive builder migration from the September h
 
 ### A5. Execution order
 
+Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
+They need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
+
 Order matters: create stories first, then comments that reference them, then the epic edits last. Each step is verified before the next.
 
 1. **Canary: create story S4** (RPM lockfile setup) using the fields in new-stories.md: ACM Story, the maintainer's account, parent ACM-39728,
@@ -145,7 +148,7 @@ Order matters: create stories first, then comments that reference them, then the
 5. After checking their acceptance criteria, transition finished stories (S2, S3, S4) to Resolved with the appropriate resolution;
    move S1 and S5 to In Progress. Use each issue's available transition metadata.
 6. Add the relationship from S1 to ACM-45508 using the currently available related-issue link type, confirmed in preflight.
-7. Post the four existing-story comments in comments-existing.md, replacing `<S1>` to `<S5>` with the real keys. Optionally append the #109 link to the
+7. Reconcile the four existing-story updates and their recorded write ids; post only missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 (append, never replace, and only after step 2 passes).
 8. Apply the epic description edits, verifying by re-reading after each.
 9. Post the epic summary comment.
