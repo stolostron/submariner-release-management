@@ -35,7 +35,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39731 | Record merged #109/#112/#113 and open #114 in one update | #114 is pending, not shipped |
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
-| ACM-39736 | Record shared setup and checkout-safety prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
+| ACM-39736 | Record initial teammate adoption of CVE/autorelease tooling and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | One parent summary linking existing CVE contribution children and the plugin's existing epic | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
 | ACM-39739 | Update open shipyard#2582 evidence | Published head is now ab10cebf; hosted checks are running, one unresolved current thread remains, and no review/approval is recorded on this head. Reported regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |

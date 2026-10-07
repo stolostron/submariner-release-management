@@ -17,6 +17,8 @@ Existing comments cover the conductor/refactor PRs and September 13 fixes. Refre
 ```text
 Autorelease updates since September 13:
 
+Another team member has begun using the autorelease tooling.
+
 * [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) (merged September 29): retry/reuse RPM lockfile PRs, serialize Tekton updates, harden checkout restoration and failure checks, strengthen release-note evidence/resume/apply.
 * [release-management#112](https://github.com/stolostron/submariner-release-management/pull/112) (merged): fix cross-branch release status, adjust EC handling of retained BuildPLRInProgress markers, and inspect the Step 11 catalog on main.
 * [release-management#113](https://github.com/stolostron/submariner-release-management/pull/113) (merged): parallelize the test hook and remove a repeated live-GitHub lookup from the tests.
@@ -39,6 +41,8 @@ The 0.23.2-to-0.23.4 retarget required manual reconciliation of step records, su
 No comments exist yet. Keep it factual; the story is still New and requires multiple team members to complete releases.
 
 ```text
+Team adoption has started: another team member has begun using the CVE and autorelease tooling. Capture feedback from these initial runs as it becomes available.
+
 Shared setup and checkout-safety prerequisites have improved:
 
 * https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key.
@@ -53,6 +57,8 @@ Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard
 
 ```text
 CVE remediation during the September 13–30 reporting window, plus current skill work:
+
+Another team member has begun using the CVE tooling.
 
 * 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. [Full PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md).
 * 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-07).

@@ -66,7 +66,7 @@ Basis: the October 7 exact production bundle tag resolves with version v0.24.1. 
 
 ## Edit 4: release ownership transfer
 
-Old (append to the end of the paragraph under "Release ownership transfer"):
+Old (replace this paragraph under "Release ownership transfer"):
 
 ```text
 Currently only one engineer can execute downstream releases. The goal is for any team member to be able to pick up a release branch and drive the full downstream release process. The skills and context docs encode the knowledge, but this hasn't been validated yet.
@@ -75,7 +75,7 @@ Currently only one engineer can execute downstream releases. The goal is for any
 New:
 
 ```text
-Currently only one engineer can execute downstream releases. The goal is for any team member to be able to pick up a release branch and drive the full downstream release process. The skills and context docs encode the knowledge, but this hasn't been validated yet. Setup for the RPM lockfile step is now a single command (make setup-entitlements), so a new releaser no longer needs a personal Red Hat activation key.
+The goal is for any team member to be able to pick up a release branch and drive the full downstream release process. Another team member has begun using the CVE and autorelease tooling. Full ownership-transfer validation still requires multiple team members each to complete a downstream release, with the maintainer available for questions but not driving, and gaps documented and fed back into improvements. Setup for the RPM lockfile step is now a single command (make setup-entitlements), so a new releaser no longer needs a personal Red Hat activation key.
 ```
 
 ## Edit 5: new deliverables (insert before the "Broader ecosystem impact" heading)
