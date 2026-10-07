@@ -14,7 +14,7 @@ Use this rollup if the parent needs a missing status delta; otherwise post the c
 ```text
 The existing CVE contribution children remain the right tracking scope for those skills:
 
-* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Returned hosted checks pass or skip; a new current-head review requests changes on four current threads and no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
+* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at ab10cebf. Hosted checks are still running; one unresolved current thread remains and no review or approval is recorded on this head. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
 Neither child has met its ai-helpers merge acceptance criterion. The parent's original criterion covers all generally relevant skills, so reconcile that inventory before parent acceptance. The k8s-rebase contribution remains open in https://github.com/openshift-eng/ai-helpers/pull/617; its qualification and upstreaming stay on existing CORENET-7155 tracking, without duplicate children here.
@@ -25,7 +25,7 @@ Neither child has met its ai-helpers merge acceptance criterion. The parent's or
 Use one focused contribution update on this target, keeping ACM-39729’s remediation progress on that story.
 
 ```text
-The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Returned hosted checks pass or skip; GitHub reports changes requested, and no current-head approval is recorded. The [October 7 current-head review](https://github.com/submariner-io/shipyard/pull/2582#pullrequestreview-5445744394) requests changes on four current threads covering exit-status classification, active-worker cleanup, self-fix cleanup and YAML fix-state parsing. Four older unresolved threads are outdated. Triage the current requests against source; author responses do not establish acceptance.
+The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 at 17:50 UTC to ab10cebfe8e72cef5d443cb852abf1f1e0249afb, matching the clean local checkout. Hosted checks are still running. Complete thread pagination returns one unresolved current YAML fix-state thread and four unresolved outdated threads. No review or approval is recorded on this new head; the aggregate changes-requested decision comes from earlier reviews. Verify the new source and remaining thread before prerequisite acceptance.
 
 The PR reports 1,372 regression checks, six focused probes and live client-go master/release-4.20 checks, with explicit scan/toolchain limits and no cluster E2E. Those runs were not repeated by this planning audit. Preserve the distinction between author-reported validation and the current head's hosted checks/reviewer acceptance.
 
