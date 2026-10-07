@@ -189,7 +189,7 @@ Completeness check: every active assigned non-Vulnerability issue has a payload 
 
 The content passes corrected these scope/claim problems:
 
-* ACM-39736 requires **multiple** team members each to complete a release, with the maintainer not driving; gaps must be documented and fed back into improvements. One volunteer is a milestone, not its acceptance criterion. S4 and all rollups now retain that original scope.
+* ACM-39736 requires **multiple** team members each to complete a release, with the maintainer not driving; gaps must be documented and fed back into improvements. The maintainer’s October 7 report that another team member has started using CVE/autorelease tooling is adoption evidence, not evidence of completed full releases or feedback. The three relevant comments and ownership-transfer description now include that milestone; S4 and all rollups retain the original acceptance scope.
 * ACM-39738 requires contribution of **all generally relevant skills**. The CVE children retain their own criteria; the plugin remains on existing CORENET-7155 tracking. Parent acceptance requires an inventory reconciliation, without duplicate stories.
 * ACM-45318 targets ART Go builders consumed through **Brew/OSBS**, not every Go builder. The addon has verified affected references; sampled UBI Go Toolset stages do not justify an independent-product migration by themselves. Shared/pipeline inputs must be checked before classifying another path as affected.
 * CORENET-7615 records decision owners/dates **when decided**; it does not require every pending decision to be settled. Its separate reviewer-confirmation and three-conflict resolution criteria remain. Optional sections are consolidated into one update per target.
@@ -205,6 +205,6 @@ read-only verification cannot establish that a future write or transition succee
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 64 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 65 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.

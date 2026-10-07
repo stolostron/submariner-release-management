@@ -136,10 +136,10 @@ First approval chunk: one comment on each existing story, using the [four exact 
 
 | Order | Target | Comment to approve | Current status / existing comments |
 | --- | --- | --- | --- |
-| 1 | ACM-39731 | Merged conductor/status hardening and the separate open #114 proposal | In Progress / 3 |
+| 1 | ACM-39731 | Merged conductor/status hardening, initial teammate adoption and the separate open #114 proposal | In Progress / 3 |
 | 2 | ACM-39730 | Tracker Activity Type fix, current releases, and the observed retarget/artifact gap | In Progress / 3 |
-| 3 | ACM-39736 | Shared setup and checkout prerequisites; multiple releasers and feedback still required | New / 0 |
-| 4 | ACM-39729 | Verified September remediation counts, merged CVE-agent improvements and current open CVE-fix work | In Progress / 1 |
+| 3 | ACM-39736 | Teammate adoption of CVE/autorelease tooling and shared prerequisites; full releases and feedback still required | New / 0 |
+| 4 | ACM-39729 | Verified September counts, initial teammate adoption, merged CVE-agent improvements and open CVE-fix work | In Progress / 1 |
 
 Approve these comments together or individually. This chunk changes no fields or statuses and creates no issues. Before each authorized post, re-read the target’s complete comments and refresh mutable PR evidence, preserving the historical reporting window. If the factual meaning changes, revise the draft for review. Set restricted visibility in the initial request, read back the text/links/visibility, and record the comment id before the next post. If a request has an uncertain result, inspect Jira before retrying to avoid duplicate comments.
 
