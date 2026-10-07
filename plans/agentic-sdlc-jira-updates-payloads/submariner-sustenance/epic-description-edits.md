@@ -6,7 +6,7 @@ Nothing here has been applied. The baseline description was read on 2026-09-29 a
 rendered description exactly once; re-read the epic immediately before editing and stop if any snippet has changed. All four old snippets and
 the insertion heading still matched once at the 2026-10-07 read. Jira Cloud stores the description as ADF: save the full original document, update
 the relevant nodes with a supported client/UI and preserve everything else. The Markdown below is text for that client, not a raw REST field value.
-Rollback means writing back the saved original ADF document and verifying it; issue history alone is not an automatic restore operation.
+Save a fresh baseline before each independent edit. Before writing, confirm it is unchanged; restore it only while the field still equals that edit’s written result. If later edits exist, reconcile them first. Issue history is not an automatic restore operation.
 
 Each edit is independent. Review in order 4 (adoption), 3 (release evidence), 5 (deliverables), then optional metrics edits 1/2. Keep these edit numbers stable; no new story keys are needed.
 
@@ -44,12 +44,12 @@ Basis: the October 7 exact production bundle tag resolves with version v0.24.1. 
 
 ## Edit 5: new deliverables (insert before the "Broader ecosystem impact" heading)
 
-Insert this block immediately before the line `#### Broader ecosystem impact`:
+Omit this insertion if the block is already present. Otherwise insert it immediately before the line `#### Broader ecosystem impact`:
 
 ```text
 #### Portable, security-aware release tooling
 
-Release skills share Claude/Codex discovery and a tested compatibility contract from one source; konflux-ci-fix retains five known debt entries, and installed-host execution remains a follow-up. Tekton task updates detect Enterprise Contract deny rules instead of advising futile version bumps. A resumable onboarding CLI prepares FBC catalogs and the tenant and admission changes for OCP major-version transitions (OCP 5.0 is a provisional draft; builds and installation are not yet verified). RPM lockfile prerequisites are set up with one command.
+Release skills share Claude/Codex discovery and a tested compatibility contract from one source; konflux-ci-fix retains five known debt entries, and installed-host execution remains a follow-up. Tekton task updates and log diagnosis report Enterprise Contract deny reasons; a qualifying bump can fix a minimum-version denial, while catalog replacement must follow policy. A resumable onboarding CLI prepares FBC catalogs and the tenant and admission changes for OCP major-version transitions (OCP 5.0 is a provisional draft; builds and installation are not yet verified). RPM lockfile prerequisites are set up with one command.
 
 #### Glasswing shipyard audit remediation
 
@@ -96,4 +96,4 @@ the conservative wording avoids presenting them as one uniform metric.
 
 1. Re-read the epic and confirm only the approved changes, nothing else, and that headings, bullets and nested bullets still render.
 2. Confirm the description's other sections (Current Automation, CVE Remediation, Upstream Release, Agent Context Layer) are unchanged.
-3. If conversion altered formatting anywhere, explicitly restore the saved original ADF description, read it back, and retry the edits through the Jira UI.
+3. If conversion altered formatting, stop and apply the baseline/rollback rule above. Read back any correction before retrying through a supported Jira UI.

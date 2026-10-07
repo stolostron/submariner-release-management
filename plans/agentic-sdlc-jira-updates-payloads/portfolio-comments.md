@@ -52,7 +52,7 @@ This is the maintained source merge. Product-specific component/image mappings, 
 One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
 
 ```text
-The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The October 7 read finds hosted checks still running, one unresolved current YAML review thread and no review/approval on that head. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
+The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The latest October 7 read finds all returned hosted checks passing or skipped, a changes-requested review on that head and three unresolved current threads; no current-head approval is recorded. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
 
 The source now supports repository-registry configuration and native-command overrides. Remaining work is to accept the prerequisite and package the contribution under the original criteria: go-fix-cves merged into ai-helpers, configurable through a project-level file, with no hardcoded Submariner values.
 ```
