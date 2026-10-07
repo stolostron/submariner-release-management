@@ -303,7 +303,15 @@ historical inventories are preserved. Fresh EVPN main/decision-index reads confi
 Optional epic edits 1/2 now replace stale file/line/test totals with verified operation and validation scope. K1's scope likewise names tests instead of
 using a dated test-function count. Historical counting methods remain recorded; no tracking creation or acceptance criterion is removed.
 
+## Duplicate epic-summary review
+
+Fresh October 7 reads confirm both epics remain In Progress, their descriptions and complete histories are unchanged (one/six comments),
+and their child searches still return ten/zero stories. The pass removes both automatic epic-summary drafts and their execution steps. They repeat the new child keys, delivery PRs
+and qualification limits already carried by the children. A separate missing decision, delivery or blocker can justify a later epic comment;
+creating tracking alone does not. The new-story baseline comments, all acceptance requirements, four posted records and historical inventories remain intact.
+The queue, portfolio instructions and payload index now agree; no placeholder-key summary is left to post. Earlier preparation records above describe superseded drafts.
+
 ## Documentation validation
 
-The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 149 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
+The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
