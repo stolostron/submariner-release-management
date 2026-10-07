@@ -11,7 +11,7 @@ No Jira changes or external posts have been applied. Re-read each target and omi
 
 The unrestricted, paginated `assignee = currentUser()` search returned **703 unique issues across nine projects**:
 80 active, 623 terminal. Of these, 483 are Vulnerability issues: four active and 479 terminal.
-All 220 other assigned issues were read with descriptions, comments, links and fields. The deeper pass re-read all 76 active issues and related dependencies; assigned keys/statuses are unchanged.
+All 220 other assigned issues were fully re-read, alongside nine related non-Vulnerability issues and the four active private vulnerabilities. Assigned keys/statuses and inspected full-view update fields remain unchanged.
 The tables below account for **all 76 active non-Vulnerability issues**. Terminal issues default to no update.
 The September 13 onward non-Vulnerability update search returned 118 issues, including 53 terminal ones;
 an `updated` timestamp alone does not establish new engineering work.
@@ -37,7 +37,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Record shared setup and checkout-safety prerequisites | New; another engineer must complete a release and record the gaps |
 | ACM-39738 | One parent summary linking existing contribution children | New; existing k8s-rebase PR linkage is not completion of the CVE contribution scope |
-| ACM-39739 | Update open shipyard#2582 evidence | New; ai-helpers merge remains required. Local follow-up is now committed at 8f4871ef, outside published PR head and unvalidated by this audit |
+| ACM-39739 | Update open shipyard#2582 evidence | New; ai-helpers merge remains required. Two local follow-ups now end at 36afbd1e, outside published PR head; reported checks were not repeated here |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
 The first four existing-story updates and epic text remain in
@@ -50,8 +50,8 @@ ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or com
 | Assigned issues | Proposed treatment | Evidence needed before changing status |
 | --- | --- | --- |
 | ACM-40644 | Closure review; all 15 children terminal, parent In Progress | Exact production bundle is verified. Seven 4.16–4.22 index probes timed out and historical Release CRs are NotFound; recover catalog/QE proof and compare all 159 comments before closeout. Neither failure proves absence |
-| ACM-44527; ACM-44537, ACM-44538, ACM-44540, ACM-44541, ACM-44542 | One parent blocker/update, then change individual steps only as recovery progresses | Catalog In Progress; stage/prod/URL steps New. Use the existing snapshot, registry repair and complete scenario verdicts; catalog merge alone does not complete stage |
-| ACM-45070; ACM-45075, ACM-45077, ACM-45078, ACM-45079, ACM-45080, ACM-45081, ACM-45083, ACM-45084, ACM-45085 | Reconcile EC and bundle evidence first; fill pending parent artifacts from verified state | EC and bundle SHAs In Progress; stage onward New. A merged SHA PR is not proof of the selected rebuilt bundle or passing EC |
+| ACM-44527; ACM-44537, ACM-44538, ACM-44540, ACM-44541, ACM-44542 | One parent blocker/update, then change individual steps only as recovery progresses | Catalog In Progress; stage/prod/URL steps New. Six exact FBC snapshot/scenario associations are recovered, all aggregate Failed; use the recovery map and verify credentials/content before reruns |
+| ACM-45070; ACM-45075, ACM-45077, ACM-45078, ACM-45079, ACM-45080, ACM-45081, ACM-45083, ACM-45084, ACM-45085 | Reconcile candidate source/operand identity before accepting EC/bundle and filling parent artifacts | Retained nine-component candidate passes integration with warnings and contains a 0.22.2 bundle. Seven embedded operand digests differ from snapshot operands; registry/content identity remains unverified. EC/bundle stay In Progress; stage onward New |
 
 QE subtasks retain their existing owners and are dependencies, not assigned work in these totals.
 ACM-45087/45088 are two extra test subtasks under the 0.22.2 parent; their disposition is separate from release completion.
@@ -68,7 +68,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 | ACM-25779 | Replace the stale console-specific description with the actual Submariner pipeline scope | Existing May comment already explains ownership-dependent deferral. Do not repost it or treat inline pipelines as an unrecorded failure |
 | ACM-26999 | Reconcile older CVE scope/links with ACM-39729/39739/39740 | Existing May comment already says production tooling exists. Link remaining upstream contribution rather than repeat the original delivery; closure/supersession needs a scope decision |
 | ACM-34592 | Closure review with existing five PRs | All five directly read PRs merged May 28. Parent ACM-34591 is Closed and the comment asks for closure; review issue criteria and current transition/resolution before resolving |
-| ACM-34593 | Separate closure investigation | Same closed parent and an older closure request, but no current successful route-agent build evidence was checked. Do not copy ACM-34592's disposition |
+| ACM-34593 | Closure review of the original build failure | October 2 route-agent push build succeeds at 82adbacd; retained snapshot exists, while its EC scenario fails. Confirm the original DNF/RPM criteria and fix attribution before resolving; EC failure is a separate investigation |
 
 ACM-45508 is a related addon-consumption task owned by another person, not an assigned issue.
 Link it from S1 where useful; it does not prove FBC runtime compatibility. OPGM-364 also predates S1:
