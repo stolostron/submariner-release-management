@@ -54,23 +54,17 @@ Still needed for this story's original acceptance criteria: multiple team member
 Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard#2443, claude-skills#27 and shipyard#2582 (open).
 
 ```text
-CVE remediation since the last update (2026-09-13 to 2026-09-30):
+CVE remediation during the September 13–30 reporting window, plus current skill work:
 
 * 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. [Full PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md).
 * 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-06).
-* The skill hardening for the ai-helpers contribution is still open in https://github.com/submariner-io/shipyard/pull/2582.
-```
-
-Optional additional ACM-39729 bullet, after checking for an existing update:
-
-```text
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
 * https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c3a429d86624c9302b4f4f01276115ad8, with a clean matching local checkout. Returned hosted checks pass or skip, but the new current-head review requests changes on four current threads; no current-head approval is recorded. The PR reports 1,372 regression checks and focused/live OpenShift validation with explicit limits; those runs were not repeated here.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.
 Their source merges are prerequisites; both children still require ai-helpers merges, and ACM-39740 requires non-Submariner product validation.
-Do not duplicate the same optional maintenance paragraphs on each issue.
+Use one comment per target, omitting facts already recorded there.
 
 ## ACM-39732: optional progress on the existing URL-conversion story
 
