@@ -18,7 +18,7 @@ Use this order for the remaining Jira work. Start with small comments supported 
 | 3 | EVPN planning handoff | CORENET-7615 | Recorded decisions and remaining review; comment only |
 | 4 | Deadline and requested status | ACM-45318 → OPGM-364 | Refresh branch/build scope and live blockers; no completion claim |
 | 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Mutable artifact evidence needs refresh; no candidate selection or step transitions |
-| 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional count edits 1/2. CORENET-7155 description separately | Substantive corrections before optional metrics; preserve ADF; no new keys required |
+| 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
 | 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; retain project canaries/read-back; summaries wait for keys. Terminal transitions wait for group 9 |
 | 9 | Acceptance and closure reviews | ACM-34592; ACM-34593; ACM-40644; any proposed finished-story transitions | Original criteria, attribution, artifact/QE proof and workflow required; no automatic closure |
@@ -53,7 +53,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | Defer a duplicate child-progress rollup; settle the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; 4fa703b3 checks are still running, aggregate changes requested comes from older heads, and two current threads remain unresolved. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
+| ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; 4fa703b3 checks pass/skip, its current-head review requests changes, and four current threads remain unresolved. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
 | ACM-39740 | Group 2 first: source #35 merge and agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
 The first four posted existing-story updates and pending epic text are recorded in

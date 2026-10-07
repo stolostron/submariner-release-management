@@ -73,7 +73,7 @@ _Scope:_
 * 32 verification gates with explicit verdict rules: a gate that did not run is never passed or skipped
 * Scripts for the repeatable work, and hooks
 * Docs: design guide, runtime compatibility, repair patterns, Kubernetes 1.37 notes
-* Unit and integration tests for the tooling (238 test functions at the dated bak42 baseline; current source is newer)
+* Unit and integration tests for the tooling
 
 _Acceptance criteria:_
 
@@ -85,9 +85,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Current source implements the five-step workflow, verification gates, hooks, repair guidance and retained-evidence contracts. Upstream https://github.com/openshift-eng/ai-helpers/pull/617 remains at 7e1aa060; local HEAD a477bced has 82 newer commits, including 13 beyond verified bak42. Two test files also contain uncommitted court-permission changes.
+October 7 source: the five-step workflow, gates, hooks and retained-evidence contracts are implemented locally. https://github.com/openshift-eng/ai-helpers/pull/617 remains at 7e1aa060; local HEAD a477bced has 82 newer commits, including 13 beyond verified bak42, plus two uncommitted test-file changes.
 
-Preserve and review the complete intended source before publishing it. Current installed-runtime and CI acceptance are not established by the older PR or dated test-function counts. K2 owns historical 1.36.2 evidence, K3 measurements and K4 the newer trial limits; no plugin test or trial was run by this planning audit.
+The complete current source is not published on that PR. Installed-runtime and CI qualification remain unfinished.
 ```
 
 ## Story K2: Qualify k8s-rebase on the 1.36.2 rebases
@@ -116,11 +116,12 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Runs to date:
+Recorded 1.36.2 work:
 
-* 2026-06-09 and 2026-06-10: six Kubernetes 1.36.2 rebase PRs: [ovn-kubernetes-mcp#57](https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57) merged; [ovn-kubernetes#6525](https://github.com/ovn-kubernetes/ovn-kubernetes/pull/6525), [multus-cni#305](https://github.com/openshift/multus-cni/pull/305), [cluster-network-operator#3027](https://github.com/openshift/cluster-network-operator/pull/3027), [cloud-network-config-controller#225](https://github.com/openshift/cloud-network-config-controller/pull/225) and [ingress-node-firewall#718](https://github.com/openshift/ingress-node-firewall/pull/718) closed without merging.
-* 2026-07-16 to 2026-07-23: 108 draft PRs opened from the maintainer's fork and then closed: cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15. This counts PRs, not independently accepted runs.
-* Local legacy matrix records contain 536 rows dated July 29–September 24, including 218 for 1.36.2 and latest unmutated PASS rows for all six targets. The inspected matrix-state has no evidence archive and only one run-input record; those PASS summaries are not requalified by the current harness. Recover per-target source/result, gates and failure dispositions before accepting this story. Missing evidence needs an explicit limited-acceptance decision or fresh qualification; no rerun was performed here.
+* June 9–10: [ovn-kubernetes-mcp#57](https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57) merged; [ovn-kubernetes#6525](https://github.com/ovn-kubernetes/ovn-kubernetes/pull/6525), [multus-cni#305](https://github.com/openshift/multus-cni/pull/305), [cluster-network-operator#3027](https://github.com/openshift/cluster-network-operator/pull/3027), [cloud-network-config-controller#225](https://github.com/openshift/cloud-network-config-controller/pull/225) and [ingress-node-firewall#718](https://github.com/openshift/ingress-node-firewall/pull/718) closed without merging.
+* July 16–23: 108 closed draft PRs across CNCC, ingress-node-firewall, Multus, MCP and CNO. These count PRs, not independently accepted runs.
+
+Legacy PASS summaries exist for all six targets but lack the current per-run evidence archive. Per-target source/result, gates and failure dispositions remain unqualified; story acceptance is pending.
 ```
 
 ## Story K3: Evals and cost/model measurement
@@ -147,9 +148,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Current source has 16 pattern-retention cases, isolated plugin snapshots, exact input/result metadata and a runner that captures model, tokens, turns and cost. The guide gives observed estimates of $17–27 for light cases and $40–60 for heavy cases; these are documented estimates, not a fresh benchmark. The runner collects artifacts but does not execute the YAML judges, and its missing-result fallback writes zero-valued metrics. Exclude fallback metrics from measurements rather than treating them as free successful runs.
+Source includes 16 pattern-retention cases and a runner capturing model, tokens, turns and cost. The guide's $17–27 light/$40–60 heavy estimates are not a fresh benchmark. The runner collects artifacts without executing YAML judges; missing-result zero metrics do not supply valid measurements.
 
-Remaining: retain valid per-run measurements and judge outcomes with source/model/version attribution, distinguish workflow completion from diff review, decide the shared-harness approach, and answer the reviewer with that data. No model run or paid eval was launched by this audit.
+Valid per-run measurements and judge outcomes, the shared-harness decision and an answer with measured data to the reviewer's cost/model question remain unfinished.
 ```
 
 ## Story K4: Kubernetes 1.37
@@ -176,13 +177,13 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-October 7 source refresh: the plugin HEAD is at a477bced687c3385311bafddbf2ae1a3b0228ed0, 82 commits after the upstream PR and 13 after bak42. Its docs/k8s-1.37.md records CNCC, Multus and initial MCP Kubernetes 1.37.1 workflow candidates, superseding the September assertion that no real rebase exists.
+Recorded Kubernetes 1.37.1 candidates at the October 7 source read:
 
-CNCC has historical independent host evidence but requires fresh qualification after correcting unsupported JSON-pin attribution. Multus candidate f5b4591085fb66dc62cd43140f24ee8e01d6cdb1 has recorded frozen-source evidence: 28 PASS, two SKIP, two INCONCLUSIVE. Dependency-history and hosted-coverage limits and an unchanged reachable gRPC finding remain disclosed. This is recorded source evidence, not a qualification rerun by this planning audit.
+* CNCC has historical independent host evidence; requalification remains after the unsupported JSON-pin attribution correction.
+* Multus f5b4591085fb66dc62cd43140f24ee8e01d6cdb1 records 28 PASS, two SKIP and two INCONCLUSIVE gates. Dependency-history/hosted-coverage limits and an unchanged reachable gRPC finding remain.
+* MCP 8cfc303b77f7f65232e8a726c3048376e9b23d88, using plugin 80a1c318 from baseline 858f54cf, records 24 PASS, three SKIP, three FAIL and two INCONCLUSIVE gates. Offline E2E covers 58 selected specs with 76 excluded. Lint did not complete; dependency-history/security coverage is incomplete and live CI selects Kubernetes 1.36.4. A separate maintainer assessment fails byte-identical upstream vendor suppression under the frozen rubric.
 
-MCP candidate 8cfc303b77f7f65232e8a726c3048376e9b23d88 used source 80a1c318 from baseline 858f54cf. Its independent execution/reporting audit accepts limits: 24 PASS, three SKIP, three FAIL and two INCONCLUSIVE gates. Unit tests report 17 fresh packages, 62 top-level and 589 subtest passes separately; offline E2E passes 58 selected specs with 76 excluded. Lint did not complete after three retained attempts; dependency-history/security coverage remains incomplete and live CI selects Kubernetes 1.36.4. Preserve the separate maintainer FAIL for byte-identical upstream vendor suppression under the frozen rubric.
-
-The a477bced source applies MCP lessons and two test files have further uncommitted court-permission changes; neither is a fresh qualification result. Freeze the intended source and compare loaded skill/hook bytes before a separate fresh MCP run; preserve the original budgets/reports. CNCC requalification and other repositories remain deferred while MCP is corrected and qualified. Keep this story In Progress until agreed criteria pass; do not claim clean vulnerability, installed-host, image or external-CI coverage.
+These are retained trial reports. Local plugin a477bced incorporates MCP lessons, with further dirty test changes; fresh qualification of that source/runtime remains pending. CNCC and other repository runs remain deferred while MCP is corrected and qualified.
 ```
 
 ## Story K5: Upstream the plugin
@@ -210,5 +211,5 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-https://github.com/openshift-eng/ai-helpers/pull/617 remains draft at 7e1aa060 with WIP, invalid-OWNERS and needs-ok-to-test labels at the October 7 read. Automation previously reported nonmembers in OWNERS; confirm and repair the current repository requirements before asking for verification/approval. The reviewer's eval/cost/shared-harness question remains K3 work. Review and qualify all intended local changes before an authorized PR refresh; merge remains this story's acceptance criterion.
+https://github.com/openshift-eng/ai-helpers/pull/617 remains draft at 7e1aa060 with WIP, invalid-OWNERS and needs-ok-to-test labels at the October 7 read. Automation reported nonmembers in OWNERS. The reviewer's eval/cost/shared-harness question remains tracked in K3.
 ```

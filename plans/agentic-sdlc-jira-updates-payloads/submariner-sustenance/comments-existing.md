@@ -83,23 +83,20 @@ Use one comment per target, omitting facts already recorded there.
 This is not an additional story or part of the four required comments. Re-read the issue and candidate source before posting:
 
 ```text
-A fork-only implementation candidate exists at 3cabf0e1f7526d3ef554571ffbb0a95db33bf013 (scripts/update-fbc-prod-urls.sh plus wiring/tests); no PR for its branch was found on October 7. It is not shipped on main and has not been executed by this planning audit.
+A fork-only candidate at 3cabf0e1f7526d3ef554571ffbb0a95db33bf013 adds scripts/update-fbc-prod-urls.sh plus conductor wiring/tests. It is absent from main, and no PR for its branch was found on October 7.
 
-Before preparing it for review, replace the all-OCP-success assumption, isolate the working tree and preserve unrelated/untracked work, distinguish prod URL conversion from selecting a newer bundle snapshot, and keep completion behind the existing verifier. Reconcile its deferred-next-release wording with the conductor's linear per-release closeout. Current assessment: plans/current-work.md in stolostron/submariner-release-management. Keep this existing story New or move it only after agreeing its actual work/status; no transition is implied here.
+The candidate assumes one OCP production release establishes all-target completion and does not isolate unrelated/untracked work. Those defects remain before review.
 ```
 
 ## ACM-39728 (epic): summary comment
 
-Before posting, replace all keys and reconcile every status/count with the refreshed evidence. Retain the final existing-story update line only for updates confirmed by recorded write ids/read-back or already present in Jira; omit any unperformed update.
+Post after approved creations: replace every key and refresh delivery/blocker states. This summary introduces the tracking; detailed inventories and evidence stay on the children.
 
 ```text
-Update for 2026-08-04 to 2026-09-30 at 05:00 UTC, reconstructed and verified on 2026-10-06. The sweep recorded 335 PRs by the maintainer across 12 repositories (290 merged, 32 closed without merging, 13 open); the largest groups are the Glasswing shipyard-audit remediation (113), Enterprise Contract and Tekton fixes (74) and CVE fixes (about 68). Theme membership other than the audit series is classified by PR title and repository; the inventory records each assignment. Shipped and ongoing work is tracked in new child stories:
+Work is now tracked in these new stories:
 
-* <S1> Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft): [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged; [operator-fbc#81](https://github.com/stolostron/submariner-operator-fbc/pull/81) merged and [operator-fbc#82](https://github.com/stolostron/submariner-operator-fbc/pull/82) open. Not finished: konflux-release-data changes and real builds and install are unverified.
-* <S2> Detect Enterprise Contract deny rules during Tekton task updates: [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged.
-* <S3> Deliver shared Claude/Codex skill discovery and compatibility contract: [release-management#109](https://github.com/stolostron/submariner-release-management/pull/109) merged. Five known konflux-ci-fix debt entries and installed-host validation remain.
-* <S4> One-command setup for RPM lockfile prerequisites: [release-management#110](https://github.com/stolostron/submariner-release-management/pull/110) merged.
-* <S5> Remediate Glasswing shipyard audit findings: September inventory of 113 PRs (105 merged); all eight FIND-006 drafts closed without merging on October 3. Their finding needs a disposition, and coordinated upgrade-test repair PRs [shipyard#2654](https://github.com/submariner-io/shipyard/pull/2654) and [subctl#1944](https://github.com/submariner-io/subctl/pull/1944) remain open.
-
-Existing stories updated: ACM-39731 (autorelease hardening), ACM-39730 (tracker), ACM-39736 (ownership transfer prerequisites), ACM-39729 (CVE remediation, 40 PRs and 259 issues).
+* <S4> RPM lockfile prerequisite setup: delivered in https://github.com/stolostron/submariner-release-management/pull/110 (merged).
+* <S2> EC deny-rule detection and <S3> shared Claude/Codex discovery: delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged). Installed-host portability remains separate follow-up.
+* <S1> OCP 5 FBC onboarding: CLI/catalog preparation merged; https://github.com/stolostron/submariner-operator-fbc/pull/82 remains blocked on its build account, with live configuration/build/install acceptance unfinished.
+* <S5> Shipyard audit remediation: FIND-006 drafts closed without merging; disposition and helper-pod/upgrade-test repairs remain unfinished.
 ```
