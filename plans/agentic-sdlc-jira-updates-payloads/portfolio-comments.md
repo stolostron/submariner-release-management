@@ -49,12 +49,12 @@ ACM-39738: no parent rollup proposed. Post the two child updates only; the broad
 
 ### CORENET-7615 — reconcile planning decisions
 
-Group 3: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
+Reviewed October 7, 2026. Group 3: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
 
 ```text
-The delivery plan merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. Its [merge discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records preliminary artifact-graph review, the OpenShift FRR/frr-metrics choice with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
+The delivery plan merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. The October 1 [review discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records preliminary artifact-graph review, the OpenShift FRR/frr-metrics choice with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
 
-The published decision index still reflects the earlier proposals. Product home, Konflux cluster and AMI channel remain pending; release-gate/responsibility confirmation and owner corrections or recorded resolutions for CORENET-7501/7504/7505 remain unfinished.
+The decision index on main still needs these outcomes recorded with owners and dates. Open [appliance PR #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) proposes host-installed FRR for RHEL 10; reconcile it with the recorded payload choice. Product home, Konflux cluster and AMI channel remain pending. Release-gate/responsibility review and owner-attributed recording of the CORENET-7501/7504/7505 criteria resolutions remain unfinished.
 ```
 
 ## Group 4 — deadline and requested status
