@@ -2,9 +2,9 @@
 
 # Jira planning verification
 
-Read-only audit: October 6–7, 2026; refreshed after the deeper October 7 assigned-work, review, artifact and repository-source checks.
+Evidence audit: October 6–7, 2026; latest pass re-read the complete assignment population, issue documents, public work and retained tenant artifacts.
 [current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
-and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. No Jira write, transition, branch push, PR post, cluster change or release was performed.
+and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. No Jira write, transition, PR post, cluster change or release was performed.
 Private raw exports and pre-edit plan copies are retained outside this public checkout.
 
 ## Complete assigned-issue sweep
@@ -14,12 +14,12 @@ Private raw exports and pre-edit plan copies are retained outside this public ch
 | Paginated `assignee = currentUser() ORDER BY updated DESC`, no project/status/date restriction | 703 unique issues across ACM, CORENET, OPGM, KFLUXMIG, HYCLD, CLOUDWF, ODL, RCM and BREW |
 | Active status-category query, also unrestricted | 80: 76 non-Vulnerability issues and four Vulnerability issues; its key set matches the active subset of the complete search |
 | Terminal assigned history | 623: 144 non-Vulnerability and 479 Vulnerability issues; no reopening/bulk update proposed |
-| Full non-Vulnerability issue views | All 220 assigned issues plus four related issues; descriptions, comments, links, parent/subtasks and fields read |
+| Full issue views | Latest pass: all 220 assigned issues plus nine related non-Vulnerability issues and four active private Vulnerability views; 233 full documents read |
 | Non-Vulnerability `updated >= "2026-09-13"` query | 118 issues, 53 terminal; mutable update time does not prove recent implementation |
 | Epic membership queries | ACM-39728 has ten direct children; CORENET-7155 has zero, and its description remains empty |
 | Full comment pagination on 21 update/reconciliation targets | Returned unique ids reconcile with reported totals, including 159 comments on ACM-40644 rather than the 100 in its issue view |
 | Latest public work discovery | 23 authored PRs updated since September 30, 16 currently open authored PRs, five authored issues updated since September 30; populations overlap |
-| Direct PR reads | All 16 open authored PRs plus releases#1444; EVPN #3–7 and recent merged #2/cve-agent#35 also read. Five merged PRs for ACM-34592 checked separately |
+| Direct PR reads | Latest pass: 24 direct reads, including all 16 open authored PRs, releases#1444, EVPN #2–7 and cve-agent#35. Five merged PRs for ACM-34592 checked earlier |
 
 The 76 non-Vulnerability active issues reconcile exactly to queue groups: automation 10, releases 17,
 deadline/lifecycle/legacy eight, Kubernetes/MCN/EVPN 41. No private vulnerability keys or descriptions are copied into the queue.
@@ -32,21 +32,23 @@ Pages were decoded, flattened and checked against each reported total; issue ADF
 Neither rendered text nor an issue view's first 100 comments is a safe replacement document for Jira rich text.
 
 Fresh observations add OPGM-364's existing lifecycle-publication scope and status request, ACM-25779's stale console template,
-ACM-34593's unsupported closure assumption, and the already-created MCN CI subtask set.
+ACM-34593's original build-failure acceptance scope, and the already-created MCN CI subtask set.
 The May draft saying it will split into subtasks is obsolete. ACM-34592's five linked PRs all merged May 28;
-its sibling still needs route-agent build evidence. Both contribution children require an ai-helpers merge,
+the latest pass now finds a successful October 2 route-agent push build for its sibling, with a separate failing EC scenario. Fix attribution and original acceptance criteria still need review. Both contribution children require an ai-helpers merge,
 and ACM-39740 additionally requires another product's validation. CVE-agent#35's source merge is preparatory evidence only.
 
 ## Current checks and local work
 
-The deeper pass repeated the complete 703-row inventory and all 76 active non-Vulnerability full views,
-plus eight dependency views and the three EVPN conflict issues. Assigned keys/statuses are unchanged.
-Complete comment histories remain supported by unchanged issue timestamps; re-fetch before any write.
+The latest complete inventory still returns 703 unique assigned issues and the same 80 active keys/statuses.
+All 233 full documents were compared with the previous full-view baseline: actual `updated` fields, descriptions, comments,
+links, PR fields, parent/subtasks and status/summary show no changes. Freshness comparisons use full-view `updated` fields, which search rows do not expose.
+The earlier fully paginated comment histories remain supported by those unchanged documents; re-fetch before any write.
+Direct PR heads/states/reviews remain unchanged apart from the planning PR's publication; EVPN #3–7 label changes do not establish acceptance.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
 | Full GitHub review-thread pagination | Shipyard #2582: 32 threads, four unresolved/outdated, zero current/unresolved; no current-head approval. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard follow-up is now committed/clean and outside published #2582. Plugin HEAD has two dirty court-permission test files; previous clean claims removed |
+| Exact local source inspection | Shipyard has two clean local commits through 36afbd1e beyond published #2582 at 56e7233a; 1,372 checks are author-reported, not repeated. Plugin still has two dirty court-permission test files |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
@@ -126,9 +128,21 @@ The [epic edits](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-d
 Earlier focused draft tests passed, but a full release-data warning-group failure reproduced on untouched cached main; the entire repository was not green.
 Tenant/admission drafts still require fresh-base reads and separation of the tenant's unrelated documentation rewrite.
 
-The earlier successful tenant read found the Docker-config Secret unlinked to the runner and OCP 5 Application/Component/build account absent.
-No retained PipelineRuns or named historical run were found. That read did not prove credential usability, controller ownership,
-snapshot/scenario associations or release success. GitLab refresh remained blocked by DNS; no credential contents were printed.
+The latest authenticated namespace read returns zero PipelineRuns and 746 snapshots. Six retained FBC snapshots match the pinned
+4.x source and recover the exact scenario/run associations: all aggregate Failed/operator TestFail, with completed standard warnings.
+The exact map belongs to [FBC recovery](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities).
+The registry Secret remains unlinked to the runner; OCP 5 Application/Component/build account are NotFound.
+Credential usability and deployed controller/field ownership remain unverified. The earlier GitLab read failed DNS;
+no fresh-base access is claimed and no credential contents were printed.
+
+The retained 0.23.4 component-stage snapshot has nine components and aggregate TestSucceeded=True;
+its recorded stage Release is currently Released=True/Succeeded, confirming evidence already in the parent comments.
+The retained 0.22.2 candidate also passes aggregate integration with warnings. Direct immutable bundle inspection/extraction verifies
+its v0.22.2 label and 0.22.2 CSV. Seven mapped related-image digests differ from the snapshot operands; registry copying can change digests,
+so content identity remains unreconciled rather than proven invalid. The snapshot operator inspects as v0.22.2;
+the embedded production operator inspection fails. Neither candidate selection nor EC/bundle acceptance is inferred.
+The October 2 route-agent-0-21 push check succeeds at 82adbacd, while its retained EC scenario fails.
+That supports review of the original build issue without claiming compliance or adding EC acceptance to its original scope.
 
 ## Execution limits
 
@@ -141,7 +155,10 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 
 ## Documentation validation
 
-The deeper revisions pass full `make -j4 test` without a retry, Markdown lint across 136 files,
-61 changed-document relative-link/anchor checks and whitespace validation. All four original epic-description snippets and the insertion heading still match once.
+This refresh passes full `make -j4 test`, including Markdown lint across 136 files, plus 110 changed-document relative-link/anchor checks
+and whitespace validation. All four original epic-description snippets and the insertion heading match exactly once in the refreshed document.
 The queue still accounts for all 76 active assigned non-Vulnerability keys exactly once. Existing unrelated edits are preserved;
 no release/test implementation was changed. Raw exports, source snapshots and validation logs remain outside this public checkout.
+
+Five superseded design bodies now retain concise current contracts and immutable links to their complete pre-cleanup history.
+Canonical recovery/rollout/queue documents retain active gates; historical detail is preserved in Git without duplicating it in the current plans.

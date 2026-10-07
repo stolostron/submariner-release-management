@@ -23,9 +23,11 @@ It records review gates; it does not authorize pushes, merge requests, cluster c
 | Installation | Source inspection establishes conditional execution, not a successful OCP 5 install | Record actual cluster version, selected bundle/channel and successful installation/QE |
 | Release | Existing RPA drafts use generic OCP-version index templates | Confirm live matching, release mode, publishing decisions and target-index membership |
 
-The third October 7 pass authenticated successfully and read `submariner-tenant`. The 5.0 Application, Component and build account are absent;
-the existing Docker-config Secret remains unlinked to the integration runner. No PipelineRuns are retained in the returned list, so recover exact snapshot/scenario
-associations before reruns. Credential usability, snapshot verdicts, controller ownership and release state remain unverified. GitLab DNS still blocks fresh-base review.
+The October 7 authenticated read checked `submariner-tenant`. The 5.0 Application, Component and build account are absent;
+the existing Docker-config Secret remains unlinked to the integration runner. Zero PipelineRuns and 746 snapshots are retained.
+The six exact failed 4.x [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) are recovered;
+re-read their identities and verify intended catalog content before reruns. Credential usability and controller ownership remain unverified.
+The earlier GitLab read failed DNS; fresh-base access has not been re-established.
 The original plan's cluster findings remain dated observations. Native image/E2E validation is recorded in
 [implementation status](ocp-5-implementation-status.md); those runs were not repeated during this consolidation.
 The September 24 status document describes an earlier state, including before #81 merged.

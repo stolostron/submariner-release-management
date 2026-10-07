@@ -2,8 +2,9 @@
 
 # Comments for existing ACM-39728 stories and the epic (exact payloads)
 
-Nothing here has been posted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do. Post them
-after the new stories exist (they reference the new keys, shown as `<S1>` to `<S5>` and to be filled in with the created keys).
+Nothing here has been posted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
+Existing-story comments are independent of creating new stories; post only missing deltas after target-specific preflight.
+The epic summary uses `<S1>` to `<S5>` and must wait for the reviewed stories and real keys.
 
 Historical counts retain their September cutoff; current issues and PRs were re-read October 7. The retarget note is from October 1. Re-read the target stories and follow the plan's preflight before posting; replace placeholders and update dates with any refreshed counts.
 
@@ -56,8 +57,8 @@ No comments exist yet. Keep it factual; the story is still New and needs a secon
 ```text
 Prerequisites for another engineer to drive a release are now in place:
 
-* https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key. See <S4>.
-* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch safety so a release run does not clobber a teammate's checkout, add-team-member hardening, and skills usable from Claude or Codex. See <S3>.
+* https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key. Relate the setup story if it has been created.
+* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch safety so a release run does not clobber a teammate's checkout, add-team-member hardening, and skills usable from Claude or Codex. Relate the discovery/compatibility story if it has been created.
 
 Still needed for this story's acceptance criteria: at least one other engineer completing a full downstream release using the skills and docs, and the gaps they hit written down.
 ```
@@ -78,7 +79,7 @@ Optional additional ACM-39729 bullet, after checking for an existing update:
 
 ```text
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
-* https://github.com/submariner-io/shipyard/pull/2582 remains open at 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass/skip but review disposition remains changes requested. A newer five-file follow-up is committed locally at 8f4871efdb18c5447ace2f49a05c983dd05b645c with a clean checkout; it remains outside the published PR and was not validated here.
+* https://github.com/submariner-io/shipyard/pull/2582 remains open at 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass/skip but review disposition remains changes requested. Two local follow-ups now end at 36afbd1eca881a326ae6b948a096b273bfab59cf in a clean checkout, including OpenShift branch/order-independent arguments. They remain outside the published PR; their reported checks were not repeated here.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.

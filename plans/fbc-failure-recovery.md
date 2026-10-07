@@ -2,36 +2,27 @@
 
 # FBC failure recovery — current priority
 
-Reviewed 2026-10-06; published checks, authentication and clean local drafts rechecked 2026-10-07.
+Reviewed 2026-10-07; published checks, retained snapshots, component-stage release and local drafts rechecked.
 The [current work map](current-work.md) records concurrent upstream repairs, release trackers and the independent October 15 builder-migration deadline. First unblock the existing **0.23.4 / OCP 4.16–4.21** FBC integration tests, then address the separate
-OCP 5.0 PR prerequisite. Jira payload application and planning-file cleanup follow this recovery work.
+OCP 5.0 PR prerequisite. Jira payload application remains a separate reviewed handoff.
 No Release resource, live secret binding, snapshot rerun or GitLab submission has been applied by this review.
 
 ## Confirmed failures and proposed fixes
 
-GitHub's latest published checks on FBC main `2e6b489e65620738d68504d9158418fe463e2073` report:
-
-| OCP | Operator test PipelineRun | Last published result |
-| --- | --- | --- |
-| 4.16 | `submariner-fbc-operator-4-16-z2gvp` | failed, September 30 |
-| 4.17 | `submariner-fbc-operator-4-17-5plbs` | failed, September 30 |
-| 4.18 | `submariner-fbc-operator-4-18-d4pr2` | failed, September 30 |
-| 4.19 | `submariner-fbc-operator-4-19-gc5df` | failed, September 30 |
-| 4.20 | `submariner-fbc-operator-4-20-xswhp` | failed, September 30 |
-| 4.21 | `submariner-fbc-operator-4-21-zzbxz` | failed again, October 1 |
+GitHub's published operator checks on FBC main `2e6b489e65620738d68504d9158418fe463e2073` failed September 30/October 1.
+The exact snapshot/scenario/run map below combines those checks with retained cluster evidence.
 
 All six report `get-unreleased-bundle` / `StepFailed`; their corresponding catalog push builds succeeded.
 The saved September 30 4.19 step log shows repeated anonymous pulls of the production index returning `401 Unauthorized`.
 The standard integration checks report warnings, not the operator failure; inspect the complete snapshot verdict before releasing.
-These failures remain published/historical evidence. The October 7 third pass authenticated successfully and read the explicit `submariner-tenant` namespace:
+These failures remain published/historical evidence. The October 7 authenticated read checked the explicit `submariner-tenant` namespace:
 
 * `submariner-konflux-registry-redhat-io` exists with type `kubernetes.io/dockerconfigjson`; no credential data was read or printed.
 * Its name is absent from both `secrets` and `imagePullSecrets` on `konflux-integration-runner`. This confirms the missing link; it does not verify credential usability.
 * `submariner-fbc-5-0` Application and Component and `build-pipeline-submariner-fbc-5-0` are NotFound. Reconciliation remains a prerequisite.
-* The returned PipelineRun list contains zero items and the named 4.19 historical run is NotFound. Retrieve retained snapshot/scenario associations and archived evidence before reruns;
-  do not claim a fresh task diagnosis or completion from an empty list.
+* The latest namespace read returns zero PipelineRuns and 746 retained snapshots. The six exact failing FBC snapshot/scenario associations are recovered below; archived task logs are still needed for fresh diagnosis and historical root-cause comparison.
 
-GitLab main-ref access still fails DNS. Field ownership/controller deployment and snapshot verdicts remain unverified. No link, resource or rerun was changed.
+The earlier GitLab main-ref read failed DNS; fresh-base/controller ownership and credential usability remain unverified. The current six FBC snapshot verdicts are Failed. No link, resource or rerun was changed.
 
 | Priority | Failure | Prepared action | Success evidence |
 | --- | --- | --- | --- |
@@ -41,6 +32,30 @@ GitLab main-ref access still fails DNS. Field ownership/controller deployment an
 
 Task expiry is not the demonstrated cause of the current failures. The OCP 5 catalog, profile access and runtime support remain separate rollout gates in the
 [OCP 5 plan](ocp-5-0-fbc-rollout.md).
+
+## Retained snapshot and scenario identities
+
+October 7 authenticated reads recover one snapshot per 4.16–4.21 Application at FBC source
+`2e6b489e65620738d68504d9158418fe463e2073`. All six have integration Finished=True, aggregate TestSucceeded=False/Failed,
+and a completed operator scenario with TestFail. Standard scenarios finished with “passed with warnings”; their retained
+`BuildPLRInProgress` strings do not mean the operator tests passed or are still running.
+
+| OCP | Snapshot | Operator scenario | Recorded failed run |
+| --- | --- | --- | --- |
+| 4.16 | `submariner-fbc-4-16-20260930-152915-000` | `submariner-fbc-operator-4-16` | `submariner-fbc-operator-4-16-z2gvp` |
+| 4.17 | `submariner-fbc-4-17-20260930-152915-000` | `submariner-fbc-operator-4-17` | `submariner-fbc-operator-4-17-5plbs` |
+| 4.18 | `submariner-fbc-4-18-20260930-152916-000` | `submariner-fbc-operator-4-18` | `submariner-fbc-operator-4-18-d4pr2` |
+| 4.19 | `submariner-fbc-4-19-20260930-152916-000` | `submariner-fbc-operator-4-19` | `submariner-fbc-operator-4-19-gc5df` |
+| 4.20 | `submariner-fbc-4-20-20260930-152915-000` | `submariner-fbc-operator-4-20` | `submariner-fbc-operator-4-20-xswhp` |
+| 4.21 | `submariner-fbc-4-21-20260930-152915-000` | `submariner-fbc-operator-4-21` | `submariner-fbc-operator-4-21-zzbxz` |
+
+Each snapshot has its matching single FBC Component and immutable catalog-image digest. Those identities are retained privately with the raw evidence.
+The association is established; source/image catalog-content and intended 0.23.4 bundle verification remain before mutation.
+A missing live PipelineRun does not erase the snapshot's finished failed verdict. Re-read this map before a separately authorized rerun.
+
+The component-stage snapshot `submariner-0-23-20260930-064533-000` is also retained with nine components and aggregate TestSucceeded=True.
+Its EC/standard scenario finished with warnings. The recorded `submariner-0-23-4-stage-20260930-01` Release still reports Released=True/Succeeded,
+matching the existing Jira artifact entry. This confirms the component-stage evidence, not FBC/QE/production completion; no duplicate component success comment is needed.
 
 ## Prepared registry-link repair
 
@@ -85,8 +100,7 @@ Local files also do not establish the tenant's ArgoCD apply/pruning mode, so the
 
 ### Restore and verify live access
 
-1. Reconfirm authentication and the expected cluster/namespace, then recover the six failed tests' snapshot/scenario associations from retained or archived evidence.
-   Verify the snapshot's application, FBC source URL/revision, catalog image and 0.23.4 bundle before any rerun.
+1. Reconfirm authentication/namespace and the recovered snapshot/scenario map above. Verify each Application, FBC source URL/revision, catalog digest and actual 0.23.4 bundle contents before any rerun; do not choose a newer snapshot implicitly.
 2. Read the current integration ServiceAccount and confirm the named registry secret exists with the expected Docker-config type.
    Validate that its `auths` entries contain usable credentials for `registry.redhat.io`; report registry names and pass/fail only, never credential values.
    Check for competing credentials for the same registry before assuming the merged configuration uses this secret. Save the original ServiceAccount and binding privately.
@@ -106,7 +120,7 @@ Local files also do not establish the tenant's ArgoCD apply/pruning mode, so the
 ### Rerun the same release snapshots
 
 Follow the [integration-test rerun procedure](https://konflux-ci.dev/docs/testing/integration/rerunning/).
-Resolve the actual snapshot names from the failed PipelineRuns; do not guess them from timestamps or choose a newer snapshot with different source/content.
+Use the recovered identities above after re-reading their source/content and finished test state; do not guess from timestamps or select a newer snapshot with different content.
 Initial tests must be finished. Rerun one affected snapshot first, then the other five after it passes:
 
 ```bash
@@ -151,5 +165,5 @@ A passing PR check still supplies no OCP 5 push-test, installation or release ev
 
 The proposed registry-link manifest renders correctly and declares no replacement for controller-managed image-pull credentials.
 Repository validation results are recorded in the [verification record](agentic-sdlc-jira-updates-verification.md).
-The live repair/reruns require renewed Konflux authentication; durable submission requires GitLab access and a fresh base.
+Recheck Konflux authentication before a separately authorized repair/rerun; durable submission requires GitLab access and a fresh base.
 No FBC failure is marked resolved until the corrected live run and existing release verification pass.

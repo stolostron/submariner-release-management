@@ -2,34 +2,43 @@
 
 # Current work and planning handoffs
 
-Checked October 7, 2026 through read-only Jira/GitHub/source queries; complete assigned inventory and all 76 active non-Vulnerability issues re-read during the deeper pass.
-Earlier tenant observations retain their 13:37 UTC boundary. Later direct production bundle/index and historical Release-resource reads are recorded separately below.
+Refreshed October 7, 2026 after 16:16 UTC: unrestricted assigned inventory, all 220 non-Vulnerability full views, four active private vulnerabilities and related dependencies.
+Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
-Historical counts retain their stated cutoff. No Jira write, branch push, PR comment, cluster mutation or release was performed.
+Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
+Jira payloads remain unapplied; no PR comment, cluster mutation or release was performed by this refresh.
 
 ## Release recovery and time-sensitive work
 
 | Work | Observed reality | Next action and completion evidence |
 | --- | --- | --- |
 | 0.23.4, ACM-44527 | Parent In Progress; component stage and all prerequisites through release notes Resolved; FBC catalog In Progress; FBC stage, QE and production steps New | Authentication now works; verify registry credential usability/field ownership, then carry out the separately authorized recovery. Require successful intended-snapshot tests and release verification before stage/QE |
-| FBC 4.16–4.21 | Main remains `2e6b489e65620738d68504d9158418fe463e2073`; latest published operator checks fail at `get-unreleased-bundle`; corresponding builds succeed and standard tests have warnings | Use [recovery procedure](fbc-failure-recovery.md). GitHub reports September 30/October 1 runs; this is a fresh read of published evidence, not fresh pod diagnosis |
+| FBC 4.16–4.21 | Each retained snapshot matches `2e6b489e65620738d68504d9158418fe463e2073`; aggregate tests Failed and operator scenarios TestFail, finished September 30/October 1 | Exact [snapshot/scenario map](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) is recovered. Verify catalog content/credential usability before an authorized rerun; no fresh task logs exist in the returned PipelineRun list |
 | ART Go builder migration, ACM-45318 | New; description requests migration by October 15 and lists addon, lighthouse, submariner and operator source repos | Use the [pinned source inventory](art-builder-migration.md): downstream component streams use UBI Go Toolset, addon branches use older Brew builders, and branch Go floors differ. Prepare separate reviewed changes with compiler/FIPS/build evidence. This deadline can proceed independently of FBC credentials and Jira story creation |
 | 0.24.1, ACM-40644 | Parent In Progress; all 15 subtasks terminal. Exact production bundle tag resolves with version v0.24.1; seven index probes time out and recorded component Release CRs are NotFound | Bundle publication is confirmed. Recover catalog/QE/release evidence for actual 4.16–4.22 scope before authorized closeout; missing retained CRs and timed-out probes are not proof of absence |
-| 0.22.2, ACM-45070 | Parent In Progress; EC and bundle SHAs In Progress; component stage onward New. Two additional test subtasks remain New | Reconcile actual snapshots/PRs with the tracker. Give the two test items their own disposition; do not resolve them as completed release work |
+| 0.22.2, ACM-45070 | Retained candidate snapshot passes aggregate integration with warnings; its bundle CSV/version is 0.22.2, but embedded operand identity remains unreconciled. EC and bundle SHAs remain In Progress; stage onward New | Verify source/operand mapping before accepting this candidate or updating parent artifacts. Give the two additional test items their own disposition |
 | Task trust maintenance | The October 6 immutable allowlist audit records three #82 pins expiring October 30 and lifecycle injection October 31 | Re-read current allowlist and deny rules; keep any repo-wide refresh separate. Expiry is not the demonstrated cause of today's FBC failures |
 
-The third pass authenticated successfully and read `submariner-tenant`: the registry secret has Docker-config type, but its name is absent from both runner credential lists.
-The OCP 5 Application, Component and build account are absent. No PipelineRuns are retained in the returned namespace list; the historical 4.19 run is NotFound.
-This confirms current missing prerequisites, not credential validity or a fresh failed task. GitLab main-ref reads still fail DNS; no resource was changed.
+The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
+The namespace returns zero PipelineRuns and 746 retained snapshots; six of those recover the exact FBC failure associations.
+This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. GitLab fresh-base access remains unverified since the earlier DNS failure.
 
 0.24.1 artifact read: `registry.redhat.io/rhacm2/submariner-operator-bundle:v0.24.1` resolves to
 `sha256:a8bb318b8afa37daf2ce9394d80c46224e872b593934fbb68fd89e20e6665f84` with label `version=v0.24.1`.
 Local FBC production records enumerate OCP 4.16–4.22. Each direct index extraction timed out at 100 seconds;
 index membership remains unknown. All three recorded September component production Release names are NotFound in the authenticated tenant.
 Their repository YAMLs are retained intent, not a current success verdict. No install, QE or release execution was repeated.
+
+The inspected 0.22.2 candidate is `submariner-0-22-20261002-125823-000-lz`, with nine components and aggregate TestSucceeded=True.
+Its completed EC/standard scenarios report warnings, despite retained `BuildPLRInProgress` labels. The bundle digest
+`sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3` has version label v0.22.2 and CSV version 0.22.2;
+the bundle source is `da81d438c0456f367bc5e83e671362181a47ab63`. All seven CSV related-image digests differ from their mapped snapshot operands.
+Registry copying can change manifest digests, so this comparison is not proof of invalid content. The snapshot operator inspects as v0.22.2;
+inspection of the embedded production operator failed. Reconcile source/content and registry identity before treating this candidate as release-ready.
+No tracker step or artifact is advanced from this partial evidence.
 
 ## Prepared release-data and OCP 5 work
 
@@ -81,7 +90,7 @@ Create-field/transition metadata and write canaries remain untested.
 * [Release-management #114](https://github.com/stolostron/submariner-release-management/pull/114) remains open at `a1bfe041b626ed39c42e703afc3b735b1bbd04c0`, with completed checks passing and Tide pending. Its skip-completed-step changes are not on main; describe them as pending work on ACM-39731.
 * `make test-skills` passes 19 checks while retaining five overlapping compatibility debt entries in `konflux-ci-fix`. The proposed S3 now names the delivered discovery/contract scope. The [compatibility plan](claude-codex-skill-compatibility.md) retains remaining execution and host-matrix work.
 * [shipyard #2582](https://github.com/submariner-io/shipyard/pull/2582) was refreshed at 09:59 UTC to `56e7233ad0db33023378e85d0d42aba1129c5ff5`, now titled "Harden CVE fixes for OpenShift repositories". Its description reports 1,315 checks and additional live OpenShift targets, with partial workflows and no cluster E2E claimed. All 32 returned review threads were checked: four remain unresolved but outdated, each with a new author response; zero are current/unresolved. The latest direct read still reports CHANGES_REQUESTED, with returned checks passing/skipped. The stale label remained at the inspected label read. Reviewer acceptance and the actual ai-helpers merge criterion remain before completing ACM-39738/39739; the earlier September feedback summary is superseded.
-* Shipyard's CVE-fix checkout is now clean at `8f4871efdb18c5447ace2f49a05c983dd05b645c`, one local commit beyond published `56e7233a`. Its five-file delta (+472/-138) preserves repair versions, rollback metadata and module outcomes. It remains outside the published PR; no tests of that commit were run here and the older reported 1,315 checks do not cover it.
+* Shipyard's CVE-fix checkout is now clean at `36afbd1eca881a326ae6b948a096b273bfab59cf`, two local commits beyond published `56e7233a`. The six-file delta (+540/-148) preserves repair versions/rollback/module outcomes and accepts OpenShift `main`/`master` or explicit repository/branch arguments in either order. The newest commit reports 1,372 regression checks; those were not repeated here and do not refresh the older published PR's evidence.
 * [cve-agent #35](https://github.com/dfarrell07/claude-skills/pull/35) is merged; the inspected local checkout is clean. Its merged provenance work is evidence for ACM-39729/39740, not proof that the separate upstream contribution is finished.
 * [Addon #2792](https://github.com/stolostron/submariner-addon/pull/2792) remains open against `appstudio-submariner-addon-acm-214`, with Tide pending. Assess its intended stream and current task trust separately; do not count an August task bump as current builder migration or OCP 5 readiness.
 
@@ -136,6 +145,7 @@ PR #617 still has WIP, invalid-OWNERS and needs-ok-to-test labels; preserve thos
 | PQC image readiness, ACM-41119 | New; updated October 5, targets OCP 5 GA. Addon release-5.0 already selects a PQC-minimal Konflux runtime base; main/5.1 does not | Verify actual image policy/build evidence and approved scope. Existing source configuration is partial evidence, not shipped-image proof; see [branch inventory](art-builder-migration.md#addon-branch-differences) |
 | Addon OLMv1, ACM-37426 | New; description says ACM 5.0, July 24 comment targets 5.1. Private research has ClusterExtension/installer prototypes; least-privilege RBAC explicitly lacks two required parts | Preserve preparation; confirm target and current API before addon integration, complete/review RBAC and prove install behavior. Do not count templates as implementation or inherit the old 5.0 deadline |
 | EVPN delivery plan, CORENET-7615 | To Do; planning #2, public-safety check #4 and build-root #5 merged. Appliance #6 and Ansible #3/#7 imports remain open; #7 verify fails | Record planning acceptance separately from implementation. Current decision index still proposes owners; related 7501/7504/7505 retain conflicting criteria and have no resolution comments |
+| Older route-agent build, ACM-34593 | October 2 hosted route-agent push build succeeds at `82adbacd`; its later EC scenario fails | Review closure of the original DNF/RPM build issue against that exact source/build; keep EC failure as separate compliance evidence. See the [queue](jira-update-queue.md) |
 | Pre-merge automation, CORENET-7086 | To Do in the current assigned-work query | Reconcile its existing acceptance criteria before proposing overlapping pre-merge or qualification automation; it is separate from the plugin epic |
 | MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress; implementation stories remain To Do in the assigned-work query | Retain their existing scope; shared tooling ideas do not make them Kubernetes-plugin deliverables |
 

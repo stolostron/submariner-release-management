@@ -71,7 +71,7 @@ The old claims that scripts and verifiers never coexist, component fan-out is un
 
 | Work | Concrete next action | Acceptance boundary |
 | --- | --- | --- |
-| Existing FBC failures | Use [recovery plan](fbc-failure-recovery.md) and reconstruct intended snapshots/scenarios | Registry access plus complete intended-snapshot checks; installation/QE/publishing remain distinct |
+| Existing FBC failures | Use the recovered [snapshot/scenario map](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities); re-read identities and verify intended catalog content | Registry access plus complete intended-snapshot checks; installation/QE/publishing remain distinct |
 | Pending skip-completed-upstream proposal | Review release-management#114 against current main and release retry/retarget behavior | Merge and required checks, not the existence of its open branch |
 | Retarget and parent artifacts | Reconcile ACM-44527/ACM-45070 observations before designing an explicit retarget operation | Preserve version/snapshot identity, invalidate only affected evidence, refresh parent artifacts and read back tracker state |
 | Prod URL conversion, existing ACM-39732 | Reconcile fork candidate `3cabf0e` in an isolated worktree | Actual OCP scope and QE-approved snapshot/index evidence; conversion distinct from selecting a new bundle; original/untracked work preserved. See [candidate review](current-work.md#unpublished-tooling-and-stale-roadmap-entries) |
