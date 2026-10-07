@@ -150,7 +150,7 @@ All four comments were created on October 7 at 18:23 UTC with restricted visibil
 
 The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Start with the short CORENET-7171 correction, then the two CVE contribution children, then EVPN planning. Parent rollups and the older CVE progress comment are deferred pending a distinct decision or delivery. Deadline/status and release-evidence groups follow, with engineering priorities proceeding in parallel. Each group requires its own approval and fresh target/evidence read; set restricted visibility at creation and verify text/links/visibility before the next write. Earlier audits and preparation do not authorize posting.
 
-Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional count changes. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. Summary comments wait for real keys and verified writes; closure reviews remain separate from progress reporting.
+Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional stale-count cleanup. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. Summary comments wait for real keys and verified writes; closure reviews remain separate from progress reporting.
 
 Each creation or field write is read back before the next. Skip completed deltas.
 
@@ -203,7 +203,7 @@ rg -o 'https://github.com/[^ )]+/pull/[0-9]+' plans/agentic-sdlc-jira-updates-pa
 # Substitute owner, repo and n from each URL before running this template.
 gh api 'repos/<owner>/<repo>/pulls/<n>' --jq '[.merged, .state, .created_at, .base.ref]'
 
-# Repo-size baseline used by epic-description-edits.md (not today's main).
+# Historical repo-size audit baseline (not today's main).
 git ls-tree -d --name-only 0ed2981 skills/ | wc -l
 git ls-tree -r --name-only 0ed2981 scripts | rg '\.(sh|py)$' | wc -l
 ```
@@ -295,7 +295,7 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
 1. Re-read CORENET-7155 and confirm it still has no description and no children, and that nobody added stories since 2026-09-30.
 2. Re-run section B8 against the pinned bak42 snapshot for historical development counts, and query current PR/run state separately.
    Refresh dates and counts together when reporting current work; do not expect mutable HEAD or review totals to equal the historical snapshot.
-3. Confirm the maintainer's answers to section B4, and inspect and back up any current uncommitted or unpushed plugin work.
+3. Confirm the maintainer's answers to section B4, and inspect and back up any current uncommitted or unpushed plugin work. Before fresh qualification, freeze the intended source, compare loaded skill/hook bytes and retain the original trial budgets/reports.
 4. Confirm the story-point scale and the sprint id with the team.
 5. Re-read Story create metadata and available transitions. The October 7 metadata exposes `parent`, not legacy Epic Link, on CORENET creation; Original story points and Git Pull Request require later edits. `Related` is currently link type 10077. Confirm the new canary's edit metadata and rich-text handling before continuing.
 6. Reconcile K2/K4 qualification scope with existing delivery epics CORENET-6983 and CORENET-7450 and their children. K stories qualify the plugin; they do not recreate repository bumps or change those other-owned delivery issues.
