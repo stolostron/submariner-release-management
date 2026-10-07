@@ -334,7 +334,7 @@ All story/epic payload blocks, posted records and historical inventories remain 
 
 ## First-batch readiness audit
 
-The focused October 7 audit re-reads 34 full issue documents and complete histories (three comments total), including the research, all 27 implementation
+Before posting, the focused October 7 audit re-read 34 full issue documents and complete histories (three comments total), including the research, all 27 implementation
 subtasks, parent epic and adjacent Prow/image/release scope. CORENET-7171 remains In Progress with the same two May comments and ten changelog events;
 its Browse/Add Comments permissions and restricted-group membership are confirmed. The two existing comments use the required group visibility.
 CORENET-7086 still has exactly the research plus 27 implementation subtasks; all implementation issues remain To Do with no comments.
@@ -345,7 +345,19 @@ The comment describes their scope and release-note suggestions without claiming 
 Prepared ADF matches the exact draft, links six issue references, sets the required initial visibility and validates against the [published Atlassian schema](https://go.atlassian.com/adf-json-schema).
 One restricted comment is ready for review; parent comments, fields, status transitions and new issues remain outside this batch. No Jira write was performed.
 
+## Approved first batch posted
+
+After explicit approval, fresh target/parent/AI-scope reads, complete comments, permissions and restricted membership matched the reviewed baseline.
+CORENET-7171 comment `18824859` was created October 7 at **22:59:33 UTC** with `Red Hat Employee` visibility in the initial request.
+Jira's rendered view mangled adjacent links on the abbreviated `7197/7198` labels. An authorized correction of the same owned comment at **23:02:14 UTC**
+removed those two hyperlink marks, preserving every approved text character and the restriction; no second comment was created.
+
+Read-back verifies exact approved text in both ADF and rendered HTML, four working full-key links, restricted visibility and unchanged In Progress status.
+The complete history has three comments: both May records are unchanged and the approved correction appears exactly once. All other issue fields are unchanged.
+Group 1 is complete; group 2 remains the next separate approval batch. No parent comment, field edit, transition or issue creation was performed.
+Keep abbreviated numeric suffixes plain and verify actual rendered text/links, not only stored ADF. Raw requests, responses and the receipt remain outside this checkout.
+
 ## Documentation validation
 
-The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
+The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the five fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
