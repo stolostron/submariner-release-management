@@ -14,7 +14,7 @@ The [approval order](../jira-update-queue.md#approval-order) is authoritative; g
 One comment correcting two obsolete statements; preserve status. Parent coverage/ownership questions remain in the implementation plan.
 
 ```text
-Implementation tracking now exists under CORENET-7086: CORENET-7173 through CORENET-7199, superseding the May plan to create subtasks. CORENET-7196/7197/7198 specify post-merge AI security, RBAC and release-note automation; the earlier PR-review wording is superseded.
+Implementation subtasks CORENET-7173 through CORENET-7199 were created on May 20, 2026 and are tracked under CORENET-7086. CORENET-7196/7197/7198 scope AI security/RBAC review and release-note suggestions to post-merge workflows (push to main), correcting the earlier PR-review wording.
 ```
 
 CORENET-7086: no parent comment proposed. Its hierarchy already exposes the task split; post when there is a concrete implementation or ownership decision.
