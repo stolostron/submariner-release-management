@@ -14,7 +14,7 @@ Use this rollup if the parent needs a missing status delta; otherwise post the c
 ```text
 The existing contribution children remain the right tracking scope:
 
-* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 remains open. The October 7 published head has passing/skipped returned checks, but GitHub still reports changes requested. Author responses do not replace reviewer acceptance. Two newer commits are local at 36afbd1e, outside the published PR and not validated by this audit.
+* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Hosted checks are still running and GitHub reports changes requested; no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
 Neither child has met its ai-helpers merge acceptance criterion. Kubernetes rebase plugin qualification is tracked separately in CORENET-7155.
@@ -25,9 +25,9 @@ Neither child has met its ai-helpers merge acceptance criterion. Kubernetes reba
 Use this in place of the optional maintenance paragraph in `submariner-sustenance/comments-existing.md`; post once.
 
 ```text
-The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass or skip; GitHub review disposition still reports changes requested. Four outdated unresolved threads have author responses, which do not establish reviewer acceptance.
+The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Hosted checks are still running, GitHub reports changes requested, and no current-head approval is recorded. Four unresolved threads are outdated; author responses do not establish acceptance.
 
-The PR reports 1,315 regression checks and additional OpenShift repository validation with partial workflows and no cluster E2E claimed. Those runs were not repeated by this planning audit. Two local follow-up commits now end at 36afbd1eca881a326ae6b948a096b273bfab59cf in a clean checkout. They preserve repair versions/rollback/module outcomes and accept OpenShift main/master and explicit repo/branch arguments in either order. The newest commit reports 1,372 regression checks, not repeated by this audit. The published PR still points to 56e7233a; its older checks do not validate these newer commits.
+The PR reports 1,372 regression checks, six focused probes and live client-go master/release-4.20 checks, with explicit scan/toolchain limits and no cluster E2E. Those runs were not repeated by this planning audit. Preserve the distinction between author-reported validation and the current head's hosted checks/reviewer acceptance.
 
 Remaining for this story: acceptance of the prerequisite, configurable project-neutral go-fix-cves packaging, and merge into openshift-eng/ai-helpers. Keep the contribution open until its own criteria are met.
 ```
@@ -45,13 +45,11 @@ This is a merge in the maintained source repository, not the ai-helpers contribu
 ## OPGM-364 — requested lifecycle status
 
 ```text
-Current state: At Risk.
+Status: At Risk.
 
-OCP-major catalog tooling and the provisional catalog are merged in https://github.com/stolostron/submariner-operator-fbc/pull/81. Lifecycle injection pipelines remain open in https://github.com/stolostron/submariner-operator-fbc/pull/82; its published Konflux check fails before tasks start because the build service account is missing. The October 7 tenant read also found the Application and Component absent. Tenant/admission drafts are prepared locally; fresh-base review and reconciliation remain.
+Remaining work: merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, build the existing valid lifecycle fragment, and issue its FBC release with advisory/snapshot/IIB or catalog proof. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81; that is not publication evidence.
 
-Remaining proof for this issue: merged lifecycle injection, a build of the valid existing lifecycle fragment, and an issued FBC release with a verified advisory/snapshot/IIB or catalog proof. Current production-index membership has not been verified. Restoring registry access is also a prerequisite for the push test.
-
-This lifecycle publication does not add or assert OpenShift 5 runtime compatibility. Actual runtime installation and product support require separate evidence.
+Blockers: #82's published build fails before tasks start because its build account is missing; the October 7 tenant read also finds the Application and Component absent. Local tenant/admission drafts need fresh-base review and reconciliation. Registry access for the push test and current publication proof remain unverified.
 ```
 
 ## ACM-45318 — builder migration inventory

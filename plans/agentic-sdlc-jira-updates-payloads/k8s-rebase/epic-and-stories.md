@@ -6,16 +6,16 @@ Nothing here has been created or edited in Jira. Jira and GitHub facts were rech
 bak42 snapshot (`febb7974696e870f933e8ad3741605d31ead0b5c`), rather than today's mutable working tree.
 Text blocks are Markdown for a converting client/UI; direct Jira Cloud REST writes need ADF. Read current create-field and transition metadata before writing.
 
-Conventions copied from the project (CORENET) and from sibling issues:
+Conventions verified against CORENET Story create metadata and existing Story edit/transition metadata on October 7:
 
-* Project `CORENET` (id `10389`), issue type Story (id `10009`), epic membership `CORENET-7155` via `parent` or legacy Epic Link (`customfield_10014`), as current create-field metadata permits.
+* Project `CORENET` (id `10389`), issue type Story (id `10009`), epic membership `CORENET-7155` via `parent`. Current CORENET Story create metadata does not expose legacy Epic Link (`customfield_10014`). Reporter is required with a default; verify the approved reporter on read-back.
 * Assignee: the maintainer's own Jira account, resolved through the authenticated client. Priority Normal (id `10003`), as on CORENET-7155 and the closed sibling CORENET-7062.
 * Activity Type is `customfield_10464`. The epic and CORENET-7062 use `Product / Portfolio Work` (option id `10610`); `Quality / Stability / Reliability` is option id `10608`.
 * CORENET automation warns about missing **original story points** before In Progress/Code Review and a missing **sprint** before In Progress/Code Review/Closed
-  (comments read on CORENET-7062). Set both at creation: Original story points is `customfield_10977` and Story Points is `customfield_10028` (CORENET-7062 has 1 in both);
+  (comments read on CORENET-7062). Story Points (`customfield_10028`) is writable at creation. Original story points (`customfield_10977`) is absent from create metadata but writable in existing Story edit metadata: set it after creation only when the new canary confirms edit support. CORENET-7062 has 1 in both;
   Sprint is `customfield_10020`. The epic is in the active sprint "CORENET Sprint 295" (id `87581`, board `9839`, ends 2026-10-19).
 * The story-point values below are **placeholders for the maintainer to choose**; I do not know the team's scale. Confirm the chosen values against the team's scale and current field constraints before creating any story.
-* Git Pull Request is `customfield_10875`; on the epic it holds an ADF document containing a linked URL. The Markdown links below need conversion before direct REST use.
+* Git Pull Request is `customfield_10875`; it is absent from CORENET create metadata but writable in existing Story edit metadata. Set it after the new Story confirms edit support, or preserve the URL in its restricted comment. The epic already holds an ADF URL; its edit metadata does not expose this field, and no epic PR-field edit is proposed. Markdown links need conversion before direct REST use.
 * Description format: markdown with `_Scope:_` and `_Acceptance criteria:_` italic headings, as used on sibling stories.
 * Comments use visibility `{"type": "group", "value": "Red Hat Employee"}`.
 
@@ -103,7 +103,7 @@ Run the plugin against real Kubernetes 1.36.2 rebases of CoreNet repositories to
 
 _Scope:_
 
-* First runs against ovn-kubernetes, ovn-kubernetes-mcp, multus-cni, cluster-network-operator, cloud-network-config-controller and ingress-node-firewall
+* First runs against ovn-kubernetes, ovn-kubernetes-mcp, multus-cni, cluster-network-operator, cloud-network-config-controller and ingress-node-firewall; preserve the separate repository-delivery scope under CORENET-6983
 * A larger batch of qualification runs, opened as draft PRs from a fork and closed afterwards, across five repositories
 * Feed the findings back into the gates, repair patterns and docs
 
@@ -164,7 +164,7 @@ The next Kubernetes minor changes APIs and tooling the plugin relies on. Prepare
 _Scope:_
 
 * 1.37 preparation and validation in the plugin, with notes in docs/k8s-1.37.md
-* Tests that target the published 1.37.1 patch
+* Tests that target the published 1.37.1 patch; plugin qualification is separate from the repository-delivery bumps already tracked under CORENET-7450
 * A real 1.37 rebase of at least one CoreNet repository
 
 _Acceptance criteria:_
