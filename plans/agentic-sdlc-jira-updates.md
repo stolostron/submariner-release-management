@@ -26,7 +26,7 @@ Rules that apply to both parts:
 
 * The first four existing-story comments are posted, with verified ids in A5. Other payloads remain pending; post only newly approved missing deltas.
 * An existing-issue comment must add a missing delivery, blocker/evidence, specific correction or answer to an explicit request. Keep audit instructions and repeated criteria in the plan; omit parent rollups that only repeat children. New-story comments establish their evidence baseline. Creating child tracking does not itself warrant an epic comment; propose one only for a separate missing decision, delivery or blocker.
-* Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify them on read-back; PR-field edits remain a separate action.
+* Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify them on read-back; PR-field edits remain a separate action. Append only missing approved links to PR fields, preserving existing text and links.
 * The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
   and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
 * These are proposed text payloads, not raw Jira REST requests. Jira Cloud descriptions, comments and the Git Pull Request field use Atlassian Document Format (ADF).
@@ -39,7 +39,7 @@ Rules that apply to both parts:
 * Approval covers only the named actions in the approved group. Story creation, field edits and status transitions need their own explicit scope; creation does not authorize later resolution.
 * If a write times out or its result is uncertain, stop and reconcile Jira before retrying. Check returned ids, complete comments, or matching stories under the intended parent; do not assume a failed response means no write occurred.
 * Before each field edit, save its current value and compare it again immediately before writing. Stop on a changed baseline. Roll back only if the field still equals this operation’s written value; otherwise reconcile later edits before restoring anything.
-* Create one story per project as a canary and read it back before creating the rest. Existing-issue comments and independent description edits need their own target preflight, not a new story. Issue deletion is outside this plan.
+* Before creating the rest, read back one canary story per project, including its approved field setup and restricted progress comment. Confirm PR-field support before writing; if unsupported, retain its PR links in the comment and omit that field edit. A failed or mismatched write stops the batch for reconciliation. Existing-issue comments and independent description edits need their own target preflight, not a new story. Issue deletion is outside this plan.
 * Set comment visibility to group `Red Hat Employee` in the create request and verify it on read-back. Current `acli jira workitem comment create` exposes only project-default visibility and no restriction flag; use REST or a supported UI that sets the group in the initial request. If the client cannot set that visibility at creation,
   stop and use a supported client/UI; do not publish an unrestricted comment and restrict it afterward.
 
@@ -156,12 +156,12 @@ Each creation or field write is read back before the next. Skip completed deltas
    component 33720, priority 10002 and Activity Type 10606. Story create metadata marks reporter required with a default; preserve the approved reporter and verify it on read-back. Use the approved Jira client/UI and its supported description format.
    Read it back and check the parent, fields, italic headings and bullets. If the workflow requires legacy Epic Link instead of `parent`, use
    `customfield_10014` only after create-field metadata confirms that field is writable.
-2. **Canary: Git Pull Request field.** Set `customfield_10875` on S4 to an ADF document containing the #110 link, or use a client/UI that converts it.
-   Read it back and confirm the URL and formatting before proceeding with PR-field edits on other issues. If the client cannot preserve this rich-text field, use comments only.
-3. Create S2, S3, S1, S5 using each story's own fields in new-stories.md. S2 and S5 use Security & Compliance (10609); S3 uses Normal priority (10003).
-   Do not copy S4's priority and Activity Type to all stories. Read each creation back before proceeding and record its key.
-4. Post each new story's progress comment with the restricted visibility set at creation, and verify the returned comment's text and visibility.
-   Set each Git Pull Request field as in new-stories.md and read it back before the next write.
+2. **Canary: Git Pull Request field.** Confirm S4's edit metadata and client support before appending the #110 link to `customfield_10875` as ADF.
+   Read back the full field and confirm its links and formatting. If unsupported, use the comment-only route; omit subsequent PR-field edits.
+3. **Canary: restricted progress comment.** Post S4's progress comment with restricted visibility set at creation. Verify text, clickable links and visibility before creating another story.
+4. Create S2, S3, S1, S5 using each story's own fields in new-stories.md. S2 and S5 use Security & Compliance (10609); S3 uses Normal priority (10003).
+   Read back each creation and record its key. Complete that story's approved field/comment writes and read-backs before creating the next.
+   Append its proposed PR links only if step 2 passed and its own edit metadata confirms support; read back each field. S5 proposes no PR-field edit.
 5. Move S1/S5 to In Progress only if those transitions were included in the approved group, using each new issue’s metadata and read-back. Keep S2/S3/S4 in their created status until the separate group-9 acceptance review approves a terminal transition and its resolution; do not resolve them as part of story creation.
 6. Add related-issue links from S1 to ACM-45508 (addon consumption) and OPGM-364 (lifecycle publication), using the link type confirmed in preflight. Check for an existing link first and read back each new relationship.
 7. The four existing-story updates are already posted (ids above); reconcile their read-backs and post only newly approved missing deltas. Optionally append the #109 link to the
@@ -304,10 +304,10 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 
 1. Create K1 as a canary with writable create fields: `parent` CORENET-7155, its own Activity Type/priority, approved Story Points and sprint, assignee and description. Verify the default/approved reporter on read-back. CORENET create metadata does not expose legacy Epic Link, Original story points or Git Pull Request; do not send those fields in the create request. Read back membership and rendered content.
    Fetch K1 edit metadata, then set approved Original story points and read it back. Existing Story edit metadata supports that field, but the new canary must confirm it. Do not transition to In Progress until it is set and verified; do not silently omit the automation prerequisite.
-2. Set K1's Git Pull Request field only after its edit metadata confirms it is writable; use an ADF-capable client and read it back. If the field/client is unavailable, preserve the link in the restricted comment.
-   Create K2–K5 with their own writable create fields, then inspect each new issue's edit metadata, set Original story points and verify both point fields and sprint before any transition.
-3. Post each progress comment with restricted visibility set at creation. Verify its text and visibility before the next write.
-   Set Git Pull Request where given and read each field back.
+2. Append K1's PR link only after its edit metadata confirms support; use an ADF-capable client and read back the full field. If the field/client is unsupported, use the comment-only route and omit subsequent PR-field edits.
+3. Post K1's progress comment with restricted visibility set at creation. Verify text, clickable links and visibility before creating K2–K5.
+   Create each remaining story with its own writable fields; inspect its edit metadata, set Original story points and verify both point fields and sprint. Complete its approved field/comment writes and read-backs before creating the next.
+   Append proposed PR links only if K1's field canary passed and that issue's edit metadata confirms support; read back each field. K3/K4 propose no PR-field edit.
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.
 5. Transition K1–K5 to In Progress only if included in the approved group, after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
