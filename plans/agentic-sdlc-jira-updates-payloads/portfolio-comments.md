@@ -47,10 +47,14 @@ ACM-39738: no parent rollup proposed. Post the two child updates only; the broad
 
 ## Group 4 — deadline and requested status
 
+Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The requested “At Risk” assessment is comment text, not a workflow transition. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
+
 ### ACM-45318 — builder migration inventory
 
 ```text
-Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/ecb3f1be31bbea22219e0487063772c4664d505f/plans/art-builder-migration.md) for the October 15 builder migration. It identifies Brew builders in the addon; sampled downstream component Dockerfiles use UBI Go Toolset. Supported addon branches and approved replacement ART tags remain to be confirmed before preparing changes.
+Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/4460072eac2b8f88c72bab567078fe42873e0b1c/plans/art-builder-migration.md) for the October 15 ART builder migration. Direct Brew consumers are in the addon; all 18 ticket-listed downstream component Dockerfiles across 0.22–0.24 use UBI Go Toolset.
+
+Remaining work: confirm supported addon build sources, select documented ART replacement tags, verify CI entitlement and qualify the compiler and release architectures. The inventory does not establish a completed migration.
 ```
 
 ### OPGM-364 — requested lifecycle status
@@ -58,9 +62,9 @@ Prepared a [branch-by-branch source inventory](https://github.com/stolostron/sub
 ```text
 Status: At Risk.
 
-Remaining work: land lifecycle injection (current draft https://github.com/stolostron/submariner-operator-fbc/pull/82), release existing valid PLCC data without new OpenShift 5 / 5.0 compatibility statements, and attach an advisory/snapshot/IIB reference plus redhat-operator-index:v5.0 membership or the allowed team IIB/catalog proof. Tooling/catalog preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81.
+Remaining work: merge lifecycle injection (open PR https://github.com/stolostron/submariner-operator-fbc/pull/82), release existing valid PLCC data without new OpenShift 5 / 5.0 compatibility statements, and attach an advisory/snapshot/IIB reference plus redhat-operator-index:v5.0 membership or the allowed team IIB/catalog proof. Catalog/tooling preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81.
 
-Blockers: #82 cannot build because its account is missing; the October 7 tenant read also finds the Application and Component absent. Tenant configuration remains an unmerged local draft; registry access and publication proof remain unverified.
+Blockers: #82’s published build fails at init for a missing build account; the October 7 tenant read also finds the Application and Component absent. Prepared tenant resources need reconciliation; refreshing GitLab main fails DNS. Registry access and publication proof remain unverified.
 ```
 
 ## Group 5 — release evidence
