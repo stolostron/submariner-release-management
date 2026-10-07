@@ -118,7 +118,7 @@ Progress comment (post after creation):
 ```text
 Runs to date:
 
-* 2026-06-09 and 2026-06-10: six Kubernetes 1.36.2 rebase PRs (ovn-kubernetes, ovn-kubernetes-mcp, multus-cni, cluster-network-operator, cloud-network-config-controller, ingress-node-firewall). https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57 merged; the other five were closed.
+* 2026-06-09 and 2026-06-10: six Kubernetes 1.36.2 rebase PRs: [ovn-kubernetes-mcp#57](https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57) merged; [ovn-kubernetes#6525](https://github.com/ovn-kubernetes/ovn-kubernetes/pull/6525), [multus-cni#305](https://github.com/openshift/multus-cni/pull/305), [cluster-network-operator#3027](https://github.com/openshift/cluster-network-operator/pull/3027), [cloud-network-config-controller#225](https://github.com/openshift/cloud-network-config-controller/pull/225) and [ingress-node-firewall#718](https://github.com/openshift/ingress-node-firewall/pull/718) closed without merging.
 * 2026-07-16 to 2026-07-23: 108 draft PRs opened from the maintainer's fork and then closed: cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15. This counts PRs, not independently accepted runs.
 * Local legacy matrix records contain 536 rows dated July 29–September 24, including 218 for 1.36.2 and latest unmutated PASS rows for all six targets. The inspected matrix-state has no evidence archive and only one run-input record; those PASS summaries are not requalified by the current harness. Recover per-target source/result, gates and failure dispositions before accepting this story. Missing evidence needs an explicit limited-acceptance decision or fresh qualification; no rerun was performed here.
 ```
