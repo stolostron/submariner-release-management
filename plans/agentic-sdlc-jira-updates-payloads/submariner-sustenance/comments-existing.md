@@ -5,8 +5,7 @@
 Nothing here has been posted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do. Post them
 after the new stories exist (they reference the new keys, shown as `<S1>` to `<S5>` and to be filled in with the created keys).
 
-Counts and Jira observations are September 2026 snapshots; the retarget note is from October 1. PR states for #114 and claude-skills#35 were
-checked on October 6. Re-read the target stories and follow the plan's preflight before posting; replace placeholders and update dates with any refreshed counts.
+Historical counts retain their September cutoff; current issues and PRs were re-read October 7. The retarget note is from October 1. Re-read the target stories and follow the plan's preflight before posting; replace placeholders and update dates with any refreshed counts.
 
 Style of the existing comments: a one-line intro, then bullet lines of `PR link — short description`. Each is a separate comment.
 
@@ -36,7 +35,7 @@ Fixes found while retargeting the 0.23.x release (0.23.2 never shipped; now 0.23
 
 * https://github.com/stolostron/submariner-release-management/pull/112 — release-status read only the checked-out branch and gave wrong next steps from any other branch; the FBC release gate rejected `BuildPLRInProgress`, which push snapshots keep after a passing run; Step 11 now checks the catalog on main
 * https://github.com/stolostron/submariner-release-management/pull/113 — pre-commit `make test` from about 5 minutes to about 35 seconds (a test hit live GitHub on every call, and the hook now runs make in parallel)
-* https://github.com/stolostron/submariner-release-management/pull/114 — open proposal as of 2026-10-06: do not redo CVE fixes or the upstream release once the upstream tag exists; Tekton task updates only when Enterprise Contract fails; update the status tool and conductor messages to match
+* https://github.com/stolostron/submariner-release-management/pull/114 — open proposal as of 2026-10-07: do not redo CVE fixes or the upstream release once the upstream tag exists; Tekton task updates only when Enterprise Contract fails; update the status tool and conductor messages to match
 * https://github.com/stolostron/submariner-operator-fbc/pull/83 and https://github.com/stolostron/submariner-operator-fbc/pull/84 — catalog update accepts `BuildPLRInProgress`; 0.23.2 replaced by 0.23.4
 ```
 
@@ -75,12 +74,25 @@ CVE remediation since the last update (2026-09-13 to 2026-09-30):
 * The skill hardening for the ai-helpers contribution is still open in https://github.com/submariner-io/shipyard/pull/2582.
 ```
 
-Optional extra bullet for this comment. The five cve-agent commits were validated and opened as <https://github.com/dfarrell07/claude-skills/pull/35> on
-2026-09-30 and merged 2026-10-06. After checking for an existing update, also post this bullet as a separate comment on ACM-39740
-(the generalized CVE-agent story under ACM-39738):
+Optional additional ACM-39729 bullet, after checking for an existing update:
 
 ```text
-* cve-agent improvements, developed 2026-09-22 to 2026-09-25 and merged 2026-10-06 (https://github.com/dfarrell07/claude-skills/pull/35): verify shipped applicability and image provenance; fix the subctl source repo and the RHACM 2.13 CoreDNS shipped version; allow fixed, scan_limitation and source_fix together in validate-triage check 4b; fix a multi-arch digest false positive in the verify and closure-gate prompts; update the Go version table.
+* https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
+* https://github.com/submariner-io/shipyard/pull/2582 remains open at 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass/skip but review disposition remains changes requested. A newer five-file follow-up is committed locally at 8f4871efdb18c5447ace2f49a05c983dd05b645c with a clean checkout; it remains outside the published PR and was not validated here.
+```
+
+Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.
+Their source merges are prerequisites; both children still require ai-helpers merges, and ACM-39740 requires non-Submariner product validation.
+Do not duplicate the same optional maintenance paragraphs on each issue.
+
+## ACM-39732: optional progress on the existing URL-conversion story
+
+This is not an additional story or part of the four required comments. Re-read the issue and candidate source before posting:
+
+```text
+A fork-only implementation candidate exists at 3cabf0e1f7526d3ef554571ffbb0a95db33bf013 (scripts/update-fbc-prod-urls.sh plus wiring/tests); no PR for its branch was found on October 7. It is not shipped on main and has not been executed by this planning audit.
+
+Before preparing it for review, replace the all-OCP-success assumption, isolate the working tree and preserve unrelated/untracked work, distinguish prod URL conversion from selecting a newer bundle snapshot, and keep completion behind the existing verifier. Reconcile its deferred-next-release wording with the conductor's linear per-release closeout. Current assessment: plans/current-work.md in stolostron/submariner-release-management. Keep this existing story New or move it only after agreeing its actual work/status; no transition is implied here.
 ```
 
 ## ACM-39728 (epic): summary comment
@@ -90,9 +102,9 @@ Update for 2026-08-04 to 2026-09-30 at 05:00 UTC, reconstructed and verified on 
 
 * <S1> Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft): stolostron/submariner-release-management#109 merged; stolostron/submariner-operator-fbc#81 merged and #82 open. Not finished: konflux-release-data changes and real builds and install are unverified.
 * <S2> Detect Enterprise Contract deny rules during Tekton task updates: #109.
-* <S3> Make release skills portable across Claude and Codex: #109.
+* <S3> Deliver shared Claude/Codex skill discovery and compatibility contract: #109. Five known konflux-ci-fix debt entries and installed-host validation remain.
 * <S4> One-command setup for RPM lockfile prerequisites: #110 merged.
-* <S5> Remediate Glasswing shipyard audit findings: 113 PRs (105 merged, 8 FIND-006 drafts open).
+* <S5> Remediate Glasswing shipyard audit findings: September inventory of 113 PRs (105 merged); all eight FIND-006 drafts closed without merging on October 3. Their finding needs a disposition, and coordinated upgrade-test repair PRs shipyard#2654/subctl#1944 remain open.
 
 Existing stories updated: ACM-39731 (autorelease hardening), ACM-39730 (tracker), ACM-39736 (ownership transfer prerequisites), ACM-39729 (CVE remediation, 40 PRs and 259 issues).
 ```
