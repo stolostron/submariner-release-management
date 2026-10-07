@@ -37,7 +37,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Record shared setup and checkout-safety prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | One parent summary linking existing CVE contribution children and the plugin's existing epic | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; hosted checks are running and changes requested remains. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
+| ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; returned hosted checks are complete (45 successful, three skipped) and changes requested remains. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
 The first four existing-story updates and epic text remain in
@@ -83,7 +83,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | CORENET-7171 | Research/recommendation update, then acceptance review | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
-| CORENET-7615 | Link merged EVPN planning PR #2 and list unfinished criteria | To Do. Planning #2 and infrastructure #4/#5 merged; source imports remain open. Current decision index and related 7501/7504/7505 still lack recorded conflict resolution; source/check work is separate from planning acceptance |
+| CORENET-7615 | Link merged EVPN planning PR #2 and list unfinished criteria | To Do. Planning #2 and infrastructure #4/#5 merged; source imports remain open. Record decision owners/dates when decisions are made; pending decisions need not all be settled. Conflicts 7501/7504/7505 still lack recorded resolution; source/check work is separate from planning acceptance |
 
 Do not duplicate the 27 CI subtasks from the May research drafts or post the same research list on each one.
 Do not close CORENET-7171 solely because the subtasks exist. Do not reuse EVPN or plugin qualification as MCN implementation evidence.
