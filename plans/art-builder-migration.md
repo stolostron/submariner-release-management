@@ -10,7 +10,8 @@ No Dockerfile, dependency, pipeline, branch or external issue was changed by thi
 
 The three ticket-listed independent-product repositories have downstream builders in `release-0.22`, `release-0.23` and `release-0.24`.
 Their devel Dockerfiles use the shared Shipyard Dapper builder and Fedora/scratch output; these are separate upstream build paths.
-The ticket targets Brew/OSBS consumers of ART Go builders. The sampled downstream component Dockerfiles use UBI Go Toolset, not the named ART builder; no replacement is justified by the deadline alone. Inspect shared/transitive build inputs before identifying an affected component path.
+The ticket targets Brew/OSBS consumers of ART Go builders. Its parent lists `registry.redhat.io/openshift/golang-builder:golang-builder-vX.YY-rhelZ` replacements, including Go 1.25/1.26 on RHEL9, and requires internal registry entitlement. Tag selection and CI access still need verification.
+The downstream component Dockerfiles use UBI Go Toolset, not the named ART builder; no replacement is justified by the deadline alone. Inspect shared/transitive build inputs before identifying an affected component path.
 The rows below read an immutable branch head's Go directive and sample Konflux Dockerfile; that directive is a module floor, not the observed build compiler.
 
 | Repository | Stream | Root Go floor | Sample builder | Exact source |
@@ -28,9 +29,8 @@ The rows below read an immutable branch head's Go directive and sample Konflux D
 | subctl | 0.23 | `1.26.0` | UBI9 Go Toolset `latest` | [Dockerfile](https://github.com/submariner-io/subctl/blob/3e2f1fab0347ffcb8f027b8a66934b69ae9a2ab3/package/Dockerfile.subctl.konflux) |
 | subctl | 0.24 | `1.26.0` | UBI9 Go Toolset `latest` | [Dockerfile](https://github.com/submariner-io/subctl/blob/8a2d1298c2489dae7832cfc5dac7b2c489b2e9ad/package/Dockerfile.subctl.konflux) |
 
-All six 0.24 ticket-listed component Dockerfiles were read: both lighthouse components, all three submariner components and the operator use UBI9 Go Toolset.
-Older-stream rows sampled one component per repository; inspect sibling and pipeline inputs before classifying any path as affected. No component-builder migration is proposed from these UBI samples alone.
-The operator also builds a tools module for controller-gen: inspect its own Go/toolchain directive and build path as well as the root module.
+All 18 ticket-listed component Dockerfiles across 0.22–0.24 and their push/PR pipeline selections were read: both lighthouse components, all three submariner components and the operator use UBI9 Go Toolset. No direct Brew/ART builder reference was found in those source trees or their devel trees; registry contents and transitive task inputs remain unqualified.
+Module floors can differ inside a repository: [0.22 CoreDNS](https://github.com/submariner-io/lighthouse/blob/2cd528f6a2289f3179f6fcf223602486d45ff8f6/coredns/go.mod) requires Go 1.26.0 despite the root's 1.25.0. Its pipeline prefetches `./coredns` and builds in that directory. Retain each compiled module's floor, including operator tools/controller-gen, rather than selecting a compiler from the root alone.
 
 The CLI is outside the four repositories named by the ticket but inside the independently released product. Its `subctl` rows above identify the same builder family;
 confirm whether the ticket's accepted scope includes that image before silently declaring all product builders migrated.
@@ -45,15 +45,19 @@ Addon belongs to the ACM artifact path and has its own release branches. Source 
 | Branch | Root Go floor | Ordinary Dockerfile | Konflux Dockerfile | Pinned source |
 | --- | --- | --- | --- | --- |
 | release-2.14 | 1.25.8 | CI `stolostron/builder:go1.24-linux` | Brew `openshift-golang-builder:v1.25` | [546eaf0c](https://github.com/stolostron/submariner-addon/tree/546eaf0cb95c1433e27d00fa8d4b1bb84e00610f) |
+| release-2.15 | 1.25.8 | Brew `v1.25` | Brew `v1.25` | [77383385](https://github.com/stolostron/submariner-addon/tree/77383385f14254be6db8264b38393fdc0400e6fe) |
 | release-2.16 | 1.25.8 | Brew `v1.25` | Brew `v1.25` | [19532bd7](https://github.com/stolostron/submariner-addon/tree/19532bd70d7014013ca9490bc1d52ca4b51a41c6) |
 | release-2.17 | 1.25.13 | Brew `v1.25` | Brew `v1.25` | [19baa867](https://github.com/stolostron/submariner-addon/tree/19baa867769757ca1700bb90b290eca3d8153ffe) |
+| release-4.23 | 1.25.8 | Brew `v1.25` | Brew `v1.25` | [f9e62785](https://github.com/stolostron/submariner-addon/tree/f9e627854f63038ff99fa39d417eeda4b08379b9) |
 | release-5.0 | 1.26.0 | Brew `v1.26` | Brew `v1.26`; PQC-minimal runtime base | [cd2fbb77](https://github.com/stolostron/submariner-addon/tree/cd2fbb7714ca8be7052dc239569449e33d7a1598) |
-| release-5.1 / main | 1.26.0 | Brew `v1.26` | Brew `v1.26`; ordinary UBI-minimal runtime base | [1805dcb1](https://github.com/stolostron/submariner-addon/tree/1805dcb1166ad331097f0379c1a1d3b27f0ae12e) |
+| release-5.1 / release-5.2 / main | 1.26.0 | Brew `v1.26` | Brew `v1.26`; ordinary UBI-minimal runtime base | [1805dcb1](https://github.com/stolostron/submariner-addon/tree/1805dcb1166ad331097f0379c1a1d3b27f0ae12e) |
 
 At the inspected heads, the 2.14 ordinary builder's tag advertises an older Go minor than the root directive. Actual toolchain auto-download or compiler behavior
 was not measured; do not infer either a working build or a universal failure solely from the tag. Verify the actual compiler and required patch level.
-Older branches and `release-5.2` exist but were not inspected here; this inventory does not choose the supported stream set.
-Addon task-ref PR #2792 targets the separate `appstudio-submariner-addon-acm-214` branch and does not implement this migration.
+Additional reads of release-2.10–2.13 also find Brew builders; branches older than 2.10 remain outside this audit. This inventory does not choose the supported stream set.
+The separate [appstudio 2.14 source](https://github.com/stolostron/submariner-addon/tree/8270d50dd684a3936b9693a52220130e75d1d902) has a 1.23.0 root floor and Brew `rhel_9_1.23` Konflux builder. Task-ref PR #2792 targets that branch, not release-2.14, and does not implement the builder migration. Include that build source in the owner’s scope decision.
+
+Inspected addon pipelines select `Dockerfile.konflux`. On release-2.11–2.17 and 5.0–5.2, push pipelines request four architectures while PR pipelines request only x86_64; the appstudio 2.14 pair requests only x86_64. Confirm PaC branch filters and component source mapping before choosing which files to edit. A successful PR build alone does not qualify all push platforms.
 
 The PQC runtime base on release-5.0 is existing configuration evidence relevant to ACM-41119, not proof of the released image's crypto policy.
 Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all streams are covered" claim forward.
@@ -78,4 +82,4 @@ Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all st
 
 This audit read GitHub source at pinned heads, not private registry manifests or running build containers. No target ART image or build was qualified.
 The concrete next handoff is supported-addon-branch/tag confirmation followed by isolated changes to verified Brew consumers and applicable compiler/crypto/architecture verification. Retain a no-change disposition for unaffected paths.
-Konflux authentication succeeds in the third October 7 pass. No migration build was submitted or qualified; approved image/scope selection and change review remain the next handoff.
+Konflux authentication succeeds in the October 7 reads; that does not prove access to the entitlement-gated ART builder repository. No migration build was submitted or qualified; supported build-source selection, target-image access and change review remain the next handoff.
