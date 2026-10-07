@@ -7,11 +7,10 @@ Nothing has been posted. Visibility `{"type": "group", "value": "Red Hat Employe
 The epic's existing comments end on 2026-06-12. This one brings it up to date.
 
 ```text
-Development snapshot: bak42, 2026-09-25; PR and fork state rechecked 2026-10-06. Newer local work needs separate verification and backup. The work since the June comments is now tracked in child stories: <K1> plugin, <K2> qualification runs, <K3> evals and cost measurement, <K4> Kubernetes 1.37, <K5> upstreaming.
+October 7 update: work since the June comments is split into <K1> plugin, <K2> 1.36.2 qualification, <K3> evals/measurement, <K4> Kubernetes 1.37 and <K5> upstreaming.
 
-* Plugin: the k8s-rebase plugin in openshift-eng/ai-helpers has grown into a state machine with 32 verification gates, five workflow steps, hooks, 13 scripts (including the eval runner), four design docs and 238 test functions (134 tracked files, about 20.8k lines). Development is preserved as 43 local backup branches, 2026-05-31 to 2026-09-25; 29 are pushed to the maintainer's fork, including bak41 and bak42.
-* Upstream PR: https://github.com/openshift-eng/ai-helpers/pull/617 is a draft opened 2026-07-13 (127 files, 175 review entries). The PR head is the 2026-09-18 state; 69 newer commits from 2026-09-22 to 2026-09-25 (90 files, +7,799/-2,641) are on the fork and not yet on the PR.
-* Qualification: 6 automated 1.36.2 rebase PRs on 2026-06-09/10 (https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57 merged, five closed) and 108 draft qualification PRs on 2026-07-16 to 2026-07-23 across five repositories, all closed.
-* Kubernetes 1.37: preparation and validation against the published 1.37.1 patch are in the plugin branch; no real 1.37 rebase yet.
-* Open: the eval and cost question from a reviewer on the PR, the PR's OWNERS and ok-to-test blockers, and moving the 69 newer commits onto the PR.
+* https://github.com/openshift-eng/ai-helpers/pull/617 remains a draft at 7e1aa060. Current local HEAD a477bced includes 82 newer commits, plus two uncommitted test-file changes; preserve/qualify that source before a PR refresh. Bak42 is a verified older backup, not a backup of the complete current work.
+* Six June rebase PRs and 108 closed July draft PRs record exercised workflows. Legacy matrix PASS summaries do not provide the current per-run evidence archive; K2 remains pending acceptance review.
+* CNCC/Multus/MCP 1.37.1 trials exist with limits and failed/inconclusive gates. The newest lessons and test changes need fresh qualification; no trial was rerun by this audit.
+* Eval metrics and sixteen cases exist; valid measurements/judge results, the reviewer's cost/shared-harness question, OWNERS/ok-to-test gates and final upstream merge remain.
 ```

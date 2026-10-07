@@ -3,7 +3,7 @@
 Historical design for the pre-implementation baseline. The proposed interfaces
 and reported failures below are not the current implementation contract. Use the
 [implementation status](ocp-5-implementation-status.md) and the
-[skill completion plan](ocp-5-skill-completion-plan.md) for the current state and next steps.
+[consolidated rollout plan](ocp-5-0-fbc-rollout.md) and [current work map](current-work.md) for the current state and next steps.
 
 Follow-up investigation, 2026-09-24. This focuses on making the existing onboarding entry points dependable for
 OCP 5.0, including failure, retry, and verification behavior. The broader image/build/release findings are in

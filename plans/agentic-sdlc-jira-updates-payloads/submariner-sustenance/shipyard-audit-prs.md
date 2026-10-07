@@ -4,7 +4,11 @@
 
 Generated from the maintainer's PR tracker joined with live GitHub state on 2026-09-30. All PRs are authored by the maintainer.
 
-Total: 113 PRs. State: merged 105, open 8. Merged between 2026-08-20 and 2026-09-14.
+Historical September 30 total: 113 PRs, 105 merged and 8 open. Merged between 2026-08-20 and 2026-09-14.
+
+October 7 refresh: direct reads of the eight FIND-006 PRs show all closed without merging on October 3.
+The historical rows below preserve the original snapshot. The finding remains unresolved until fixes or an evidence-backed re-triage;
+see the [current work map](../../current-work.md#upstream-audit-and-upgrade-tests). The October 6 verification claim that these drafts remained open was incorrect.
 
 ## Shipyard FIND-005/008/012/019 (8 PRs: merged 8)
 

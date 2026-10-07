@@ -1,5 +1,10 @@
 # Plan: Integrate EC Fix into Autorelease as a Smart, Self-Diagnosing Step
 
+October 7 status: the task-version helper, EC parser and `ecFixes` script wiring described below are implemented in current main.
+This document retains the original design; verify current scripts before proposing another implementation.
+Remaining skill portability is tracked in the [compatibility plan](claude-codex-skill-compatibility.md),
+and current release recovery in the [work map](current-work.md).
+
 ## Problem
 
 The current `ecFixes` step in autorelease runs `tekton-task-refs-update.sh`,

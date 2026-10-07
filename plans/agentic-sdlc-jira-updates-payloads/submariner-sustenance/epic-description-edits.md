@@ -2,9 +2,9 @@
 
 # Epic description edits for ACM-39728 (exact old and new text)
 
-Nothing here has been applied. The description was read on 2026-09-29 (last updated in Jira 2026-09-16). Every "old" snippet below must match the live
+Nothing here has been applied. The baseline description was read on 2026-09-29 and its original snippets rechecked on 2026-10-07. Every "old" snippet below must match the live
 rendered description exactly once; re-read the epic immediately before editing and stop if any snippet has changed. All four old snippets and
-the insertion heading still matched once at the 2026-10-06 read. Jira Cloud stores the description as ADF: save the full original document, update
+the insertion heading still matched once at the 2026-10-07 read. Jira Cloud stores the description as ADF: save the full original document, update
 the relevant nodes with a supported client/UI and preserve everything else. The Markdown below is text for that client, not a raw REST field value.
 Rollback means writing back the saved original ADF document and verifying it; issue history alone is not an automatic restore operation.
 
@@ -59,8 +59,10 @@ Old:
 New:
 
 ```text
-* **Production validation**: 0.24.1 released end-to-end via autorelease (Sep 2026) across 7 OCP versions (4.16–4.22); 0.22.2 and 0.23.4 in progress
+* **Release evidence**: 0.24.1 production bundle publication is verified; recorded FBC scope is OCP 4.16–4.22, with production-index membership and release/QE evidence still to recover before tracker closeout. 0.22.2 and 0.23.4 remain in progress
 ```
+
+Basis: the October 7 exact production bundle tag resolves with version v0.24.1. All seven index extraction probes timed out, and the recorded historical component Release CRs are NotFound. Those reads support bundle publication, not an end-to-end validation claim or an absence verdict. See [current artifact evidence](../../current-work.md#release-recovery-and-time-sensitive-work).
 
 ## Edit 4: release ownership transfer
 
@@ -83,11 +85,11 @@ Insert this block immediately before the line `#### Broader ecosystem impact`:
 ```text
 #### Portable, security-aware release tooling
 
-Release skills run under both Claude and Codex from one source. Tekton task updates detect Enterprise Contract deny rules instead of advising futile version bumps. A resumable onboarding CLI prepares FBC catalogs and the tenant and admission changes for OCP major-version transitions (OCP 5.0 is a provisional draft; builds and installation are not yet verified). RPM lockfile prerequisites are set up with one command.
+Release skills share Claude/Codex discovery and a tested compatibility contract from one source; konflux-ci-fix retains five known debt entries, and installed-host execution remains a follow-up. Tekton task updates detect Enterprise Contract deny rules instead of advising futile version bumps. A resumable onboarding CLI prepares FBC catalogs and the tenant and admission changes for OCP major-version transitions (OCP 5.0 is a provisional draft; builds and installation are not yet verified). RPM lockfile prerequisites are set up with one command.
 
 #### Glasswing shipyard audit remediation
 
-A Glasswing AI-SAST audit of shipyard produced 22 findings, of which 17 are fixable. The fixes were carried to every supported release branch and the consumer repos (113 PRs, 105 merged; the FIND-006 drafts are gated on prerequisites).
+A Glasswing AI-SAST audit of shipyard produced 22 findings, of which 17 are fixable. The September inventory records 113 PRs across release branches and consumer repos, with 105 merged. The eight FIND-006 drafts closed without merging on October 3 and still need a remediation or re-triage decision. Coordinated upgrade-test repairs and the open devel helper-pod repair remain separate evidence gates.
 ```
 
 ## After editing: verification

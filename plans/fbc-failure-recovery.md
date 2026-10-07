@@ -2,7 +2,8 @@
 
 # FBC failure recovery — current priority
 
-Reviewed 2026-10-06; local release-data layout rechecked 2026-10-07. First unblock the existing **0.23.4 / OCP 4.16–4.21** FBC integration tests, then address the separate
+Reviewed 2026-10-06; published checks, authentication and clean local drafts rechecked 2026-10-07.
+The [current work map](current-work.md) records concurrent upstream repairs, release trackers and the independent October 15 builder-migration deadline. First unblock the existing **0.23.4 / OCP 4.16–4.21** FBC integration tests, then address the separate
 OCP 5.0 PR prerequisite. Jira payload application and planning-file cleanup follow this recovery work.
 No Release resource, live secret binding, snapshot rerun or GitLab submission has been applied by this review.
 
@@ -22,7 +23,15 @@ GitHub's latest published checks on FBC main `2e6b489e65620738d68504d9158418fe46
 All six report `get-unreleased-bundle` / `StepFailed`; their corresponding catalog push builds succeeded.
 The saved September 30 4.19 step log shows repeated anonymous pulls of the production index returning `401 Unauthorized`.
 The standard integration checks report warnings, not the operator failure; inspect the complete snapshot verdict before releasing.
-These are published results, not a fresh cluster query. Konflux CLI credentials still return Unauthorized.
+These failures remain published/historical evidence. The October 7 third pass authenticated successfully and read the explicit `submariner-tenant` namespace:
+
+* `submariner-konflux-registry-redhat-io` exists with type `kubernetes.io/dockerconfigjson`; no credential data was read or printed.
+* Its name is absent from both `secrets` and `imagePullSecrets` on `konflux-integration-runner`. This confirms the missing link; it does not verify credential usability.
+* `submariner-fbc-5-0` Application and Component and `build-pipeline-submariner-fbc-5-0` are NotFound. Reconciliation remains a prerequisite.
+* The returned PipelineRun list contains zero items and the named 4.19 historical run is NotFound. Retrieve retained snapshot/scenario associations and archived evidence before reruns;
+  do not claim a fresh task diagnosis or completion from an empty list.
+
+GitLab main-ref access still fails DNS. Field ownership/controller deployment and snapshot verdicts remain unverified. No link, resource or rerun was changed.
 
 | Priority | Failure | Prepared action | Success evidence |
 | --- | --- | --- | --- |
@@ -76,7 +85,7 @@ Local files also do not establish the tenant's ArgoCD apply/pruning mode, so the
 
 ### Restore and verify live access
 
-1. Renew Konflux authentication, confirm the expected cluster/namespace, and re-read the six failed tests and their snapshot associations.
+1. Reconfirm authentication and the expected cluster/namespace, then recover the six failed tests' snapshot/scenario associations from retained or archived evidence.
    Verify the snapshot's application, FBC source URL/revision, catalog image and 0.23.4 bundle before any rerun.
 2. Read the current integration ServiceAccount and confirm the named registry secret exists with the expected Docker-config type.
    Validate that its `auths` entries contain usable credentials for `registry.redhat.io`; report registry names and pass/fail only, never credential values.

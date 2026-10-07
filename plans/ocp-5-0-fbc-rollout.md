@@ -2,7 +2,8 @@
 
 # OCP 5.0 FBC rollout plan
 
-Reviewed 2026-10-06. Consolidates the planning document from
+Reviewed 2026-10-06; heads, published checks and clean configuration drafts rechecked 2026-10-07.
+Use the [current work map](current-work.md) and [builder branch inventory](art-builder-migration.md) for concurrent builder, PQC, addon and release work. Consolidates the planning document from
 [FBC PR #82](https://github.com/stolostron/submariner-operator-fbc/pull/82), head
 `1e8b3c26137b49db60a0d93853f144990770f304`. The pipeline implementation remains in that PR.
 This document supports the proposed OCP onboarding story in the [tracking plan](agentic-sdlc-jira-updates.md).
@@ -16,13 +17,15 @@ It records review gates; it does not authorize pushes, merge requests, cluster c
 | --- | --- | --- |
 | Catalog/tooling | FBC #76 and #81 merged; current FBC main is `2e6b489e65620738d68504d9158418fe463e2073` | Confirm provisional inputs against product policy and runtime compatibility |
 | Pipelines | #82 remains open; two pipeline files and a snapshot-verification doc change | Rebase onto current main, reconcile task pins and pass checks at the exact head |
-| PR failure | GitHub's published Konflux check reports `init` / `PodCreationFailed`: `build-pipeline-submariner-fbc-5-0` not found | Recheck live tenant resources after configuration reconciliation |
+| PR failure | GitHub's published Konflux check reports `init` / `PodCreationFailed`: `build-pipeline-submariner-fbc-5-0` not found | October 7 authenticated read confirms absent build account, Application and Component; reconcile configuration first |
 | Tenant/admission | Local drafts inspected; cached base is `8c18efee295889f5d86b03d16930a2f11977fd58` from September 18 | Refresh GitLab main, review two separate changes and verify live reconciliation |
-| Registry access | October 1 observations in tracking-plan A11 describe a missing integration-runner credential link | Recheck with renewed cluster credentials; validate the chosen fix and rerun the intended snapshot |
+| Registry access | October 7 authenticated read confirms the registry Secret exists but is absent from both integration-runner credential lists | Validate credential usability/field ownership, then separately authorized repair and verified-snapshot rerun |
 | Installation | Source inspection establishes conditional execution, not a successful OCP 5 install | Record actual cluster version, selected bundle/channel and successful installation/QE |
 | Release | Existing RPA drafts use generic OCP-version index templates | Confirm live matching, release mode, publishing decisions and target-index membership |
 
-Cluster authentication still returns Unauthorized. No current Application, service account, secret binding, snapshot or release state was established by this audit.
+The third October 7 pass authenticated successfully and read `submariner-tenant`. The 5.0 Application, Component and build account are absent;
+the existing Docker-config Secret remains unlinked to the integration runner. No PipelineRuns are retained in the returned list, so recover exact snapshot/scenario
+associations before reruns. Credential usability, snapshot verdicts, controller ownership and release state remain unverified. GitLab DNS still blocks fresh-base review.
 The original plan's cluster findings remain dated observations. Native image/E2E validation is recorded in
 [implementation status](ocp-5-implementation-status.md); those runs were not repeated during this consolidation.
 The September 24 status document describes an earlier state, including before #81 merged.

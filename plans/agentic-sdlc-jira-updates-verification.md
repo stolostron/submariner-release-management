@@ -1,9 +1,73 @@
 <!-- markdownlint-disable MD013 -->
 
-# Verification of the agentic-SDLC update plan
+# Jira planning verification
 
-Read-only audit performed on 2026-10-06. This record distinguishes source checks from operations that still require execution preflight.
-No Jira payload, transition, cluster change or release was applied during the audit.
+Read-only audit: October 6–7, 2026; refreshed after the deeper October 7 assigned-work, review, artifact and repository-source checks.
+[current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
+and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. No Jira write, transition, branch push, PR post, cluster change or release was performed.
+Private raw exports and pre-edit plan copies are retained outside this public checkout.
+
+## Complete assigned-issue sweep
+
+| Read | Result and limits |
+| --- | --- |
+| Paginated `assignee = currentUser() ORDER BY updated DESC`, no project/status/date restriction | 703 unique issues across ACM, CORENET, OPGM, KFLUXMIG, HYCLD, CLOUDWF, ODL, RCM and BREW |
+| Active status-category query, also unrestricted | 80: 76 non-Vulnerability issues and four Vulnerability issues; its key set matches the active subset of the complete search |
+| Terminal assigned history | 623: 144 non-Vulnerability and 479 Vulnerability issues; no reopening/bulk update proposed |
+| Full non-Vulnerability issue views | All 220 assigned issues plus four related issues; descriptions, comments, links, parent/subtasks and fields read |
+| Non-Vulnerability `updated >= "2026-09-13"` query | 118 issues, 53 terminal; mutable update time does not prove recent implementation |
+| Epic membership queries | ACM-39728 has ten direct children; CORENET-7155 has zero, and its description remains empty |
+| Full comment pagination on 21 update/reconciliation targets | Returned unique ids reconcile with reported totals, including 159 comments on ACM-40644 rather than the 100 in its issue view |
+| Latest public work discovery | 23 authored PRs updated since September 30, 16 currently open authored PRs, five authored issues updated since September 30; populations overlap |
+| Direct PR reads | All 16 open authored PRs plus releases#1444; EVPN #3–7 and recent merged #2/cve-agent#35 also read. Five merged PRs for ACM-34592 checked separately |
+
+The 76 non-Vulnerability active issues reconcile exactly to queue groups: automation 10, releases 17,
+deadline/lifecycle/legacy eight, Kubernetes/MCN/EVPN 41. No private vulnerability keys or descriptions are copied into the queue.
+Search counts and active categories were compared by unique key; absence in a filtered query was not treated as absence from Jira.
+All assigned Vulnerability issues received inventory/status coverage; the deeper pass also fetched full views for the four active cases. No fresh shipped-image applicability/fix triage was performed.
+Their four active cases remain private follow-up; the historical 259 closures below are a different population.
+
+The comment CLI emits consecutive page objects and rendered text, which can omit rich-text links.
+Pages were decoded, flattened and checked against each reported total; issue ADF was retained separately for exact links and field editing.
+Neither rendered text nor an issue view's first 100 comments is a safe replacement document for Jira rich text.
+
+Fresh observations add OPGM-364's existing lifecycle-publication scope and status request, ACM-25779's stale console template,
+ACM-34593's unsupported closure assumption, and the already-created MCN CI subtask set.
+The May draft saying it will split into subtasks is obsolete. ACM-34592's five linked PRs all merged May 28;
+its sibling still needs route-agent build evidence. Both contribution children require an ai-helpers merge,
+and ACM-39740 additionally requires another product's validation. CVE-agent#35's source merge is preparatory evidence only.
+
+## Current checks and local work
+
+The deeper pass repeated the complete 703-row inventory and all 76 active non-Vulnerability full views,
+plus eight dependency views and the three EVPN conflict issues. Assigned keys/statuses are unchanged.
+Complete comment histories remain supported by unchanged issue timestamps; re-fetch before any write.
+
+| Deeper check | Result affecting the plan |
+| --- | --- |
+| Full GitHub review-thread pagination | Shipyard #2582: 32 threads, four unresolved/outdated, zero current/unresolved; no current-head approval. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
+| Exact local source inspection | Shipyard follow-up is now committed/clean and outside published #2582. Plugin HEAD has two dirty court-permission test files; previous clean claims removed |
+| EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
+| OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
+
+Exact heads, returned checks and handoffs belong to [current-work.md](current-work.md).
+Author-reported runs, source contracts, approvals and successful runtime qualification are different evidence types;
+the refresh did not execute plugin tests, trials, builds or hosted reruns.
+
+### Production artifact checks
+
+Direct `skopeo inspect` verified the already-recorded exact 0.24.1 production bundle reference/version;
+the [work map](current-work.md#release-recovery-and-time-sensitive-work) retains its digest.
+Seven recorded 4.16–4.22 indexes were probed with `oc image extract`, each bounded to 100 seconds; all timed out, so membership is unknown.
+`oc get` of all three recorded September component production Release names returned NotFound in the authenticated tenant.
+Repository YAMLs retain intent/snapshot identities, not success verdicts. Recover catalog/QE/release proof before closeout;
+these reads establish bundle publication, not end-to-end validation or artifact absence. No status skill used an inferred version.
+
+Static conductor review supersedes several old roadmap claims: all build-readiness scripts are review level;
+scripted steps can have external verifiers; `run_conductor` is extracted and has an integration test target;
+bundle snapshot selection has a warn-only tag-age check; checkout restoration is implemented.
+The [shortened roadmap](autorelease-step-automation.md) preserves remaining write-acknowledgement, snapshot-selection, retry and concurrency questions.
+No implementation or external runtime was changed to test those questions.
 
 ## Public PR evidence
 
@@ -11,7 +75,7 @@ The audit fetched pull-request metadata for 347 unique PRs through GitHub's API,
 
 | Evidence | Verified result |
 | --- | --- |
-| Glasswing list | Exactly the same 113 URLs as the original local tracker; 105 merged, 8 open drafts; author, base branch and merge date match every row |
+| Glasswing list | 113 URLs in the September inventory; 105 historical merges, 8 drafts open at that cutoff. October 7 direct reads find those eight closed unmerged on October 3; the earlier claim that all were still open on October 6 was incorrect |
 | CVE/revert list | 43 unique PRs: 26 merged, 17 closed without merging; 3 are lint-only reverts, leaving 40 CVE-fix PRs |
 | EC/Tekton list | 33 unique PRs: 32 merged, 1 closed without merging |
 | Initial epic-period inventory | 335 PRs across 12 repositories; 290 merged, 32 closed without merging, 13 open at the reconstructed cutoff |
@@ -30,124 +94,54 @@ reported onboarding E2E and live RPM lockfile run; those runs were not independe
 [release-management PR #114](https://github.com/stolostron/submariner-release-management/pull/114) and
 [OCP 5 FBC PR #82](https://github.com/stolostron/submariner-operator-fbc/pull/82) remain open.
 
-## Jira observations
-
-Both epics and relevant existing stories and release trackers were read through the authenticated Jira CLI. The ACM epic still has its ten existing children;
-the CORENET epic still has an empty description and no children. Existing story statuses, component 33720, Activity Type choices and priority ids match
-the plan. The four old epic-description snippets and the insertion heading each match once in the rendered description.
-
-The bounded Vulnerability JQL in A8 returned 259, matching the original unbounded query. No private issue export, teammate name or account id is published here.
-The query now also includes `BY currentUser()`: all 259 were transitioned by the authenticated maintainer and are currently assigned to that account.
-
-The active sprint observed on ACM siblings is now 2026-59 (87579); 2026-58 (85613) is closed. CORENET Sprint 295 (87581) remains active on its epic.
-Descriptions, comments and the Git Pull Request field are ADF documents. The payloads now require an ADF-capable client and preserve existing rich-text links.
-No create-field metadata or available-transition endpoint was exercised, so those remain mandatory preflight checks; numeric transition ids were removed.
-The execution instructions now use each story's own field values, validate the Kubernetes canary before editing the epic, and require restricted comment visibility at creation and on read-back.
-
 ## Kubernetes rebase evidence
 
 The inventory is pinned to fork branch bak42 at `febb7974696e870f933e8ad3741605d31ead0b5c`; a remote-ref read confirms that backup exists.
-At that committed snapshot: 134 files, 20,792 lines, 32 gate documents, four design/compatibility documents, 13 shell/Python script files across
-`scripts/` and `evals/scripts/`, 238 Python test functions in 4,939 Python test-file lines, and 16 pattern-retention evaluation case directories.
-Hooks and gate scripts are outside that 13-script count.
+At that committed snapshot: 134 files, 20,792 lines, 32 gate documents, four design/compatibility documents,
+13 shell/Python scripts, 238 Python test functions and 16 pattern-retention cases. Hooks/gate scripts are outside the script count.
+Bak42 adds 69 commits beyond PR `7e1aa060`; current HEAD adds another 13, plus two dirty test files.
+The checked fork refs remain at the PR and bak42; neither backs up the entire current source.
 
-Compared with [the upstream PR head](https://github.com/openshift-eng/ai-helpers/pull/617), bak42 adds 69 commits and changes 90 files (+7,799/-2,641).
-The 43 local backup refs and a fresh remote-ref query confirming 29 fork backup refs match the recorded counts. Current local work is newer; it must not be described as entirely backed up by bak42.
-GitHub confirms 108 closed July draft PRs with the stated repository distribution, six June rebase PRs with one merged, and 175 upstream review entries
-(85 bot, 83 author, 7 teammate). The September 8 measurement question is an
-[issue comment](https://github.com/openshift-eng/ai-helpers/pull/617#issuecomment-5587555534), not a code-review thread.
-The [Kubernetes v1.37.1 release](https://github.com/kubernetes/kubernetes/releases/tag/v1.37.1) supports the plugin's patch-target claim;
-it does not prove a consumer rebase passed.
+GitHub verifies 108 closed July draft PRs across five repos and six June PRs (one merged).
+The legacy local matrix has **536 rows** dated July 29–September 24, **218** for 1.36.2, with latest unmutated PASS summaries for all six targets.
+The inspected matrix-state has no `evidence/` archive and only one run-input record. Those rows cannot establish current retained-evidence qualification;
+Proposed K2 status stays In Progress pending per-target evidence/failure dispositions or an explicit limited-acceptance decision. PR counts are not counts of accepted runs.
 
-## Execution gates and limits
+Current eval source captures model/tokens/turns/cost but emits zeros when terminal metrics are missing; exclude that fallback from measurements.
+The runner collects artifacts and does not execute YAML judges. The guide's $17–27 light/$40–60 heavy estimates are documented observations,
+not a benchmark repeated here. K3 retains valid measurements/judge outcomes and the unanswered reviewer/shared-harness question.
+That question is an [issue comment](https://github.com/openshift-eng/ai-helpers/pull/617#issuecomment-5587555534), not a review thread.
+The [published Kubernetes v1.37.1 release](https://github.com/kubernetes/kubernetes/releases/tag/v1.37.1) supports target availability, not a consumer result.
 
-* Read current Jira create-field, transition, resolution and link-type metadata before writing. Confirm story splits, acceptance criteria, points and sprint choices;
-  then perform the canary create and rich-text update and read them back. Read-only observations cannot prove a create or transition will succeed.
-* The cluster rejected the current credentials as unauthorized. Live build, service-account and release state could not be rechecked.
-  A11's cluster observations remain dated findings; its installation and historical-registry claims were narrowed to what the available evidence supports.
-* The cached tenant configuration confirms the `stable` channel parameter. The catalog uses versioned channels; the
-  [helper](https://github.com/konflux-ci/tekton-integration-catalog/blob/24ed4b2be4ff378d2d688b7bc380e47ef99a3eba/stepactions/bundles/get-unreleased-bundle/0.1/get-unreleased-bundle.yaml) can return no matching bundle,
-  and the
-  [pipeline](https://github.com/konflux-ci/tekton-integration-catalog/blob/24ed4b2be4ff378d2d688b7bc380e47ef99a3eba/pipelines/deploy-fbc-operator/0.1/deploy-fbc-operator.yaml) conditions later install tasks on a returned bundle. This static configuration check does not reconstruct archived passing-run logs.
-* The documented registry-secret linkage and snapshot-label rerun mechanisms were checked against official Konflux documentation.
-  Linking secrets, relabeling snapshots, inspecting old passing-run credentials and verifying a real install remain separate authorized operations.
-* Local shell/Python inventory counts were checked against release-management commit `0ed2981` (81 files, 29 test files, 30,164 lines).
-  The full `make test`, commit lint, Markdown links and PR-list consistency checks validate the proposed documentation, not the live rollout.
+## Field and infrastructure evidence
 
-## Consolidated FBC rollout review
+Issue reads checked Activity Type, component 33720, priorities, exact description snippets and ADF PR fields.
+Active sibling sprint observations were ACM 2026-59 (87579) and CORENET 295 (87581); ACM 2026-58 (85613) is closed.
+Those observations do not establish writable create/transition metadata or approved points/status choices.
+The September 13–30 Vulnerability JQL `BY currentUser()` returned 259 currently assigned closures, a historical population separate from today's four active cases.
 
-The [rollout plan](ocp-5-0-fbc-rollout.md) reconciles FBC #82's 159-line planning file with this plan and the canonical onboarding workflow.
-The audit checked #82's complete seven-commit diff, current FBC main, published check failure, effective required checks/app IDs, and the local tenant/admission drafts.
-It traced the 0.2 wrapper to the 0.3 pipeline at integration-catalog `24ed4b2be4ff378d2d688b7bc380e47ef99a3eba`, the pinned bundle helper's
-image revision to konflux-test `5f33b66974c024e0e3b2d809de88297e9806f9a0`, and RPA-selected production release tasks to `9bfb0b2588a07e765fccef05e2919e4a44ff4401`.
+The [epic edits](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-description-edits.md) retain their own baseline/counting definitions.
+[OCP rollout](ocp-5-0-fbc-rollout.md) owns immutable task/index inputs and expiry evidence;
+[FBC recovery](fbc-failure-recovery.md) owns historical 401 diagnosis, prepared release-data render/regression results and prerequisite probes.
+Earlier focused draft tests passed, but a full release-data warning-group failure reproduced on untouched cached main; the entire repository was not green.
+Tenant/admission drafts still require fresh-base reads and separation of the tenant's unrelated documentation rewrite.
 
-The helper compares against the target OCP index, so release in 4.x does not establish a 5.0 no-op. Current Pyxis opt-in and publishing cannot be inferred
-from historical successful releases. The acceptable-bundles artifact lists all 12 pinned task refs, with three expiries on October 30 and lifecycle injection
-on October 31; #82's claim that the lifecycle pin is non-expiring is stale. The rollout plan records immutable artifact/layer digests for reproduction.
-No native image/E2E, cluster index render, cluster install, provisioning, GitLab submission or release operation was repeated or performed here.
-The registry diagnostic below is a separate local authenticated manifest inspection.
+The earlier successful tenant read found the Docker-config Secret unlinked to the runner and OCP 5 Application/Component/build account absent.
+No retained PipelineRuns or named historical run were found. That read did not prove credential usability, controller ownership,
+snapshot/scenario associations or release success. GitLab refresh remained blocked by DNS; no credential contents were printed.
 
-## Priority FBC failure recovery
+## Execution limits
 
-The [recovery plan](fbc-failure-recovery.md) takes precedence over Jira payload application and planning cleanup.
-A fresh GitHub main-ref read still points to `2e6b489e65620738d68504d9158418fe463e2073`.
-Its latest published operator checks fail at `get-unreleased-bundle` for all six OCP 4.16–4.21 versions; the corresponding catalog builds succeeded.
-The saved September 30 4.19 step log records anonymous production-index pulls returning 401. This establishes that run's registry failure,
-not a fresh pod diagnosis or an independent explanation for every failed run. Standard checks have warnings and require complete snapshot review.
+Before an authorized write, refresh issue/comments/ADF/PR evidence, project create/transition/resolution/link metadata,
+acceptance criteria and chosen points/sprint. Create one reviewed canary, read it back and only then continue the epic sequence.
+Set restricted comment visibility at creation and verify it. Preserve full original ADF and write ids for correction/read-back.
+Do not repeat a fact already recorded, bulk-close private vulnerabilities, resolve unrelated test subtasks as release work,
+or infer product compatibility/qualification/production from local packaging, source merges or Jira status.
+No native build/E2E, plugin trial, tenant regression or hosted rerun was repeated. The direct artifact/retained-Release reads above were performed; they did not execute a release.
 
-The minimal registry repair is a separate local, single-commit tenant change: source ServiceAccount, Kustomization resource entry and generated ServiceAccount.
-Full tenant regeneration reproduces the committed output; all 60,102 tenant tests pass. CODEOWNERS validation passes with 8,514 tests passed and 10,006 skipped
-after rerunning it following regeneration. The full main suite passes (132,517 tests), as do Ruff, YAML and shell checks.
-The warning group affected by concurrent regeneration was rerun on the stable tree: 2,179 pass and one fails because another tenant references a missing EC policy.
-A focused check on untouched cached main reproduces that policy failure. The repository is therefore not fully green.
-Initial concurrent regeneration caused missing-file failures in CODEOWNERS and that warning group; their affected checks were rerun after regeneration.
-The inspected integration controller preserves added secret links while maintaining its own
-image-pull credentials. Official documentation confirms the mount-link and selected-snapshot rerun mechanisms.
-A local authenticated 4.19 registry manifest inspection succeeds; integration-pod access and the named tenant credential remain unverified.
+## Documentation validation
 
-Live verification remains blocked by Unauthorized cluster credentials; GitLab main refresh/submission remains blocked by DNS resolution.
-No live link, rerun or release was applied. The separate OCP 5 repair still requires reconciliation of its existing tenant draft and exact-head CI.
-
-## Additional FBC fix verification
-
-A second render of the registry-repair tenant produces 222 resources, including exactly one integration runner ServiceAccount; its output matches the committed generated file.
-The 5.0 tenant draft adds seven resources while preserving all 221 existing baseline resources. Application, Component and ImageRepository references and generated outputs match.
-Build-service source at [`918a4ce53681c988c6b81bd140a58747ad60e7c3`](https://github.com/konflux-ci/build-service/blob/918a4ce53681c988c6b81bd140a58747ad60e7c3/internal/controller/component_build_controller_service_account.go)
-derives `build-pipeline-` from the Component metadata name in both API models. Its derived 5.0 name matches the currently published #82 failure.
-The controller provisions that account and its role binding; creating a bare replacement account is not the proposed fix.
-
-Tekton source at [`fbf48a876d1b367d66824eda7d8e72781e8d4423`](https://github.com/tektoncd/pipeline/blob/fbf48a876d1b367d66824eda7d8e72781e8d4423/pkg/credentials/dockercreds/creds.go)
-accepts `dockerconfigjson` secrets without a Docker annotation and writes merged credentials to `.docker/config.json`.
-Annotated basic-auth entries can override them; the recovery plan now checks competing credentials and the new task's effective credential path.
-The [runtime-auth guide](https://tekton.dev/docs/pipelines/auth/#configuring-docker-authentication-for-docker) confirms the `secrets` mount mechanism.
-These upstream source checks do not identify the deployed controller/Tekton versions.
-
-A fresh authenticated local index inspection succeeds. Local `opm` v1.56.0 reaches image-blob copying but is stopped by the 120-second timeout; no completed render is claimed.
-The Konflux task uses a separately pinned image, and neither this local diagnostic nor repository tests establish its credential validity or live recovery.
-Cluster authentication remains Unauthorized and GitLab main still cannot be refreshed because DNS resolution fails.
-
-## Local release-data plan audit — October 7
-
-The main checkout and all three repair/onboarding worktrees were inspected locally; their working trees remain unchanged and clean.
-All drafts use cached main `8c18efee295889f5d86b03d16930a2f11977fd58`, so this audit does not establish readiness against current GitLab main.
-Repository instructions require tenant and managed changes in separate merge requests. Existing CODEOWNERS covers the proposed source,
-generated and admission paths. The recovery plan now records three scopes: registry repair, 5.0 tenant onboarding and later release admissions.
-The tenant draft's extra `CLAUDE.md` rewrite should be separated before submission; its configuration-only scope is 16 files, adding seven resources.
-
-Focused checks against the existing drafts passed:
-
-| Draft | Checks | Result |
-| --- | --- | --- |
-| 5.0 tenant | Tenant manifest tests selected with `-k submariner` | 264 passed; 59,835 deselected |
-| 5.0 tenant | Root `tests/test_tenant.py`, selected with `-k submariner` | 266 passed; 6 skipped; 62,454 deselected |
-| 5.0 admissions | Constraints, schemas, consistency, FBC, basics and service-account mapping tests selected with `-k submariner-fbc` | 23 passed; 13 skipped; 68,867 deselected |
-
-Fresh Kustomize renders match every generated tenant resource in both drafts. Registry repair preserves all 221 baseline resources and adds one;
-5.0 onboarding preserves all 221 and adds seven. Object comparisons confirm that each admission changes only its application's membership list.
-The draft stage/prod ReleasePlans match their respective admission labels, application, origin and target; automatic release remains disabled.
-These focused checks supplement the earlier full registry-repair validation; they do not replace fresh-base CI or live reconciliation.
-
-The missing build account is provisioned from the tenant Component, independently of the release-admission additions.
-Cached main defines neither the named registry Secret nor the integration-runner ServiceAccount, and does not establish its ArgoCD apply/pruning mode.
-The registry repair consequently requires live credential and field-ownership verification. The earlier unrelated missing-policy test failure remains;
-no new GitLab submission, cluster change or successful FBC rerun is claimed.
+The deeper revisions pass full `make -j4 test` without a retry, Markdown lint across 136 files,
+61 changed-document relative-link/anchor checks and whitespace validation. All four original epic-description snippets and the insertion heading still match once.
+The queue still accounts for all 76 active assigned non-Vulnerability keys exactly once. Existing unrelated edits are preserved;
+no release/test implementation was changed. Raw exports, source snapshots and validation logs remain outside this public checkout.
