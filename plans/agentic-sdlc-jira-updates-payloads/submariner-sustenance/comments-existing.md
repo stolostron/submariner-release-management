@@ -21,7 +21,7 @@ Autorelease hardening and script fixes since the Sep 13 update, found while usin
     * retry the RPM lockfile step when only some repos have a PR yet, and reuse existing release PRs
     * auto-push and open PRs at review stops, falling back to printed commands
     * serialize Tekton task updates
-    * preserve and restore dirty worktrees and the original branch around every step; CI also caught a Git 2.43 case where a failed `git stash pop --index` exits 0, which is now detected
+    * harden the scripts' dirty-worktree and original-ref restoration with failure checks; CI also caught a Git 2.43 case where a failed `git stash pop --index` exits 0, which is now detected
     * stricter release-notes review contract with per-issue evidence bundles, and safer resume and apply
     * add-team-member target checks; release root resolved independent of the caller's working directory
     * full OCP identities (4.x and 5.x) carried through release scope, status, snapshot checks and prod-index verification
@@ -52,15 +52,15 @@ Retargeting a tracker (0.23.2 to 0.23.4) leaves step records and subtask statuse
 
 ## ACM-39736 (Release knowledge transfer to team)
 
-No comments exist yet. Keep it factual; the story is still New and needs a second engineer.
+No comments exist yet. Keep it factual; the story is still New and requires multiple team members to complete releases.
 
 ```text
-Prerequisites for another engineer to drive a release are now in place:
+Shared setup and checkout-safety prerequisites have improved:
 
 * https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key.
-* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch safety so a release run does not clobber a teammate's checkout, add-team-member hardening, and skills usable from Claude or Codex.
+* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch-safety hardening, add-team-member hardening, and skills usable from Claude or Codex.
 
-Still needed for this story's acceptance criteria: at least one other engineer completing a full downstream release using the skills and docs, and the gaps they hit written down.
+Still needed for this story's original acceptance criteria: multiple team members each complete a full downstream release using the skills and workflow docs, with the maintainer available for questions but not driving. Document their gaps and feed them back into skill/doc improvements. A first volunteer's release is a milestone, not completion of this story.
 ```
 
 ## ACM-39729 (Harden autonomous CVE remediation)
