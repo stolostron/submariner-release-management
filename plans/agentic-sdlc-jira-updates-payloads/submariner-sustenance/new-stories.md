@@ -35,7 +35,7 @@ _Scope:_
 
 * make setup-entitlements, check-entitlements and seal-entitlements; idempotent, backs up and restores the registration on failure, and verifies RHEL repository access instead of trusting the certificate
 * rpm-lockfile-update fails fast, with the fix, when the setup is missing or the entitlement grants no repository access
-* Decision, tradeoffs and limits recorded in secrets/README.md and CLAUDE.md so they are not re-litigated
+* Shared setup decision, tradeoffs and limits documented in secrets/README.md and CLAUDE.md
 
 _Acceptance criteria:_
 
@@ -47,14 +47,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Delivered in https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): 12 files, +954/-10.
+Delivered in https://github.com/stolostron/submariner-release-management/pull/110 (merged September 29): shared entitlement setup, prerequisite checks and seal/rotation support. The 127-assertion suite uses stubbed host tools and real GPG for the bundle.
 
-* scripts/setup-entitlements.sh, seal-entitlements.sh and lib/entitlement-bundle.sh; make targets setup-entitlements, check-entitlements, seal-entitlements
-* scripts/lib/test-setup-entitlements.sh: 127 assertions with stubbed sudo, subscription-manager, podman and curl and a real gpg for the bundle. A flaky tamper check (a no-op about 1 run in 64) was found by CI and fixed.
-* rpm-lockfile-update.sh now calls the check first and stops early with the fix
-* Rationale and security limits: secrets/README.md; decision recorded in CLAUDE.md "Settled Decisions"
-
-Per the PR description, a full rpm-lockfile-update run on release-0.24 regenerated the gateway, globalnet, route-agent and nettest lockfiles using this setup.
+The PR reports a full release-0.24 RPM lockfile run regenerating gateway, globalnet, route-agent and nettest lockfiles with this setup.
 ```
 
 ## Story 2: Detect Enterprise Contract deny rules during Tekton task updates
@@ -74,7 +69,7 @@ _Scope:_
 
 * scripts/lib/deny-rules.sh: active denials fail the run, future-dated ones warn, and only quay.io/konflux-ci/<catalog> replacements named by the policy message are followed
 * Pinned pipeline-patcher bumped to match; bump commit messages explain replaced refs and component bump PRs are labelled ready-to-test
-* parse-ec-log reports deny reasons instead of advising a version bump, and recovers violations from truncated Konflux UI JSON
+* parse-ec-log reports deny reasons and recovers violations from truncated Konflux UI JSON
 * Tests: deny rules, Tekton version bump, task refs, parse-ec-log
 
 _Acceptance criteria:_
@@ -86,9 +81,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): EC deny-rule detection and Tekton task update fixes.
+Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged September 29): EC deny-rule detection, policy-directed catalog replacements and parser diagnosis.
 
-Real-world motivation, 2026-09-13 onward: 33 Enterprise Contract and Tekton task PRs across the component repos (32 merged). They include replacing the denied rpms-signature-scan vanguard ref and removing the policy-denied show-sbom task on the release branches. Since the epic started on 2026-08-04 there have been 74 such PRs (64 merged) in the initial 2026-09-30 sweep (05:00 UTC cutoff). Related policy work: [rhtap-ec-policy#268](https://github.com/release-engineering/rhtap-ec-policy/pull/268) (merged 2026-08-31) added Submariner 0.24 to the network policy RBAC exceptions. [Full PR list since 2026-09-13](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/ec-tekton-prs.md).
+Related component changes replaced the denied rpms-signature-scan vanguard ref and removed policy-denied show-sbom refs: [dated PR inventory](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/ec-tekton-prs.md).
 ```
 
 ## Story 3: Deliver shared Claude/Codex skill discovery and compatibility contract
@@ -120,7 +115,7 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): shared skill discovery and the compatibility contract. On October 7, make test-skills passes all 19 checks with five known debt entries, all in konflux-ci-fix. Passing the debt ratchet does not establish zero debt or complete installed-host execution. Keep that follow-up explicit in plans/claude-codex-skill-compatibility.md.
+Delivered in https://github.com/stolostron/submariner-release-management/pull/109 (merged September 29): shared skill discovery and the compatibility contract. On October 7, make test-skills passes all 19 checks with five known debt entries in konflux-ci-fix. Complete execution portability and the installed-host matrix remain unfinished.
 ```
 
 ## Story 1: Onboard FBC catalogs for OCP major-version transitions (OCP 5.0 draft)
@@ -149,26 +144,24 @@ _Scope:_
 
 _Acceptance criteria:_
 
-* Onboarding is reproducible for OCP 4.23, 5.0 and 5.1 (done in an end-to-end run with real Kustomize, OPM and Podman)
+* Onboarding is reproducible for OCP 4.23, 5.0 and 5.1
 * OCP 5.0 catalog and pipelines merged, and Konflux builds pass on all four platforms
 * Tenant and admission changes merged in konflux-release-data, and the live release plans match the admissions
-* Installation verified on a real OCP 5 cluster (not done yet; the catalog inputs, minimum Submariner stream 0.24 and channel head 0.24.1, are provisional)
+* Installation verified on a real OCP 5 cluster
 ```
 
 Progress comment (post after creation):
 
 ```text
-October 7 read:
+The onboarding CLI and provisional OCP 5.0 catalog merged in https://github.com/stolostron/submariner-release-management/pull/109 and https://github.com/stolostron/submariner-operator-fbc/pull/81. Recorded local E2E covers OCP 4.23, 5.0 and 5.1 with real Kustomize, OPM and Podman.
 
-* https://github.com/stolostron/submariner-release-management/pull/109 and https://github.com/stolostron/submariner-operator-fbc/pull/81 are merged: onboarding CLI, regression coverage, OCP-major workflow support and a provisional OCP 5.0 catalog.
-* https://github.com/stolostron/submariner-operator-fbc/pull/82 remains open; its published build fails before tasks start because the build account is missing. The tenant read also found the Application and Component absent.
-* Registry repair, tenant and managed-admission drafts exist locally and require fresh-base review. Tenant reconciliation provisions the build account; admissions gate later releases.
+At the October 7 read, https://github.com/stolostron/submariner-operator-fbc/pull/82 cannot build because its account is missing; the tenant Application and Component are absent. Tenant/admission drafts remain unmerged. Tenant reconciliation creates the build account; admissions gate later releases.
 
-Still required: registry credential usability, merged configuration/pipelines, actual four-platform build/provenance, release matching, catalog proof and applicable real-cluster installation. Task trust expires October 30/31 at the pinned audit; re-read current allow/deny policy before execution and replace expired or denied refs when required. Existing OPGM-364 tracks lifecycle publication; ACM-45508 tracks addon consumption. Neither establishes OCP 5 runtime support.
+OCP 5 catalog inputs remain provisional: minimum stream 0.24, channel stable-0.24, head 0.24.1. Live build/provenance, release matching and real-cluster installation remain unfinished. [Rollout evidence and gates](https://github.com/stolostron/submariner-release-management/blob/ecb3f1be31bbea22219e0487063772c4664d505f/plans/ocp-5-0-fbc-rollout.md).
 ```
 
 Rollout evidence and remaining gates: [OCP 5.0 FBC rollout plan](../../ocp-5-0-fbc-rollout.md).
-Before posting, refresh the progress comment from that plan, including registry access, target-index membership and task-trust expiry.
+Before posting, refresh PRs, configuration/build state and reported qualification. Registry access, target-index membership and task trust remain execution checks in the rollout plan.
 
 ## Story 5: Remediate the Glasswing shipyard audit findings
 
@@ -178,10 +171,12 @@ Before posting, refresh the progress comment from that plan, including registry 
 * Target status: In Progress, using the issue's available transition; all eight FIND-006 drafts closed without merging; remediation/re-triage and the open helper/upgrade repairs remain.
 * Git Pull Request: leave empty and rely on the comment (113 PRs is too many for the field).
 
+Creation preflight: the October 7 duplicate check found broader closed Glasswing epic ACM-36285 with no children and related incident issues, but no matching shipyard-audit remediation story in the searched results. Reconcile that scope before creating this story.
+
 Description:
 
 ```text
-A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). The initial report classifies five as Won't Fix (including architectural e2e-framework behaviour) and 17 as fixable; those labels alone do not establish owner acceptance of the risk dispositions. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files. The October 7 duplicate check found the broader closed Glasswing epic ACM-36285 with no children, plus related incident issues, but no matching shipyard-audit remediation story in the searched results. Reconcile that scope before creating this story; do not reopen or duplicate the broader epic.
+A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). The initial report classifies five as Won't Fix (including architectural e2e-framework behaviour) and 17 as fixable; those labels alone do not establish owner acceptance of the risk dispositions. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files.
 
 _Scope:_
 
@@ -198,19 +193,14 @@ _Acceptance criteria:_
 * CI helper pod manifests work on OCP
 ```
 
-Progress comment (post after creation): see `shipyard-audit-prs.md` in this directory for the full PR list, and use this summary:
+Detailed repair evidence and sequencing: [upgrade CI handoff](../../upgrade-ci-recovery.md) and [current upstream work](../../current-work.md#upstream-audit-and-upgrade-tests).
+
+Progress comment (post after creation):
 
 ```text
-Status as of 2026-09-30, from the remediation tracker joined with live GitHub state:
+The September inventory records 113 PRs, 105 merged: [per-finding list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/shipyard-audit-prs.md). All eight remaining FIND-006 drafts closed without merging on October 3; the finding still needs remediation or an accepted re-triage disposition.
 
-* 113 PRs, all authored by the maintainer: shipyard 65, lighthouse 16, subctl 16, submariner 8, submariner-operator 8
-* 105 merged between 2026-08-20 and 2026-09-14 (most on 2026-09-10); 8 open
-* The 8 open PRs are the FIND-006 (subctl download integrity) draft series on devel and release-0.18 through release-0.24, gated on the subctl checksums PRs and a dapper-base rebuild
-* Follow-up: 9 PRs fix the CI helper pod manifests for OCP (8 merged, release-0.18 through release-0.25; the devel PR [shipyard#2618](https://github.com/submariner-io/shipyard/pull/2618) is still open)
+OCP helper-pod repair https://github.com/submariner-io/shipyard/pull/2618 remains open at 682127c8424d8f6a1614e0bf789bb7d17ea10af9 with current-head approval and passing/skipped checks. Its OCP admission/install evidence remains to be reviewed.
 
-Current refresh, October 7: all eight FIND-006 drafts closed without merging on October 3. They need an explicit disposition and refreshed prerequisite checks; closure is not remediation. The September counts above remain historical. [shipyard#2618](https://github.com/submariner-io/shipyard/pull/2618) remains open with passing/skipped returned checks and an approval on current head 682127c8424d8f6a1614e0bf789bb7d17ea10af9. Its aggregate changes-requested state originates in an older review; zero current unresolved threads were returned. Current-head OCP admission/install evidence still needs review, and the PR body incorrectly retains a hostUsers claim removed from the actual manifests.
-
-https://github.com/submariner-io/shipyard/issues/2633 is closed; https://github.com/submariner-io/shipyard/issues/2635 remains open. Coordinated fixes are https://github.com/submariner-io/shipyard/pull/2654 (open, published checks pass or skip) and https://github.com/submariner-io/subctl/pull/1944 (draft, dependency/upgrade/Go/vulnerability checks fail). The Go check specifically reports gofumpt formatting at cmd/subctl/upgrade_test.go:135; the scan reports high-severity gRPC/x/crypto module findings. Prepare the formatting fix and reconcile existing CVE work now. Both upgrade jobs complete baseline deployment but fail the subsequent isolated-baseline executable guard before the upgrade stage. Merge and publish the Shipyard runtime, verify the consumer at its exact head, and complete applicable maintained-stream backports before closing #2635. Do not infer download-integrity remediation from upgrade-test success.
-
-[Full per-finding PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/shipyard-audit-prs.md).
+Upgrade-test repair remains on https://github.com/submariner-io/shipyard/issues/2635: https://github.com/submariner-io/shipyard/pull/2654 is open with passing/skipped checks; https://github.com/submariner-io/subctl/pull/1944 is draft with dependency/upgrade/format/security failures. Shipyard runtime publication, consumer qualification and applicable backports remain pending, separately from FIND-006 download-integrity work.
 ```

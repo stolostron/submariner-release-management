@@ -284,17 +284,26 @@ private vulnerability inspection remains attributed to the earlier comprehensive
 
 ## Payload usefulness review
 
-The review compared pending existing-issue comments with their original criteria and complete histories. Sixteen fresh full issue reads and all 27 complete
+The review compared pending existing-issue comments with their original criteria and complete histories. Nineteen fresh full issue reads and all 27 complete
 comment histories are unchanged. Group 1 is now one short correction on CORENET-7171: the implementation tasks exist and the AI scope is post-merge.
 The parent CI comment, CVE contribution-parent rollup and older CVE progress draft are deferred because they repeat visible tracking or existing updates.
 Their coverage, inventory and scope decisions remain in the queue. Execution guidance now requires a distinct missing fact or requested answer before posting;
 audit checklists and acceptance instructions belong in the plan. No Jira write or acceptance change is performed.
 
 The fresh contribution read also finds Shipyard #2582 advanced to 4fa703b3, matching clean local HEAD. The previously dirty five-file delta is now published.
-At this read, 42 checks succeed, three skip and two run; two current and five outdated threads remain unresolved. Aggregate changes requested originates
-on older heads and no new-head approval is recorded. Pending text and the work map now reflect this source change; qualification was not rerun.
+The final refresh returns 45 successful and three skipped checks, a changes-requested review on this head, and four current/four outdated unresolved threads
+out of 41; no current-head approval is recorded. Pending text and the work map now reflect this source change; qualification was not rerun.
+
+The remaining review shortens 23 pending payload blocks from 2,664 to 1,324 words. Release comments retain newly recovered identities
+and unreconciled evidence; builder/lifecycle comments retain their concrete inventory or requested status. New-story comments keep delivery PRs and relevant
+qualification limits; epic summaries introduce the new keys instead of copying child inventories. Audit/duplicate checks move outside posted descriptions,
+and S1's done/not-done annotations move from acceptance criteria to progress. Acceptance requirements remain unchanged. The exact four posted blocks and
+historical inventories are preserved. Fresh EVPN main/decision-index reads confirm the unreconciled proposals; plugin source still has the same HEAD and two dirty tests.
+
+Optional epic edits 1/2 now replace stale file/line/test totals with verified operation and validation scope. K1's scope likewise names tests instead of
+using a dated test-function count. Historical counting methods remain recorded; no tracking creation or acceptance criterion is removed.
 
 ## Documentation validation
 
-The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 146 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
+The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 149 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.

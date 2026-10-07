@@ -8,7 +8,7 @@ the insertion heading still matched once at the 2026-10-07 read. Jira Cloud stor
 the relevant nodes with a supported client/UI and preserve everything else. The Markdown below is text for that client, not a raw REST field value.
 Save a fresh baseline before each independent edit. Before writing, confirm it is unchanged; restore it only while the field still equals that edit’s written result. If later edits exist, reconcile them first. Issue history is not an automatic restore operation.
 
-Each edit is independent. Review in order 4 (adoption), 3 (release evidence), 5 (deliverables), then optional metrics edits 1/2. Keep these edit numbers stable; no new story keys are needed.
+Each edit is independent. Review in order 4 (adoption), 3 (release evidence), 5 (deliverables), then optional stale-count cleanup 1/2. Keep these edit numbers stable; no new story keys are needed.
 
 ## Edit 4: release ownership transfer
 
@@ -56,7 +56,7 @@ Release skills share Claude/Codex discovery and a tested compatibility contract 
 A Glasswing AI-SAST audit of shipyard produced 22 findings; its initial report classified 17 as fixable. The September inventory records 113 PRs across release branches and consumer repos, with 105 merged. The eight FIND-006 drafts closed without merging on October 3 and still need a remediation or re-triage decision. Coordinated upgrade-test repairs and the open devel helper-pod repair remain separate evidence gates.
 ```
 
-## Edit 1: script, file and line counts
+## Edit 1: replace stale size metrics with supported scope
 
 Old:
 
@@ -67,14 +67,12 @@ Old:
 New:
 
 ```text
-* At the 2026-09-29 baseline, 18 skills were backed by 51 scripts, 29 test files and one test helper (81 shell/Python files, about 30k lines including tests), covering component setup, bundle builds, FBC catalogs, release notes, RPM lockfiles, OCP onboarding, and verification
+* Release skills backed by deterministic scripts and tests cover component setup, bundle builds, FBC catalogs, release notes, RPM lockfiles, OCP onboarding and verification
 ```
 
-Basis (origin/main at 0ed2981, 2026-09-29): 18 directories under skills/; 81 .sh/.py files under scripts/, of which 29 are test files (test-\*, test\_\*, e2e\_\*), 1 is a
-test helper (isolate_git.py) and 51 are scripts; 30,164 lines across them. The old "56 scripts (15,700 LOC)" used a counting rule I could not reproduce,
-so the new line states its own definition.
+Basis: replace dated file/line totals with the supported operations. Current scripts and checks are listed in the [autorelease roadmap](../../autorelease-step-automation.md); historical counts remain in the audit history.
 
-## Edit 2: test count
+## Edit 2: replace the stale test count with validation scope
 
 Old (nested under the Autorelease conductor bullet, indented four spaces):
 
@@ -85,12 +83,10 @@ Old (nested under the Autorelease conductor bullet, indented four spaces):
 New:
 
 ```text
-    * Over 1,100 shell assertions and Python test cases across the conductor, step libraries, worktree safety, EC deny-rule checks and OCP onboarding
+    * Automated shell/Python checks cover the conductor, step libraries, worktree safety, EC deny-rule handling and OCP onboarding
 ```
 
-Basis: the October 6 full `make test` reports more than 1,100 checks and test cases across its suite summaries, including 127 entitlements
-assertions and 55 Python onboarding tests. This is an aggregate of shell assertions and Python test cases, not a count of unique test functions;
-the conservative wording avoids presenting them as one uniform metric.
+Basis: the full `make test` target covers these areas. Naming them avoids maintaining a mixed total of shell assertions and Python test cases.
 
 ## After editing: verification
 
