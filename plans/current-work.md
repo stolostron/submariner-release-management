@@ -9,7 +9,7 @@ with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-co
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Jira payloads remain unapplied; no PR comment, cluster mutation or release was performed by this refresh.
+Four approved existing-story comments were posted and verified October 7 at 18:23 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
 ## Release recovery and time-sensitive work
 

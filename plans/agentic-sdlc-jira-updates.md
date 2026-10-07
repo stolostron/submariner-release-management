@@ -4,7 +4,7 @@
 
 **Release priority:** [recover the failing FBC integration tests](fbc-failure-recovery.md). Planning and independent deadline work can proceed while recovery prerequisites are resolved.
 
-Status: prepared for review; the epic and story payloads have not been applied. Prepared 2026-09-30; refreshed 2026-10-07.
+Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; refreshed 2026-10-07.
 The [current work map](current-work.md) records the latest Jira, PR and local-work checks, corrections and next actions.
 In particular, the eight FIND-006 drafts are now closed without merging, and real local Kubernetes 1.37 qualification work exists.
 
@@ -24,7 +24,7 @@ done without the other.
 
 Rules that apply to both parts:
 
-* Nothing here has been posted or edited in Jira; every payload is exact text to post after the preflight passes.
+* The first four existing-story comments are posted, with verified ids in A5. Other payloads remain pending; post only newly approved missing deltas.
 * Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify them on read-back; PR-field edits remain a separate action.
 * The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
   and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
@@ -132,16 +132,16 @@ known portability debt and time-sensitive builder migration from the September h
 
 ### A5. Execution order
 
-First approval chunk: one comment on each existing story, using the [four exact drafts](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md). October 7 full reads found the proposed deltas absent from their complete histories.
+Completed first approved chunk: one comment on each existing story, using the [four recorded comments](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md). October 7 full reads found these deltas absent before posting.
 
-| Order | Target | Comment to approve | Current status / existing comments |
+| Order | Target | Posted update | Verified status / comment id |
 | --- | --- | --- | --- |
-| 1 | ACM-39731 | Merged conductor/status hardening, initial teammate adoption and the separate open #114 proposal | In Progress / 3 |
-| 2 | ACM-39730 | Tracker Activity Type fix, current releases, and the observed retarget/artifact gap | In Progress / 3 |
-| 3 | ACM-39736 | Teammate adoption of CVE/autorelease tooling and shared prerequisites; full releases and feedback still required | New / 0 |
-| 4 | ACM-39729 | Verified September counts, initial teammate adoption, merged CVE-agent improvements and open CVE-fix work | In Progress / 1 |
+| 1 | ACM-39731 | Merged conductor/status hardening, initial teammate adoption and the separate open #114 proposal | In Progress / 18820423 |
+| 2 | ACM-39730 | Tracker Activity Type fix, current releases, and the observed retarget/artifact gap | In Progress / 18820431 |
+| 3 | ACM-39736 | Teammate adoption of CVE/autorelease tooling and shared prerequisites; full releases and feedback still required | New / 18820438 |
+| 4 | ACM-39729 | Verified September counts, initial teammate adoption, merged CVE-agent improvements and open CVE-fix work | In Progress / 18820449 |
 
-Approve these comments together or individually. This chunk changes no fields or statuses and creates no issues. Before each authorized post, re-read the target’s complete comments and refresh mutable PR evidence, preserving the historical reporting window. If the factual meaning changes, revise the draft for review. Set restricted visibility in the initial request, read back the text/links/visibility, and record the comment id before the next post. If a request has an uncertain result, inspect Jira before retrying to avoid duplicate comments.
+All four comments were created on October 7 at 18:23 UTC with restricted visibility set in the initial request; exact ADF text, clickable links, group visibility and unchanged issue statuses were verified after each write. No issue fields or statuses were changed, and no new issues were created. The CVE comment uses refreshed Shipyard head 3b67af1a and its current changes-requested review. For later updates, re-read complete comments and refresh mutable evidence; if a write has an uncertain result, inspect Jira before retrying.
 
 Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
 They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
@@ -161,7 +161,7 @@ Create stories before comments that reference their keys. Each write is verified
 5. After checking their acceptance criteria, transition finished stories (S2, S3, S4) to Resolved with the appropriate resolution;
    move S1 and S5 to In Progress. Use each issue's available transition metadata.
 6. Add related-issue links from S1 to ACM-45508 (addon consumption) and OPGM-364 (lifecycle publication), using the link type confirmed in preflight. Check for an existing link first and read back each new relationship.
-7. Reconcile the four existing-story updates and their recorded write ids; post only missing deltas. Optionally append the #109 link to the
+7. The four existing-story updates are already posted (ids above); reconcile their read-backs and post only newly approved missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
 8. Apply the epic description edits, verifying by re-reading after each.
 9. Post the epic summary comment.

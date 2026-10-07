@@ -2,7 +2,7 @@
 
 # Comments for existing ACM-39728 stories and the epic (exact payloads)
 
-Nothing here has been posted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
+The first four existing-story comments were posted and verified on October 7, 2026 at 18:23 UTC. The optional URL-conversion comment and epic summary remain unposted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
 Existing-story comments are independent of creating new stories; post only missing deltas after target-specific preflight.
 The epic summary uses `<S1>` to `<S5>` and must wait for the reviewed stories and real keys.
 
@@ -11,6 +11,8 @@ Historical counts retain their September cutoff; current issues and PRs were re-
 Style of the existing comments: a one-line intro, then bullet lines of `PR link — short description`. Use one comment per target, combining only the missing sections below.
 
 ## ACM-39731 (Orchestrate existing release skills into autorelease)
+
+Posted and read back: comment `18820423`; visibility `Red Hat Employee`.
 
 Existing comments cover the conductor/refactor PRs and September 13 fixes. Refresh the open proposal before posting one comment containing only the missing deltas; this is progress reporting, not a status transition.
 
@@ -28,6 +30,8 @@ Another team member has begun using the autorelease tooling.
 
 ## ACM-39730 (Agentic downstream release tracking in Jira)
 
+Posted and read back: comment `18820431`; visibility `Red Hat Employee`.
+
 ```text
 Tracker fix since the last update: https://github.com/stolostron/submariner-release-management/pull/109 sets the Activity Type field on the tracker parent and its subtasks at creation, addressing the missing-Activity-Type warning. Other required fields and project automation still need verification when a tracker is created.
 
@@ -38,7 +42,9 @@ The 0.23.2-to-0.23.4 retarget required manual reconciliation of step records, su
 
 ## ACM-39736 (Release knowledge transfer to team)
 
-No comments exist yet. Keep it factual; the story is still New and requires multiple team members to complete releases.
+Posted and read back: comment `18820438`; visibility `Red Hat Employee`.
+
+This story had no comments before this update. It remains New and requires multiple team members to complete releases.
 
 ```text
 Team adoption has started: another team member has begun using the CVE and autorelease tooling. Capture feedback from these initial runs as it becomes available.
@@ -53,6 +59,8 @@ Still needed for this story's original acceptance criteria: multiple team member
 
 ## ACM-39729 (Harden autonomous CVE remediation)
 
+Posted and read back: comment `18820449`; visibility `Red Hat Employee`.
+
 Existing comments: 2026-09-04. The Git Pull Request field already lists shipyard#2443, claude-skills#27 and shipyard#2582 (open).
 
 ```text
@@ -63,7 +71,7 @@ Another team member has begun using the CVE tooling.
 * 40 CVE-fix PRs across admiral, cloud-prepare, lighthouse, shipyard, subctl, submariner and submariner-operator on release-0.22, release-0.23 and release-0.24: 23 merged, 17 closed without merging. Plus 3 merged reverts of lint-only changes. [Full PR list](https://github.com/stolostron/submariner-release-management/blob/d094bf36994f5d938f41d4fc305feb93bd896977/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md).
 * 259 Vulnerability issues moved to Closed by the maintainer in the same period (Jira: status changed to Closed by the maintainer during September 13–30, currently assigned to the maintainer; rechecked 2026-10-07).
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
-* https://github.com/submariner-io/shipyard/pull/2582 remains open at ab10cebfe8e72cef5d443cb852abf1f1e0249afb. At the October 7, 17:50 UTC read, hosted checks are still running; one unresolved current review thread remains, and no review or approval is recorded on this new head. The PR’s regression and live OpenShift validation claims are author-reported and were not repeated by this audit. Robustness and daily-use acceptance remain to be reviewed before contribution.
+* https://github.com/submariner-io/shipyard/pull/2582 remains open at 3b67af1a3e9d3d9c9dbee1147b1294bf25879fc4. At the 2026-10-07 18:23 UTC read, hosted checks are still running; the current-head review requests changes, with two unresolved current threads and no current-head approval. The PR’s regression and live OpenShift validation claims are author-reported and were not repeated by this audit. Robustness and daily-use acceptance remain to be reviewed before contribution.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.

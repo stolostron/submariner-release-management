@@ -4,7 +4,7 @@
 
 Evidence audit: October 6–7, 2026; includes the complete assignment population, issue documents, public work and retained tenant artifacts.
 [current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
-and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. No Jira write, transition, PR post, cluster change or release was performed.
+and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. Four approved existing-story comments were posted and verified October 7 at 18:23 UTC. No field edit, transition, PR post, cluster change or release was performed.
 Private raw exports and pre-edit plan copies are retained outside this public checkout.
 
 ## Complete assigned-issue sweep
@@ -40,9 +40,9 @@ and ACM-39740 additionally requires another product's validation. CVE-agent#35's
 ## Current checks and local work
 
 The first proposed-action audit read 114 full non-Vulnerability documents, including 29 additional scope/duplicate candidates.
-The latest content pass repeated the complete 703-issue inventory and read 88 active/payload targets: descriptions, comments,
+The latest read-only content pass before posting repeated the complete 703-issue inventory and read 88 active/payload targets: descriptions, comments,
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline. All four active private Vulnerability full views were also refreshed, without shipped-image triage.
-All comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
+Before posting, all comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
 The latest 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. The focused first-chunk audit subsequently read all nine relevant PRs and their complete changed-file pages; Shipyard advanced to ab10cebf, with hosted checks still running and unchanged author-reported validation claims.
 The 17:50 UTC complete Shipyard review/thread read records one unresolved current YAML thread and four unresolved outdated threads, with no review or approval on ab10cebf; aggregate changes requested comes from earlier heads. Historical inventories retain their explicit cutoff and are separate from today's work.
@@ -177,7 +177,7 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 
 | Proposed action | Review result |
 | --- | --- |
-| Existing comments and independent epic edits | Missing deltas remain reviewable; full target comments and original ADF checked. They do not wait for new story creation. Summaries using S/K placeholders must wait for real keys and accurately reflect completed writes |
+| Existing comments and independent epic edits | First four comments posted; remaining missing deltas and epic edits are pending review; full target comments and original ADF checked. They do not wait for new story creation. Summaries using S/K placeholders must wait for real keys and accurately reflect completed writes |
 | S1/S5 creation and In Progress | Scope remains unfinished. S5 acceptance now consistently allows explicitly accepted evidence-based re-triage; unmerged draft closure does not satisfy remediation. Recheck existing scope before creation |
 | S2/S3/S4 creation and proposed Resolved | Delivered contracts and linked merges support acceptance review; transition only after the approved criteria and the new canary's workflow/resolution are verified |
 | K1–K5 creation and In Progress | Qualification/measurement/upstream gaps remain. Corrected field setup separates create from post-create edit; chosen points, sprint and actual canary metadata are required |
@@ -185,7 +185,7 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 | ACM-37426 timeline correction | Exact title and description drafts are prepared; apply together only after confirming the 5.1 target and install/migration contract, preserving original reference links |
 | Deferred/other-owned/private work | No bulk comment, duplicate task creation, reopening, other-owner transition or vulnerability closure is proposed |
 
-Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk does not depend on story creation or the PR-field canary. Its autorelease and CVE drafts each contain one complete comment; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates. The Kubernetes epic describes evidence gates as a design contract, with enforcement and installed-runtime qualification still required. S1’s execution order now includes the already-planned lifecycle relationship alongside addon consumption, with duplicate-link checks and read-back; the audit draft links the open helper-pod prerequisite directly.
+Completeness check: every active assigned non-Vulnerability issue has a payload or an explicit review/defer disposition in the queue. ACM-34592/ACM-40644 remain acceptance reviews, not pending unconditional transitions. The four-comment first chunk is posted and verified; it did not depend on story creation or the PR-field canary. Its autorelease and CVE drafts each contain one complete comment; new-story, sprint/points, contribution inventory and acceptance decisions remain explicit gates. The Kubernetes epic describes evidence gates as a design contract, with enforcement and installed-runtime qualification still required. S1’s execution order now includes the already-planned lifecycle relationship alongside addon consumption, with duplicate-link checks and read-back; the audit draft links the open helper-pod prerequisite directly.
 
 The content passes corrected these scope/claim problems:
 
@@ -199,12 +199,12 @@ Independent recomputation confirms the 335-entry historical inventory has 290 me
 with 113 audit, 74 EC/Tekton and 68 CVE theme entries; all three PR-list sets belong to that inventory.
 The pinned 0ed2981 baseline reproduces 18 skills, 51 scripts, 29 tests, one helper and 30,164 lines.
 Primary PR reads confirm #109/#110 validation is author-reported; no onboarding runtime or RPM regeneration was repeated here.
-The first-chunk audit matched each original acceptance scope and complete comment history, and confirmed issue-level Browse/Add Comments permission on all four targets plus restricted-group membership. The proposed deltas are absent from their histories. Source review qualified BuildPLRInProgress handling, retained the observed retarget/artifact-refresh gap, and removed unrelated setup details and aggregate test-count prose from the conductor comment. All 43 historical CVE PRs still reconcile to 23 merged/17 closed fix PRs plus three merged lint reverts; the bounded closure query again returns 259. Contribution payloads now use ab10cebf with running checks, one unresolved current thread and no review/approval on that head; no fresh runtime qualification is inferred.
+The first-chunk audit matched each original acceptance scope and complete comment history, and confirmed issue-level Browse/Add Comments permission on all four targets plus restricted-group membership. The proposed deltas were absent before posting. Source review qualified BuildPLRInProgress handling, retained the observed retarget/artifact-refresh gap, and removed unrelated setup details and aggregate test-count prose from the conductor comment. All 43 historical CVE PRs still reconcile to 23 merged/17 closed fix PRs plus three merged lint reverts; the bounded closure query again returns 259. The approved CVE comment was refreshed before posting to Shipyard 3b67af1a: checks still running, two current unresolved threads, a current-head changes-requested review and no approval. The other contribution drafts retain their explicit earlier snapshot and require refresh before posting; no fresh runtime qualification is inferred.
 OPGM's draft stays on lifecycle publication scope. New-story/client/workflow choices and acceptance decisions remain execution gates;
 read-only verification cannot establish that a future write or transition succeeds.
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 65 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 62 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
