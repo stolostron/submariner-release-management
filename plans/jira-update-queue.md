@@ -9,19 +9,19 @@ Four approved comments were posted and verified on ACM-39731/39730/39736/39729 o
 
 ## Approval order
 
-Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments and group 1 remain completed.
+Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments and group 1 remain completed.
 
-| Order | Logical group | Targets, in order | Why here / boundary |
+| Group | Work | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
-| 3 | EVPN planning handoff | CORENET-7615 | Recorded decisions and remaining review; comment only |
 | 4 | Deadline and requested status | ACM-45318 → OPGM-364 | Refresh branch/build scope and live blockers; no completion claim |
 | 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Mutable artifact evidence needs refresh; no candidate selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
 | 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; complete project field/comment canaries before further creations; omit duplicate epic summaries. Terminal transitions wait for group 9 |
 | 9 | Acceptance and closure reviews | ACM-34592; ACM-34593; ACM-40644; any proposed finished-story transitions | Original criteria, attribution, artifact/QE proof and workflow required; no automatic closure |
+| 3 (deferred) | EVPN planning handoff | CORENET-7615 | Last at maintainer request; another planning PR iteration is WIP and CI PRs will start soon. Refresh the draft when reprioritized |
 
 Exact existing-issue drafts follow the same grouping in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md). The [epic plan](agentic-sdlc-jira-updates.md) owns creation/field procedures; the [verification record](agentic-sdlc-jira-updates-verification.md) owns the dated evidence. Refresh only the targets and prerequisites of the approved group before writing; omit facts already present and verify restricted visibility/text/links afterward.
 
@@ -99,7 +99,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | CORENET-7171 | Posted comment 18824859: May task creation and post-merge AI scope | In Progress, unchanged. Review the original research/rationale deliverable; implementation tracking does not establish research acceptance |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
-| CORENET-7615 | Group 3: link merged planning PR #2 and its substantive merge discussion; reconcile recorded decisions and remaining acceptance | To Do / no comments. Discussion records the FRR/exporter choice and transit-VIF resolution, but the published decision index remains unreconciled. Record existing outcomes with owners/dates and reconcile open #6’s host-FRR proposal with the recorded image choice; complete release-gate/responsibility review or requested changes. Pending decisions need not all be settled. Imports and CI remain separate |
+| CORENET-7615 | Group 3 deferred to the end: another planning PR iteration is WIP; CI PRs will start soon (maintainer report). Refresh the handoff before review | To Do / no comments. Discussion records the FRR/exporter choice and transit-VIF resolution, but the published decision index remains unreconciled. Record existing outcomes with owners/dates and reconcile open #6’s host-FRR proposal with the recorded image choice; complete release-gate/responsibility review or requested changes. Pending decisions need not all be settled. Imports and CI remain separate |
 
 Do not duplicate the 27 CI subtasks from the May research drafts or post the same research list on each one.
 Do not close CORENET-7171 solely because the subtasks exist. Do not reuse EVPN or plugin qualification as MCN implementation evidence.

@@ -383,6 +383,12 @@ The public index still carries September 29 proposals with proposed role owners.
 
 The transit-VIF interpretation matches [AWS’s Direct Connect/Transit Gateway guidance](https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-transit-gateways.html). No appliance build, AWS operation, EVPN repository change or qualification run was performed. This batch remains one restricted comment on CORENET-7615, preserving To Do; no related-issue/index edit or transition. Batch 2 remains reviewed and unposted. Refresh target/history, published main, the cited discussion and open #6 before the separately approved write; verify rendered text/links and visibility afterward. The prepared ADF validates against the published schema, preserves the exact visible text and has three exact clickable links; Markdown link labels are converted rather than posted literally, and trailing punctuation stays outside the raw PR URL. Initial visibility is restricted. Only this pending EVPN comment changed; all posted records, batch-2 drafts and original story/epic payloads are preserved. Raw evidence and prepared requests stay outside this checkout.
 
+## EVPN handoff deprioritized
+
+The October 7 maintainer instruction moves group 3 to the end of the approval queue, after acceptance/closure reviews. Group identifiers stay fixed; queue rows and portfolio sections now show the revised priority. Group 2 remains next, followed by group 4 deadline/status work. The maintainer reports another EVPN planning PR iteration is WIP and will start CI PRs soon; this is current-work context, not a new merge or qualification claim. No PR URL is inferred from the earlier fork snapshot.
+
+The reviewed EVPN comment is retained unchanged as a deferred draft and must be refreshed before review/posting. All posted records, other pending payloads, acceptance criteria and write boundaries are preserved. No Jira write was performed.
+
 ## Documentation validation
 
 The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the five fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
