@@ -2,7 +2,7 @@
 
 # Exact payloads: epic description and five child stories for CORENET-7155
 
-Nothing here has been created or edited in Jira. Jira and GitHub facts were rechecked on 2026-10-06. Development counts describe the committed
+Nothing here has been created or edited in Jira. Jira and GitHub facts were rechecked on 2026-10-07. Development counts describe the committed
 bak42 snapshot (`febb7974696e870f933e8ad3741605d31ead0b5c`), rather than today's mutable working tree.
 Text blocks are Markdown for a converting client/UI; direct Jira Cloud REST writes need ADF. Read current create-field and transition metadata before writing.
 
@@ -28,7 +28,7 @@ Verified facts used below (full method in Part B, section B8 of the plan):
 * PR openshift-eng/ai-helpers#617: opened 2026-07-13, draft, 127 files, +15,774/-17, one squashed commit (head 7e1aa060, the bak41 state), 175 reviews (85 by CodeRabbit,
   83 by the author, 7 by a teammate), labels `do-not-merge/work-in-progress`, `do-not-merge/invalid-owners-file`, `needs-ok-to-test`.
 * From the PR head to bak42: 69 commits between 2026-09-22 and 2026-09-25 (10, 35, 23 and 1 per day), 90 files, +7,799/-2,641, backed up on the fork but not on the PR.
-  The October 6 local read found 79 commits after the PR head and 5 modified files; newer work needs its own backup and evidence check.
+  The October 7 local HEAD is at `a477bced`, 82 commits beyond the PR head and 13 beyond bak42; those 13 need their own backup and qualification evidence. Two test files also have uncommitted court-permission changes, separate from that HEAD and its evidence.
 * Qualification runs: 6 Kubernetes 1.36.2 PRs on 2026-06-09/10 (1 merged: ovn-kubernetes-mcp#57; 5 closed) and 108 draft PRs from the maintainer's fork against upstream
   repos on 2026-07-16 to 2026-07-23 (all closed): cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15.
 
@@ -73,7 +73,7 @@ _Scope:_
 * 32 verification gates with explicit verdict rules: a gate that did not run is never passed or skipped
 * Scripts for the repeatable work, and hooks
 * Docs: design guide, runtime compatibility, repair patterns, Kubernetes 1.37 notes
-* Unit and integration tests for the tooling (238 test functions)
+* Unit and integration tests for the tooling (238 test functions at the dated bak42 baseline; current source is newer)
 
 _Acceptance criteria:_
 
@@ -85,10 +85,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Development snapshot: bak42, 2026-09-25; PR and fork state rechecked 2026-10-06:
+Current source implements the five-step workflow, verification gates, hooks, repair guidance and retained-evidence contracts. Upstream https://github.com/openshift-eng/ai-helpers/pull/617 remains at 7e1aa060; local HEAD a477bced has 82 newer commits, including 13 beyond verified bak42. Two test files also contain uncommitted court-permission changes.
 
-* Plugin in openshift-eng/ai-helpers at plugins/k8s-rebase: 134 tracked files, about 20.8k lines. Development history is preserved as 43 local backup branches (bak0, 2026-05-31, to bak42, 2026-09-25); 29 are pushed to the maintainer's fork, including bak41 and bak42.
-* The pull request https://github.com/openshift-eng/ai-helpers/pull/617 is a draft with a single squashed commit. Since that head, 69 commits (2026-09-22 to 2026-09-25; 90 files, +7,799/-2,641) hardened the gates and verification evidence, reworked the docs, extended the evals and added Kubernetes 1.37 support. They are on the fork as bak42 and are not on the PR yet.
+Preserve and review the complete intended source before publishing it. Current installed-runtime and CI acceptance are not established by the older PR or dated test-function counts. K2 owns historical 1.36.2 evidence, K3 measurements and K4 the newer trial limits; no plugin test or trial was run by this planning audit.
 ```
 
 ## Story K2: Qualify k8s-rebase on the 1.36.2 rebases
@@ -96,7 +95,7 @@ Development snapshot: bak42, 2026-09-25; PR and fork state rechecked 2026-10-06:
 * Summary: `Qualify k8s-rebase on the Kubernetes 1.36.2 rebases of CoreNet repositories`
 * Activity Type: Product / Portfolio Work (`10610`); Priority Normal; story points: placeholder
 * Link: `Related` to CORENET-7062 (the closed story for the ovn-kubernetes-mcp bump, which the agent's merged PR completed)
-* Proposed status after acceptance-criteria review: Closed, with the resolution and transition confirmed from current metadata; set points and sprint first.
+* Target status: In Progress pending evidence/acceptance review; set points and sprint first. PR counts and legacy PASS rows do not establish both criteria below.
 * Git Pull Request: `[https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57](https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57)`
 
 ```text
@@ -120,7 +119,8 @@ Progress comment (post after creation):
 Runs to date:
 
 * 2026-06-09 and 2026-06-10: six Kubernetes 1.36.2 rebase PRs (ovn-kubernetes, ovn-kubernetes-mcp, multus-cni, cluster-network-operator, cloud-network-config-controller, ingress-node-firewall). https://github.com/ovn-kubernetes/ovn-kubernetes-mcp/pull/57 merged; the other five were closed.
-* 2026-07-16 to 2026-07-23: 108 qualification runs opened as draft PRs from the maintainer's fork and then closed: cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15. They exercised the workflow across those repositories.
+* 2026-07-16 to 2026-07-23: 108 draft PRs opened from the maintainer's fork and then closed: cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15. This counts PRs, not independently accepted runs.
+* Local legacy matrix records contain 536 rows dated July 29–September 24, including 218 for 1.36.2 and latest unmutated PASS rows for all six targets. The inspected matrix-state has no evidence archive and only one run-input record; those PASS summaries are not requalified by the current harness. Recover per-target source/result, gates and failure dispositions before accepting this story. Missing evidence needs an explicit limited-acceptance decision or fresh qualification; no rerun was performed here.
 ```
 
 ## Story K3: Evals and cost/model measurement
@@ -147,7 +147,9 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Current state: plugins/k8s-rebase/evals has a README and 16 pattern-retention cases, and the test harness was changed on 2026-09-23 and 2026-09-24 to copy only the plugin into mutated runs, isolate eval runs, keep interrupted-run evidence, tie reviews to the exact run base and result, and show why a session failed to launch; the eval guide includes run duration and cost. Not done: answer the reviewer's question on the pull request and decide on the shared harness.
+Current source has 16 pattern-retention cases, isolated plugin snapshots, exact input/result metadata and a runner that captures model, tokens, turns and cost. The guide gives observed estimates of $17–27 for light cases and $40–60 for heavy cases; these are documented estimates, not a fresh benchmark. The runner collects artifacts but does not execute the YAML judges, and its missing-result fallback writes zero-valued metrics. Exclude fallback metrics from measurements rather than treating them as free successful runs.
+
+Remaining: retain valid per-run measurements and judge outcomes with source/model/version attribution, distinguish workflow completion from diff review, decide the shared-harness approach, and answer the reviewer with that data. No model run or paid eval was launched by this audit.
 ```
 
 ## Story K4: Kubernetes 1.37
@@ -174,7 +176,13 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Done so far (2026-09-24): "prepare and validate Kubernetes 1.37 rebases" and "target the published Kubernetes 1.37.1 patch" landed in the plugin branch, with docs/k8s-1.37.md. Not done: a real 1.37 rebase of a CoreNet repository. Other teams have 1.37 bump epics (NE-2852, OCPCLOUD-3653) that could use the plugin.
+October 7 source refresh: the plugin HEAD is at a477bced687c3385311bafddbf2ae1a3b0228ed0, 82 commits after the upstream PR and 13 after bak42. Its docs/k8s-1.37.md records CNCC, Multus and initial MCP Kubernetes 1.37.1 workflow candidates, superseding the September assertion that no real rebase exists.
+
+CNCC has historical independent host evidence but requires fresh qualification after correcting unsupported JSON-pin attribution. Multus candidate f5b4591085fb66dc62cd43140f24ee8e01d6cdb1 has recorded frozen-source evidence: 28 PASS, two SKIP, two INCONCLUSIVE. Dependency-history and hosted-coverage limits and an unchanged reachable gRPC finding remain disclosed. This is recorded source evidence, not a qualification rerun by this planning audit.
+
+MCP candidate 8cfc303b77f7f65232e8a726c3048376e9b23d88 used source 80a1c318 from baseline 858f54cf. Its independent execution/reporting audit accepts limits: 24 PASS, three SKIP, three FAIL and two INCONCLUSIVE gates. Unit tests report 17 fresh packages, 62 top-level and 589 subtest passes separately; offline E2E passes 58 selected specs with 76 excluded. Lint did not complete after three retained attempts; dependency-history/security coverage remains incomplete and live CI selects Kubernetes 1.36.4. Preserve the separate maintainer FAIL for byte-identical upstream vendor suppression under the frozen rubric.
+
+The a477bced source applies MCP lessons and two test files have further uncommitted court-permission changes; neither is a fresh qualification result. Freeze the intended source and compare loaded skill/hook bytes before a separate fresh MCP run; preserve the original budgets/reports. CNCC requalification and other repositories remain deferred while MCP is corrected and qualified. Keep this story In Progress until agreed criteria pass; do not claim clean vulnerability, installed-host, image or external-CI coverage.
 ```
 
 ## Story K5: Upstream the plugin
@@ -202,5 +210,5 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-Pull request https://github.com/openshift-eng/ai-helpers/pull/617: opened 2026-07-13 as a draft; 127 files, +15,774/-17; 175 reviews so far (85 from CodeRabbit, 83 from the author's replies and threads, 7 from a teammate). Blockers reported by automation on 2026-09-18: the OWNERS file is invalid because it lists users who are not org members, the PR needs ok-to-test, and approvals are needed from the listed owners. A reviewer asked on 2026-09-08 about evals and cost (tracked in the evals story). The PR head is the 2026-09-18 squash; 69 newer commits are on the fork.
+https://github.com/openshift-eng/ai-helpers/pull/617 remains draft at 7e1aa060 with WIP, invalid-OWNERS and needs-ok-to-test labels at the October 7 read. Automation previously reported nonmembers in OWNERS; confirm and repair the current repository requirements before asking for verification/approval. The reviewer's eval/cost/shared-harness question remains K3 work. Review and qualify all intended local changes before an authorized PR refresh; merge remains this story's acceptance criterion.
 ```

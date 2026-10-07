@@ -1,5 +1,9 @@
 # Plan: Integrate submariner-addon Tekton Setup into Release Process
 
+October 7 status: this remains an unimplemented proposal. The current step graph has no `tektonAddon` step or backing setup script.
+Assess the need against the ACM-integrated addon's current ART path before implementation; see [adjacent work](current-work.md#adjacent-work-with-separate-ownership-and-scope).
+Existing addon task-ref PR #2792 targets an older ACM stream and does not implement this setup proposal.
+
 ## Problem
 
 submariner-addon lives in a different Konflux tenant (`crt-redhat-acm-tenant` on
