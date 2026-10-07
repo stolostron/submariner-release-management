@@ -35,6 +35,7 @@ Rules that apply to both parts:
 * This is a public repository: no teammate names, no Product Security tracker details, no internal links. Jira keys appear in these files only; they must not appear in the
   titles, bodies or commit messages of pull requests (project rule). Jira comments may link to GitHub, not the reverse.
 * Read complete comment histories with pagination; an issue view can contain only the first 100 comments. Preserve exact ADF and link targets alongside rendered text.
+* Run the preflight checks relevant to the approved group, refreshing its targets, mutable claims and field prerequisites. Preserve pinned historical evidence at its recorded cutoff.
 * Approval covers only the named actions in the approved group. Story creation, field edits and status transitions need their own explicit scope; creation does not authorize later resolution.
 * If a write times out or its result is uncertain, stop and reconcile Jira before retrying. Check returned ids, complete comments, or matching stories under the intended parent; do not assume a failed response means no write occurred.
 * Before each field edit, save its current value and compare it again immediately before writing. Stop on a changed baseline. Roll back only if the field still equals this operation’s written value; otherwise reconcile later edits before restoring anything.
@@ -116,17 +117,15 @@ no new umbrella story is proposed for them. Full OCP rollout evidence remains in
 5. **Sprint.** Leave unset, or use an active sprint chosen by the maintainer. On 2026-10-06 the existing In Progress siblings include active
    Submariner Sprint 2026-59 (id 87579); Sprint 2026-58 (id 85613) is now closed and must not be used as the active sprint.
 
-### A4. Preflight (do all of these, and stop on any surprise)
+### A4. Preflight for approved actions (stop on any surprise)
 
 Use the October 7 [work map](current-work.md) when refreshing payloads: distinguish the closed FIND-006 drafts, open upgrade-test PRs,
 known portability debt and time-sensitive builder migration from the September historical counts.
 
 1. Re-read ACM-39728 and its ten children. Compare the table in section A1, especially statuses, child membership, comments and PR links;
    stop and reconcile any new work instead of creating duplicates. Include the two CVE contribution subtasks and search for each proposed deliverable beyond this epic before creation. A sprint update by itself is not evidence that a payload was applied.
-2. Confirm each old description snippet and the insertion heading in epic-description-edits.md occur exactly once in the rendered description.
-   Preserve the full original ADF document before editing, and update the corresponding nodes rather than treating an ADF document as a Markdown string.
-3. Use section A8 to refresh the evidence. Preserve the dated September counts when reporting that period; if reporting current state instead, update the dates,
-   states and totals together in the plan and payloads. The 107, 110 and 335 figures are different discovery snapshots, not expected totals for a new search.
+2. Before each approved pending epic-description edit, confirm its old snippet or insertion heading occurs exactly once. Reconcile completed edits and omit them; stop on an unexplained difference. Save the current full ADF and update the corresponding nodes, preserving other content and earlier edits.
+3. Use section A8 to refresh mutable claims in the approved payload. Retain the verified September inventories and their cutoff; recompute historical totals only to correct or expand that population. If reporting current state, update dates, states and totals together. The 107, 110 and 335 figures are different discovery snapshots, not expected totals for a new search.
 4. Confirm #109 and #110 are still merged and 0ed2981 is on main. Also check #112, #113 and #114 (section A11) and claude-skills#35 ([current work](current-work.md#release-tooling-and-jira-payloads)):
    preserve the four posted payloads as historical records. Prepare any newly approved missing delta separately, identifying open work explicitly.
 5. Confirm the maintainer's answers to section A3 (the 0.23.2 question is already answered).
@@ -288,15 +287,16 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
    MCP records three FAIL/two INCONCLUSIVE gates, incomplete lint and live CI selecting 1.36.4; its lessons commit needs separate fresh qualification.
    Keep K4 In Progress until its agreed acceptance criteria pass; the September assertion that no real rebase exists is superseded.
 
-### B5. Preflight (stop on any surprise)
+### B5. Preflight for approved actions (stop on any surprise)
 
-1. Re-read CORENET-7155 and confirm it still has no description and no children, and that nobody added stories since 2026-09-30.
-2. Re-run section B8 against the pinned bak42 snapshot for historical development counts, and query current PR/run state separately.
-   Refresh dates and counts together when reporting current work; do not expect mutable HEAD or review totals to equal the historical snapshot.
-3. Confirm the maintainer's answers to section B4, and inspect and back up any current uncommitted or unpushed plugin work. Before fresh qualification, freeze the intended source, compare loaded skill/hook bytes and retain the original trial budgets/reports.
+1. Re-read CORENET-7155 and its children. Reconcile any description or stories with recorded approved writes; omit completed actions and stop on unexplained differences. The empty-description/no-child audit baseline may have changed through an earlier approved group.
+2. Refresh current PR/run claims used by the approved payload. Section B8 records the historical counting method; retain the verified bak42 snapshot and its dates. Refresh dates and counts together when reporting current work; do not expect mutable HEAD or review totals to equal the historical snapshot.
+3. Confirm the maintainer's answers to section B4. Refresh local source/backup observations used by the approved payload and record unfinished qualification or backup gaps as blockers.
 4. Confirm the story-point scale and the sprint id with the team.
 5. Re-read Story create metadata and available transitions. The October 7 metadata exposes `parent`, not legacy Epic Link, on CORENET creation; Original story points and Git Pull Request require later edits. `Related` is currently link type 10077. Confirm the new canary's edit metadata and rich-text handling before continuing.
 6. Reconcile K2/K4 qualification scope with existing delivery epics CORENET-6983 and CORENET-7450 and their children. K stories qualify the plugin; they do not recreate repository bumps or change those other-owned delivery issues.
+
+Before authorized plugin changes or publication, preserve and verify committed and dirty work. Before fresh qualification, freeze the intended source, compare loaded skill/hook bytes and retain the original trial budgets/reports. These engineering actions require their own scope; Jira tracking can record the unfinished work.
 
 ### B6. Execution order
 

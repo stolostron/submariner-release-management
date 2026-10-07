@@ -2,9 +2,7 @@
 
 # Epic description edits for ACM-39728 (exact old and new text)
 
-Nothing here has been applied. The baseline description was read on 2026-09-29 and its original snippets rechecked on 2026-10-07. Every "old" snippet below must match the live
-rendered description exactly once; re-read the epic immediately before editing and stop if any snippet has changed. All four old snippets and
-the insertion heading still matched once at the 2026-10-07 read. Jira Cloud stores the description as ADF: save the full original document, update
+Nothing here has been applied. The baseline description was read on 2026-09-29 and its original snippets rechecked on 2026-10-07. Reconcile recorded completed edits and skip them. For each approved pending edit, its "old" snippet or insertion heading must match the live rendered description exactly once; re-read immediately before editing and stop on an unexplained difference. All four old snippets and the insertion heading still matched once at the 2026-10-07 read. Jira Cloud stores the description as ADF: save the full original document, update
 the relevant nodes with a supported client/UI and preserve everything else. The Markdown below is text for that client, not a raw REST field value.
 Save a fresh baseline before each independent edit. Before writing, confirm it is unchanged; restore it only while the field still equals that edit’s written result. If later edits exist, reconcile them first. Issue history is not an automatic restore operation.
 
