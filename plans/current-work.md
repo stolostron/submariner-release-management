@@ -6,11 +6,11 @@ Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates; it starts with CI research, then CVE contributions and EVPN planning. FBC recovery, private CVE triage and deadline work retain their engineering priority.
+Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction is posted; remaining approvals start with CVE contributions, then EVPN planning. FBC recovery, private CVE triage and deadline work retain their engineering priority.
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Four approved existing-story comments were posted and verified October 7 at 18:23 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
+Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
 ## Release recovery and time-sensitive work
 
@@ -149,7 +149,7 @@ PR #617 still has WIP, invalid-OWNERS and needs-ok-to-test labels; preserve thos
 | EVPN delivery plan, CORENET-7615 | To Do / no comments. Planning #2 merged; its [October 1 discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records preliminary artifact-graph review, FRR/exporter selection and the transit-VIF resolution | Reconcile the published decision index with the discussion, preserving owner/date/evidence. Release-gate/responsibility confirmation and owner-attributed criteria reconciliation remain; pending product-home/cluster/AMI decisions need not all be settled |
 | Older route-agent build, ACM-34593 | October 2 hosted route-agent push build succeeds at `82adbacd`; its later EC scenario fails | Review closure of the original DNF/RPM build issue against that exact source/build; keep EC failure as separate compliance evidence. See the [queue](jira-update-queue.md) |
 | Pre-merge automation, CORENET-7086 | To Do in the current assigned-work query | 28 children: research plus 27 implementation subtasks. Reconcile header/API-compatibility coverage and GHA/Prow scope; preserve existing tracking |
-| MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress with two May comments; all 27 implementation subtasks To Do, no comments | Linked proposal contains recommendations/rationale and post-merge AI scope. Research acceptance is separate from implementation; planned GHA/Prow responsibilities need reconciliation with CORENET-7083/7087 |
+| MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress with two May comments and verified October 7 correction 18824859; all 27 implementation subtasks To Do, no comments | Linked proposal contains recommendations/rationale and post-merge AI scope. Research acceptance is separate from implementation; planned GHA/Prow responsibilities need reconciliation with CORENET-7083/7087 |
 
 EVPN main is `306b8fe8a68cd878a9b8272b5329e5a6b8ac1e92` (October 5). Its current `make verify` runs the planning/public-safety checks, not appliance build or AWS qualification.
 [Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) has a passing verify check at the new October 7 head `629d9e671a94e6303ff46c2e97c78b310c672c63`; tide is pending and the PR remains open;
