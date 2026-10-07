@@ -39,16 +39,17 @@ and ACM-39740 additionally requires another product's validation. CVE-agent#35's
 
 ## Current checks and local work
 
-The latest complete inventory still returns 703 unique assigned issues and the same 80 active keys/statuses.
-All 233 full documents were compared with the previous full-view baseline: actual `updated` fields, descriptions, comments,
-links, PR fields, parent/subtasks and status/summary show no changes. Freshness comparisons use full-view `updated` fields, which search rows do not expose.
-The earlier fully paginated comment histories remain supported by those unchanged documents; re-fetch before any write.
-Direct PR heads/states/reviews remain unchanged apart from the planning PR's publication; EVPN #3–7 label changes do not establish acceptance.
+The proposed-action audit repeated the complete 703-issue assignment inventory, read 114 full non-Vulnerability documents,
+and paginated all comments on 26 targets. The initial 85 target/active views are unchanged against the prior full-view baseline;
+29 additional scope/duplicate candidates were inspected separately. Both epic memberships are unchanged.
+Freshness comparisons use full-view `updated` fields, which search rows do not expose.
+The 32 direct PR reads caught a new published Shipyard #2582 head and updated validation claims; planning PR publication is separate.
+Descriptions, comments and fields were checked for already-recorded deltas before retaining proposed text.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
 | Full GitHub review-thread pagination | Shipyard #2582: 32 threads, four unresolved/outdated, zero current/unresolved; no current-head approval. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard has two clean local commits through 36afbd1e beyond published #2582 at 56e7233a; 1,372 checks are author-reported, not repeated. Plugin still has two dirty court-permission test files |
+| Exact local source inspection | Shipyard is now clean at published 0777e63c; previously local changes are included. Hosted checks are running; 1,372 checks are author-reported, not repeated. Plugin's earlier two dirty test files remain dated source observations |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
@@ -117,10 +118,28 @@ The [published Kubernetes v1.37.1 release](https://github.com/kubernetes/kuberne
 
 ## Field and infrastructure evidence
 
-Issue reads checked Activity Type, component 33720, priorities, exact description snippets and ADF PR fields.
-Active sibling sprint observations were ACM 2026-59 (87579) and CORENET 295 (87581); ACM 2026-58 (85613) is closed.
-Those observations do not establish writable create/transition metadata or approved points/status choices.
-The September 13–30 Vulnerability JQL `BY currentUser()` returned 259 currently assigned closures, a historical population separate from today's four active cases.
+The proposed-action audit read both projects' complete Story create metadata (ACM 81 fields, CORENET 21), project permissions,
+and edit/transition metadata for 20 existing targets. All reads succeeded. Current project permissions allow create/edit/comment/link/assign/transition/resolve;
+those permissions do not authorize writes on the user's behalf. Both Story type ids are 10009.
+Reporter is required with a default; verify the approved/default reporter after creation.
+
+| Action input | Verified result and correction |
+| --- | --- |
+| ACM creation | Component 33720, proposed priorities/Activity Types, `parent`, PR field, both point fields and sprint are writable. Use one membership path and read back the canary |
+| CORENET creation | `parent`, proposed priority/Activity Type, Story Points and sprint are writable; legacy Epic Link, Original story points and Git Pull Request are absent. Set the latter two only in a subsequent edit after the new Story confirms support |
+| CORENET edit support | Existing Stories 7062/7171/7615 expose Original story points and PR fields. Epic 7155 does not expose the PR field for editing; no epic PR-field edit is proposed |
+| Related links | `Related`, id 10077, supports the proposed S1/ACM-45508 and K2/CORENET-7062 relationships. Check existing links before adding |
+| Terminal transitions | Inspected closure-review targets require resolution. The epic and Story workflows differ; no transition id is reused, and no new Story's transitions can be verified before it exists |
+| Comments | The authenticated account belongs to `Red Hat Employee`. REST supports initial restricted visibility; current `acli comment create` only exposes project-default visibility, so it is not the execution client for these comments |
+| Sprint and points | Sprints 87579 and 87581 still report active. Story-point values and the story split remain proposed choices, not inferred approvals |
+
+The duplicate/scope search found a closed broader Glasswing epic ACM-36285 with no children and related incidents,
+not a matching shipyard-audit remediation story in the searched results. S5 now records that boundary instead of claiming no tracker exists.
+Existing OCP readiness epic ACM-36458 has eight runtime-readiness children; S1 remains catalog/release onboarding, not those compatibility deliverables.
+Existing Kubernetes delivery epic CORENET-7450 has nine children; CORENET-6983 retains 1.36 delivery scope.
+K2/K4 qualify the plugin without recreating or changing those other-owned repository-bump tasks.
+The September 13–30 Vulnerability JQL `BY currentUser()` returned 259 currently assigned closures earlier;
+that historical population does not justify closing today's four private active cases.
 
 The [epic edits](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-description-edits.md) retain their own baseline/counting definitions.
 [OCP rollout](ocp-5-0-fbc-rollout.md) owns immutable task/index inputs and expiry evidence;
@@ -153,12 +172,27 @@ Do not repeat a fact already recorded, bulk-close private vulnerabilities, resol
 or infer product compatibility/qualification/production from local packaging, source merges or Jira status.
 No native build/E2E, plugin trial, tenant regression or hosted rerun was repeated. The direct artifact/retained-Release reads above were performed; they did not execute a release.
 
+## Proposed-action disposition
+
+| Proposed action | Review result |
+| --- | --- |
+| Existing comments and independent epic edits | Missing deltas remain reviewable; full target comments and original ADF checked. They do not wait for new story creation. Summaries using S/K placeholders must wait for real keys and accurately reflect completed writes |
+| S1/S5 creation and In Progress | Scope remains unfinished. S5 acceptance now consistently allows explicitly accepted evidence-based re-triage; unmerged draft closure does not satisfy remediation. Recheck existing scope before creation |
+| S2/S3/S4 creation and proposed Resolved | Delivered contracts and linked merges support acceptance review; transition only after the approved criteria and the new canary's workflow/resolution are verified |
+| K1–K5 creation and In Progress | Qualification/measurement/upstream gaps remain. Corrected field setup separates create from post-create edit; chosen points, sprint and actual canary metadata are required |
+| Release/legacy/research closure reviews | No immediate transition is proposed. Preserve original acceptance scope and recover missing build/fix/QE/catalog or research evidence; unrelated failures are separate investigations |
+| Deferred/other-owned/private work | No bulk comment, duplicate task creation, reopening, other-owner transition or vulnerability closure is proposed |
+
+The Shipyard contribution payloads now use published 0777e63c with running hosted checks and no current-head approval;
+older unpublished-source claims are removed. OPGM's draft stays on lifecycle publication scope and omits compatibility commentary.
+New-story/client/workflow choices and acceptance decisions remain execution gates; read-only verification cannot establish that a future write or transition succeeds.
+
 ## Documentation validation
 
-This refresh passes full `make -j4 test`, including Markdown lint across 136 files, plus 110 changed-document relative-link/anchor checks
-and whitespace validation. All four original epic-description snippets and the insertion heading match exactly once in the refreshed document.
-The queue still accounts for all 76 active assigned non-Vulnerability keys exactly once. Existing unrelated edits are preserved;
-no release/test implementation was changed. Raw exports, source snapshots and validation logs remain outside this public checkout.
+This action-audit revision passes full `make -j4 test`, including 136-file Markdown lint, plus 64 changed-document relative-link/anchor checks,
+exact 76-issue queue coverage, original epic snippet checks, proposed field/transition assertions and whitespace validation.
+No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
 
-Five superseded design bodies now retain concise current contracts and immutable links to their complete pre-cleanup history.
-Canonical recovery/rollout/queue documents retain active gates; historical detail is preserved in Git without duplicating it in the current plans.
+The first commit-hook attempt hit an existing sign-off assertion despite the earlier full-suite pass.
+A private two-commit fixture reproduced the assertion's `git log | grep -q` race: Git exited 141 (SIGPIPE) while grep matched successfully.
+The focused release-note suite then passed all 48 checks. No test implementation was changed; publication still requires a passing normal commit hook.

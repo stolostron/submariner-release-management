@@ -29,7 +29,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 
 | Issue | Proposed update | Completion/status boundary |
 | --- | --- | --- |
-| ACM-39728 | Apply the reviewed description edits and one summary after the S stories exist | Keep In Progress; use the epic plan's canaries and real created keys |
+| ACM-39728 | Apply reviewed description edits independently; post the summary after S stories exist | Keep In Progress; preserve original ADF, verify edits and use real keys in the summary |
 | ACM-39729 | Post the historical remediation and merged cve-agent evidence; add current open skill work only if absent | Do not equate tooling merges or issue counts with complete remediation |
 | ACM-39730 | Record merged tracker fields and the retarget reconciliation gap | Parent artifact refresh/retarget automation remains a follow-up |
 | ACM-39731 | Record merged #109/#112/#113 and open #114 in one update | #114 is pending, not shipped |
@@ -37,7 +37,7 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Record shared setup and checkout-safety prerequisites | New; another engineer must complete a release and record the gaps |
 | ACM-39738 | One parent summary linking existing contribution children | New; existing k8s-rebase PR linkage is not completion of the CVE contribution scope |
-| ACM-39739 | Update open shipyard#2582 evidence | New; ai-helpers merge remains required. Two local follow-ups now end at 36afbd1e, outside published PR head; reported checks were not repeated here |
+| ACM-39739 | Update open shipyard#2582 evidence | Published head is now 0777e63c; hosted checks are running and changes requested remains. Reported 1,372 regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
 The first four existing-story updates and epic text remain in
@@ -109,5 +109,5 @@ Resolved recent release steps stay as evidence on their parents; routine timesta
 Re-read the target's description, complete comments, PR field, parent and available transitions; preserve the original rich text.
 Post only a missing factual delta, with comment visibility `Red Hat Employee` set at creation and verified on read-back.
 Descriptions/PR fields need ADF or a converting client. Read back each write and record its issue/comment id before continuing.
-Status reviews are separate from comments and require acceptance evidence, resolution metadata and any project points/sprint requirements.
+Status reviews are separate from comments and require acceptance evidence, resolution metadata and any project points/sprint requirements. Live metadata confirms required resolution on terminal transitions; the existing closure candidates remain reviews, not approved transitions. CORENET Original story points/PR fields need post-create edits; see the epic plan.
 No branch push, PR update, Jira write, cluster change or release is authorized by this planning document.
