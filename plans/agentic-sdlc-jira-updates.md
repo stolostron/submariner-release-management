@@ -143,31 +143,11 @@ Completed first approved chunk: one comment on each existing story, using the [f
 
 All four comments were created on October 7 at 18:23 UTC with restricted visibility set in the initial request; exact ADF text, clickable links, group visibility and unchanged issue statuses were verified after each write. No issue fields or statuses were changed, and no new issues were created. The CVE comment uses refreshed Shipyard head 3b67af1a and its current changes-requested review. For later updates, re-read complete comments and refresh mutable evidence; if a write has an uncertain result, inspect Jira before retrying.
 
-Prepared contribution approval chunk: three contribution comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md), independent of S/K story creation.
+The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Start with CORENET-7171 → CORENET-7086, then the CVE contribution children/parent, then EVPN planning. Deadline/status and release-evidence groups follow, with engineering priorities proceeding in parallel. Each group requires its own approval and fresh target/evidence read; set restricted visibility at creation and verify text/links/visibility before the next write. Earlier audits and preparation do not authorize posting.
 
-| Order | Target | Comment to approve | Verified status / existing comments |
-| --- | --- | --- | --- |
-| 1 | ACM-39739 | Open CVE-fix prerequisite, configuration progress, original merge criterion | New / 1 |
-| 2 | ACM-39740 | Merged source improvements, remaining product/dependency configuration and non-Submariner validation | New / 1 |
-| 3 | ACM-39738 | Roll up the existing children and flag the broader contribution inventory; keep Kubernetes tracking on CORENET-7155 | New / 0 |
+Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional count changes. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. Summary comments wait for real keys and verified writes; closure reviews remain separate from progress reporting.
 
-Complete histories and issue-level Browse/Add Comments permissions were checked October 7. These comments add missing contribution deltas without repeating September remediation counts or initial adoption. Before each approved post, refresh its target and PR evidence, omit any newly recorded delta, set restricted visibility at creation and verify text/links/visibility before proceeding. No transitions, parent moves, new subtasks, marketplace PRs or upstream messages are part of this chunk.
-
-Prepared CI approval chunk: two comments from [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7171--research-acceptance-and-handoff).
-
-| Order | Target | Comment to approve | Verified status / existing comments |
-| --- | --- | --- | --- |
-| 1 | CORENET-7171 | Existing research/rationale, created subtasks, post-merge AI boundary and implementation handoffs | In Progress / 2 |
-| 2 | CORENET-7086 | Existing 27-task implementation split, original acceptance coverage and GHA/Prow scope reconciliation | To Do / 0 |
-
-October 7 full histories, original scopes and all 27 implementation descriptions were rechecked. Keep research acceptance separate from CI implementation; preserve the existing hierarchy and statuses. Refresh targets before any approved post and verify restricted visibility/text/links afterward. No new tasks, field edits, transitions or repository implementation are proposed; the contribution chunk above is also still pending.
-
-Next proposed approval chunk: one [CORENET-7615 planning comment](agentic-sdlc-jira-updates-payloads/portfolio-comments.md#corenet-7615--reconcile-planning-decisions). Its October 7 full view and complete history show To Do / zero comments; comment permissions and restricted-group membership were checked. Link both merged PR #2 and its October 1 merge discussion, acknowledge the decisions already recorded there, and request reconciliation of the decision index and original acceptance evidence. Refresh before an approved post and verify restricted visibility/text/links afterward. No related-issue edits, EVPN repository writes or transitions are part of this chunk; the contribution and CI chunks remain pending.
-
-Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
-They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
-
-Create stories before comments that reference their keys. Each write is verified before the next; independent description edits can proceed after their own preflight.
+Each creation or field write is read back before the next. Skip completed deltas.
 
 1. **Canary: create story S4** (RPM lockfile setup) using the fields in new-stories.md: ACM Story, the maintainer's account, parent ACM-39728,
    component 33720, priority 10002 and Activity Type 10606. Story create metadata marks reporter required with a default; preserve the approved reporter and verify it on read-back. Use the approved Jira client/UI and its supported description format.
@@ -175,7 +155,7 @@ Create stories before comments that reference their keys. Each write is verified
    `customfield_10014` only after create-field metadata confirms that field is writable.
 2. **Canary: Git Pull Request field.** Set `customfield_10875` on S4 to an ADF document containing the #110 link, or use a client/UI that converts it.
    Read it back and confirm the URL and formatting before proceeding with PR-field edits on other issues. If the client cannot preserve this rich-text field, use comments only.
-3. Create S1, S2, S3, S5 using each story's own fields in new-stories.md. S2 and S5 use Security & Compliance (10609); S3 uses Normal priority (10003).
+3. Create S2, S3, S1, S5 using each story's own fields in new-stories.md. S2 and S5 use Security & Compliance (10609); S3 uses Normal priority (10003).
    Do not copy S4's priority and Activity Type to all stories. Read each creation back before proceeding and record its key.
 4. Post each new story's progress comment with the restricted visibility set at creation, and verify the returned comment's text and visibility.
    Set each Git Pull Request field as in new-stories.md and read it back before the next write.
@@ -184,7 +164,7 @@ Create stories before comments that reference their keys. Each write is verified
 6. Add related-issue links from S1 to ACM-45508 (addon consumption) and OPGM-364 (lifecycle publication), using the link type confirmed in preflight. Check for an existing link first and read back each new relationship.
 7. The four existing-story updates are already posted (ids above); reconcile their read-backs and post only newly approved missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
-8. Apply the epic description edits, verifying by re-reading after each.
+8. Apply only approved epic description edits not already performed in group 6, verifying each by read-back; omit completed deltas.
 9. Post the epic summary comment.
 
 ### A6. Verification and rollback
@@ -319,6 +299,8 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
 
 ### B6. Execution order
 
+The epic description is an independent group-6 edit after its own scope/ADF review; it needs no new story keys. The sequence below handles approved K-story creation and the dependent summary. Omit an already-applied description delta.
+
 1. Create K1 as a canary with writable create fields: `parent` CORENET-7155, its own Activity Type/priority, approved Story Points and sprint, assignee and description. Verify the default/approved reporter on read-back. CORENET create metadata does not expose legacy Epic Link, Original story points or Git Pull Request; do not send those fields in the create request. Read back membership and rendered content.
    Fetch K1 edit metadata, then set approved Original story points and read it back. Existing Story edit metadata supports that field, but the new canary must confirm it. Do not transition to In Progress until it is set and verified; do not silently omit the automation prerequisite.
 2. Set K1's Git Pull Request field only after its edit metadata confirms it is writable; use an ADF-capable client and read it back. If the field/client is unavailable, preserve the link in the restricted comment.
@@ -328,7 +310,7 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.
 5. Transition K1–K5 to In Progress after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
-6. Set the epic description (payload: epic-and-stories.md, "Epic CORENET-7155") and read it back.
+6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic CORENET-7155") and read it back.
 7. Post the epic summary comment (epic-comment.md) with the real story keys and verify its text and restricted visibility.
 
 ### B7. Verification and rollback

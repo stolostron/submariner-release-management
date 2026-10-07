@@ -205,7 +205,7 @@ read-only verification cannot establish that a future write or transition succee
 
 ## Prepared contribution approval chunk
 
-The focused October 7 audit refreshed full documents and complete comments for ACM-39738/39739/39740, ACM-39729 and CORENET-7155. All three contribution targets remain New, with comment totals 0/1/1. The parent is a Story with the same two Sub-task children. Original criteria, parent links, issue-level Browse/Add Comments permissions and restricted-group membership were checked. Proposed order: ACM-39739, ACM-39740, then ACM-39738; comments only, none posted. The 703-issue inventory above belongs to the preceding complete sweep.
+The focused October 7 audit refreshed full documents and complete comments for ACM-39738/39739/39740, ACM-39729 and CORENET-7155. All three contribution targets remain New, with comment totals 0/1/1. The parent is a Story with the same two Sub-task children. Original criteria, parent links, issue-level Browse/Add Comments permissions and restricted-group membership were checked. Current group-2 order: ACM-39740, ACM-39739, then ACM-39738; comments only, none posted. The 703-issue inventory above belongs to the preceding complete sweep.
 
 Pinned Shipyard source at a88023ad already supports repository-registry configuration and native-command overrides. Child 39739 still requires project-level configuration, no hardcoded Submariner values and go-fix-cves merged into ai-helpers. Source PR #35 merged October 6 at 80c90e176244b6f84625778f7122e7a2c1993db3; its complete 11-file change and local source retain product-specific mappings, version references and Jira scope, including cve-jira-triage dependencies. Include those dependencies within child 39740's configuration review; preserve its own ai-helpers merge and non-Submariner CVE validation criteria.
 
@@ -239,7 +239,7 @@ The proposed GHA/Prow split is not settled by the research note: 7083 explicitly
 
 The two comments add the created-task and handoff deltas without repeating the May survey or its existing research link. Proposed order is research 7171, then parent 7086. No comments or fields were written; contribution comments remain pending separately. The broader assigned-issue inventory retains its preceding audit date.
 
-## Next EVPN approval chunk
+## Prepared EVPN approval chunk
 
 The focused October 7 audit refreshed CORENET-7615 and the three named conflict issues (7501/7504/7505), including complete histories: all four are To Do with zero comments. Original criteria, issue-level comment permissions and restricted-group membership were checked. Six direct PR reads and complete changed-file pages confirm #2/#4/#5 merged and #3/#6/#7 open; #6 verify passes with tide pending, #7 verify fails. These implementation statuses are omitted from the planning comment.
 
@@ -249,7 +249,15 @@ Six published source files were read at main 306b8fe8a68cd878a9b8272b5329e5a6b8a
 
 The public main source differs from the newer local checkout. A local ci-source.md is absent at the pinned published main; it was not used as published evidence. No appliance build, AWS qualification, release or repository change was executed. The shortened comment links PR #2 and the exact discussion, preserves To Do, and leaves related-issue/decision-index edits outside this approval chunk. All earlier pending chunks remain pending.
 
+## Grouped approval order
+
+The October 7 organization pass reviewed the assigned queue, all 14 portfolio targets, the optional URL-conversion draft, four posted comment records, five ACM epic edits, ten proposed stories, both epic summaries and their supporting work/evidence plans. The [queue](jira-update-queue.md#approval-order) now owns one order, starting with established comments and ending with new tracking and acceptance reviews. Portfolio sections follow that order; duplicate chunk tables were removed from the execution plan.
+
+Existing comment and description payloads retain their text and criteria. Only organization/instructions changed. The merged CVE-agent update precedes the mutable CVE-fix update; the parent remains last. New ACM tracking keeps S4 as canary, then S2/S3 before unfinished S1/S5. Epic descriptions need no new keys, while summaries still do. Optional metric edits follow substantive edits; verification checks only the edits actually approved.
+
+All 76 active non-Vulnerability dispositions and posted ids remain intact. This pass used the preceding audited Jira/PR records; it did not perform a new live sweep, approve writes, post comments, create tasks or transition issues. Target evidence and permissions still require refresh immediately before an approved action.
+
 ## Documentation validation
 
-This EVPN revision passes full `make -j4 test`, 136-file Markdown lint, 66 changed-document relative-link/anchor checks, exact 76-issue queue coverage and whitespace validation. Its target has one complete comment payload. Fresh target histories, original criteria and comment permissions were checked; unrelated creation/transition metadata remains the preceding audit's evidence and must be refreshed when needed.
-No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
+The grouping revision passed all `make test` targets, using the installed Markdown CLI directly for offline validation. Markdown lint covers 136 files; 79 changed-document relative links/anchors, exact 76-issue queue coverage and whitespace checks pass. Every fenced draft payload and the posted comment record are unchanged. Jira/PR/permission evidence retains its preceding audit date and requires target-specific refresh before a write.
+No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
