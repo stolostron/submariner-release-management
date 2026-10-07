@@ -36,9 +36,9 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
-| ACM-39738 | Next proposed chunk: parent rollup after the two existing CVE subtask comments, with marketplace overlap and broader inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Next proposed chunk: refresh open shipyard#2582 and configuration progress; compare existing golang:fix-cve | New; published a88023ad has running checks, one unresolved current thread and no review/approval on that head. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
-| ACM-39740 | Next proposed chunk: source #35 merge, agent/triage configuration gaps and marketplace overlap | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Other marketplace tools and initial team adoption do not satisfy these criteria |
+| ACM-39738 | Next proposed chunk: parent rollup after the two existing CVE subtask comments, with the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
+| ACM-39739 | Next proposed chunk: refresh open shipyard#2582 and configuration progress | New; published a88023ad has running checks, one unresolved current thread and no review/approval on that head. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
+| ACM-39740 | Next proposed chunk: source #35 merge, agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
 The first four posted existing-story updates and pending epic text are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).

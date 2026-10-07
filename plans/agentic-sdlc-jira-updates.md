@@ -147,8 +147,8 @@ Next proposed approval chunk: three contribution comments from [portfolio-commen
 
 | Order | Target | Comment to approve | Verified status / existing comments |
 | --- | --- | --- | --- |
-| 1 | ACM-39739 | Open CVE-fix prerequisite, configuration progress, original merge criterion and marketplace overlap | New / 1 |
-| 2 | ACM-39740 | Merged source improvements, remaining product/dependency configuration, marketplace overlap and non-Submariner validation | New / 1 |
+| 1 | ACM-39739 | Open CVE-fix prerequisite, configuration progress, original merge criterion | New / 1 |
+| 2 | ACM-39740 | Merged source improvements, remaining product/dependency configuration and non-Submariner validation | New / 1 |
 | 3 | ACM-39738 | Roll up the existing children and flag the broader contribution inventory; keep Kubernetes tracking on CORENET-7155 | New / 0 |
 
 Complete histories and issue-level Browse/Add Comments permissions were checked October 7. These comments add missing contribution deltas without repeating September remediation counts or initial adoption. Before each approved post, refresh its target and PR evidence, omit any newly recorded delta, set restricted visibility at creation and verify text/links/visibility before proceeding. No transitions, parent moves, new subtasks, marketplace PRs or upstream messages are part of this chunk.
