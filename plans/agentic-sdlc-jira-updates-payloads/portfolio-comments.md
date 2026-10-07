@@ -45,18 +45,6 @@ This PR implements per-repository .cve-fix.yaml overrides and repository-registr
 
 ACM-39738: no parent rollup proposed. Post the two child updates only; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
 
-## Group 3 — EVPN planning handoff
-
-### CORENET-7615 — reconcile planning decisions
-
-Reviewed October 7, 2026. Group 3: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
-
-```text
-The delivery plan merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. The October 1 [review discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records preliminary artifact-graph review, the OpenShift FRR/frr-metrics choice with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
-
-The decision index on main still needs these outcomes recorded with owners and dates. Open [appliance PR #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) proposes host-installed FRR for RHEL 10; reconcile it with the recorded payload choice. Product home, Konflux cluster and AMI channel remain pending. Release-gate/responsibility review and owner-attributed recording of the CORENET-7501/7504/7505 criteria resolutions remain unfinished.
-```
-
 ## Group 4 — deadline and requested status
 
 ### ACM-45318 — builder migration inventory
@@ -154,3 +142,15 @@ The snapshot's separate EC scenario fails; the successful build supplies build e
 ```
 
 Other release/closure reviews and private security follow-up remain in the [queue](../jira-update-queue.md); no success payload is drafted from Jira status alone.
+
+## Group 3 — EVPN planning handoff
+
+### CORENET-7615 — reconcile planning decisions
+
+Deferred to the end of the queue at the maintainer’s request. October 7 report: another planning PR iteration is WIP and CI PRs will start soon. Refresh this retained draft before review. Group 3: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
+
+```text
+The delivery plan merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. The October 1 [review discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records preliminary artifact-graph review, the OpenShift FRR/frr-metrics choice with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
+
+The decision index on main still needs these outcomes recorded with owners and dates. Open [appliance PR #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) proposes host-installed FRR for RHEL 10; reconcile it with the recorded payload choice. Product home, Konflux cluster and AMI channel remain pending. Release-gate/responsibility review and owner-attributed recording of the CORENET-7501/7504/7505 criteria resolutions remain unfinished.
+```
