@@ -209,14 +209,23 @@ The focused October 7 audit refreshed full documents and complete comments for A
 
 Pinned Shipyard source at a88023ad already supports repository-registry configuration and native-command overrides. Child 39739 still requires project-level configuration, no hardcoded Submariner values and go-fix-cves merged into ai-helpers. Source PR #35 merged October 6 at 80c90e176244b6f84625778f7122e7a2c1993db3; its complete 11-file change and local source retain product-specific mappings, version references and Jira scope, including cve-jira-triage dependencies. Include those dependencies within child 39740's configuration review; preserve its own ai-helpers merge and non-Submariner CVE validation criteria.
 
-The complete, untruncated ai-helpers main tree and source files pinned to a62717603bcf5cc13b744d123a7cef5ab02992f3 establish golang:fix-cve, golang:triage-fixed-cves, compliance:analyze-cve and node-cve tooling. Direct reads confirm merged [#470](https://github.com/openshift-eng/ai-helpers/pull/470), [#736](https://github.com/openshift-eng/ai-helpers/pull/736) and [#763](https://github.com/openshift-eng/ai-helpers/pull/763). Review overlapping module repair, reachability/analysis and triage capabilities with maintainers before choosing reuse, composition or extension. Their merges do not establish these children's acceptance. Author-scoped PR discovery does not prove absence of other contributions.
+The maintainer challenged the marketplace-overlap inference. A deeper static comparison read the loaded source contracts and deterministic scripts plus eight pinned marketplace implementation/dependency files. It establishes distinct workflow contracts:
+
+| Marketplace workflow at a6271760 | Maintained workflow | Material distinction |
+| --- | --- | --- |
+| [golang:fix-cve](https://github.com/openshift-eng/ai-helpers/blob/a62717603bcf5cc13b744d123a7cef5ab02992f3/plugins/golang/skills/fix-cve/SKILL.md) | Shipyard cve-fix at a88023ad | Supplied module/fix/CVE/ticket and compatibility-selected patching versus scanner-discovered findings, scripted per-location remediation/rollback, builder-aware stdlib handling and final build/rescan/PR gates |
+| [compliance:analyze-cve](https://github.com/openshift-eng/ai-helpers/blob/a62717603bcf5cc13b744d123a7cef5ab02992f3/plugins/compliance/skills/analyze-cve/references/implementation.md) | CVE agent at 80c90e17 | One CVE/ticket per invocation, source govulncheck/call-graph report and optional fix versus recurring portfolio survey, shipped-image/provenance evidence, independent verification, prior-triage auditing and closure gating |
+| [node-cve](https://github.com/openshift-eng/ai-helpers/blob/a62717603bcf5cc13b744d123a7cef5ab02992f3/plugins/node-cve/skills/analyze-cve-repos/SKILL.md) | CVE agent | Latest Node-team OCP version, downstream-branch reachability and Jira/Slack reporting versus all active product versions, shipped-image triage and gated issue actions |
+| [golang:triage-fixed-cves](https://github.com/openshift-eng/ai-helpers/blob/a62717603bcf5cc13b744d123a7cef5ab02992f3/plugins/golang/skills/triage-fixed-cves/SKILL.md) | CVE agent | OCP release-payload Go-stdlib/toolchain cross-reference report versus product issue lifecycle and broader applicability/provenance verification |
+
+Shared security vocabulary and basic operations do not establish interchangeable workflows or a contribution conflict. No demonstrated duplication justifies a reuse/composition gate. Removed that inferred prerequisite and the unrelated marketplace paragraphs from the three Jira drafts. This comparison inspected source; it did not execute either set of tools.
 
 Parent 39738 covers all generally relevant skills. This candidate inventory needs owner classification, not automatic task creation:
 
 | Candidate family | Existing scope / disposition |
 | --- | --- |
-| Maintained CVE-fix | ACM-39739; compare golang:fix-cve |
-| CVE agent and cve-jira-triage dependencies | ACM-39740; compare analysis/triage tools; preserve cross-product validation |
+| Maintained CVE-fix | ACM-39739; preserve project-level configuration and merge criteria |
+| CVE agent and cve-jira-triage dependencies | ACM-39740; preserve per-product configuration and cross-product validation |
 | Release tooling | 18 current skill definitions; classify relevance and product coupling before selecting contribution scope |
 | Kubernetes rebase | CORENET-7155; [#617](https://github.com/openshift-eng/ai-helpers/pull/617) remains open/draft at 7e1aa060f3167de8a66e5191bf8e8692666c3ad4; preserve existing tracking |
 

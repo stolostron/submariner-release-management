@@ -17,8 +17,6 @@ Contribution progress remains on the existing CVE subtasks:
 * ACM-39739: the maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open. Project-neutral go-fix-cves packaging and merge into ai-helpers remain required.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged in the maintained source repository. Product configuration extraction, ai-helpers merge and non-Submariner CVE validation remain required.
 
-The marketplace already has overlapping Go CVE-fix and analysis tools, including merged [ai-helpers#470](https://github.com/openshift-eng/ai-helpers/pull/470) and [ai-helpers#763](https://github.com/openshift-eng/ai-helpers/pull/763). Review reuse, composition or extension with the maintainers before choosing contribution packaging. Existing tools do not establish acceptance of either subtask.
-
 The original parent criterion covers all generally relevant skills. Reconcile the broader candidate inventory, including the release tooling, before parent acceptance; do not treat these two subtasks as the complete list. Kubernetes plugin work remains on CORENET-7155 with draft https://github.com/openshift-eng/ai-helpers/pull/617. Reuse existing tracking and preserve the current hierarchy.
 ```
 
@@ -30,8 +28,6 @@ One contribution update; the September remediation counts and team adoption are 
 The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The October 7 read finds hosted checks still running, one unresolved current YAML review thread and no review/approval on that head. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
 
 The source now supports repository-registry configuration and native-command overrides. Remaining work is to accept the prerequisite and package the contribution under the original criteria: go-fix-cves merged into ai-helpers, configurable through a project-level file, with no hardcoded Submariner values.
-
-Merged [ai-helpers#470](https://github.com/openshift-eng/ai-helpers/pull/470) already supplies golang:fix-cve. Review its overlap with this maintained workflow and choose reuse, extension or separate packaging with the maintainers. That existing tool and the Shipyard prerequisite do not themselves satisfy this subtask's merge criterion.
 ```
 
 ## ACM-39740 — CVE-agent contribution
@@ -42,8 +38,6 @@ One contribution update; keep the already-posted adoption/remediation progress o
 Preparatory CVE-agent work merged October 6 in https://github.com/dfarrell07/claude-skills/pull/35: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling.
 
 This is the maintained source merge. Product-specific component/image mappings, version references and Jira scope still need extraction into per-product configuration, including the cve-jira-triage dependencies used by the agent. Remaining original criteria are a configurable agent merged into ai-helpers and validation against at least one non-Submariner product's CVE issues. No such validation is established by the Submariner source merge or initial team adoption.
-
-The marketplace already has compliance:analyze-cve, including merged [ai-helpers#763](https://github.com/openshift-eng/ai-helpers/pull/763), and node-cve tooling. Review overlap and the integration approach with maintainers; their existing tools do not establish that this agent has been contributed or validated for another product.
 ```
 
 ## OPGM-364 — requested lifecycle status
