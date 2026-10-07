@@ -14,7 +14,7 @@ Use this rollup if the parent needs a missing status delta; otherwise post the c
 ```text
 The existing CVE contribution children remain the right tracking scope for those skills:
 
-* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Returned hosted checks pass or skip; GitHub reports changes requested and no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
+* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Returned hosted checks pass or skip; a new current-head review requests changes on four current threads and no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
 Neither child has met its ai-helpers merge acceptance criterion. The parent's original criterion covers all generally relevant skills, so reconcile that inventory before parent acceptance. The k8s-rebase contribution remains open in https://github.com/openshift-eng/ai-helpers/pull/617; its qualification and upstreaming stay on existing CORENET-7155 tracking, without duplicate children here.
@@ -25,7 +25,7 @@ Neither child has met its ai-helpers merge acceptance criterion. The parent's or
 Use this in place of the optional maintenance paragraph in `submariner-sustenance/comments-existing.md`; post once.
 
 ```text
-The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Returned hosted checks pass or skip; GitHub reports changes requested, and no current-head approval is recorded. Four unresolved threads are outdated; author responses do not establish acceptance.
+The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Returned hosted checks pass or skip; GitHub reports changes requested, and no current-head approval is recorded. The [October 7 current-head review](https://github.com/submariner-io/shipyard/pull/2582#pullrequestreview-5445744394) requests changes on four current threads covering exit-status classification, active-worker cleanup, self-fix cleanup and YAML fix-state parsing. Four older unresolved threads are outdated. Triage the current requests against source; author responses do not establish acceptance.
 
 The PR reports 1,372 regression checks, six focused probes and live client-go master/release-4.20 checks, with explicit scan/toolchain limits and no cluster E2E. Those runs were not repeated by this planning audit. Preserve the distinction between author-reported validation and the current head's hosted checks/reviewer acceptance.
 
@@ -100,6 +100,23 @@ The existing May progress comment already records production CVE tooling. Curren
 Preparatory shipped-image/provenance improvements merged in https://github.com/dfarrell07/claude-skills/pull/35; https://github.com/submariner-io/shipyard/pull/2582 remains open. Neither establishes completion of the ai-helpers contribution criteria.
 
 Please reconcile this older issue's remaining scope with those existing stories before choosing acceptance or supersession. There is no need to recreate the production tooling or file duplicate contribution stories.
+```
+
+## ACM-37426 — OLMv1 target correction
+
+Apply only after the issue owner confirms the July 24 target is still ACM 5.1 (February 2027). Update the title and description together; make no status change or duplicate timeline comment. Save the original ADF, preserve its analysis-document link on `analysis doc` below, and retain other useful reference nodes. Confirm fresh-install/migration scope with the owner; do not silently transfer the old 5.0 contract to 5.1.
+
+* Original title: `Support OLMv1 for Submariner addon in ACM 5.0`
+* Proposed title: `Support OLMv1 for Submariner addon in ACM 5.1`
+
+Proposed description:
+
+```text
+Submariner addon OLMv1 support targets ACM 5.1 (February 2027), per the July 24 timeline clarification (analysis doc). stolostron/submariner-addon currently deploys operators on managed clusters via OLMv0 (Subscription + OperatorGroup) and needs to support OLMv1 (ClusterExtension).
+
+The earlier ACM 5.0 analysis scoped fresh installs only and left upgrade migration without a committed timeline. Confirm that install/migration contract for the ACM 5.1 scope before implementation. This timeline correction does not establish implemented or validated addon support.
+
+Reference: [MCH#4109](https://github.com/stolostron/multiclusterhub-operator/pull/4109).
 ```
 
 ## ACM-25779 — proposed description correction
