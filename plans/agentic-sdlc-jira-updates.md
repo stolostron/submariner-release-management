@@ -126,7 +126,8 @@ known portability debt and time-sensitive builder migration from the September h
 4. Confirm #109 and #110 are still merged and 0ed2981 is on main. Also check #112, #113 and #114 (section A11) and claude-skills#35 ([current work](current-work.md#release-tooling-and-jira-payloads)):
    update the comments-existing.md payload to identify open work explicitly and avoid reposting evidence already recorded in Jira.
 5. Confirm the maintainer's answers to section A3 (the 0.23.2 question is already answered).
-6. Re-read project create-field metadata and each issue's transition metadata. Confirm the component, Activity Type, priority, assignee, sprint,
+6. Reconcile ACM-39738's generally relevant skill inventory with its existing CVE children and CORENET-7155 contribution tracking. Reuse existing issues; propose a subtask only for an uncovered contribution scope.
+7. Re-read project create-field metadata and each issue's transition metadata. Confirm the component, Activity Type, priority, assignee, sprint,
    resolution and link type against the current workflow; the read-only review did not exercise any create or transition operation.
 
 ### A5. Execution order
@@ -141,7 +142,7 @@ Create stories before comments that reference their keys. Each write is verified
    Read it back and check the parent, fields, italic headings and bullets. If the workflow requires legacy Epic Link instead of `parent`, use
    `customfield_10014` only after create-field metadata confirms that field is writable.
 2. **Canary: Git Pull Request field.** Set `customfield_10875` on S4 to an ADF document containing the #110 link, or use a client/UI that converts it.
-   Read it back and confirm the URL and formatting before touching any existing story. If the client cannot preserve this rich-text field, use comments only.
+   Read it back and confirm the URL and formatting before proceeding with PR-field edits on other issues. If the client cannot preserve this rich-text field, use comments only.
 3. Create S1, S2, S3, S5 using each story's own fields in new-stories.md. S2 and S5 use Security & Compliance (10609); S3 uses Normal priority (10003).
    Do not copy S4's priority and Activity Type to all stories. Read each creation back before proceeding and record its key.
 4. Post each new story's progress comment with the restricted visibility set at creation, and verify the returned comment's text and visibility.

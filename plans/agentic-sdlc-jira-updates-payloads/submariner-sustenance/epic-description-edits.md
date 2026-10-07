@@ -89,7 +89,7 @@ Release skills share Claude/Codex discovery and a tested compatibility contract 
 
 #### Glasswing shipyard audit remediation
 
-A Glasswing AI-SAST audit of shipyard produced 22 findings, of which 17 are fixable. The September inventory records 113 PRs across release branches and consumer repos, with 105 merged. The eight FIND-006 drafts closed without merging on October 3 and still need a remediation or re-triage decision. Coordinated upgrade-test repairs and the open devel helper-pod repair remain separate evidence gates.
+A Glasswing AI-SAST audit of shipyard produced 22 findings; its initial report classified 17 as fixable. The September inventory records 113 PRs across release branches and consumer repos, with 105 merged. The eight FIND-006 drafts closed without merging on October 3 and still need a remediation or re-triage decision. Coordinated upgrade-test repairs and the open devel helper-pod repair remain separate evidence gates.
 ```
 
 ## After editing: verification
