@@ -40,17 +40,17 @@ and ACM-39740 additionally requires another product's validation. CVE-agent#35's
 ## Current checks and local work
 
 The first proposed-action audit read 114 full non-Vulnerability documents, including 29 additional scope/duplicate candidates.
-The second content pass repeated the complete 703-issue inventory and read 88 active/payload targets: descriptions, comments,
+The latest content pass repeated the complete 703-issue inventory and read 88 active/payload targets: descriptions, comments,
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline.
-All comments on 26 targets were paginated again; both epic memberships and duplicate-query populations remain unchanged.
+All comments on 26 targets were paginated again; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 20 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
-The 32 direct PR reads find unchanged source/state except this planning PR; Shipyard hosted checks have progressed, with some deployment checks still running.
+The 32 direct PR reads find unchanged source/state since the preceding content pass; Shipyard now returns 45 successful and three skipped checks, with no pending or failed returned checks.
 Its current head still has no approval. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
 | Full GitHub review-thread pagination | Shipyard #2582: 32 threads, four unresolved/outdated, zero current/unresolved; no current-head approval. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard is clean at published 0777e63c; some hosted deployment checks are still running. Author-reported 1,372 checks were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
+| Exact local source inspection | Shipyard is clean at published 0777e63c; returned hosted checks are complete: 45 successful, three skipped. Author-reported 1,372 checks were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
@@ -184,24 +184,25 @@ No native build/E2E, plugin trial, tenant regression or hosted rerun was repeate
 | Release/legacy/research closure reviews | No immediate transition is proposed. Preserve original acceptance scope and recover missing build/fix/QE/catalog or research evidence; unrelated failures are separate investigations |
 | Deferred/other-owned/private work | No bulk comment, duplicate task creation, reopening, other-owner transition or vulnerability closure is proposed |
 
-The second content pass corrected four substantive scope/claim problems:
+The content passes corrected these scope/claim problems:
 
 * ACM-39736 requires **multiple** team members each to complete a release, with the maintainer not driving; gaps must be documented and fed back into improvements. One volunteer is a milestone, not its acceptance criterion. S4 and all rollups now retain that original scope.
 * ACM-39738 requires contribution of **all generally relevant skills**. The CVE children retain their own criteria; the plugin remains on existing CORENET-7155 tracking. Parent acceptance requires an inventory reconciliation, without duplicate stories.
 * ACM-45318 targets ART Go builders consumed through **Brew/OSBS**, not every Go builder. The addon has verified affected references; sampled UBI Go Toolset stages do not justify an independent-product migration by themselves. Shared/pipeline inputs must be checked before classifying another path as affected.
+* CORENET-7615 records decision owners/dates **when decided**; it does not require every pending decision to be settled. Its separate reviewer-confirmation and three-conflict resolution criteria remain. Optional sections are consolidated into one update per target.
 * Test-pod E2E and checkout restoration are scoped to the actual recorded runs/contracts. The audit's initial Won't Fix labels are classifications, not proof of owner-accepted risk dispositions.
 
 Independent recomputation confirms the 335-entry historical inventory has 290 merged/32 closed/13 open across 12 repositories,
 with 113 audit, 74 EC/Tekton and 68 CVE theme entries; all three PR-list sets belong to that inventory.
 The pinned 0ed2981 baseline reproduces 18 skills, 51 scripts, 29 tests, one helper and 30,164 lines.
 Primary PR reads confirm #109/#110 validation is author-reported; no onboarding runtime or RPM regeneration was repeated here.
-The Shipyard contribution payloads use published 0777e63c with pending hosted checks and no current-head approval.
+The Shipyard contribution payloads use published 0777e63c with completed passing/skipped hosted checks and no current-head approval.
 OPGM's draft stays on lifecycle publication scope. New-story/client/workflow choices and acceptance decisions remain execution gates;
 read-only verification cannot establish that a future write or transition succeeds.
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 65 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 34 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
 
