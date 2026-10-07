@@ -9,7 +9,7 @@ These comments propose no transitions. Private security details and internal res
 
 ## ACM-39738 — contribution parent
 
-Next approval chunk: post the two child updates first, then this parent rollup if its delta is still missing. All three are comments only; preserve their current statuses, parents and subtask membership.
+Prepared contribution chunk: post the two child updates first, then this parent rollup if its delta is still missing. All three are comments only; preserve their current statuses, parents and subtask membership.
 
 ```text
 Contribution progress remains on the existing CVE subtasks:
@@ -62,7 +62,7 @@ Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-r
 
 ## CORENET-7086 — parent CI handoff
 
-Next CI approval chunk: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
+Prepared CI chunk: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
 
 ```text
 Research is tracked in CORENET-7171, with 27 implementation subtasks already under this parent (CORENET-7173 through CORENET-7199). The earlier proposal to create them is superseded.
@@ -86,14 +86,16 @@ The proposal and CORENET-7196/7197/7198 specify post-merge AI security/RBAC/rele
 Review the existing proposal against this subtask's original research-and-rationale criterion. Parent handoffs remain explicit coverage of license-header/API-compatibility checks and alignment of the proposed GHA/Prow split with CORENET-7083/7087. These implementation decisions do not add acceptance criteria to this research subtask. No deployed or passing CI is established by the research records.
 ```
 
-## CORENET-7615 — landed planning context
+## CORENET-7615 — reconcile planning decisions
+
+Next approval chunk: one planning comment, with the merged PR and its substantive discussion linked. Preserve To Do; no related-issue edits, decision-index edits or transitions are authorized.
 
 ```text
-The EVPN CI/CD planning context landed October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. This satisfies the planning-PR landing criterion.
+The planning context merged October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. Its [merge discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) records a preliminary artifact-graph review, selection of the OpenShift FRR image and frr-metrics with planned standalone/EVPN-metrics fixes, and a transit-VIF resolution for CORENET-7501.
 
-Remaining acceptance: confirm the artifact graph, release gates and responsibilities with reviewers; record an owner and date for each decision when it is made, beginning with product home, cluster, payload and AMI channel; and obtain owner-recorded resolution of the three acceptance conflicts (CORENET-7501, CORENET-7504, CORENET-7505). Pending decisions need not all be settled for the decision-recording criterion.
+Product home, Konflux cluster and AMI channel remain pending in that discussion; proposed responsibilities were left for later review. The published decision index still needs reconciliation with these recorded decisions and actions.
 
-Current repository work has moved beyond planning: public-safety checks [EVPN #4](https://github.com/openshift/evpn-gateway-appliance/pull/4) and a build-root [EVPN #5](https://github.com/openshift/evpn-gateway-appliance/pull/5) merged October 5; appliance import [EVPN #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) and Ansible imports [EVPN #3](https://github.com/openshift/evpn-gateway-appliance/pull/3) and [EVPN #7](https://github.com/openshift/evpn-gateway-appliance/pull/7) remain open. #6 verify passes at its new October 7 head 629d9e671a94e6303ff46c2e97c78b310c672c63; tide is pending. #7 verify fails at 55d471e0336fa3c6812fdf88a4ce38732bb7533b. These are separate implementation handoffs; neither the planning merge nor static verification establishes product build/support acceptance. The current decision index still proposes owners, and 7501/7504/7505 retain the conflicting criteria without resolution comments. Keep this issue open pending its original acceptance review.
+Next: record owner/date/evidence for decisions already made, reconcile CORENET-7501/7504/7505 through owner corrections or attributed resolution, and confirm release gates and responsibilities against the original criteria. Pending decisions need not all be settled for the decision-recording criterion. Keep this issue open for that acceptance review; source imports and static CI are separate implementation work.
 ```
 
 ## ACM-26999 — older CVE scope

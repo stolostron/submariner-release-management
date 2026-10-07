@@ -44,14 +44,14 @@ The latest read-only content pass before posting repeated the complete 703-issue
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline. All four active private Vulnerability full views were also refreshed, without shipped-image triage.
 Before posting, all comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
-The latest 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. The focused first-chunk audit subsequently read all nine relevant PRs and their complete changed-file pages; Shipyard advanced during the successive focused audits; its dated posted comment retains the 3b67af1a snapshot.
+The preceding 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. The focused first-chunk audit subsequently read all nine relevant PRs and their complete changed-file pages; Shipyard advanced during the successive focused audits; its dated posted comment retains the 3b67af1a snapshot.
 The next-chunk read pins Shipyard to a88023ad, with hosted checks still running, one unresolved current YAML thread and four unresolved outdated threads. No review or approval is on that head; aggregate changes requested comes from earlier heads. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
 | Full GitHub review-thread pagination | Shipyard #2582: 37 threads, one unresolved/current and four unresolved/outdated; no review/approval on a88023ad. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
 | Exact local source inspection | Shipyard is clean at published a88023ad; returned hosted checks are still running. Author-reported 1,455 regression checks, 83 review-focused checks, six probes and client-go evidence were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
-| EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
+| EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; the later focused audit below adds substantive merge-discussion evidence |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
 Exact heads, returned checks and handoffs belong to [current-work.md](current-work.md).
@@ -203,7 +203,7 @@ The first-chunk audit matched each original acceptance scope and complete commen
 OPGM's draft stays on lifecycle publication scope. New-story/client/workflow choices and acceptance decisions remain execution gates;
 read-only verification cannot establish that a future write or transition succeeds.
 
-## Next contribution approval chunk
+## Prepared contribution approval chunk
 
 The focused October 7 audit refreshed full documents and complete comments for ACM-39738/39739/39740, ACM-39729 and CORENET-7155. All three contribution targets remain New, with comment totals 0/1/1. The parent is a Story with the same two Sub-task children. Original criteria, parent links, issue-level Browse/Add Comments permissions and restricted-group membership were checked. Proposed order: ACM-39739, ACM-39740, then ACM-39738; comments only, none posted. The 703-issue inventory above belongs to the preceding complete sweep.
 
@@ -229,7 +229,7 @@ Parent 39738 covers all generally relevant skills. This candidate inventory need
 | Release tooling | 18 current skill definitions; classify relevance and product coupling before selecting contribution scope |
 | Kubernetes rebase | CORENET-7155; [#617](https://github.com/openshift-eng/ai-helpers/pull/617) remains open/draft at 7e1aa060f3167de8a66e5191bf8e8692666c3ad4; preserve existing tracking |
 
-## Next CI approval chunk
+## Prepared CI approval chunk
 
 The October 7 focused audit read 35 full issue documents: CORENET-7086/7171, all 27 implementation subtasks, Prow scope 7083, plugin epic 7155 and supporting 7067/7081/7087/7089. Complete histories on the first 31 targets reconcile with reported totals. The proposed targets have 0/2 comments, Browse/Add Comments permission and confirmed restricted-group membership. Parent 7086 is To Do with exactly 28 children (research plus implementation); research 7171 is In Progress; all 27 implementation subtasks are To Do with no comments. The enclosing epic's Closed status does not establish child acceptance.
 
@@ -239,7 +239,17 @@ The proposed GHA/Prow split is not settled by the research note: 7083 explicitly
 
 The two comments add the created-task and handoff deltas without repeating the May survey or its existing research link. Proposed order is research 7171, then parent 7086. No comments or fields were written; contribution comments remain pending separately. The broader assigned-issue inventory retains its preceding audit date.
 
+## Next EVPN approval chunk
+
+The focused October 7 audit refreshed CORENET-7615 and the three named conflict issues (7501/7504/7505), including complete histories: all four are To Do with zero comments. Original criteria, issue-level comment permissions and restricted-group membership were checked. Six direct PR reads and complete changed-file pages confirm #2/#4/#5 merged and #3/#6/#7 open; #6 verify passes with tide pending, #7 verify fails. These implementation statuses are omitted from the planning comment.
+
+A substantive [October 1 merge discussion](https://github.com/openshift/evpn-gateway-appliance/pull/2#issuecomment-5936707328) was missing from the preceding draft. It records preliminary artifact-graph feedback, the OpenShift FRR/frr-metrics choice with standalone/EVPN-metrics fixes, and a transit-VIF resolution for 7501. It links 7504/7505 to the payload decision and identifies a follow-up actor for still-pending product-home/cluster/AMI decisions. Responsibilities were explicitly deferred; the discussion does not clearly confirm release gates. PR #2 has no formal reviews or inline review comments, but that does not erase its substantive discussion or prove a lack of review.
+
+Six published source files were read at main 306b8fe8a68cd878a9b8272b5329e5a6b8ac1e92, including the decision index, delivery/pipeline plans and Makefile. The decision index retains September 29 proposals; it has not incorporated the October 1 discussion. The three Jira descriptions also retain their old wording and are unassigned. Treat the discussion as existing decision evidence to reconcile with owner attribution, not a reason to declare all original criteria accepted or remake those decisions. No new requirement to settle every pending decision is introduced.
+
+The public main source differs from the newer local checkout. A local ci-source.md is absent at the pinned published main; it was not used as published evidence. No appliance build, AWS qualification, release or repository change was executed. The shortened comment links PR #2 and the exact discussion, preserves To Do, and leaves related-issue/decision-index edits outside this approval chunk. All earlier pending chunks remain pending.
+
 ## Documentation validation
 
-This CI-handoff revision passes full `make -j4 test`, 136-file Markdown lint, 65 changed-document relative-link/anchor checks, exact 76-issue queue coverage and whitespace validation. Each target has one complete comment payload. Fresh target histories, original criteria and comment permissions were checked; unrelated creation/transition metadata remains the preceding audit's evidence and must be refreshed when needed.
+This EVPN revision passes full `make -j4 test`, 136-file Markdown lint, 66 changed-document relative-link/anchor checks, exact 76-issue queue coverage and whitespace validation. Its target has one complete comment payload. Fresh target histories, original criteria and comment permissions were checked; unrelated creation/transition metadata remains the preceding audit's evidence and must be refreshed when needed.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
