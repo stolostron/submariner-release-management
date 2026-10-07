@@ -282,7 +282,19 @@ from package-publication proof and preserves the permitted team IIB/catalog alte
 from its broader runtime scope. The queue's refresh count now matches the latest 220 assigned plus eight related documents;
 private vulnerability inspection remains attributed to the earlier comprehensive sweep.
 
+## Payload usefulness review
+
+The review compared pending existing-issue comments with their original criteria and complete histories. Sixteen fresh full issue reads and all 27 complete
+comment histories are unchanged. Group 1 is now one short correction on CORENET-7171: the implementation tasks exist and the AI scope is post-merge.
+The parent CI comment, CVE contribution-parent rollup and older CVE progress draft are deferred because they repeat visible tracking or existing updates.
+Their coverage, inventory and scope decisions remain in the queue. Execution guidance now requires a distinct missing fact or requested answer before posting;
+audit checklists and acceptance instructions belong in the plan. No Jira write or acceptance change is performed.
+
+The fresh contribution read also finds Shipyard #2582 advanced to 4fa703b3, matching clean local HEAD. The previously dirty five-file delta is now published.
+At this read, 42 checks succeed, three skip and two run; two current and five outdated threads remain unresolved. Aggregate changes requested originates
+on older heads and no new-head approval is recorded. Pending text and the work map now reflect this source change; qualification was not rerun.
+
 ## Documentation validation
 
-The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 145 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending CVE-fix and lifecycle comments, epic deny-rule wording and S1's lifecycle boundary change fenced payload text; all four posted blocks remain unchanged. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
+The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 146 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
