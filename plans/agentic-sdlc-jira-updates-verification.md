@@ -44,13 +44,13 @@ The latest content pass repeated the complete 703-issue inventory and read 88 ac
 status, PR fields, parent/subtasks and actual update fields are unchanged against the preceding full-view baseline. All four active private Vulnerability full views were also refreshed, without shipped-image triage.
 All comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
-The latest 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. Shipyard returns 46 successful and three skipped check records, with unchanged author-reported validation claims.
-The complete October 7 review/thread read records the 17:13 UTC CodeRabbit changes-requested review on that head, with four unresolved current requests and no approval. Historical inventories retain their explicit cutoff and are separate from today's work.
+The latest 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. The focused first-chunk audit subsequently read all nine relevant PRs and their complete changed-file pages; Shipyard advanced to ab10cebf, with hosted checks still running and unchanged author-reported validation claims.
+The 17:50 UTC complete Shipyard review/thread read records one unresolved current YAML thread and four unresolved outdated threads, with no review or approval on ab10cebf; aggregate changes requested comes from earlier heads. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
-| Full GitHub review-thread pagination | Shipyard #2582: 36 threads, four unresolved/current and four unresolved/outdated; current-head changes requested and no approval. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard is clean at published 0777e63c; returned hosted checks are complete and pass or skip. Author-reported 1,372 checks were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
+| Full GitHub review-thread pagination | Shipyard #2582: 36 threads, one unresolved/current and four unresolved/outdated; no review/approval on ab10cebf. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
+| Exact local source inspection | Shipyard is clean at published ab10cebf; returned hosted checks are still running. Author-reported 1,372 checks were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; decision/conflict acceptance remains unrecorded |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
@@ -199,12 +199,12 @@ Independent recomputation confirms the 335-entry historical inventory has 290 me
 with 113 audit, 74 EC/Tekton and 68 CVE theme entries; all three PR-list sets belong to that inventory.
 The pinned 0ed2981 baseline reproduces 18 skills, 51 scripts, 29 tests, one helper and 30,164 lines.
 Primary PR reads confirm #109/#110 validation is author-reported; no onboarding runtime or RPM regeneration was repeated here.
-The Shipyard contribution payloads use published 0777e63c with completed passing/skipped checks, four current review requests and no current-head approval. The newly requested exit-status, active-worker cleanup, self-fix cleanup and YAML parsing changes are triage inputs, not accepted fixes.
+The first-chunk audit matched each original acceptance scope and complete comment history, and confirmed issue-level Browse/Add Comments permission on all four targets plus restricted-group membership. The proposed deltas are absent from their histories. Source review qualified BuildPLRInProgress handling, retained the observed retarget/artifact-refresh gap, and removed unrelated setup details and aggregate test-count prose from the conductor comment. All 43 historical CVE PRs still reconcile to 23 merged/17 closed fix PRs plus three merged lint reverts; the bounded closure query again returns 259. Contribution payloads now use ab10cebf with running checks, one unresolved current thread and no review/approval on that head; no fresh runtime qualification is inferred.
 OPGM's draft stays on lifecycle publication scope. New-story/client/workflow choices and acceptance decisions remain execution gates;
 read-only verification cannot establish that a future write or transition succeeds.
 
 ## Documentation validation
 
-This content revision passes full `make -j4 test`, 136-file Markdown lint and 41 changed-document relative-link/anchor checks,
+This content revision passes full `make -j4 test`, 136-file Markdown lint and 64 changed-document relative-link/anchor checks,
 exact 76-issue queue coverage, original epic snippet checks, refreshed field/transition metadata checks and whitespace validation.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.

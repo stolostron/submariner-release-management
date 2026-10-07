@@ -132,6 +132,17 @@ known portability debt and time-sensitive builder migration from the September h
 
 ### A5. Execution order
 
+First approval chunk: one comment on each existing story, using the [four exact drafts](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md). October 7 full reads found the proposed deltas absent from their complete histories.
+
+| Order | Target | Comment to approve | Current status / existing comments |
+| --- | --- | --- | --- |
+| 1 | ACM-39731 | Merged conductor/status hardening and the separate open #114 proposal | In Progress / 3 |
+| 2 | ACM-39730 | Tracker Activity Type fix, current releases, and the observed retarget/artifact gap | In Progress / 3 |
+| 3 | ACM-39736 | Shared setup and checkout prerequisites; multiple releasers and feedback still required | New / 0 |
+| 4 | ACM-39729 | Verified September remediation counts, merged CVE-agent improvements and current open CVE-fix work | In Progress / 1 |
+
+Approve these comments together or individually. This chunk changes no fields or statuses and creates no issues. Before each authorized post, re-read the target’s complete comments and refresh mutable PR evidence, preserving the historical reporting window. If the factual meaning changes, revise the draft for review. Set restricted visibility in the initial request, read back the text/links/visibility, and record the comment id before the next post. If a request has an uncertain result, inspect Jira before retrying to avoid duplicate comments.
+
 Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
 They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
 
