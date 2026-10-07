@@ -5,13 +5,13 @@
 Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
 The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
 Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-No Jira changes or external posts have been applied. Re-read each target and omit anything already recorded before posting.
+Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Remaining actions are pending. Re-read each target and omit anything already recorded before posting.
 
 ## Coverage and priority
 
 The unrestricted, paginated `assignee = currentUser()` search returned **703 unique issues across nine projects**:
 80 active, 623 terminal. Of these, 483 are Vulnerability issues: four active and 479 terminal.
-All 220 other assigned issues were fully re-read, alongside nine related non-Vulnerability issues and the four active private vulnerabilities. Assigned keys/statuses and inspected full-view update fields remain unchanged.
+All 220 other assigned issues were fully re-read, alongside nine related non-Vulnerability issues and the four active private vulnerabilities. The pre-post audit found assigned keys/statuses and inspected full-view update fields unchanged.
 The tables below account for **all 76 active non-Vulnerability issues**. Terminal issues default to no update.
 The September 13 onward non-Vulnerability update search returned 118 issues, including 53 terminal ones;
 an `updated` timestamp alone does not establish new engineering work.
@@ -30,17 +30,17 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | Issue | Proposed update | Completion/status boundary |
 | --- | --- | --- |
 | ACM-39728 | Apply reviewed description edits independently; post the summary after S stories exist | Keep In Progress; preserve original ADF, verify edits and use real keys in the summary |
-| ACM-39729 | Post the historical remediation and merged cve-agent evidence; add current open skill work only if absent | Do not equate tooling merges or issue counts with complete remediation |
-| ACM-39730 | Record merged tracker fields and the retarget reconciliation gap | Parent artifact refresh/retarget automation remains a follow-up |
-| ACM-39731 | Record merged #109/#112/#113 and open #114 in one update | #114 is pending, not shipped |
+| ACM-39729 | Posted comment 18820449: September remediation, merged CVE-agent work, open CVE-fix work and initial teammate adoption | Do not equate tooling merges or issue counts with complete remediation |
+| ACM-39730 | Posted comment 18820431: Activity Type fix and observed retarget/artifact gaps | Parent artifact refresh/retarget automation remains a follow-up |
+| ACM-39731 | Posted comment 18820423: merged hardening, open #114 and initial teammate adoption | #114 is pending, not shipped |
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
-| ACM-39736 | Record initial teammate adoption of CVE/autorelease tooling and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
+| ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | One parent summary linking existing CVE contribution children and the plugin's existing epic | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
 | ACM-39739 | Update open shipyard#2582 evidence | Published head is now ab10cebf; hosted checks are running, one unresolved current thread remains, and no review/approval is recorded on this head. Reported regression checks were not repeated; ai-helpers merge remains required |
 | ACM-39740 | Link merged cve-agent#35 as preparatory work | New; product parameterization, ai-helpers merge and non-Submariner validation remain |
 
-The first four existing-story updates and epic text remain in
+The first four posted existing-story updates and pending epic text are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).
 The contribution parent/child comments below are independent of S-story creation. Keep ACM-39733 with its existing owner;
 ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or comment is proposed for those three here.
