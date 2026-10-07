@@ -332,6 +332,19 @@ Both sampled Story edit-metadata reads expose the PR field with `set` only. The 
 New issues require their own metadata and actual canary read-backs; this review performed no create, comment, field edit or transition.
 All story/epic payload blocks, posted records and historical inventories remain unchanged.
 
+## First-batch readiness audit
+
+The focused October 7 audit re-reads 34 full issue documents and complete histories (three comments total), including the research, all 27 implementation
+subtasks, parent epic and adjacent Prow/image/release scope. CORENET-7171 remains In Progress with the same two May comments and ten changelog events;
+its Browse/Add Comments permissions and restricted-group membership are confirmed. The two existing comments use the required group visibility.
+CORENET-7086 still has exactly the research plus 27 implementation subtasks; all implementation issues remain To Do with no comments.
+
+All 27 were created May 20 after the research comments; the draft now dates that fact instead of implying recent implementation work.
+CORENET-7196/7197/7198 and the unchanged linked proposal at `723f6f4f683bc19cb72b0cb7c13c7821e501c3f1` explicitly specify post-merge workflows on push to main.
+The comment describes their scope and release-note suggestions without claiming a new approval, implemented workflows or research completion.
+Prepared ADF matches the exact draft, links six issue references, sets the required initial visibility and validates against the [published Atlassian schema](https://go.atlassian.com/adf-json-schema).
+One restricted comment is ready for review; parent comments, fields, status transitions and new issues remain outside this batch. No Jira write was performed.
+
 ## Documentation validation
 
 The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
