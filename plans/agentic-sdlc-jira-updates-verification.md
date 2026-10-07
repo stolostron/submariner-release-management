@@ -311,6 +311,15 @@ and qualification limits already carried by the children. A separate missing dec
 creating tracking alone does not. The new-story baseline comments, all acceptance requirements, four posted records and historical inventories remain intact.
 The queue, portfolio instructions and payload index now agree; no placeholder-key summary is left to post. Earlier preparation records above describe superseded drafts.
 
+## Action-scoped preflight review
+
+The execution plan now reconciles completed epic edits before story creation: a description written in group 6 must not fail the later empty-description audit check. ACM edits check only their approved pending snippet/heading and preserve earlier writes.
+Preflight is limited to the approved Jira group's targets, mutable claims and field prerequisites. Verified historical populations
+retain their source/cutoff; their counting recipes remain available for a correction or expanded audit. Creating plugin tracking no longer requires
+backing up unrelated working-tree changes first. Source preservation remains required before authorized engineering changes/publication, and frozen-source,
+loaded-runtime and retained-budget checks remain required before fresh qualification. Story descriptions, baseline comments and acceptance criteria are unchanged.
+No plugin backup, push, test or qualification was performed by this documentation review.
+
 ## Documentation validation
 
 The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 148 relative links/anchors across all 25 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the four fixed posted blocks; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
