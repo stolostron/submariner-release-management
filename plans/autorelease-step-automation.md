@@ -83,9 +83,13 @@ Historical roadmap items 1–9 describe delivered work; they are removed from th
 
 ## Source risks requiring a focused follow-up
 
-These observations preserve useful review questions from the older roadmap. They are not independently reproduced failures in this planning pass.
-Check current source and write a meaningful failure case before changing behavior.
+These observations preserve useful review questions from the older roadmap. Only the FBC helper's marker acceptance below was reproduced here;
+no complete release verifier or conductor failure was reproduced. Check current source and establish meaningful failure cases before changing behavior.
 
+* **FBC test completion and selection.** A synthetic array containing only the required standard/operator `BuildPLRInProgress` markers passes
+  `fbc_tests_passed`, without completion or aggregate success evidence. Preserve support for completed warning results while requiring finished intended-snapshot tests.
+  The verifier and stage generator select the latest matching snapshots; a source pin does not pin names. Compare returned/generated identities with the approved map,
+  following the [recovery gate](fbc-failure-recovery.md#rerun-the-same-release-snapshots), and retain completion evidence before release preparation.
 * **Jira write acknowledgement.** `update_step` deliberately returns success on tracking failures. `try_auto_verify` can return verified success after that call,
   and its caller advances in memory. Preserve best-effort behavior for standalone scripts while considering explicit write/read-back acknowledgement at conductor boundaries.
   Its open-PR comment cache is also written after a best-effort comment attempt; ensure a failed post can be retried.
