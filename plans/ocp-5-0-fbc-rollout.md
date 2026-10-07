@@ -24,7 +24,7 @@ It records review gates; it does not authorize pushes, merge requests, cluster c
 | Release | Existing RPA drafts use generic OCP-version index templates | Confirm live matching, release mode, publishing decisions and target-index membership |
 
 The October 7 authenticated read checked `submariner-tenant`. The 5.0 Application, Component and build account are absent;
-the existing Docker-config Secret remains unlinked to the integration runner. Zero PipelineRuns and 746 snapshots are retained.
+the existing Docker-config Secret remains unlinked to the integration runner. No PipelineRuns are retained; the [work map](current-work.md#release-recovery-and-time-sensitive-work) owns the current snapshot total.
 The six exact failed 4.x [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) are recovered;
 re-read their identities and verify intended catalog content before reruns. Credential usability and controller ownership remain unverified.
 The earlier GitLab read failed DNS; fresh-base access has not been re-established.
@@ -65,7 +65,7 @@ The [private-registry documentation](https://konflux-ci.dev/docs/testing/integra
 such as `registry.redhat.io` to be linked to `konflux-integration-runner`. Component-image credentials are linked automatically.
 A credential passed for OCI artifact storage does not by itself establish authentication for the production-index render.
 
-A11 records a valid tenant registry secret that was not linked to that runner on October 1. Verify the current binding and registry access first.
+The earlier A11 read records a tenant registry Secret that was not linked to that runner on October 1. Its presence/type does not prove usable credentials; verify the current binding and registry access first.
 If the maintainer chooses the documented manual repair and authorizes the live write, the proposed command is:
 
 ```bash

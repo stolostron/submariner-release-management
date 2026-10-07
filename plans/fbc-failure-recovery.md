@@ -20,7 +20,7 @@ These failures remain published/historical evidence. The October 7 authenticated
 * `submariner-konflux-registry-redhat-io` exists with type `kubernetes.io/dockerconfigjson`; no credential data was read or printed.
 * Its name is absent from both `secrets` and `imagePullSecrets` on `konflux-integration-runner`. This confirms the missing link; it does not verify credential usability.
 * `submariner-fbc-5-0` Application and Component and `build-pipeline-submariner-fbc-5-0` are NotFound. Reconciliation remains a prerequisite.
-* The latest namespace read returns zero PipelineRuns and 746 retained snapshots. The six exact failing FBC snapshot/scenario associations are recovered below; archived task logs are still needed for fresh diagnosis and historical root-cause comparison.
+* The latest namespace read returns zero PipelineRuns. All six exact failing FBC snapshot/scenario associations below remain present; archived task logs are still needed for fresh diagnosis and historical root-cause comparison. The [work map](current-work.md#release-recovery-and-time-sensitive-work) records the changing retained-snapshot total.
 
 The earlier GitLab main-ref read failed DNS; fresh-base/controller ownership and credential usability remain unverified. The current six FBC snapshot verdicts are Failed. No link, resource or rerun was changed.
 

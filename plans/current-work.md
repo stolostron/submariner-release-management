@@ -24,7 +24,7 @@ Four approved existing-story comments were posted and verified October 7 at 18:2
 | Task trust maintenance | The October 6 immutable allowlist audit records three #82 pins expiring October 30 and lifecycle injection October 31 | Re-read current allowlist and deny rules; keep any repo-wide refresh separate. Expiry is not the demonstrated cause of today's FBC failures |
 
 The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
-The namespace returns zero PipelineRuns and 746 retained snapshots; six of those recover the exact FBC failure associations.
+The latest namespace read returns zero PipelineRuns and 741 retained snapshots (the earlier read returned 746); all six documented FBC failure associations remain present.
 This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. GitLab fresh-base access remains unverified since the earlier DNS failure.
 
 0.24.1 artifact read: `registry.redhat.io/rhacm2/submariner-operator-bundle:v0.24.1` resolves to
@@ -92,7 +92,7 @@ Both projects' create metadata and existing targets' edit/transition metadata we
 * [Release-management #114](https://github.com/stolostron/submariner-release-management/pull/114) remains open at `a1bfe041b626ed39c42e703afc3b735b1bbd04c0`, with completed checks passing and Tide pending. Its skip-completed-step changes are not on main; describe them as pending work on ACM-39731.
 * `make test-skills` passes 19 checks while retaining five overlapping compatibility debt entries in `konflux-ci-fix`. The proposed S3 now names the delivered discovery/contract scope. The [compatibility plan](claude-codex-skill-compatibility.md) retains remaining execution and host-matrix work.
 * [shipyard #2582](https://github.com/submariner-io/shipyard/pull/2582) is published at `a88023ad8dd9adfb11223a579cd13de3e6f513bc`, matching the clean local checkout. Its description now reports 1,455 regression checks, including 83 review-focused checks, plus six focused probes and client-go master/release-4.20 evidence with explicit limits. Those author-reported runs were not repeated here.
-* The October 7 contribution read returns running hosted checks and 37 review threads: one unresolved/current YAML thread and four unresolved/outdated threads. No review or approval is recorded on this head; aggregate changes requested comes from earlier heads. Keep source/test claims separate from qualification and reviewer acceptance; refresh before posting.
+* The latest October 7 contribution read returns 46 successful and three skipped checks, plus a changes-requested review on this head. Of 39 review threads, three are unresolved/current and four unresolved/outdated; no current-head approval is recorded. Current threads concern YAML value parsing, readiness-gate exit status and workspace synchronization. These are reviewer findings awaiting disposition, not failures reproduced by this planning audit. Keep source/test claims separate from qualification and reviewer acceptance; refresh before posting.
 
 Before writes, settle the story split/status and CORENET points/sprint, refresh descriptions and PR evidence, then read back one canary at a time.
 No new stories for ordinary release steps or unrelated product work are proposed by this refresh.
