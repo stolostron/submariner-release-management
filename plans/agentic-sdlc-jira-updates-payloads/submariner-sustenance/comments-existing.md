@@ -8,7 +8,7 @@ The epic summary uses `<S1>` to `<S5>` and must wait for the reviewed stories an
 
 Historical counts retain their September cutoff; current issues and PRs were re-read October 7. The retarget note is from October 1. Re-read the target stories and follow the plan's preflight before posting; replace placeholders and update dates with any refreshed counts.
 
-Style of the existing comments: a one-line intro, then bullet lines of `PR link — short description`. Each is a separate comment.
+Style of the existing comments: a one-line intro, then bullet lines of `PR link — short description`. Use one comment per target, combining only the missing sections below.
 
 ## ACM-39731 (Orchestrate existing release skills into autorelease)
 
@@ -29,7 +29,7 @@ Autorelease hardening and script fixes since the Sep 13 update, found while usin
 make test reports over 1,100 shell assertions and Python test cases across its suite summaries (the epic description recorded 337 tests). Coverage includes failure injection for checkout and worktree restoration; this aggregate is not a count of unique test functions.
 ```
 
-Optional second comment, after the Sep 30 to Oct 1 work (#114 was still open on Oct 6; refresh its state before posting):
+Optional additional section for the same comment, covering Sep 30 to Oct 1 work (refresh #114 before posting):
 
 ```text
 Fixes found while retargeting the 0.23.x release (0.23.2 never shipped; now 0.23.4):
@@ -79,7 +79,7 @@ Optional additional ACM-39729 bullet, after checking for an existing update:
 
 ```text
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
-* https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c3a429d86624c9302b4f4f01276115ad8, with a clean matching local checkout. Hosted checks are running, changes requested remains and no current-head approval is recorded. The PR reports 1,372 regression checks and focused/live OpenShift validation with explicit limits; those runs were not repeated here.
+* https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c3a429d86624c9302b4f4f01276115ad8, with a clean matching local checkout. Returned hosted checks pass or skip; changes requested remains and no current-head approval is recorded. The PR reports 1,372 regression checks and focused/live OpenShift validation with explicit limits; those runs were not repeated here.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.

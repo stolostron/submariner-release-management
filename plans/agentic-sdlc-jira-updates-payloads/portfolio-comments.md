@@ -14,7 +14,7 @@ Use this rollup if the parent needs a missing status delta; otherwise post the c
 ```text
 The existing CVE contribution children remain the right tracking scope for those skills:
 
-* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Hosted checks are still running and GitHub reports changes requested; no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
+* ACM-39739: https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c. Returned hosted checks pass or skip; GitHub reports changes requested and no current-head approval is recorded. Author-reported checks do not replace acceptance of this prerequisite or the separate ai-helpers merge.
 * ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged October 6, delivering shipped-image applicability and provenance improvements. Product configuration extraction, contribution to ai-helpers and validation on a non-Submariner product remain.
 
 Neither child has met its ai-helpers merge acceptance criterion. The parent's original criterion covers all generally relevant skills, so reconcile that inventory before parent acceptance. The k8s-rebase contribution remains open in https://github.com/openshift-eng/ai-helpers/pull/617; its qualification and upstreaming stay on existing CORENET-7155 tracking, without duplicate children here.
@@ -25,7 +25,7 @@ Neither child has met its ai-helpers merge acceptance criterion. The parent's or
 Use this in place of the optional maintenance paragraph in `submariner-sustenance/comments-existing.md`; post once.
 
 ```text
-The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Hosted checks are still running, GitHub reports changes requested, and no current-head approval is recorded. Four unresolved threads are outdated; author responses do not establish acceptance.
+The maintained prerequisite https://github.com/submariner-io/shipyard/pull/2582 was refreshed October 7 to 0777e63c3a429d86624c9302b4f4f01276115ad8. The local checkout is clean at that same head; the previously local follow-ups are now included in the published source. Returned hosted checks pass or skip; GitHub reports changes requested, and no current-head approval is recorded. Four unresolved threads are outdated; author responses do not establish acceptance.
 
 The PR reports 1,372 regression checks, six focused probes and live client-go master/release-4.20 checks, with explicit scan/toolchain limits and no cluster E2E. Those runs were not repeated by this planning audit. Preserve the distinction between author-reported validation and the current head's hosted checks/reviewer acceptance.
 
@@ -87,7 +87,7 @@ The original research deliverable is to evaluate tooling and document recommenda
 ```text
 The EVPN CI/CD planning context landed October 1 in https://github.com/openshift/evpn-gateway-appliance/pull/2. This satisfies the planning-PR landing criterion.
 
-Remaining acceptance: confirm the artifact graph, release gates and responsibilities with reviewers; record owners/dates for open decisions, beginning with product home, cluster, payload and AMI channel; and obtain owner-recorded resolution of the three acceptance conflicts (CORENET-7501, CORENET-7504, CORENET-7505).
+Remaining acceptance: confirm the artifact graph, release gates and responsibilities with reviewers; record an owner and date for each decision when it is made, beginning with product home, cluster, payload and AMI channel; and obtain owner-recorded resolution of the three acceptance conflicts (CORENET-7501, CORENET-7504, CORENET-7505). Pending decisions need not all be settled for the decision-recording criterion.
 
 Current repository work has moved beyond planning: public-safety checks (#4) and a build-root (#5) merged October 5; appliance import #6 and Ansible imports #3/#7 remain open. #6 verify passes and #7 verify fails at the inspected heads. These are separate implementation handoffs; neither the planning merge nor static verification establishes product build/support acceptance. The current decision index still proposes owners, and 7501/7504/7505 retain the conflicting criteria without resolution comments. Keep this issue open pending its original acceptance review.
 ```
