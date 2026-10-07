@@ -4,7 +4,7 @@
 
 Evidence audit: October 6–7, 2026; includes the complete assignment population, issue documents, public work and retained tenant artifacts.
 [current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
-and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. Four approved existing-story comments were posted and verified October 7 at 18:23 UTC. No field edit, transition, PR post, cluster change or release was performed.
+and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. Four approved existing-story comments were posted and verified October 7 at 18:23 UTC. No Jira field edit, transition, PR comment, cluster change or release was performed.
 Private raw exports and pre-edit plan copies are retained outside this public checkout.
 
 ## Complete assigned-issue sweep
@@ -45,12 +45,12 @@ status, PR fields, parent/subtasks and actual update fields are unchanged agains
 Before posting, all comments on 27 targets were paginated again, including the OLMv1 correction target; both epic memberships and duplicate-query populations remain unchanged. The bounded historical closure query still returns 259.
 Both projects' complete create metadata and 21 existing targets' edit/transition metadata were re-read successfully with the same field constraints.
 The preceding 44 unique direct PR reads include the five legacy-closeout PRs, the OLMv1 reference and all six June Kubernetes qualification PRs. The June results remain one merged and five closed without merging; the K2 draft now links all six. Published heads/states are unchanged against the preceding pass apart from this planning PR. EVPN #6 verify passes at 629d9e67; tide remains pending and the import is still open. The focused first-chunk audit subsequently read all nine relevant PRs and their complete changed-file pages; Shipyard advanced during the successive focused audits; its dated posted comment retains the 3b67af1a snapshot.
-The next-chunk read pins Shipyard to a88023ad, with hosted checks still running, one unresolved current YAML thread and four unresolved outdated threads. No review or approval is on that head; aggregate changes requested comes from earlier heads. Historical inventories retain their explicit cutoff and are separate from today's work.
+The earlier next-chunk read pins Shipyard to a88023ad, with hosted checks still running, one unresolved current YAML thread and four unresolved outdated threads. No review or approval is on that head; aggregate changes requested comes from earlier heads. Historical inventories retain their explicit cutoff and are separate from today's work.
 
 | Deeper check | Result affecting the plan |
 | --- | --- |
-| Full GitHub review-thread pagination | Shipyard #2582: 37 threads, one unresolved/current and four unresolved/outdated; no review/approval on a88023ad. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard is clean at published a88023ad; returned hosted checks are still running. Author-reported 1,455 regression checks, 83 review-focused checks, six probes and client-go evidence were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
+| Latest GitHub review-thread pagination | Shipyard #2582: 39 threads, three unresolved/current and four unresolved/outdated; current-head changes requested and no approval on a88023ad. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
+| Exact local source inspection | Shipyard is clean at published a88023ad; the latest returned hosted checks all pass or skip. Author-reported 1,455 regression checks, 83 review-focused checks, six probes and client-go evidence were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; the later focused audit below adds substantive merge-discussion evidence |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
@@ -148,7 +148,7 @@ The [epic edits](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-d
 Earlier focused draft tests passed, but a full release-data warning-group failure reproduced on untouched cached main; the entire repository was not green.
 Tenant/admission drafts still require fresh-base reads and separation of the tenant's unrelated documentation rewrite.
 
-The latest authenticated namespace read returns zero PipelineRuns and 746 snapshots. Six retained FBC snapshots match the pinned
+The latest authenticated namespace read returns zero PipelineRuns and 741 snapshots, down from the earlier 746. Six retained FBC snapshots match the pinned
 4.x source and recover the exact scenario/run associations: all aggregate Failed/operator TestFail, with completed standard warnings.
 The exact map belongs to [FBC recovery](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities).
 The registry Secret remains unlinked to the runner; OCP 5 Application/Component/build account are NotFound.
@@ -257,7 +257,15 @@ Existing comment and description payloads retain their text and criteria. Only o
 
 All 76 active non-Vulnerability dispositions and posted ids remain intact. This pass used the preceding audited Jira/PR records; it did not perform a new live sweep, approve writes, post comments, create tasks or transition issues. Target evidence and permissions still require refresh immediately before an approved action.
 
+## Final plan review
+
+The final October 7 read repeated the unrestricted 703-issue inventory and fetched 228 full non-Vulnerability documents (all 220 assigned, plus eight related), complete comment histories on 27 targets (315 comments, including all 159 on ACM-40644), both projects’ complete Story create metadata and 20 targets’ edit/transition metadata. Assigned keys/statuses and compared scope fields remain unchanged. The four posted comments match their recorded text, clickable links and restricted visibility. Epic membership/duplicate searches remain unchanged; restricted-group membership was verified through the authenticated account’s groups. This pass performed no Jira writes or private vulnerability triage.
+
+Twenty-two direct PR reads and complete Shipyard review-thread pagination supersede the earlier running-check/no-current-review observations: #2582 at a88023ad has 46 successful/three skipped checks, current-head changes requested and three current unresolved threads. Fresh tenant reads retain all six documented failed FBC associations, both nine-component candidate verdicts and the successful component-stage Release. The registry link and OCP 5 resources are still absent; GitLab DNS remains unavailable. No credential usability, archived task diagnosis, installation, QE or new release was established.
+
+The execution plan now separates creation from terminal acceptance, handles uncertain write results before retrying and checks changed baselines before edits/rollback. Posted payloads remain fixed historical records. The epic deny-rule wording now distinguishes minimum-version repair from catalog replacement. Independent recomputation confirms the 335-entry historical totals and all three PR-list memberships; runtime claims retain their original evidence limits.
+
 ## Documentation validation
 
-The grouping revision passed all `make test` targets, using the installed Markdown CLI directly for offline validation. Markdown lint covers 136 files; 79 changed-document relative links/anchors, exact 76-issue queue coverage and whitespace checks pass. Every fenced draft payload and the posted comment record are unchanged. Jira/PR/permission evidence retains its preceding audit date and requires target-specific refresh before a write.
+The grouping revision and its commit hook passed full `make test` and commit lint. Final-review validation covers full repository checks, 143 relative links/anchors across all 26 Markdown files changed by the PR, exact 76-issue queue coverage, historical inventory totals, posted text/links/visibility and whitespace. Only the pending CVE-fix comment and epic deny-rule wording change fenced payload text; all four posted blocks remain unchanged. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.

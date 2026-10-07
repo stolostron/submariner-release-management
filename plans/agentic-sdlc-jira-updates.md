@@ -33,6 +33,10 @@ Rules that apply to both parts:
 * Read [project/Story create metadata](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/) with `GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` (paginate), and target transitions with `GET /rest/api/3/issue/{issueIdOrKey}/transitions?expand=transitions.fields`. Confirm writable fields, allowed values and required resolution fields. The October 7 action audit read both projects' complete Story create metadata, permissions and 21 existing targets' edit/transition metadata. Re-read new canaries after creation; existing issue metadata does not establish a new issue's workflow. See the [field verification](agentic-sdlc-jira-updates-verification.md#field-and-infrastructure-evidence).
 * This is a public repository: no teammate names, no Product Security tracker details, no internal links. Jira keys appear in these files only; they must not appear in the
   titles, bodies or commit messages of pull requests (project rule). Jira comments may link to GitHub, not the reverse.
+* Read complete comment histories with pagination; an issue view can contain only the first 100 comments. Preserve exact ADF and link targets alongside rendered text.
+* Approval covers only the named actions in the approved group. Story creation, field edits and status transitions need their own explicit scope; creation does not authorize later resolution.
+* If a write times out or its result is uncertain, stop and reconcile Jira before retrying. Check returned ids, complete comments, or matching stories under the intended parent; do not assume a failed response means no write occurred.
+* Before each field edit, save its current value and compare it again immediately before writing. Stop on a changed baseline. Roll back only if the field still equals this operation’s written value; otherwise reconcile later edits before restoring anything.
 * Create one story per project as a canary and read it back before creating the rest. Existing-issue comments and independent description edits need their own target preflight, not a new story. Issue deletion is outside this plan.
 * Set comment visibility to group `Red Hat Employee` in the create request and verify it on read-back. Current `acli jira workitem comment create` exposes only project-default visibility and no restriction flag; use REST or a supported UI that sets the group in the initial request. If the client cannot set that visibility at creation,
   stop and use a supported client/UI; do not publish an unrestricted comment and restrict it afterward.
@@ -118,13 +122,13 @@ Use the October 7 [work map](current-work.md) when refreshing payloads: distingu
 known portability debt and time-sensitive builder migration from the September historical counts.
 
 1. Re-read ACM-39728 and its ten children. Compare the table in section A1, especially statuses, child membership, comments and PR links;
-   stop and reconcile any new work instead of creating duplicates. A sprint update by itself is not evidence that a payload was applied.
+   stop and reconcile any new work instead of creating duplicates. Include the two CVE contribution subtasks and search for each proposed deliverable beyond this epic before creation. A sprint update by itself is not evidence that a payload was applied.
 2. Confirm each old description snippet and the insertion heading in epic-description-edits.md occur exactly once in the rendered description.
    Preserve the full original ADF document before editing, and update the corresponding nodes rather than treating an ADF document as a Markdown string.
 3. Use section A8 to refresh the evidence. Preserve the dated September counts when reporting that period; if reporting current state instead, update the dates,
    states and totals together in the plan and payloads. The 107, 110 and 335 figures are different discovery snapshots, not expected totals for a new search.
 4. Confirm #109 and #110 are still merged and 0ed2981 is on main. Also check #112, #113 and #114 (section A11) and claude-skills#35 ([current work](current-work.md#release-tooling-and-jira-payloads)):
-   update the comments-existing.md payload to identify open work explicitly and avoid reposting evidence already recorded in Jira.
+   preserve the four posted payloads as historical records. Prepare any newly approved missing delta separately, identifying open work explicitly.
 5. Confirm the maintainer's answers to section A3 (the 0.23.2 question is already answered).
 6. Reconcile ACM-39738's generally relevant skill inventory with its existing CVE children and CORENET-7155 contribution tracking. Reuse existing issues; propose a subtask only for an uncovered contribution scope.
 7. Re-read project create-field metadata and each issue's transition metadata. Confirm the component, Activity Type, priority, assignee, sprint,
@@ -159,8 +163,7 @@ Each creation or field write is read back before the next. Skip completed deltas
    Do not copy S4's priority and Activity Type to all stories. Read each creation back before proceeding and record its key.
 4. Post each new story's progress comment with the restricted visibility set at creation, and verify the returned comment's text and visibility.
    Set each Git Pull Request field as in new-stories.md and read it back before the next write.
-5. After checking their acceptance criteria, transition finished stories (S2, S3, S4) to Resolved with the appropriate resolution;
-   move S1 and S5 to In Progress. Use each issue's available transition metadata.
+5. Move S1/S5 to In Progress only if those transitions were included in the approved group, using each new issue’s metadata and read-back. Keep S2/S3/S4 in their created status until the separate group-9 acceptance review approves a terminal transition and its resolution; do not resolve them as part of story creation.
 6. Add related-issue links from S1 to ACM-45508 (addon consumption) and OPGM-364 (lifecycle publication), using the link type confirmed in preflight. Check for an existing link first and read back each new relationship.
 7. The four existing-story updates are already posted (ids above); reconcile their read-backs and post only newly approved missing deltas. Optionally append the #109 link to the
    Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
@@ -173,8 +176,7 @@ Each creation or field write is read back before the next. Skip completed deltas
 * A supported Jira client/UI can edit or delete comments if the account has permission. Save each created comment id; REST comment updates use the
   [update-comment operation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-id-put), not add-comment.
   No issue-deletion operation is authorized by this plan; a mistaken story needs a separate disposition decision. That is why one story is created first as a canary.
-* Save the full original epic description before editing. Rollback means explicitly writing that saved ADF document back and reading it back;
-  do not assume issue history provides an automatic restore operation.
+* Save the full current ADF before each independent description edit. Apply the shared baseline/rollback rule above so earlier approved edits and later changes survive; issue history provides no automatic restore operation.
 * Do not put Jira keys in the titles or bodies of upstream GitHub PRs (project rule); Jira comments may link to GitHub, not the reverse.
 
 ### A7. Work outside these epic payloads
@@ -308,7 +310,7 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 3. Post each progress comment with restricted visibility set at creation. Verify its text and visibility before the next write.
    Set Git Pull Request where given and read each field back.
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.
-5. Transition K1–K5 to In Progress after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
+5. Transition K1–K5 to In Progress only if included in the approved group, after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
 6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic CORENET-7155") and read it back.
 7. Post the epic summary comment (epic-comment.md) with the real story keys and verify its text and restricted visibility.
@@ -317,7 +319,7 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 
 * Read each issue back after writing and compare with the payload before continuing.
 * Comments can be edited by id with a supported client/UI; issue deletion is outside this plan, which is why one story is created first as a canary.
-* Save the original description value (currently empty). If the new text is wrong, explicitly restore that value and read it back.
+* Save the current description value (empty at this audit). Apply the shared baseline/rollback rule before restoring it, then read it back.
 
 ### B8. How the numbers were produced
 

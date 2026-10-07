@@ -3,18 +3,18 @@
 # Comments for existing ACM-39728 stories and the epic (exact payloads)
 
 The first four existing-story comments were posted and verified on October 7, 2026 at 18:23 UTC. The optional URL-conversion comment and epic summary remain unposted. All comments use visibility `{"type": "group", "value": "Red Hat Employee"}`, as the existing comments do.
-Existing-story comments are independent of creating new stories; post only missing deltas after target-specific preflight.
+The four posted blocks are fixed historical records; keep their text, dates and source pins unchanged. Any later comment is a separately approved missing delta after target-specific preflight.
 The epic summary uses `<S1>` to `<S5>` and must wait for the reviewed stories and real keys.
 
-Historical counts retain their September cutoff; current issues and PRs were re-read October 7. The retarget note is from October 1. Re-read the target stories and follow the plan's preflight before posting; replace placeholders and update dates with any refreshed counts.
+Historical counts retain their September cutoff; the retarget note is from October 1. Refresh evidence and follow the plan’s preflight for the unposted drafts only; replace their placeholders before posting.
 
-Style of the existing comments: a one-line intro, then bullet lines of `PR link — short description`. Use one comment per target, combining only the missing sections below.
+Use one concise comment per target for an approved missing delta. The posted records below do not authorize reposting.
 
 ## ACM-39731 (Orchestrate existing release skills into autorelease)
 
 Posted and read back: comment `18820423`; visibility `Red Hat Employee`.
 
-Existing comments cover the conductor/refactor PRs and September 13 fixes. Refresh the open proposal before posting one comment containing only the missing deltas; this is progress reporting, not a status transition.
+This posted progress update supplemented the conductor/refactor and September 13 comments; it changed no status.
 
 ```text
 Autorelease updates since September 13:
