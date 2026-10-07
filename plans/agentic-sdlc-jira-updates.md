@@ -25,15 +25,15 @@ done without the other.
 Rules that apply to both parts:
 
 * Nothing here has been posted or edited in Jira; every payload is exact text to post after the preflight passes.
-* Conventions differ by project. ACM and CORENET use different Activity Type choices. CORENET automation warns about original story points before In Progress/Code Review
+* The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
   and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
 * These are proposed text payloads, not raw Jira REST requests. Jira Cloud descriptions, comments and the Git Pull Request field use Atlassian Document Format (ADF).
   Use a client that converts Markdown to ADF, or construct valid ADF explicitly; never send a bare Markdown string where an ADF document is required.
-* Read [project/Story create metadata](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/) with `GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` (paginate), and target transitions with `GET /rest/api/3/issue/{issueIdOrKey}/transitions?expand=transitions.fields`. Confirm writable fields, allowed values and required resolution fields. Sibling values do not prove write permission; resolve each workflow's status/transition instead of reusing ids. These reads have not been performed here.
+* Read [project/Story create metadata](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/) with `GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` (paginate), and target transitions with `GET /rest/api/3/issue/{issueIdOrKey}/transitions?expand=transitions.fields`. Confirm writable fields, allowed values and required resolution fields. The October 7 action audit read both projects' complete Story create metadata, permissions and 20 existing targets' edit/transition metadata. Re-read new canaries after creation; existing issue metadata does not establish a new issue's workflow. See the [field verification](agentic-sdlc-jira-updates-verification.md#field-and-infrastructure-evidence).
 * This is a public repository: no teammate names, no Product Security tracker details, no internal links. Jira keys appear in these files only; they must not appear in the
   titles, bodies or commit messages of pull requests (project rule). Jira comments may link to GitHub, not the reverse.
-* Create one item first as a canary and read it back before creating the rest or editing existing items; issue deletion is outside this plan.
-* Set comment visibility to group `Red Hat Employee` in the create request and verify it on read-back. If the client cannot set that visibility at creation,
+* Create one story per project as a canary and read it back before creating the rest. Existing-issue comments and independent description edits need their own target preflight, not a new story. Issue deletion is outside this plan.
+* Set comment visibility to group `Red Hat Employee` in the create request and verify it on read-back. Current `acli jira workitem comment create` exposes only project-default visibility and no restriction flag; use REST or a supported UI that sets the group in the initial request. If the client cannot set that visibility at creation,
   stop and use a supported client/UI; do not publish an unrestricted comment and restrict it afterward.
 
 Exact text to post, all under [agentic-sdlc-jira-updates-payloads/](agentic-sdlc-jira-updates-payloads/):
@@ -131,12 +131,12 @@ known portability debt and time-sensitive builder migration from the September h
 ### A5. Execution order
 
 Existing-story comments in comments-existing.md can proceed independently after target-specific preflight and write authorization.
-They need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
+They need no new story keys. Independent epic-description edits also need no new story keys. The creation sequence below applies only to the approved S stories and epic summary; skip already-posted deltas.
 
-Order matters: create stories first, then comments that reference them, then the epic edits last. Each step is verified before the next.
+Create stories before comments that reference their keys. Each write is verified before the next; independent description edits can proceed after their own preflight.
 
 1. **Canary: create story S4** (RPM lockfile setup) using the fields in new-stories.md: ACM Story, the maintainer's account, parent ACM-39728,
-   component 33720, priority 10002 and Activity Type 10606. Use the approved Jira client/UI and its supported description format.
+   component 33720, priority 10002 and Activity Type 10606. Story create metadata marks reporter required with a default; preserve the approved reporter and verify it on read-back. Use the approved Jira client/UI and its supported description format.
    Read it back and check the parent, fields, italic headings and bullets. If the workflow requires legacy Epic Link instead of `parent`, use
    `customfield_10014` only after create-field metadata confirms that field is writable.
 2. **Canary: Git Pull Request field.** Set `customfield_10875` on S4 to an ADF document containing the #110 link, or use a client/UI that converts it.
@@ -149,7 +149,7 @@ Order matters: create stories first, then comments that reference them, then the
    move S1 and S5 to In Progress. Use each issue's available transition metadata.
 6. Add the relationship from S1 to ACM-45508 using the currently available related-issue link type, confirmed in preflight.
 7. Reconcile the four existing-story updates and their recorded write ids; post only missing deltas. Optionally append the #109 link to the
-   Git Pull Request field of ACM-39731 and ACM-39730 (append, never replace, and only after step 2 passes).
+   Git Pull Request field of ACM-39731 and ACM-39730 only after step 2 passes. Re-read the original ADF, add only missing link nodes and set the combined document; the field exposes `set`, not an `add` operation. Verify that every original link survives and stop if the baseline changed.
 8. Apply the epic description edits, verifying by re-reading after each.
 9. Post the epic summary comment.
 
@@ -217,7 +217,7 @@ Current release blockers and separate local configuration drafts are in [current
 with registry repair in [fbc-failure-recovery.md](fbc-failure-recovery.md).
 The earlier successful tenant read confirms an unlinked registry Secret and missing OCP 5 Application/Component/build account;
 no retained PipelineRuns were returned. It does not establish credential validity, installation, QE or publishing.
-Recover snapshot/scenario associations before authorized reruns. GitLab fresh-base review remained blocked by DNS at that read.
+The latest read recovered all six failed FBC [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) and confirmed the recorded component-stage release succeeded. Verify intended catalog content/credentials before any authorized rerun; component-stage success does not complete FBC. GitLab fresh-base access remains unverified after the earlier DNS failure.
 
 ## Part B: k8s-rebase automation (CORENET-7155)
 
@@ -280,15 +280,15 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
    Refresh dates and counts together when reporting current work; do not expect mutable HEAD or review totals to equal the historical snapshot.
 3. Confirm the maintainer's answers to section B4, and inspect and back up any current uncommitted or unpushed plugin work.
 4. Confirm the story-point scale and the sprint id with the team.
-5. Read current create-field metadata and available transitions; confirm the related-issue link type and rich-text field handling.
+5. Re-read Story create metadata and available transitions. The October 7 metadata exposes `parent`, not legacy Epic Link, on CORENET creation; Original story points and Git Pull Request require later edits. `Related` is currently link type 10077. Confirm the new canary's edit metadata and rich-text handling before continuing.
+6. Reconcile K2/K4 qualification scope with existing delivery epics CORENET-6983 and CORENET-7450 and their children. K stories qualify the plugin; they do not recreate repository bumps or change those other-owned delivery issues.
 
 ### B6. Execution order
 
-1. Create story K1 first as a canary, using its own fields and the approved points and sprint. Read it back and check epic membership, Activity Type,
-   priority, both point fields, sprint and the rendered description. Use `parent` or legacy Epic Link (`customfield_10014`) according to current
-   create-field metadata; do not retry a rejected parent write with an unverified legacy field.
-2. Set K1's Git Pull Request field with an ADF-capable client and read it back. If the client cannot preserve rich text, use comments only.
-   Create K2 to K5 with each story's own Activity Type and approved points and sprint, reading each creation back before proceeding.
+1. Create K1 as a canary with writable create fields: `parent` CORENET-7155, its own Activity Type/priority, approved Story Points and sprint, assignee and description. Verify the default/approved reporter on read-back. CORENET create metadata does not expose legacy Epic Link, Original story points or Git Pull Request; do not send those fields in the create request. Read back membership and rendered content.
+   Fetch K1 edit metadata, then set approved Original story points and read it back. Existing Story edit metadata supports that field, but the new canary must confirm it. Do not transition to In Progress until it is set and verified; do not silently omit the automation prerequisite.
+2. Set K1's Git Pull Request field only after its edit metadata confirms it is writable; use an ADF-capable client and read it back. If the field/client is unavailable, preserve the link in the restricted comment.
+   Create K2–K5 with their own writable create fields, then inspect each new issue's edit metadata, set Original story points and verify both point fields and sprint before any transition.
 3. Post each progress comment with restricted visibility set at creation. Verify its text and visibility before the next write.
    Set Git Pull Request where given and read each field back.
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.

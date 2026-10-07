@@ -2,10 +2,10 @@
 
 # New child stories for ACM-39728 (exact payloads)
 
-Nothing here has been created in Jira. Field values were read from the existing siblings on 2026-09-29/30 and rechecked on 2026-10-06.
+Nothing here has been created in Jira. Field values were read from siblings and verified against complete ACM Story create metadata on 2026-10-07.
 Text blocks are Markdown for a converting client/UI; direct Jira Cloud REST writes need ADF. Verify create-field and transition metadata before writing.
 
-* Project `ACM`, issue type `Story`, parent (Epic Link) `ACM-39728`, component id `33720` (Multicluster Networking[ext]).
+* Project `ACM`, issue type `Story` (id `10009`), `parent` `ACM-39728`, component id `33720` (Multicluster Networking[ext]). Current metadata allows `parent` and legacy Epic Link; use one verified membership path. Reporter is required with a default; verify the approved reporter on read-back.
 * Assignee: the maintainer's own Jira account, resolved through the authenticated client, same as the siblings.
 * Activity Type is `customfield_10464`: siblings use `Future Sustainability` (option id `10606`) and the security-flavored ones use
   `Security & Compliance` (option id `10609`). It is set per story below. Do not use option `10608`, which the release-tracker script uses.
@@ -97,7 +97,7 @@ October 7 read:
 * https://github.com/stolostron/submariner-operator-fbc/pull/82 remains open; its published build fails before tasks start because the build account is missing. The tenant read also found the Application and Component absent.
 * Registry repair, tenant and managed-admission drafts exist locally and require fresh-base review. Tenant reconciliation provisions the build account; admissions gate later releases.
 
-Still required: registry credential usability, merged configuration/pipelines, actual four-platform build/provenance, release matching, catalog proof and applicable real-cluster installation. Task trust expires October 30/31 at the pinned audit and must be refreshed before execution. Existing OPGM-364 tracks lifecycle publication; ACM-45508 tracks addon consumption. Neither establishes OCP 5 runtime support.
+Still required: registry credential usability, merged configuration/pipelines, actual four-platform build/provenance, release matching, catalog proof and applicable real-cluster installation. Task trust expires October 30/31 at the pinned audit; re-read current allow/deny policy before execution and replace expired or denied refs when required. Existing OPGM-364 tracks lifecycle publication; ACM-45508 tracks addon consumption. Neither establishes OCP 5 runtime support.
 ```
 
 Rollout evidence and remaining gates: [OCP 5.0 FBC rollout plan](../../ocp-5-0-fbc-rollout.md).
@@ -180,7 +180,7 @@ Delivered in https://github.com/stolostron/submariner-release-management/pull/10
 Description:
 
 ```text
-A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). Five are Won't Fix (accepted risk, including the architecturally-required e2e-framework behaviour) and 17 are fixable. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files. The preparation search found no Jira tracker for this audit (searched by label and by text on 2026-09-30); check again before creating this story.
+A Glasswing AI-SAST audit of submariner-io/shipyard produced 22 findings (7 Medium, 10 Low, 5 Informational). Five are Won't Fix (accepted risk, including the architecturally-required e2e-framework behaviour) and 17 are fixable. They are grouped into 8 PRs in 3 waves and carried to every supported release branch and to the consumer repos that vendor the affected files. The October 7 duplicate check found the broader closed Glasswing epic ACM-36285 with no children, plus related incident issues, but no matching shipyard-audit remediation story in the searched results. Reconcile that scope before creating this story; do not reopen or duplicate the broader epic.
 
 _Scope:_
 
@@ -192,8 +192,8 @@ _Scope:_
 
 _Acceptance criteria:_
 
-* All fixable findings merged on devel and every supported release branch
-* The FIND-006 finding has a recorded disposition: refreshed/reopened or replacement fixes merge on applicable supported branches, or the finding is re-triaged with evidence; closed unmerged drafts do not satisfy this criterion
+* Each finding has a recorded disposition and supported-branch scope. Findings retained as fixable have their fixes merged on devel and every applicable supported release branch; any accepted risk/re-triage has explicit evidence and acceptance
+* FIND-006 remains open until replacement/refreshed fixes merge on the applicable supported branches or its re-triage is explicitly accepted with evidence. Closing unmerged drafts is not a disposition
 * CI helper pod manifests work on OCP
 ```
 

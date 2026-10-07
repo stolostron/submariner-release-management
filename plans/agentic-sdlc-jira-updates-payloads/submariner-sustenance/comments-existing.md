@@ -57,8 +57,8 @@ No comments exist yet. Keep it factual; the story is still New and needs a secon
 ```text
 Prerequisites for another engineer to drive a release are now in place:
 
-* https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key. Relate the setup story if it has been created.
-* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch safety so a release run does not clobber a teammate's checkout, add-team-member hardening, and skills usable from Claude or Codex. Relate the discovery/compatibility story if it has been created.
+* https://github.com/stolostron/submariner-release-management/pull/110 (merged 2026-09-29): one-command setup for the RPM lockfile step's Red Hat entitlements and registry login, using the team's shared credentials, so a new releaser does not need a personal activation key.
+* https://github.com/stolostron/submariner-release-management/pull/109 (merged 2026-09-29): worktree and branch safety so a release run does not clobber a teammate's checkout, add-team-member hardening, and skills usable from Claude or Codex.
 
 Still needed for this story's acceptance criteria: at least one other engineer completing a full downstream release using the skills and docs, and the gaps they hit written down.
 ```
@@ -79,7 +79,7 @@ Optional additional ACM-39729 bullet, after checking for an existing update:
 
 ```text
 * https://github.com/dfarrell07/claude-skills/pull/35 merged October 6: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling. The separate ai-helpers contribution remains ACM-39740 scope.
-* https://github.com/submariner-io/shipyard/pull/2582 remains open at 56e7233ad0db33023378e85d0d42aba1129c5ff5. Returned checks pass/skip but review disposition remains changes requested. Two local follow-ups now end at 36afbd1eca881a326ae6b948a096b273bfab59cf in a clean checkout, including OpenShift branch/order-independent arguments. They remain outside the published PR; their reported checks were not repeated here.
+* https://github.com/submariner-io/shipyard/pull/2582 is now published at 0777e63c3a429d86624c9302b4f4f01276115ad8, with a clean matching local checkout. Hosted checks are running, changes requested remains and no current-head approval is recorded. The PR reports 1,372 regression checks and focused/live OpenShift validation with explicit limits; those runs were not repeated here.
 ```
 
 Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.
@@ -97,6 +97,8 @@ Before preparing it for review, replace the all-OCP-success assumption, isolate 
 ```
 
 ## ACM-39728 (epic): summary comment
+
+Before posting, replace all keys and reconcile every status/count with the refreshed evidence. Retain the final existing-story update line only for updates confirmed by recorded write ids/read-back or already present in Jira; omit any unperformed update.
 
 ```text
 Update for 2026-08-04 to 2026-09-30 at 05:00 UTC, reconstructed and verified on 2026-10-06. The sweep recorded 335 PRs by the maintainer across 12 repositories (290 merged, 32 closed without merging, 13 open); the largest groups are the Glasswing shipyard-audit remediation (113), Enterprise Contract and Tekton fixes (74) and CVE fixes (about 68). Theme membership other than the audit series is classified by PR title and repository; the inventory records each assignment. Shipped and ongoing work is tracked in new child stories:
