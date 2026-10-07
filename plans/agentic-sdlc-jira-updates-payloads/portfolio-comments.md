@@ -60,24 +60,30 @@ Next: confirm the supported branches and migrate verified Brew/OSBS builder cons
 Inventory and handoff: plans/art-builder-migration.md in stolostron/submariner-release-management.
 ```
 
-## CORENET-7086 — parent CI scope
+## CORENET-7086 — parent CI handoff
+
+Next CI approval chunk: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
 
 ```text
-CI research is tracked in CORENET-7171, and implementation is already split into CORENET-7173 through CORENET-7199. The earlier draft's proposal to create those subtasks is superseded; no additional copies are needed.
+Research is tracked in CORENET-7171, with 27 implementation subtasks already under this parent (CORENET-7173 through CORENET-7199). The earlier proposal to create them is superseded.
 
-The existing parent criteria still cover tests, coverage, formatting/lint, license headers and API compatibility. CORENET-7195 covers dependency licensing, not source headers; the existing 27 descriptions do not identify an API-compatibility implementation task. Reconcile those gaps before accepting the parent. Prow/cloud E2E remains CORENET-7083 scope; Kubernetes plugin qualification remains CORENET-7155 scope.
+Original parent criteria remain unit tests, coverage, formatting/lint, license headers and API compatibility. The linked research proposal already recommends goheader and CRD/Go API compatibility checks. Confirm their implementation coverage: CORENET-7195 checks dependency licenses, and CORENET-7174 checks API conventions; neither substitutes for headers or backward compatibility. Reconcile these criteria within existing tracking before accepting the parent.
 
-The implementation tasks remain To Do. Research and task creation do not establish configured or passing CI in the target repository.
+The proposed GHA/Prow split also needs alignment with CORENET-7083's Prow presubmit/postsubmit/periodic scope and CORENET-7087's Prow image-build scope. CORENET-7196/7197/7198 specify post-merge AI automation; preserve that boundary.
+
+All 27 implementation subtasks remain To Do. Research and task creation do not establish configured or passing CI. Kubernetes plugin qualification stays on CORENET-7155.
 ```
 
-## CORENET-7171 — research update
+## CORENET-7171 — research acceptance and handoff
+
+One missing handoff delta; omit another tool-survey list or research link already present in the May comments. No resolution is proposed.
 
 ```text
-The research recommendations are recorded, with 27 implementation subtasks already created under CORENET-7086 (CORENET-7173 through CORENET-7199). The existing May comments document the tool survey; this update distinguishes those recommendations from implementation.
+The linked tooling proposal records recommendations and rationale across Go/non-Go linting, security, testing and developer experience. Its implementation work is already split into 27 subtasks under CORENET-7086 (CORENET-7173 through CORENET-7199); the May comment's future task-creation statement is superseded.
 
-The existing descriptions of CORENET-7196/7197/7198 already place AI security/RBAC/release-note automation after merge. They supersede the older research comment's PR-review wording; verify the intended execution boundary when implementing those tasks.
+The proposal and CORENET-7196/7197/7198 specify post-merge AI security/RBAC/release-note automation, correcting the older comments' PR-review wording. Implementation should retain that boundary.
 
-The original research deliverable is to evaluate tooling and document recommendations with rationale. Review that existing evidence for acceptance; implementation ownership, repository/forge choices and the parent's license/API gaps are downstream handoffs, not additional acceptance criteria silently added to this research story. No deployed or passing CI is claimed.
+Review the existing proposal against this subtask's original research-and-rationale criterion. Parent handoffs remain explicit coverage of license-header/API-compatibility checks and alignment of the proposed GHA/Prow split with CORENET-7083/7087. These implementation decisions do not add acceptance criteria to this research subtask. No deployed or passing CI is established by the research records.
 ```
 
 ## CORENET-7615 — landed planning context

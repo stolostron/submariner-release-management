@@ -36,9 +36,9 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39732 | Record the existing fork-only URL-conversion candidate if useful | New; source/scope reconciliation before a review PR; no additional story |
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
-| ACM-39738 | Next proposed chunk: parent rollup after the two existing CVE subtask comments, with the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Next proposed chunk: refresh open shipyard#2582 and configuration progress | New; published a88023ad has running checks, one unresolved current thread and no review/approval on that head. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
-| ACM-39740 | Next proposed chunk: source #35 merge, agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
+| ACM-39738 | Prepared contribution chunk: parent rollup after the two existing CVE subtask comments, with the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
+| ACM-39739 | Prepared contribution chunk: refresh open shipyard#2582 and configuration progress | New; published a88023ad has running checks, one unresolved current thread and no review/approval on that head. Project-level configuration, no hardcoded Submariner values and its own ai-helpers merge remain required |
+| ACM-39740 | Prepared contribution chunk: source #35 merge, agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
 The first four posted existing-story updates and pending epic text are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).
@@ -79,8 +79,8 @@ reconcile/link its lifecycle scope instead of creating another publication story
 | Assigned issues | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
 | CORENET-7155 | Reviewed description, K-story split and one summary | In Progress, description empty, no children. Recorded 1.37 trials have limits; MCP repair/fresh qualification and upstream PR refresh remain |
-| CORENET-7086 | One parent comment linking existing research and implementation subtasks | To Do; the original May draft's "will split into subtasks" is obsolete. It is separate from the Kubernetes plugin |
-| CORENET-7171 | Research/recommendation update, then acceptance review | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
+| CORENET-7086 | Next CI chunk: parent handoff after the research comment | To Do; the original May draft's "will split into subtasks" is obsolete. It is separate from the Kubernetes plugin |
+| CORENET-7171 | Next CI chunk: research acceptance and implementation handoff | In Progress. Review May recommendations against the original research/rationale deliverable; do not add implementation/ownership requirements to its acceptance. Existing AI subtasks specify post-merge; correct the older PR-review wording |
 | CORENET-7173–7199 | Defer individual comments; retain one disposition per existing subtask | All 27 To Do. Existing descriptions cover lint, security, test, coverage, context and AI workflows. Require repository change and meaningful CI evidence for each criterion before any completion claim |
 | CORENET-7078, CORENET-7079, CORENET-7080, CORENET-7081, CORENET-7082, CORENET-7083, CORENET-7084, CORENET-7085, CORENET-7087, CORENET-7089 | Defer until repository/build/registry/CI ownership and prerequisites are agreed | All ten To Do under existing MCN scope; source bootstrap, Prow/cloud E2E, image publishing and release automation are distinct deliverables |
 | CORENET-7615 | Link merged EVPN planning PR #2 and list unfinished criteria | To Do. Planning #2 and infrastructure #4/#5 merged; source imports remain open. Record decision owners/dates when decisions are made; pending decisions need not all be settled. Conflicts 7501/7504/7505 still lack recorded resolution; source/check work is separate from planning acceptance |
@@ -88,8 +88,7 @@ reconcile/link its lifecycle scope instead of creating another publication story
 Do not duplicate the 27 CI subtasks from the May research drafts or post the same research list on each one.
 Do not close CORENET-7171 solely because the subtasks exist. Do not reuse EVPN or plugin qualification as MCN implementation evidence.
 CORENET-7085 and CORENET-7089 have empty descriptions: scope test reuse and release/versioning after repository ownership is agreed.
-The parent also requires license-header verification and API compatibility; dependency-license scanning in CORENET-7195
-does not satisfy the header criterion, and no named API-compatibility task was found in the 27 descriptions. Reconcile those gaps before parent acceptance.
+The parent also requires license-header verification and API compatibility. The linked proposal already recommends goheader, crdify and go-apidiff; reconcile explicit implementation coverage within existing tracking. CORENET-7195's dependency-license scanning and CORENET-7174's API conventions do not establish those criteria. The proposed GHA/Prow split needs alignment with CORENET-7083's presubmit/postsubmit/periodic jobs and CORENET-7087's Prow image builds.
 
 ## Recent work and terminal issues
 

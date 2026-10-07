@@ -2,7 +2,7 @@
 
 # Current work and planning handoffs
 
-Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the latest follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
+Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
@@ -145,8 +145,8 @@ PR #617 still has WIP, invalid-OWNERS and needs-ok-to-test labels; preserve thos
 | Addon OLMv1, ACM-37426 | New; description says ACM 5.0, July 24 comment targets 5.1. Private research has ClusterExtension/installer prototypes; least-privilege RBAC explicitly lacks two required parts | Preserve preparation; apply the prepared title/description correction only after target confirmation, then confirm current API before addon integration, complete/review RBAC and prove install behavior. Do not count templates as implementation or inherit the old 5.0 deadline |
 | EVPN delivery plan, CORENET-7615 | To Do; planning #2, public-safety check #4 and build-root #5 merged. Appliance #6 and Ansible #3/#7 imports remain open; #7 verify fails | Record planning acceptance separately from implementation; record owners/dates as decisions are made, without requiring every pending decision to be settled. Current decision index still proposes owners; related 7501/7504/7505 retain conflicting criteria and have no resolution comments |
 | Older route-agent build, ACM-34593 | October 2 hosted route-agent push build succeeds at `82adbacd`; its later EC scenario fails | Review closure of the original DNF/RPM build issue against that exact source/build; keep EC failure as separate compliance evidence. See the [queue](jira-update-queue.md) |
-| Pre-merge automation, CORENET-7086 | To Do in the current assigned-work query | Reconcile its existing acceptance criteria before proposing overlapping pre-merge or qualification automation; it is separate from the plugin epic |
-| MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress; implementation stories remain To Do in the assigned-work query | Retain their existing scope; shared tooling ideas do not make them Kubernetes-plugin deliverables |
+| Pre-merge automation, CORENET-7086 | To Do in the current assigned-work query | 28 children: research plus 27 implementation subtasks. Reconcile header/API-compatibility coverage and GHA/Prow scope; preserve existing tracking |
+| MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress with two May comments; all 27 implementation subtasks To Do, no comments | Linked proposal contains recommendations/rationale and post-merge AI scope. Research acceptance is separate from implementation; planned GHA/Prow responsibilities need reconciliation with CORENET-7083/7087 |
 
 EVPN main is `306b8fe8a68cd878a9b8272b5329e5a6b8ac1e92` (October 5). Its current `make verify` runs the planning/public-safety checks, not appliance build or AWS qualification.
 [Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) has a passing verify check at the new October 7 head `629d9e671a94e6303ff46c2e97c78b310c672c63`; tide is pending and the PR remains open;

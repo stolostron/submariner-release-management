@@ -229,7 +229,17 @@ Parent 39738 covers all generally relevant skills. This candidate inventory need
 | Release tooling | 18 current skill definitions; classify relevance and product coupling before selecting contribution scope |
 | Kubernetes rebase | CORENET-7155; [#617](https://github.com/openshift-eng/ai-helpers/pull/617) remains open/draft at 7e1aa060f3167de8a66e5191bf8e8692666c3ad4; preserve existing tracking |
 
+## Next CI approval chunk
+
+The October 7 focused audit read 35 full issue documents: CORENET-7086/7171, all 27 implementation subtasks, Prow scope 7083, plugin epic 7155 and supporting 7067/7081/7087/7089. Complete histories on the first 31 targets reconcile with reported totals. The proposed targets have 0/2 comments, Browse/Add Comments permission and confirmed restricted-group membership. Parent 7086 is To Do with exactly 28 children (research plus implementation); research 7171 is In Progress; all 27 implementation subtasks are To Do with no comments. The enclosing epic's Closed status does not establish child acceptance.
+
+The research proposal already linked in the May comments was read directly at notes-source commit 723f6f4f683bc19cb72b0cb7c13c7821e501c3f1. It documents the five original research categories, rationale/adoption phases, goheader, CRD/Go compatibility checks and post-merge AI workflows. No tool health/version claims were revalidated or promoted to current recommendations. Corrected the drafts to treat header/API coverage as implementation handoffs, not missing research or new research acceptance criteria. Dependency licenses (7195) and API conventions (7174) do not substitute for those parent criteria; the 7173 curated-linter scope can accommodate header enforcement but does not explicitly confirm it.
+
+The proposed GHA/Prow split is not settled by the research note: 7083 explicitly covers Prow presubmit/postsubmit/periodic jobs, and 7087 covers Prow image builds. Removed the exclusive cloud-E2E attribution; retained 7196/7197/7198's explicit post-merge boundary. No new subtask or scope reassignment is proposed. No implementation PR is linked in the 29 research/implementation issue documents. A direct openshift/mcn lookup returned 404 and an upstream organization listing identified no MCN-named target; those bounded reads do not prove repository or implementation absence. No published CI/runtime result is claimed.
+
+The two comments add the created-task and handoff deltas without repeating the May survey or its existing research link. Proposed order is research 7171, then parent 7086. No comments or fields were written; contribution comments remain pending separately. The broader assigned-issue inventory retains its preceding audit date.
+
 ## Documentation validation
 
-This contribution-chunk revision passes full `make -j4 test`, 136-file Markdown lint, 64 changed-document relative-link/anchor checks, exact 76-issue queue coverage and whitespace validation. Each target has one complete comment payload. Fresh target histories, original criteria and comment permissions were checked; unrelated creation/transition metadata remains the preceding audit's evidence and must be refreshed when needed.
+This CI-handoff revision passes full `make -j4 test`, 136-file Markdown lint, 65 changed-document relative-link/anchor checks, exact 76-issue queue coverage and whitespace validation. Each target has one complete comment payload. Fresh target histories, original criteria and comment permissions were checked; unrelated creation/transition metadata remains the preceding audit's evidence and must be refreshed when needed.
 No release/test implementation changed. Raw documents, metadata, comments and validation logs remain outside this public checkout.
