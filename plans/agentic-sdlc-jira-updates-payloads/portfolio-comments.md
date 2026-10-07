@@ -9,31 +9,15 @@ The [approval order](../jira-update-queue.md#approval-order) is authoritative; g
 
 ## Group 1 — CI research handoff
 
-### CORENET-7171 — research acceptance and handoff
+### CORENET-7171 — correct the May handoff
 
-One missing handoff delta; omit another tool-survey list or research link already present in the May comments. No resolution is proposed.
-
-```text
-The linked tooling proposal records recommendations and rationale across Go/non-Go linting, security, testing and developer experience. Its implementation work is already split into 27 subtasks under CORENET-7086 (CORENET-7173 through CORENET-7199); the May comment's future task-creation statement is superseded.
-
-The proposal and CORENET-7196/7197/7198 specify post-merge AI security/RBAC/release-note automation, correcting the older comments' PR-review wording. Implementation should retain that boundary.
-
-Review the existing proposal against this subtask's original research-and-rationale criterion. Parent handoffs remain explicit coverage of license-header/API-compatibility checks and alignment of the proposed GHA/Prow split with CORENET-7083/7087. These implementation decisions do not add acceptance criteria to this research subtask. No deployed or passing CI is established by the research records.
-```
-
-### CORENET-7086 — parent CI handoff
-
-Group 1: post the research delta on CORENET-7171 first, then this parent handoff. Comments only; preserve statuses and the existing 28-child hierarchy (research plus 27 implementation subtasks).
+One comment correcting two obsolete statements; preserve status. Parent coverage/ownership questions remain in the implementation plan.
 
 ```text
-Research is tracked in CORENET-7171, with 27 implementation subtasks already under this parent (CORENET-7173 through CORENET-7199). The earlier proposal to create them is superseded.
-
-Original parent criteria remain unit tests, coverage, formatting/lint, license headers and API compatibility. The linked research proposal already recommends goheader and CRD/Go API compatibility checks. Confirm their implementation coverage: CORENET-7195 checks dependency licenses, and CORENET-7174 checks API conventions; neither substitutes for headers or backward compatibility. Reconcile these criteria within existing tracking before accepting the parent.
-
-The proposed GHA/Prow split also needs alignment with CORENET-7083's Prow presubmit/postsubmit/periodic scope and CORENET-7087's Prow image-build scope. CORENET-7196/7197/7198 specify post-merge AI automation; preserve that boundary.
-
-All 27 implementation subtasks remain To Do. Research and task creation do not establish configured or passing CI. Kubernetes plugin qualification stays on CORENET-7155.
+Implementation tracking now exists under CORENET-7086: CORENET-7173 through CORENET-7199, superseding the May plan to create subtasks. CORENET-7196/7197/7198 specify post-merge AI security, RBAC and release-note automation; the earlier PR-review wording is superseded.
 ```
+
+CORENET-7086: no parent comment proposed. Its hierarchy already exposes the task split; post when there is a concrete implementation or ownership decision.
 
 ## Group 2 — CVE contributions
 
@@ -52,23 +36,12 @@ This is the maintained source merge. Product-specific component/image mappings, 
 One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
 
 ```text
-The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at a88023ad8dd9adfb11223a579cd13de3e6f513bc. The latest October 7 read finds all returned hosted checks passing or skipped, a changes-requested review on that head and three unresolved current threads; no current-head approval is recorded. Author-reported regression and live client-go checks were not repeated by this planning audit; they do not establish reviewer acceptance.
+The maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open at 4fa703b3c4302d559023963071aec4e0187e127a. The latest October 7 read finds hosted checks still running, aggregate changes requested from older heads and two unresolved current threads; no current-head approval is recorded.
 
 The source now supports repository-registry configuration and native-command overrides. Remaining work is to accept the prerequisite and package the contribution under the original criteria: go-fix-cves merged into ai-helpers, configurable through a project-level file, with no hardcoded Submariner values.
 ```
 
-### ACM-39738 — contribution parent
-
-Group 2: post ACM-39740, then ACM-39739, then this parent rollup if its delta is still missing. All three are comments only; preserve their current statuses, parents and subtask membership.
-
-```text
-Contribution progress remains on the existing CVE subtasks:
-
-* ACM-39739: the maintained CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 is open. Project-neutral go-fix-cves packaging and merge into ai-helpers remain required.
-* ACM-39740: https://github.com/dfarrell07/claude-skills/pull/35 merged in the maintained source repository. Product configuration extraction, ai-helpers merge and non-Submariner CVE validation remain required.
-
-The original parent criterion covers all generally relevant skills. Reconcile the broader candidate inventory, including the release tooling, before parent acceptance; do not treat these two subtasks as the complete list. Kubernetes plugin work remains on CORENET-7155 with draft https://github.com/openshift-eng/ai-helpers/pull/617. Reuse existing tracking and preserve the current hierarchy.
-```
+ACM-39738: no parent rollup proposed. Post the two child updates only; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
 
 ## Group 3 — EVPN planning handoff
 
@@ -136,15 +109,7 @@ Use [ACM epic edits](submariner-sustenance/epic-description-edits.md) in order 4
 
 The optional [ACM-39732 candidate note](submariner-sustenance/comments-existing.md#acm-39732-optional-progress-on-the-existing-url-conversion-story) belongs here; it is fork-only progress, not shipped functionality.
 
-### ACM-26999 — older CVE scope
-
-```text
-The existing May progress comment already records production CVE tooling. Current hardening is tracked in ACM-39729, with upstream contribution split between ACM-39739 (go-fix-cves) and ACM-39740 (CVE agent).
-
-Preparatory shipped-image/provenance improvements merged in https://github.com/dfarrell07/claude-skills/pull/35; https://github.com/submariner-io/shipyard/pull/2582 remains open. Neither establishes completion of the ai-helpers contribution criteria.
-
-Please reconcile this older issue's remaining scope with those existing stories before choosing acceptance or supersession. There is no need to recreate the production tooling or file duplicate contribution stories.
-```
+ACM-26999: no comment proposed. Its May update already records production tooling and the remaining upstream contribution. Resolve its scope/closure disposition before drafting another update.
 
 ### ACM-25779 — proposed description correction
 
