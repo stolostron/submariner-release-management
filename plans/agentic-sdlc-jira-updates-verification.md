@@ -50,7 +50,7 @@ The earlier next-chunk read pins Shipyard to a88023ad, with hosted checks still 
 | Deeper check | Result affecting the plan |
 | --- | --- |
 | Latest GitHub review-thread pagination | Shipyard #2582: 39 threads, three unresolved/current and four unresolved/outdated; current-head changes requested and no approval on a88023ad. #2618: two threads, zero current/unresolved and an approval on current head despite older changes-requested aggregate |
-| Exact local source inspection | Shipyard is clean at published a88023ad; the latest returned hosted checks all pass or skip. Author-reported 1,455 regression checks, 83 review-focused checks, six probes and client-go evidence were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
+| Exact local source inspection | Shipyard HEAD matches published a88023ad; the final local read finds five dirty skill/script/test files (+108/-9), superseding the earlier clean-checkout observation. Published checks all pass or skip; they do not qualify those local edits. Author-reported 1,455 regression checks, 83 review-focused checks, six probes and client-go evidence were not repeated. Plugin a477bced and its two dirty court-permission test files were rechecked and remain unchanged |
 | EVPN repo-wide PR/source reads, beyond author search | #4/#5 merged; #3/#6/#7 imports open, #7 verify failing. Current verification covers planning/public safety; the later focused audit below adds substantive merge-discussion evidence |
 | OLMv1 private prototypes | Preparatory templates exist, including incomplete RBAC; not delivered addon support |
 
