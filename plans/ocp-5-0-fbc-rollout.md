@@ -2,7 +2,7 @@
 
 # OCP 5.0 FBC rollout plan
 
-Reviewed 2026-10-06; heads, published checks and clean configuration drafts rechecked 2026-10-07.
+Reviewed 2026-10-06; heads, published checks and clean configuration drafts rechecked 2026-10-07. Lifecycle target, prerequisites and posting verified 2026-10-08.
 Use the [current work map](current-work.md) and [builder branch inventory](art-builder-migration.md) for concurrent builder, PQC, addon and release work. Consolidates the planning document from
 [FBC PR #82](https://github.com/stolostron/submariner-operator-fbc/pull/82), head
 `1e8b3c26137b49db60a0d93853f144990770f304`. The pipeline implementation remains in that PR.
@@ -35,6 +35,7 @@ The September 24 status document describes an earlier state, including before #8
 The catalog on current FBC main uses provisional minimum Submariner stream **0.24**, default channel **stable-0.24**,
 and bundles **0.24.0 / 0.24.1**. The unchanged bundle compatibility declaration reported in the implementation record is `v4.15-v4.19`.
 Catalog validation and a native OCP-base image test establish packaging behavior, not operator compatibility on OCP 5.
+OPGM-364’s requested progress answer was posted October 8 as comment `18829498`; the issue remains In Progress and lifecycle publication remains pending. No program status label or workflow transition was assigned.
 OPGM-364 requires publication of existing valid lifecycle data without new OpenShift 5 / 5.0 compatibility statements; team IIB/catalog proof is an allowed alternative to public-index membership. The program’s October 7 parent guidance separately requires a fully supported 4.22/5.0 version at GA. Lifecycle publication alone does not establish that support qualification.
 
 ## 1. Refresh and reconcile configuration
