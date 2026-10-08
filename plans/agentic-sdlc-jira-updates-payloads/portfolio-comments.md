@@ -80,7 +80,7 @@ Reviewed October 8, 2026 against both parents, all 32 children and their complet
 Target: ACM-44527. The parent already records component-stage success, the failed FBC tests and registry diagnosis. Add only the missing exact recovery map, once on the parent.
 
 ```text
-The [0.23.4 FBC recovery map](https://github.com/stolostron/submariner-release-management/blob/0d23d60a992aeb432a0cd72ad868d256427ce35f/plans/fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) now records the snapshot, operator-test scenario and failed run for each OCP version 4.16–4.21, all at catalog source 2e6b489e65620738d68504d9158418fe463e2073.
+The [0.23.4 FBC recovery map](https://github.com/stolostron/submariner-release-management/blob/0d23d60a992aeb432a0cd72ad868d256427ce35f/plans/fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) records the snapshot, test scenario and failed run for each OCP version 4.16–4.21.
 ```
 
 ### Release Submariner 0.22.2 — candidate inspection, on hold
@@ -88,11 +88,9 @@ The [0.23.4 FBC recovery map](https://github.com/stolostron/submariner-release-m
 Target: ACM-45070. The October 2 candidate is absent from the full release-target histories. Confirm its relevance before proposing this comment for posting; approval of the recovery-map comment does not include this held draft. Inspection does not select or approve a release snapshot. Verify production image identity before advancing EC/bundle steps or parent artifacts.
 
 ```text
-The October 8 inspection of candidate snapshot submariner-0-22-20261002-125823-000-lz confirms that snapshot integration finished and passed with warnings. The bundle has image label v0.22.2 and ClusterServiceVersion (CSV) version 0.22.2. The [candidate evidence](https://github.com/stolostron/submariner-release-management/blob/e2a38ecd219a6c2593431b848ecda30d69aa967b/plans/current-work.md#release-recovery-and-time-sensitive-work) records its bundle digest and source commits.
+The October 8 check of snapshot submariner-0-22-20261002-125823-000-lz found passing snapshot integration with warnings and a 0.22.2 bundle. [Evidence](https://github.com/stolostron/submariner-release-management/blob/e2a38ecd219a6c2593431b848ecda30d69aa967b/plans/current-work.md#release-recovery-and-time-sensitive-work).
 
-The extracted CSV matches both the bundle and snapshot operator source trees. Production image identity remains unverified: all seven related-image digests in the CSV differ from the corresponding snapshot images, and inspection of the CSV's production operator image returns manifest unknown. Registry copying can change manifest digests, so different digests alone do not prove incorrect content.
-
-The candidate's relevance to this release still needs confirmation; this inspection does not establish release readiness.
+Production images remain unverified: seven related-image digests differ from the snapshot images, and the referenced operator returns manifest unknown. Different digests alone do not prove incorrect content. Confirm this candidate belongs to the release before using it.
 ```
 
 ## Group 6 — independent epic descriptions
