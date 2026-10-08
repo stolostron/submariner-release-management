@@ -21,6 +21,8 @@ Conventions verified against CORENET Story create metadata and existing Story ed
 
 Current publication: #617 is draft at `1a33dafe05981ceebfaf8fe780b0c448a6310b2d` (143 changed files), with WIP, invalid-OWNERS and needs-ok-to-test labels and no returned current-head review. Direct blob comparison shows its plugin matches October 7 committed source `a477bced` except the two court-test files; the old unpublished-source conclusion is superseded. Fresh qualification of the published source/runtime remains required. No local checkout was re-read or changed by this audit.
 
+Maintainer clarification, October 8: the original title-only epic supplied no specification or design. The architecture and workflow are the maintainer’s original work, reported fully working across all six CoreNet repositories for Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37. The configurations confirm those earlier patch targets. This reports functional coverage; it is not a new independent matrix run or an approval of retained qualification evidence. The older audit records and upstream merge/measurement criteria remain separate.
+
 Historical development facts (October 7 and earlier; full method in Part B, section B8):
 
 * Plugin in openshift-eng/ai-helpers: 134 tracked files, about 20.8k lines, at `plugins/k8s-rebase`. README: a state machine above the agent, scripts do repeatable work, 32
@@ -39,14 +41,16 @@ Historical development facts (October 7 and earlier; full method in Part B, sect
 Target: CORENET-7155. Field to set: `description` (ADF, converted from the Markdown below). Nothing else on the epic needs to change.
 
 ```text
-Automate Kubernetes minor-version rebases of CoreNet Go repositories with the k8s-rebase plugin for Claude Code and Codex in openshift-eng/ai-helpers. Scripts align dependencies, regenerate code and update version references; the agent repairs build, lint and test failures. A state machine and evidence gates control progress. Gate enforcement and installed-runtime qualification remain acceptance work.
+The original epic contained only a title, with no specification or design. I originated and implemented the entire k8s-rebase design: the state machine, scripted steps, evidence gates, hooks and repair/review workflow.
+
+The plugin is fully working across all six CoreNet repositories for Kubernetes 1.34.1, 1.35.3 and 1.36.2, and is now working for 1.37. It automates dependency alignment, code generation, version updates and repairs, packaged for Claude Code and Codex in openshift-eng/ai-helpers.
 
 _Scope:_
 
 * The k8s-rebase plugin: a five-step workflow (rebase, compilation, autofix, verification, PR) with gates, scripts, hooks and design docs
-* Qualification against real Kubernetes 1.36.2 rebases of CoreNet repositories
+* Working rebases across all six CoreNet repositories for Kubernetes 1.34.1, 1.35.3 and 1.36.2
 * Evaluations that measure the workflow, including run cost and model
-* Preparing and validating the next minor (Kubernetes 1.37)
+* Kubernetes 1.37 support and qualification
 * Upstreaming the plugin to openshift-eng/ai-helpers
 
 _Acceptance criteria:_
@@ -85,6 +89,8 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
+I originated and implemented the architecture and workflow from a title-only epic with no specification. The plugin is fully working across all six CoreNet repositories for Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37.
+
 October 8: the five-step workflow, gates, hooks and retained-evidence contracts are published in https://github.com/openshift-eng/ai-helpers/pull/617 at 1a33dafe05981ceebfaf8fe780b0c448a6310b2d. Its plugin matches the October 7 committed source except two court-test files.
 
 Publication does not establish installed-runtime or CI qualification of this source.
