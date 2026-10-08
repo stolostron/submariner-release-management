@@ -2,7 +2,7 @@
 
 # Additional existing-issue updates
 
-Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted October 8 at 09:37 UTC and the group 5 recovery-map comment at 10:43 UTC, both verified. Other updates remain pending. These updates are independent of creating S/K stories.
+Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted October 8 at 09:37 UTC and the group 5 recovery-map comment at 10:43 UTC, both verified. The builder planning comment posted and verified October 8 at 15:37 UTC completes group 4. Other updates remain pending. These updates are independent of creating S/K stories.
 Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
 Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
 The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
@@ -47,9 +47,11 @@ ACM-39738: no parent rollup proposed. The two child updates are posted; the broa
 
 ## Group 4 — deadline and requested status
 
-Partially complete: the lifecycle comment is posted; ACM-45318 is a reviewed, unposted October 8 draft. Only the builder comment is next for approval. Refresh the builder target and source evidence before separately approved posting. Future lifecycle comments must add a missing delta; the posted record below must not be reposted. No workflow transition or program label was assigned.
+Complete: lifecycle comment `18829498` and builder planning comment `18839276` are posted and verified. Both blocks below are fixed posted records; do not repost them. Future comments must add a missing delta. No workflow transition or program label was assigned.
 
 ### ACM-45318 — builder migration inventory
+
+Completed: comment `18839276`, created October 8 at 15:37:20 UTC with initial `Red Hat Employee` visibility. Exact ADF/rendered text and the immutable inventory link are verified. New status, criteria, hierarchy and complete history are unchanged. The read-back also reports a populated first-response timestamp and the posting account watching; no separate field or watcher write was performed. This planning comment does not complete the migration.
 
 ```text
 Prepared a [repository and branch inventory](https://github.com/stolostron/submariner-release-management/blob/123ebebaa7279a5d75b7a3d2626988475d0a8ee8/plans/art-builder-migration.md) for the October 15 ART builder migration. Brew Go-builder references occur in both addon Dockerfiles; all 36 ticket-listed component Dockerfiles across 0.19–0.24 use UBI Go Toolset. The release-management CVE workflow still selects Brew builders.

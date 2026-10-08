@@ -2,9 +2,9 @@
 
 # ART builder migration: source inventory and implementation handoff
 
-Rechecked October 8, 2026: 137 canonical branch/ref reads across nine Submariner/addon/FBC repositories and 136 immutable source trees, plus the previously inspected shared CI builder/catalog, OpenShift CI configuration and ACM remote-build task source. ACM-45318 remains New with no comments and requests migration by October 15.
+Rechecked October 8, 2026: 137 canonical branch/ref reads across nine Submariner/addon/FBC repositories and 136 immutable source trees, plus the previously inspected shared CI builder/catalog, OpenShift CI configuration and ACM remote-build task source. ACM-45318 remains New and requests migration by October 15; planning comment `18839276` posted and verified October 8 at 15:37 UTC.
 This plan turns the [current work map](current-work.md)'s deadline into a source-backed change inventory.
-No implementation or external issue was changed by this audit.
+The source audit makes no implementation change; the posted planning comment does not complete the migration.
 
 ## Current source and coverage
 
