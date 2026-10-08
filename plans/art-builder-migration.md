@@ -10,7 +10,7 @@ No implementation or external issue was changed by this audit.
 
 The three ticket-listed independent-product repositories have downstream builders in `release-0.22`, `release-0.23` and `release-0.24`.
 Their devel Dockerfiles use the shared Shipyard Dapper builder and Fedora/scratch output; these are separate upstream build paths.
-The ticket targets Brew/OSBS consumers of ART Go builders. Its parent lists `registry.redhat.io/openshift/golang-builder:golang-builder-vX.YY-rhelZ` replacements, including Go 1.25/1.26 on RHEL9, and requires internal registry entitlement. Local manifest/config reads now confirm the documented RHEL9 Go 1.23–1.26 tags and four platforms. Supported build-source selection, CI access and build qualification remain pending.
+The ticket targets Brew/OSBS consumers of ART Go builders. Its parent lists floating `registry.redhat.io/openshift/golang-builder:golang-builder-vX.YY-rhelZ` replacements on both RHEL8 and RHEL9, with internal registry entitlement. Fresh metadata reads confirm Go 1.23–1.26 on RHEL9 and Go 1.25 on RHEL8, each on four platforms. Select the Go version **and existing builder OS family** for each consumer; the registry migration does not by itself require an OS-family change. Supported source selection, CI access and build qualification remain pending.
 The downstream component Dockerfiles use UBI Go Toolset, not the named ART builder; no replacement is justified by the deadline alone. Inspect shared/transitive build inputs before identifying an affected component path.
 The rows below read an immutable branch head's Go directive and sample Konflux Dockerfile; that directive is a module floor, not the observed build compiler.
 
@@ -83,30 +83,44 @@ Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all st
 
 ## ART replacement metadata checked October 8
 
-Local registry reads succeeded for these parent-documented floating RHEL9 tags. Each index and all four architecture-specific configs were read by digest; each has Linux amd64, arm64, ppc64le and s390x. Tekton calls amd64 `x86_64`. Config `GO_VERSION` and the image version label agree across those four architectures:
+Fresh reads resolve these five parent-documented tags and all twenty architecture-specific configs by digest. Each has Linux amd64, arm64, ppc64le and s390x; Tekton calls amd64 `x86_64`. Config `GO_VERSION` and the image version label agree across each tag’s platforms:
 
 | Tag in `registry.redhat.io/openshift/golang-builder` | Declared Go version | Source floor to assess |
 | --- | --- | --- |
 | `golang-builder-v1.23-rhel9` | `1.23.10` | Separate appstudio 2.14 source (`1.23.0`); not sufficient for release-2.10’s `1.24.0` floor |
 | `golang-builder-v1.24-rhel9` | `1.24.13` | 2.10–2.12 roots (`1.24.0`) |
-| `golang-builder-v1.25-rhel9` | `1.25.14` | 2.13–2.17 and 4.23 roots (up to `1.25.13`) |
+| `golang-builder-v1.25-rhel8` | `1.25.14` | Candidate preserving the current Brew `v1.25` OS family on 2.13–2.17/4.23; roots up to `1.25.13` |
+| `golang-builder-v1.25-rhel9` | `1.25.14` | Use for an established RHEL9 consumer or separately required OS-family transition; root Go floors alone do not choose RHEL9 |
 | `golang-builder-v1.26-rhel9` | `1.26.7` | 5.0–5.2/main roots and tools (`1.26.0`) |
 
 These are metadata observations and candidate families, not measured compiler execution or approved stream/tag selections. Preserve all compiled-module floors and existing toolchain requirements. Local index/config access does not establish CI entitlement, layer pulls, builds or crypto behavior; verify those in the actual build context. Tags float by policy, so retain resolved image digests and compiler evidence for each qualification run. Runtime-base selection remains independent.
+
+The current Brew `v1.25` index and all four configs declare **RHEL8**, Go 1.25.14, and no explicit `GOAMD64`; the RHEL8 ART candidate preserves those declarations and the declared Go RPM build. Its filesystem metadata differs, so it still needs build qualification. The RHEL9 candidate declares a different OS/RPM family and adds `GOAMD64=v2`. Prefer the matching RHEL8 family unless an existing requirement calls for RHEL9; do not silently combine registry migration with an OS/CPU baseline change. Brew `v1.26` and ART RHEL9 both declare Go 1.26.7 and `GOAMD64=v2`, but their Go RPM release and filesystem metadata differ. Matching Go version strings do not prove identical builders.
+
+All five ART tags declare `GOFLAGS=-mod=vendor`. The addon Makefile and Konflux build command pass `-mod=mod` explicitly; [Go command-line flags override GOFLAGS](https://pkg.go.dev/cmd/go#hdr-Environment_variables), so this default does not establish a new vendoring requirement. The Dockerfile’s `make build` compiles the root command; tools-module compilation belongs to targets that actually invoke those tools. Keep prefetch aligned with those targets rather than adding tools prefetch to the image build without a consumer. Measure effective CPU feature settings and check the built binary in its unchanged runtime image, including dynamic loader/libraries where CGO is used. The ordinary 2.11 CI image uses a UBI8 runtime override; retain that context in runtime qualification.
 
 ## Other build inputs and full migration scope
 
 The [OpenShift CI configuration](https://github.com/openshift/release/tree/8dc32b0f7b22122ad82bed2511fdec40419429a7/ci-operator/config/stolostron/submariner-addon) selects the ordinary `Dockerfile` for ten addon branch configurations. Its build root is separate: CI `stolostron/builder` Go 1.25 for 2.11–2.13 and Go 1.26 for 2.14–2.17, 5.0/5.1 and main. Both Dockerfiles therefore need a disposition on each accepted stream; replacing only `Dockerfile.konflux` leaves the ordinary Brew path where present. The addon Makefile also defaults image builds to `./Dockerfile`.
 
-That shared CI builder is [UBI-based](https://github.com/stolostron/image-builder/blob/363bb4685ebf964821f67d8405481dd498eb1bdc/Dockerfile.go1.26-linux), with [Go downloaded directly](https://github.com/stolostron/image-builder/blob/363bb4685ebf964821f67d8405481dd498eb1bdc/build/setup-go.sh); no named Brew builder consumer is found in its source. Its Go 1.26 Dockerfile specifies **1.26.8**, whereas the earlier ART metadata read reports **1.26.7**. Neither source nor metadata proves a running compiler; reconcile required patch/security levels before approving a replacement, even when both exceed the module floor. The Shipyard Dapper base uses Fedora and installs its Go package through dnf; its inspected source and vendored build inputs add no direct Brew consumer.
+That shared CI builder is [UBI-based](https://github.com/stolostron/image-builder/blob/363bb4685ebf964821f67d8405481dd498eb1bdc/Dockerfile.go1.26-linux), with [Go downloaded directly](https://github.com/stolostron/image-builder/blob/363bb4685ebf964821f67d8405481dd498eb1bdc/build/setup-go.sh); no named Brew builder consumer is found in its source. Its Go 1.26 Dockerfile specifies **1.26.8**, while both the current Brew and ART artifact builders declare **1.26.7**. This is a difference between build paths, not evidence that migration downgrades the artifact compiler or that 1.26.8 is an accepted minimum. Compare the actual old/new artifact compilers and retain required patch/security levels. The Shipyard Dapper base uses Fedora and installs its Go package through dnf; its inspected source and vendored build inputs add no direct Brew consumer.
 
 Addon release pipelines resolve [ACM common.yaml](https://github.com/stolostron/konflux-build-catalog/blob/d6b74add90f5717bd2858cb8b7d1cd6aec32c09e/pipelines/common.yaml) through mutable `main`. It carries hermetic mode, root-module prefetch and platform parameters into digest-pinned build tasks. The remote build task’s OCI manifest identifies [this immutable task source](https://github.com/konflux-ci/container-build-catalog/blob/cab160f4afed001a6ad32f4b0e1ee3067d1b8547/task/buildah-remote-oci-ta/buildah-remote-oci-ta.yaml). Record the catalog revision actually resolved in each qualification run and verify registry access in its remote build context. Local registry login, registry pull entitlement and RPM subscription certificates are separate evidence; do not add RPM entitlement configuration merely to pull the ART image.
+
+The pinned Prow jobs for main, 2.11 and 2.15 pass `--image-import-pull-secret` and distinguish `--target=[images]` from build/unit targets. The latter use CI-root binaries; the build test itself runs `true` in `bin`. Require the corresponding **images** check on each changed ordinary Dockerfile, plus the required Konflux image/platform checks. A green source build/unit check alone does not exercise the replacement Dockerfile stage.
+
+| CI context | Credential path to verify |
+| --- | --- |
+| OpenShift ordinary image build | Follow the job’s pull-secret input to the generated Build’s `spec.strategy.dockerStrategy.pullSecret`; [CI Operator passes that secret to the image build](https://github.com/openshift/ci-tools/blob/c02a7676f479a22cebbc56fddb841cae73c123e1/pkg/steps/source.go). A credential mounted in an unrelated test container is insufficient evidence. Verify the exact ART repository’s internal entitlement. |
+| Konflux task and remote worker | [Tekton merges credentials from the service account’s secrets](https://konflux-ci.dev/docs/troubleshooting/registries/) into `~/.docker/config.json`; Pod imagePullSecrets serve a different pull context. The inspected task rsyncs this Docker configuration to the remote worker and mounts it in the build container. Verify the selected credential’s repository/path match and entitlement along that actual path; preserve existing links. |
+
+These source paths identify where to check access; they do not establish deployed credential contents or a successful build. Do not add or rotate secrets solely because the registry hostname changes.
 
 | Area | Work needed before closure |
 | --- | --- |
 | Build sources and Dockerfiles | Confirm supported/deployed revisions; replace both verified Brew consumers where used. Give appstudio copies and archived branches an explicit disposition. Preserve matching PaC filters. |
-| CI registry access | Verify the actual build service account and remote workers can pull each required platform. Change credentials or policy only when an actual missing requirement is identified. |
-| Compiler and crypto | Preserve module/toolchain and required patch levels, CGO and the 2.15/2.16 strict-FIPS settings. Measure the compiler used; successful registry reads do not exercise these settings. |
+| CI registry access | Verify OpenShift image-build pull credentials and Konflux task/remote-worker credentials against the exact repository. Change credentials or policy only for an identified missing requirement. |
+| Compiler, runtime and crypto | Preserve builder OS family, module/toolchain and required patch/CPU levels, runtime compatibility, CGO and the 2.15/2.16 strict-FIPS settings. Measure the actual artifact compiler. |
 | Hermetic builds and release platforms | Retain root prefetch and offline build behavior; check toolchain switching as well as dependencies. No addon RPM lockfiles were found, so regenerate only inputs actually affected. Qualify every required platform and the resulting image/provenance. |
 | Future branches and completion | Carry both Dockerfile changes through the addon’s accepted stream/branch process. The eight-component setup wrapper does not include addon. Close only with reviewed changes and qualified consumer builds, plus explicit dispositions for unaffected paths. |
 
@@ -114,22 +128,13 @@ Addon release pipelines resolve [ACM common.yaml](https://github.com/stolostron/
 
 ## Prepare a reviewable change
 
-1. Confirm the current supported streams, ticket scope and approved ART registry/tag family with the existing issue owner. Retain the module Go floors and higher toolchain requirements;
-   do not choose one Go minor for all repositories merely because they share Submariner versions. Verify exact target-image availability, patch compiler, architectures and registry access.
-2. Start with an isolated addon change for the verified Brew references. Inspect pipeline `DOCKERFILE`/build-argument selection so each edit reaches the affected build. Propose an independent-product change only if a named ART/Brew consumer is found in its Dockerfiles, shared builder or pipeline inputs; otherwise record no change required.
-   Refresh branch heads first; keep upstream Dapper and downstream Konflux paths separately reviewable. Preserve source pins, runtime-base policy and image labels unless a reviewed requirement changes them.
-3. Preserve each affected build's existing compiler, crypto, CGO and platform contract. Exercise `GOEXPERIMENT=strictfipsruntime` and related build tags where already configured or separately required. Check the target Go/crypto implementation against that applicable contract; preserve the addon's independent runtime-base policy.
-4. Trace RPM lockfiles and hermetic prefetch inputs against the new builder. Regenerate only affected data through the existing deterministic tools and inspect the result;
-   record which dependencies/locks are unchanged instead of assuming a registry swap has no build implications.
-5. Run meaningful native builds/tests and the actual required multiarchitecture Konflux checks at each proposed head. Record the compiler used for root/tools modules,
-   platform images and the applicable crypto behavior. Keep source verification, local compilation and hosted build evidence distinct.
-6. Review the addon’s supported-stream propagation for both Dockerfiles; `tekton-component-setup.sh` covers eight independent-product components and does not include addon.
-   If a separate component consumer is identified, its `konflux-component-setup.sh` copies the preceding stream’s Dockerfile. Cover the affected predecessor path without broadening product support.
-7. After authorized merge, verify built-image provenance and record exact evidence in ACM-45318. Builder migration does not establish ART ownership transfer, PQC runtime state,
-   OLMv1 support or OCP 5 operator compatibility; those keep their existing acceptance criteria.
+1. Confirm supported/deployed source revisions and refresh their heads. For each used Dockerfile, record the current builder, module/toolchain floor, declared and measured compiler/RPM/OS/CPU settings, runtime base and CI source selection. Choose a parent-documented floating tag that preserves the applicable contract; the current Brew `v1.25` paths have a matching RHEL8 candidate.
+2. Verify the two credential paths above, then prepare isolated replacements of verified Brew references in both used addon Dockerfiles. Retain build commands, runtime bases, labels, crypto settings and prefetch. Add credential, dependency or lock changes only when required by that consumer; no addon RPM lockfiles are present. Give unaffected product paths and unused branch copies an explicit disposition.
+3. Qualify the proposed head through ordinary Prow images checks and the required Konflux platforms, preserving hermetic mode. Record source SHA, resolved catalog/task and base-image digests, effective Go/CPU/CGO/crypto settings, output image and verdict per context/platform. Verify binary startup/runtime dependencies and existing crypto checks in the actual runtime image; a PR’s x86_64 build does not qualify every release platform.
+4. Carry both Dockerfile changes through the accepted addon branch process; the eight-component setup wrapper excludes addon. After reviewed merge, retain qualified consumer-build and image/provenance evidence for closure. Separately identified component consumers need their own predecessor-copy disposition. ART ownership transfer, PQC runtime state, OLMv1 and OCP 5 compatibility retain their existing criteria.
 
 ## Validation boundary and immediate next action
 
-This audit reads all published addon release/appstudio branches, independent-product/shared sources, pinned CI configuration and the remote task source, alongside the earlier four ART indexes and sixteen platform configs. No builder container or migration build was run; execution and CI qualification remain unestablished.
+The 46 source refs are refreshed unchanged. This audit adds five ART indexes/twenty configs, two current Brew indexes/eight configs, six pinned Prow job documents and exact CI Operator image-build credential code to the earlier source/task coverage. No image layers, builder container or migration build were used; execution and CI qualification remain unestablished.
 The concrete next handoff is supported-addon-build-source and CI-access confirmation, then isolated changes to verified Brew consumers with applicable compiler/crypto/architecture qualification. Retain a no-change disposition for unaffected paths.
 Local ART metadata access succeeds on October 8; CI registry access remains unverified. A fresh read-only Konflux authentication check returns Unauthorized, so cached tenant configuration does not establish the current deployed build source. No migration build was submitted or qualified; supported source/tag selection, CI access and change review remain the next handoff.
