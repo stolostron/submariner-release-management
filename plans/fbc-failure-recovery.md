@@ -2,7 +2,7 @@
 
 # FBC failure recovery — current priority
 
-Reviewed 2026-10-07; published checks, retained snapshots, component-stage release and local drafts rechecked.
+Reviewed 2026-10-08; release-target histories, retained snapshots and live release/runner state rechecked. Published checks and local drafts retain their dated evidence.
 The [current work map](current-work.md) records concurrent upstream repairs, release trackers and the independent October 15 builder-migration deadline. First unblock the existing **0.23.4 / OCP 4.16–4.21** FBC integration tests, then address the separate
 OCP 5.0 PR prerequisite. Jira payload application remains a separate reviewed handoff.
 No Release resource, live secret binding, snapshot rerun or GitLab submission has been applied by this review.
@@ -15,9 +15,9 @@ The exact snapshot/scenario/run map below combines those checks with retained cl
 All six report `get-unreleased-bundle` / `StepFailed`; their corresponding catalog push builds succeeded.
 The saved September 30 4.19 step log shows repeated anonymous pulls of the production index returning `401 Unauthorized`.
 The standard integration checks report warnings, not the operator failure; inspect the complete snapshot verdict before releasing.
-These failures remain published/historical evidence. The October 7 authenticated read checked the explicit `submariner-tenant` namespace:
+These failures remain published/historical evidence. The October 8 authenticated read rechecked the explicit `submariner-tenant` namespace:
 
-* `submariner-konflux-registry-redhat-io` exists with type `kubernetes.io/dockerconfigjson`; no credential data was read or printed.
+* `submariner-konflux-registry-redhat-io` was observed October 7 with type `kubernetes.io/dockerconfigjson`; no credential data was read or printed.
 * Its name is absent from both `secrets` and `imagePullSecrets` on `konflux-integration-runner`. This confirms the missing link; it does not verify credential usability.
 * `submariner-fbc-5-0` Application and Component and `build-pipeline-submariner-fbc-5-0` are NotFound. Reconciliation remains a prerequisite.
 * The latest namespace read returns zero PipelineRuns. All six exact failing FBC snapshot/scenario associations below remain present; archived task logs are still needed for fresh diagnosis and historical root-cause comparison. The [work map](current-work.md#release-recovery-and-time-sensitive-work) records the changing retained-snapshot total.
@@ -28,14 +28,14 @@ The earlier GitLab main-ref read failed DNS; fresh-base/controller ownership and
 | --- | --- | --- | --- |
 | P0 | 4.x operator test cannot authenticate the production-index render | Link the existing Red Hat registry secret to the integration runner; retain the link declaratively | New snapshot integration runs render the index successfully and meet the release gate |
 | P1 | FBC #82 fails before its first task can start | Refresh and reconcile the existing 5.0 tenant draft, then rerun the PR | Expected live build SA exists and the exact PR head's Konflux check passes |
-| P2 | Four task pins approach their October expiry | Refresh pins in a separate reviewed change after checking current trust/deny rules | Exact-head EC succeeds with the replacement refs |
+| P2 | Five task pins expire October 30/31 or November 6 | Refresh pins in a separate reviewed change after checking current trust/deny rules | Exact-head EC succeeds with the replacement refs |
 
-Task expiry is not the demonstrated cause of the current failures. The OCP 5 catalog, profile access and runtime support remain separate rollout gates in the
+The [rollout plan](ocp-5-0-fbc-rollout.md#3-reconcile-82-and-verify-its-build) records the refreshed trust-data pin and individual expiry dates. Task expiry is not the demonstrated cause of the current failures. The OCP 5 catalog, profile access and runtime support remain separate rollout gates in the
 [OCP 5 plan](ocp-5-0-fbc-rollout.md).
 
 ## Retained snapshot and scenario identities
 
-October 7 authenticated reads recover one snapshot per 4.16–4.21 Application at FBC source
+October 8 authenticated reads retain one snapshot per 4.16–4.21 Application at FBC source
 `2e6b489e65620738d68504d9158418fe463e2073`. All six have integration Finished=True, aggregate TestSucceeded=False/Failed,
 and a completed operator scenario with TestFail. Standard scenarios finished with “passed with warnings”; their retained
 `BuildPLRInProgress` strings do not mean the operator tests passed or are still running.
@@ -51,11 +51,15 @@ and a completed operator scenario with TestFail. Standard scenarios finished wit
 
 Each snapshot has its matching single FBC Component and immutable catalog-image digest. Those identities are retained privately with the raw evidence.
 The association is established; source/image catalog-content and intended 0.23.4 bundle verification remain before mutation.
+October 8 catalog extractions timed out; they provide no content or membership verdict.
 A missing live PipelineRun does not erase the snapshot's finished failed verdict. Re-read this map before a separately authorized rerun.
 
 The component-stage snapshot `submariner-0-23-20260930-064533-000` is also retained with nine components and aggregate TestSucceeded=True.
-Its EC/standard scenario finished with warnings. The recorded `submariner-0-23-4-stage-20260930-01` Release still reports Released=True/Succeeded,
-matching the existing Jira artifact entry. This confirms the component-stage evidence, not FBC/QE/production completion; no duplicate component success comment is needed.
+Its combined EC/standard scenario finished with warnings. The archived October 7 read of
+`submariner-0-23-4-stage-20260930-01` reports Released=True/Succeeded, matching the existing Jira artifact entry.
+The October 8 read returns NotFound for that name and zero retained Releases in the namespace. This limits live re-verification;
+it does not erase the archived success or prove failure. Snapshot `AutoReleased=True` records a skipped automatic release, not release success.
+Component-stage evidence does not complete FBC/QE/production; no duplicate component success comment is needed.
 
 ## Prepared registry-link repair
 
