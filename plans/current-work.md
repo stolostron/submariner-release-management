@@ -2,15 +2,15 @@
 
 # Current work and planning handoffs
 
-Broad review October 7, 2026; lifecycle target/posting, release-evidence batch, recovery-map posting, Kubernetes epic description and contribution-batch refresh verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
+Broad review October 7, 2026; lifecycle target/posting, release-evidence batch, recovery-map posting, Kubernetes epic description and contribution-batch posting verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction and lifecycle status comment are posted; remaining approvals start with CVE contributions, then the builder comment in the partial deadline/status group. The EVPN comment is deferred to the end of the queue. FBC recovery, private CVE triage and deadline work retain their engineering priority.
+Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction, both group 2 contribution comments and lifecycle status comment are posted; remaining approvals start with the builder comment in the partial deadline/status group. The EVPN comment is deferred to the end of the queue. FBC recovery, private CVE triage and deadline work retain their engineering priority.
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC and the recovery-map comment at 10:43 UTC; ids are recorded in the Jira update plan. The Kubernetes epic description was also applied and verified at 11:23 UTC. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
+Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC and the recovery-map comment at 10:43 UTC; ids are recorded in the Jira update plan. The Kubernetes epic description was also applied and verified at 11:23 UTC, followed by the two contribution comments at 11:48 UTC. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
 ## Release recovery and time-sensitive work
 
@@ -91,7 +91,7 @@ Do not treat upgrade-test repair as proof that FIND-006 download-integrity fixes
 ## Release tooling and Jira payloads
 
 ACM-39728 still has ten direct children. CORENET-7155 has no children; its approved description was applied and verified October 8 at 11:23 UTC (changelog `92306194`), recording the maintainer’s original design and working coverage. Submariner epic edits and all new stories remain pending.
-Both epics remain In Progress. The first four ACM comments were posted and verified; their ids are recorded in the execution plan. The three contribution targets remain New with comment totals 0/1/1 on ACM-39738/39739/39740. Only the two child updates are proposed; the duplicate parent rollup is deferred.
+Both epics remain In Progress. The first four ACM comments were posted and verified; their ids are recorded in the execution plan. The three contribution targets remain New with comment totals 0/2/2 on ACM-39738/39739/39740. The two approved child updates were posted and verified October 8 at 11:48 UTC as comments `18831845` (agent) and `18831852` (fix); the duplicate parent rollup is deferred.
 Submariner Sprint 2026-59 (87579) and CORENET Sprint 295 (87581) remain active in the inspected records.
 Both projects' create metadata and existing targets' edit/transition metadata were read successfully; actual creates, transitions and write canaries remain untested.
 
