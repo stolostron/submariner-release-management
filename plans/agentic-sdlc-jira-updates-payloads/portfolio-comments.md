@@ -21,7 +21,7 @@ CORENET-7086: no parent comment proposed. Its hierarchy already exposes the task
 
 ## Group 2 — CVE contributions
 
-Reviewed October 7, 2026 at 23:11 UTC; two child comments only, in the order below. Both issues remain New. Refresh targets and mutable PR evidence before posting; verify each restricted comment, including its rendered text/links, before the next write.
+Reviewed October 8, 2026; two child comments only, in the order below. The CVE-fix snapshot at `b347a44d` has zero unresolved current threads and no current-head review; the latest changes request is on an older revision. Hosted checks were still running at 11:31 UTC; the comment keeps the delivered scope and remaining contribution work. Both issues remain New. Refresh targets and mutable PR evidence before posting; verify each restricted comment, including its rendered text/links, before the next write.
 
 ### ACM-39740 — CVE-agent contribution
 
@@ -38,9 +38,9 @@ Per-product configuration still needs extraction, including component/image mapp
 One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
 
 ```text
-The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 remains open at 453dbbb47ad189b86d811aeff0c18b71115126e1. At the October 7, 23:11 UTC read, all returned hosted checks pass or skip; the latest changes-requested review is on the previous head, two current threads remain unresolved and no current-head approval is recorded.
+The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 remains open. It implements per-repository .cve-fix.yaml overrides, configurable repository registries and Claude/Codex review.
 
-This PR implements per-repository .cve-fix.yaml overrides and repository-registry configuration. Remaining Submariner-specific defaults and the go-fix-cves merge into ai-helpers still need resolution against this story’s acceptance criteria.
+The general contribution still needs to resolve the hardcoded Submariner builder-image fallback for unconfigured Shipyard consumers and merge go-fix-cves into ai-helpers.
 ```
 
 ACM-39738: no parent rollup proposed. Post the two child updates only; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
