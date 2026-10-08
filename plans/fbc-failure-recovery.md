@@ -4,7 +4,7 @@
 
 Reviewed 2026-10-08; release-target histories, retained snapshots and live release/runner state rechecked. Published checks and local drafts retain their dated evidence.
 The [current work map](current-work.md) records concurrent upstream repairs, release trackers and the independent October 15 builder-migration deadline. First unblock the existing **0.23.4 / OCP 4.16–4.21** FBC integration tests, then address the separate
-OCP 5.0 PR prerequisite. Jira payload application remains a separate reviewed handoff.
+OCP 5.0 PR prerequisite. The approved recovery-map comment was posted and verified October 8 at 10:43 UTC; the 0.22.2 candidate comment remains on hold. Other Jira payload application remains a separate reviewed handoff.
 No Release resource, live secret binding, snapshot rerun or GitLab submission has been applied by this review.
 
 ## Confirmed failures and proposed fixes
@@ -177,5 +177,6 @@ A passing PR check still supplies no OCP 5 push-test, installation or release ev
 
 The proposed registry-link manifest renders correctly and declares no replacement for controller-managed image-pull credentials.
 Repository validation results are recorded in the [verification record](agentic-sdlc-jira-updates-verification.md).
-Recheck Konflux authentication before a separately authorized repair/rerun; durable submission requires GitLab access and a fresh base.
+The October 8 posting preflight finds Konflux authentication expired. The pinned historical map was verified; no live snapshot refresh was available.
+Renew Konflux authentication before a separately authorized repair/rerun; durable submission requires GitLab access and a fresh base.
 No FBC failure is marked resolved until the corrected live run and existing release verification pass.

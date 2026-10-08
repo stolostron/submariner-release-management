@@ -2,7 +2,7 @@
 
 # Additional existing-issue updates
 
-Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted and verified October 8 at 09:37 UTC. Other updates remain pending. These updates are independent of creating S/K stories.
+Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted October 8 at 09:37 UTC and the group 5 recovery-map comment at 10:43 UTC, both verified. Other updates remain pending. These updates are independent of creating S/K stories.
 Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
 Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
 The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
@@ -73,11 +73,11 @@ Blockers observed October 7: the published build fails at init for a missing bui
 
 ## Group 5 — release evidence
 
-Reviewed October 8, 2026 against both parents, all 32 children and their complete histories. The recovery-map comment is ready for review. Hold the candidate comment until its relevance to the intended release is confirmed. Preserve fields/statuses and refresh mutable evidence before any approved post.
+Group 5 is partial: the recovery-map comment posted and verified October 8 at 10:43 UTC. The candidate comment remains on hold until its relevance to the intended release is confirmed. Preserve fields/statuses and refresh mutable evidence before any approved post.
 
 ### Release Submariner 0.23.4 — recovery map
 
-Target: ACM-44527. The parent already records component-stage success, the failed FBC tests and registry diagnosis. Add only the missing exact recovery map, once on the parent.
+Completed on ACM-44527: comment `18830594`, created October 8 at 10:43 UTC with initial `Red Hat Employee` visibility. Exact text, rendered link, unchanged In Progress status and all earlier comments were verified. The block below is a fixed posted record; do not repost it.
 
 ```text
 The [0.23.4 FBC recovery map](https://github.com/stolostron/submariner-release-management/blob/0d23d60a992aeb432a0cd72ad868d256427ce35f/plans/fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) records the snapshot, test scenario and failed run for each OCP version 4.16–4.21.

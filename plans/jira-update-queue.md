@@ -5,18 +5,18 @@
 Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
 The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
 Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; group 4 is partial and its builder comment remains pending. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
+Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; group 4 is partial and its builder comment remains pending. The Release Submariner 0.23.4 recovery-map comment `18830594` posted and verified October 8 at 10:43 UTC; group 5 is partial and the 0.22.2 candidate remains on hold. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
 
 ## Approval order
 
-Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments, group 1 and the lifecycle comment in group 4 remain completed.
+Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments, group 1, the lifecycle comment in group 4 and the recovery-map comment in group 5 remain completed.
 
 | Group | Work | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
 | 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft still needs separate approval and refreshed source scope |
-| 5 | Release evidence | Release Submariner 0.23.4 (ACM-44527); Release Submariner 0.22.2 (ACM-45070) on hold | Recovery-map comment ready for review; registry diagnosis is already recorded. Confirm candidate relevance before proposing its comment for posting; no selection or step transitions |
+| 5 (partial) | Release evidence | Release Submariner 0.22.2 (ACM-45070), on hold | Recovery-map comment 18830594 posted on Release Submariner 0.23.4 (ACM-44527). Confirm candidate relevance before proposing its comment for posting; no selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
 | 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; complete project field/comment canaries before further creations; omit duplicate epic summaries. Terminal transitions wait for group 9 |
@@ -66,7 +66,7 @@ ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or com
 | Assigned issues | Proposed treatment | Evidence needed before changing status |
 | --- | --- | --- |
 | ACM-40644 | Closure review; all 15 children terminal, parent In Progress | Exact production bundle is verified. Seven 4.16–4.22 index probes timed out and historical Release CRs are NotFound; recover catalog/QE proof and compare all 159 comments before closeout. Neither failure proves absence |
-| ACM-44527; ACM-44537, ACM-44538, ACM-44540, ACM-44541, ACM-44542 | One parent recovery-map delta, then change individual steps only as recovery progresses | Catalog In Progress; stage/prod/URL steps New. Six exact FBC snapshot/scenario associations are recovered, all aggregate Failed; use the recovery map and verify credentials/content before reruns |
+| ACM-44527; ACM-44537, ACM-44538, ACM-44540, ACM-44541, ACM-44542 | Recovery-map comment 18830594 posted; change individual steps only as recovery progresses | Catalog In Progress; stage/prod/URL steps New. Six exact FBC snapshot/scenario associations are recovered, all aggregate Failed; use the recovery map and verify credentials/content before reruns |
 | ACM-45070; ACM-45075, ACM-45077, ACM-45078, ACM-45079, ACM-45080, ACM-45081, ACM-45083, ACM-45084, ACM-45085 | Reconcile candidate source/operand identity before accepting EC/bundle and filling parent artifacts | Unselected nine-component candidate passes integration with warnings and contains a 0.22.2 bundle. Seven embedded operand digests differ from snapshot operands; registry/content identity remains unverified. EC/bundle stay In Progress; stage onward New |
 
 QE subtasks retain their existing owners and are dependencies, not assigned work in these totals.
