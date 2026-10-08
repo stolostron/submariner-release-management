@@ -47,14 +47,14 @@ ACM-39738: no parent rollup proposed. The two child updates are posted; the broa
 
 ## Group 4 — deadline and requested status
 
-Partially complete: the lifecycle comment is posted; ACM-45318 remains a reviewed, unposted October 7 draft. Refresh the builder target and source evidence before separately approved posting. Future lifecycle comments must add a missing delta; the posted record below must not be reposted. No workflow transition or program label was assigned.
+Partially complete: the lifecycle comment is posted; ACM-45318 is a reviewed, unposted October 8 draft. Only the builder comment is next for approval. Refresh the builder target and source evidence before separately approved posting. Future lifecycle comments must add a missing delta; the posted record below must not be reposted. No workflow transition or program label was assigned.
 
 ### ACM-45318 — builder migration inventory
 
 ```text
-Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/4460072eac2b8f88c72bab567078fe42873e0b1c/plans/art-builder-migration.md) for the October 15 ART builder migration. Direct Brew consumers are in the addon; all 18 ticket-listed downstream component Dockerfiles across 0.22–0.24 use UBI Go Toolset.
+Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/74d1862651e0343d0946811941b65ca8ece7b1aa/plans/art-builder-migration.md) for the October 15 ART builder migration. Brew references are in the addon; all 18 ticket-listed downstream component Dockerfiles across 0.22–0.24 use UBI Go Toolset. Registry metadata confirms the documented Go 1.23–1.26 RHEL9 replacement tags expose all four release architectures.
 
-Remaining work: confirm supported addon build sources, select documented ART replacement tags, verify CI entitlement and qualify the compiler and release architectures. The inventory does not establish a completed migration.
+Remaining work: confirm supported addon build sources and CI registry access, migrate the Brew references, and qualify compiler and multiarchitecture builds. Inventory and registry reads do not establish a completed migration.
 ```
 
 ### OPGM-364 — requested lifecycle status
