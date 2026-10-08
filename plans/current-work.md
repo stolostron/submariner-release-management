@@ -2,7 +2,7 @@
 
 # Current work and planning handoffs
 
-Broad review October 7, 2026; lifecycle target/posting and release-evidence batch verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
+Broad review October 7, 2026; lifecycle target/posting, release-evidence batch and recovery-map posting verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
@@ -10,13 +10,13 @@ Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira u
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
+Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC and the recovery-map comment at 10:43 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
 ## Release recovery and time-sensitive work
 
 | Work | Observed reality | Next action and completion evidence |
 | --- | --- | --- |
-| 0.23.4, ACM-44527 | Parent In Progress; component stage and all prerequisites through release notes Resolved; FBC catalog In Progress; FBC stage, QE and production steps New | Authentication now works; verify registry credential usability/field ownership, then carry out the separately authorized recovery. Require successful intended-snapshot tests and release verification before stage/QE |
+| 0.23.4, ACM-44527 | Parent In Progress; component stage and all prerequisites through release notes Resolved; FBC catalog In Progress; FBC stage, QE and production steps New | Renew Konflux authentication; verify registry credential usability/field ownership, then carry out the separately authorized recovery. Require successful intended-snapshot tests and release verification before stage/QE |
 | FBC 4.16–4.21 | Each retained snapshot matches `2e6b489e65620738d68504d9158418fe463e2073`; aggregate tests Failed and operator scenarios TestFail, finished September 30/October 1 | Exact [snapshot/scenario map](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) is recovered. Verify catalog content/credential usability before an authorized rerun; no fresh task logs exist in the returned PipelineRun list |
 | ART Go builder migration, ACM-45318 | New; description requests migration by October 15 and lists addon, lighthouse, submariner and operator source repos | Use the [pinned source inventory](art-builder-migration.md): downstream component streams use UBI Go Toolset, addon branches use older Brew builders, and branch Go floors differ. Prepare reviewed changes for verified Brew/OSBS consumers with applicable compiler/crypto/build evidence; UBI Go Toolset alone is not an affected ART builder. This deadline can proceed independently of FBC credentials and Jira story creation |
 | 0.24.1, ACM-40644 | Parent In Progress; all 15 subtasks terminal. Exact production bundle tag resolves with version v0.24.1; seven index probes time out and recorded component Release CRs are NotFound | Bundle publication is confirmed. Recover catalog/QE/release evidence for actual 4.16–4.22 scope before authorized closeout; missing retained CRs and timed-out probes are not proof of absence |
@@ -27,6 +27,9 @@ Four approved existing-story comments were posted and verified October 7 at 18:2
 The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
 The latest namespace read returns zero PipelineRuns and 741 retained snapshots (the earlier read returned 746); all six documented FBC failure associations remain present.
 The recorded 0.23.4 component-stage Release is now NotFound; its archived October 7 success remains evidence.
+The October 8 posting preflight finds Konflux authentication expired; live snapshot re-verification is unavailable.
+Release Submariner 0.23.4 now has verified restricted recovery-map comment 18830594. It links recorded identities and makes no fresh test or release claim.
+Release Submariner 0.22.2’s candidate comment remains unposted and on hold.
 This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. GitLab fresh-base access remains unverified since the earlier DNS failure.
 
 0.24.1 artifact read: `registry.redhat.io/rhacm2/submariner-operator-bundle:v0.24.1` resolves to
