@@ -73,7 +73,7 @@ Another team member has begun using the CVE tooling.
 * https://github.com/submariner-io/shipyard/pull/2582 remains open at 3b67af1a3e9d3d9c9dbee1147b1294bf25879fc4. At the 2026-10-07 18:23 UTC read, hosted checks are still running; the current-head review requests changes, with two unresolved current threads and no current-head approval. The PR’s regression and live OpenShift validation claims are author-reported and were not repeated by this audit. Robustness and daily-use acceptance remain to be reviewed before contribution.
 ```
 
-Use the independent [contribution parent/child comments](../portfolio-comments.md) for ACM-39738/39739/39740.
+The independent [contribution-child comments](../portfolio-comments.md) on ACM-39739/39740 are posted and verified; the ACM-39738 parent rollup remains deferred.
 Their source merges are prerequisites; both children still require ai-helpers merges, and ACM-39740 requires non-Submariner product validation.
 Use one comment per target, omitting facts already recorded there.
 
