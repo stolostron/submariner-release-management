@@ -5,16 +5,16 @@
 Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
 The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
 Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; group 4 is partial and its builder comment remains pending. The Release Submariner 0.23.4 recovery-map comment `18830594` posted and verified October 8 at 10:43 UTC; group 5 is partial and the 0.22.2 candidate remains on hold. The Create agents to automate the bump description was applied and verified October 8 at 11:23 UTC (changelog `92306194`); group 6 is partial, with Submariner edits pending. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
+Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; group 4 is partial and its builder comment remains pending. The Release Submariner 0.23.4 recovery-map comment `18830594` posted and verified October 8 at 10:43 UTC; group 5 is partial and the 0.22.2 candidate remains on hold. The Create agents to automate the bump description was applied and verified October 8 at 11:23 UTC (changelog `92306194`); group 6 is partial, with Submariner edits pending. Group 2 is complete: contribution comments `18831845` on ACM-39740 and `18831852` on ACM-39739 posted and verified October 8 at 11:48 UTC. Remaining actions begin with the group 4 builder comment. Re-read each target and omit anything already recorded before posting.
 
 ## Approval order
 
-Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments, group 1, the lifecycle comment in group 4, the recovery-map comment in group 5 and the Kubernetes epic description in group 6 remain completed.
+Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments, groups 1 and 2, the lifecycle comment in group 4, the recovery-map comment in group 5 and the Kubernetes epic description in group 6 remain completed.
 
 | Group | Work | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
-| 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
+| 2 (complete) | CVE contributions | ACM-39740 → ACM-39739 | Posted and verified comments 18831845 and 18831852; both remain New; parent rollup deferred |
 | 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft still needs separate approval and refreshed source scope |
 | 5 (partial) | Release evidence | Release Submariner 0.22.2 (ACM-45070), on hold | Recovery-map comment 18830594 posted on Release Submariner 0.23.4 (ACM-44527). Confirm candidate relevance before proposing its comment for posting; no selection or step transitions |
 | 6 (partial) | Independent epic descriptions | Submariner Sustenance Automation (ACM-39728) edits 4 → 3 → 5; optional metrics cleanup 1/2 | Create agents to automate the bump description applied and verified, changelog 92306194. Submariner edits need separate approval; preserve unaffected ADF. Qualification remains required |
@@ -53,12 +53,12 @@ Neither the historical 259 closures nor a merged tooling PR authorizes closing t
 | ACM-39734 | Defer | No new triage implementation evidence found; avoid an empty progress post |
 | ACM-39736 | Posted comment 18820438: initial teammate adoption and shared setup prerequisites | New; multiple team members must each complete a release, with the maintainer not driving; document gaps and feed them into improvements |
 | ACM-39738 | Defer a duplicate child-progress rollup; settle the broader contribution inventory | New; original acceptance covers all generally relevant skills. Reconcile that inventory; neither two CVE children nor an open plugin PR establishes parent completion |
-| ACM-39739 | Group 2: refresh open shipyard#2582 and configuration progress after the merged agent-source update | New; October 8 source b347a44d has no unresolved current threads or current-head review; hosted checks are running. Project config, registries and Claude/Codex review are implemented. The unconfigured Shipyard builder fallback and ai-helpers merge remain |
-| ACM-39740 | Group 2 first: source #35 merge and agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
+| ACM-39739 | Posted comment 18831852: implemented project config, registries and Claude/Codex review in open shipyard#2582 | New, unchanged; unconfigured Shipyard builder fallback and ai-helpers merge remain |
+| ACM-39740 | Posted comment 18831845: source #35 merge and agent/triage configuration gaps | New; per-product configuration, ai-helpers merge and validation on another product’s CVE issues remain. Initial team adoption does not satisfy these criteria |
 
 The first four posted existing-story updates and optional URL-conversion draft are recorded in
 [comments-existing.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md).
-The two contribution-child comments are independent of S-story creation; no parent rollup is proposed. Keep ACM-39733 with its existing owner;
+The two contribution-child comments are posted and verified independently of S-story creation; no parent rollup is proposed. Keep ACM-39733 with its existing owner;
 ACM-39735 is unassigned and ACM-39737 belongs to another owner. No status or comment is proposed for those three here.
 
 ## Releases — 17

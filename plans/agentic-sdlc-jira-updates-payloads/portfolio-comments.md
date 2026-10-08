@@ -19,13 +19,13 @@ Implementation subtasks CORENET-7173 through CORENET-7199 were created on May 20
 
 CORENET-7086: no parent comment proposed. Its hierarchy already exposes the task split; post when there is a concrete implementation or ownership decision.
 
-## Group 2 — CVE contributions
+## Group 2 — CVE contributions (complete)
 
-Reviewed October 8, 2026; two child comments only, in the order below. The CVE-fix snapshot at `b347a44d` has zero unresolved current threads and no current-head review; the latest changes request is on an older revision. Hosted checks were still running at 11:31 UTC; the comment keeps the delivered scope and remaining contribution work. Both issues remain New. Refresh targets and mutable PR evidence before posting; verify each restricted comment, including its rendered text/links, before the next write.
+Both approved child comments were posted and verified October 8 at 11:48 UTC, in the order below, with employee visibility set at creation. Exact ADF/rendered text and each PR link were verified before continuing; prior comments, all other issue fields, hierarchy, changelogs and watch metadata are preserved. Both issues remain New. These are fixed posted records; do not repost them.
 
 ### ACM-39740 — CVE-agent contribution
 
-One contribution update; keep the already-posted adoption/remediation progress on ACM-39729/39736. Include the agent's cve-jira-triage dependencies in its configuration review rather than creating a duplicate task.
+Fixed posted record: comment `18831845`, created October 8 at 11:48:24 UTC. Adoption/remediation progress remains on ACM-39729/39736; include cve-jira-triage dependencies in the contribution’s configuration review.
 
 ```text
 Preparatory CVE-agent work merged October 6 in https://github.com/dfarrell07/claude-skills/pull/35: shipped-image applicability and provenance, source/version mapping, mixed triage outcomes and multi-architecture digest handling.
@@ -35,7 +35,7 @@ Per-product configuration still needs extraction, including component/image mapp
 
 ### ACM-39739 — CVE-fix contribution
 
-One contribution update; the September remediation counts and team adoption are already recorded on ACM-39729. Refresh the pinned PR snapshot before any authorized post.
+Fixed posted record: comment `18831852`, created October 8 at 11:48:51 UTC. September remediation counts and team adoption remain on ACM-39729.
 
 ```text
 The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 remains open. It implements per-repository .cve-fix.yaml overrides, configurable repository registries and Claude/Codex review.
@@ -43,7 +43,7 @@ The CVE-fix prerequisite https://github.com/submariner-io/shipyard/pull/2582 rem
 The general contribution still needs to resolve the hardcoded Submariner builder-image fallback for unconfigured Shipyard consumers and merge go-fix-cves into ai-helpers.
 ```
 
-ACM-39738: no parent rollup proposed. Post the two child updates only; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
+ACM-39738: no parent rollup proposed. The two child updates are posted; the broader generally relevant skill inventory remains an owner/scope decision in the [queue](../jira-update-queue.md).
 
 ## Group 4 — deadline and requested status
 
