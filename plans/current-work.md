@@ -6,11 +6,11 @@ Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction is posted; remaining approvals start with CVE contributions, then deadline/status work. The EVPN comment is deferred to the end of the queue. FBC recovery, private CVE triage and deadline work retain their engineering priority.
+Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction and lifecycle status comment are posted; remaining approvals start with CVE contributions, then the builder comment in the partial deadline/status group. The EVPN comment is deferred to the end of the queue. FBC recovery, private CVE triage and deadline work retain their engineering priority.
 This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
 [FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
+Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC; ids are recorded in the Jira update plan. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
 ## Release recovery and time-sensitive work
 
