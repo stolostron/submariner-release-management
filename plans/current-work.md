@@ -90,7 +90,7 @@ Do not treat upgrade-test repair as proof that FIND-006 download-integrity fixes
 
 ## Release tooling and Jira payloads
 
-ACM-39728 still has ten direct children. CORENET-7155 still has no children and an empty description.
+ACM-39728 still has ten direct children. CORENET-7155 has no children; its approved description was applied and verified October 8 at 11:23 UTC (changelog `92306194`), recording the maintainer’s original design and working coverage. Submariner epic edits and all new stories remain pending.
 Both epics remain In Progress. The first four ACM comments were posted and verified; their ids are recorded in the execution plan. The three contribution targets remain New with comment totals 0/1/1 on ACM-39738/39739/39740. Only the two child updates are proposed; the duplicate parent rollup is deferred.
 Submariner Sprint 2026-59 (87579) and CORENET Sprint 295 (87581) remain active in the inspected records.
 Both projects' create metadata and existing targets' edit/transition metadata were read successfully; actual creates, transitions and write canaries remain untested.

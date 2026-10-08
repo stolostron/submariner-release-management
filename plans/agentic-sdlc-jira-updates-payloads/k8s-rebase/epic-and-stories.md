@@ -2,7 +2,7 @@
 
 # Exact payloads: epic description and five child stories for CORENET-7155
 
-Nothing here has been created or edited in Jira. The epic, related histories and current PR source were rechecked on 2026-10-08. Development counts describe the committed
+The approved epic description was applied and verified on 2026-10-08 at 11:23 UTC. The five child stories and their progress comments remain pending. The epic, related histories and current PR source were rechecked on 2026-10-08. Development counts describe the committed
 bak42 snapshot (`febb7974696e870f933e8ad3741605d31ead0b5c`), rather than today's mutable working tree.
 Text blocks are Markdown for a converting client/UI; direct Jira Cloud REST writes need ADF. Read current create-field and transition metadata before writing.
 
@@ -36,9 +36,9 @@ Historical development facts (October 7 and earlier; full method in Part B, sect
 * Qualification runs: 6 Kubernetes 1.36.2 PRs on 2026-06-09/10 (1 merged: ovn-kubernetes-mcp#57; 5 closed) and 108 draft PRs from the maintainer's fork against upstream
   repos on 2026-07-16 to 2026-07-23 (all closed): cloud-network-config-controller 26, ingress-node-firewall 23, multus-cni 22, ovn-kubernetes-mcp 22, cluster-network-operator 15.
 
-## Epic: Create agents to automate the bump (description is empty)
+## Epic: Create agents to automate the bump (applied)
 
-Target: CORENET-7155. Field to set: `description` (ADF, converted from the Markdown below). Nothing else on the epic needs to change.
+Fixed applied record: CORENET-7155 `description`, converted to ADF from the exact approved Markdown below. Changelog `92306194`, October 8 at 11:23:37 UTC. Exact ADF and rendered text, nine bullets and two italic headings verified; all six comments, other issue fields and no-child membership preserved. Status remains In Progress. Do not repeat this edit.
 
 ```text
 The original epic contained only a title, with no specification or design. I originated and implemented the entire k8s-rebase design: the state machine, scripted steps, evidence gates, hooks and repair/review workflow.
