@@ -16,7 +16,7 @@ Table rows set approval priority; group identifiers stay fixed. Use this order f
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
 | 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft still needs separate approval and refreshed source scope |
-| 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Exact recovery-map delta only; registry diagnosis is already recorded. Candidate relevance remains a prerequisite; no selection or step transitions |
+| 5 | Release evidence | Release Submariner 0.23.4 (ACM-44527); Release Submariner 0.22.2 (ACM-45070) on hold | Recovery-map comment ready for review; registry diagnosis is already recorded. Confirm candidate relevance before proposing its comment for posting; no selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
 | 8 | New tracking, by epic | ACM stories S4 → S2 → S3 → S1 → S5; CORENET stories K1–K5 separately | Approve splits/fields and any In Progress transitions; complete project field/comment canaries before further creations; omit duplicate epic summaries. Terminal transitions wait for group 9 |
