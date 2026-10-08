@@ -132,20 +132,17 @@ now requires finished verdicts and exact snapshot-name comparisons alongside ver
 
 ## Kubernetes plugin qualification and publication
 
-The local plugin HEAD is `a477bced687c3385311bafddbf2ae1a3b0228ed0`: 82 commits beyond upstream
-[PR #617](https://github.com/openshift-eng/ai-helpers/pull/617), and 13 beyond verified fork bak42 `febb7974696e870f933e8ad3741605d31ead0b5c`.
-Fresh GitHub ref reads show the fork's working branch still at PR head `7e1aa060f3167de8a66e5191bf8e8692666c3ad4` and bak42 unchanged.
-Neither checked remote ref includes the newest 13 commits; another backup was not ruled out. Preserve/verify source before any authorized PR update.
+October 8: [PR #617](https://github.com/openshift-eng/ai-helpers/pull/617) is draft at
+`1a33dafe05981ceebfaf8fe780b0c448a6310b2d`, with 143 changed files and WIP, invalid-OWNERS and needs-ok-to-test labels.
+No returned review is on this head. Direct plugin blob comparisons show 99 differences from the old PR head,
+46 from bak42, and only two court-test files differing from October 7 committed source `a477bced`.
+The old unpublished-source conclusion is superseded; commit counts across these divergent/squashed histories do not measure source coverage.
+The current local checkout and dirty state were not re-read. Keep those October 7 observations in the historical evidence.
 
-Two test files have uncommitted court-permission changes (+101/-10), separate from committed HEAD and its qualification evidence.
-No plugin test, model call or rebase trial was run here. Preserve both source states and verify the installed bytes before qualification.
-
-The [K-story payload](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) owns detailed trial evidence:
-Keep proposed K2 In Progress because legacy 1.36.2 PASS summaries lack the current evidence archive;
-K3 requires valid measured outcomes, excludes zero-valued fallback metrics, and has no automatic YAML-judge execution;
-K4 records CNCC requalification, accepted-with-limits Multus and initial MCP failures/inconclusive gates, including live CI still selecting 1.36.4.
-The `a477bced` lessons commit and dirty tests need separate frozen-source qualification. These are source/report observations, not fresh trial results.
-PR #617 still has WIP, invalid-OWNERS and needs-ok-to-test labels; preserve those review/test gates when preparing the source refresh.
+Fresh qualification must use the exact published/installed source and runtime. No plugin test, model call or rebase trial was run here.
+The [K-story payload](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) retains detailed trial evidence:
+K2's legacy 1.36.2 PASS summaries lack the current per-run archive; K3 needs valid measured outcomes and the shared-harness decision;
+K4's CNCC/Multus/MCP trials retain their dependency, coverage and security limits. Publication does not resolve those acceptance gates.
 
 ## Adjacent work with separate ownership and scope
 
