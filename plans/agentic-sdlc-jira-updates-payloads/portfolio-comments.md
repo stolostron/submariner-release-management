@@ -52,7 +52,7 @@ Partially complete: the lifecycle comment is posted; ACM-45318 is a reviewed, un
 ### ACM-45318 — builder migration inventory
 
 ```text
-Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/79b842aef48bc1336335002fbf5c98fce8a8c92a/plans/art-builder-migration.md) for the October 15 ART builder migration. Brew references occur in both addon Dockerfiles; all 18 ticket-listed component Dockerfiles across 0.22–0.24 use UBI Go Toolset. ART Go 1.23–1.26 tag metadata confirms all four release architectures.
+Prepared a [branch-by-branch source inventory](https://github.com/stolostron/submariner-release-management/blob/4fe1c05d829f6e25d33eee137c1f1161c94e9999/plans/art-builder-migration.md) for the October 15 ART builder migration. Brew references occur in both addon Dockerfiles; all 18 ticket-listed component Dockerfiles across 0.22–0.24 use UBI Go Toolset. ART Go 1.23–1.26 tag metadata confirms all four release architectures.
 
 Remaining work: confirm active addon build sources, migrate affected Dockerfiles while preserving their builder OS family, verify OpenShift CI and Konflux registry pulls, and qualify compiler patch levels, runtime compatibility, existing CGO/FIPS settings and all required platforms. Source and registry checks do not establish a completed migration.
 ```
