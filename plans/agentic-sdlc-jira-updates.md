@@ -4,7 +4,7 @@
 
 **Release priority:** [recover the failing FBC integration tests](fbc-failure-recovery.md). Planning and independent deadline work can proceed while recovery prerequisites are resolved.
 
-Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC; release recovery-map comment posted and verified at 10:43 UTC. Epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt and release-evidence batch refreshed 2026-10-08.
+Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC; release recovery-map comment posted and verified at 10:43 UTC. Epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt, release-evidence and independent epic-description batches refreshed 2026-10-08.
 The [current work map](current-work.md) records the latest Jira, PR and local-work checks, corrections and next actions.
 In particular, the eight FIND-006 drafts are now closed without merging, and real local Kubernetes 1.37 qualification work exists.
 
@@ -257,11 +257,11 @@ the epic, related CORENET issues, the GitHub pull request, the maintainer's down
 ### B2. What has happened since, and is not recorded
 
 The [payload evidence](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) and [verification record](agentic-sdlc-jira-updates-verification.md#kubernetes-rebase-evidence)
-retain the pinned bak42 development counts and historical PR inventory. Current work is newer and remains outside upstream PR #617.
+retain the pinned bak42 development counts and historical PR inventory. The October 8 PR head is `1a33dafe`, matching October 7 committed plugin source except two court-test files; source publication supersedes the old unpublished-work conclusion. Fresh source/runtime qualification remains required.
 
 | Destination | Evidence and remaining acceptance |
 | --- | --- |
-| K1 | Five-step plugin with gates, hooks and retained-evidence contracts; current source and dirty test changes require qualification |
+| K1 | Five-step plugin with gates, hooks and retained-evidence contracts; published source at 1a33dafe requires fresh qualification |
 | K2 | Six June 1.36.2 PRs and 108 July draft PRs; legacy matrix summaries exist, but current per-run archives are missing. Review failure dispositions before closure |
 | K3 | Sixteen eval cases and a metrics runner; valid measurements, judge outcomes and an answer to the reviewer's measurement/shared-harness question remain |
 | K4 | Real CNCC/Multus/MCP 1.37.1 trials with explicit limits; repaired source and installed runtime need fresh qualification |
@@ -269,11 +269,8 @@ retain the pinned bak42 development counts and historical PR inventory. Current 
 
 ### B3. Things to know before touching Jira
 
-* **Local work:** on October 7 the clone HEAD is at `a477bced687c3385311bafddbf2ae1a3b0228ed0`,
-  82 commits after the PR head and 13 after bak42. The fork's `k8s-rebase-skill` ref still points at the PR head; bak42 is backed up, but neither ref includes these 13 newer commits.
-  Two test files also have uncommitted court-permission changes. This does not rule out another backup. Preserve and verify both before updating the PR; no plugin files were changed by this audit.
-* **The PR is stale:** bak42 contains 69 commits after its head; newer local work exists beyond that verified backup. The October 6 remote read confirms
-  that the fork's bak42 ref still points to `febb7974696e870f933e8ad3741605d31ead0b5c`.
+* **Historical local work:** October 7 source was `a477bced`, 82 commits beyond the old PR head and 13 beyond bak42, with two dirty court-test files. The October 8 published plugin matches that committed tree except those two test files; this audit did not re-read local state.
+* **Current PR source:** #617 is draft at `1a33dafe05981ceebfaf8fe780b0c448a6310b2d`. Direct blob comparisons, not commit ancestry across the squashed history, establish source coverage. Preserve and qualify the exact source selected for review; no plugin files were changed or executed by this audit.
 * **The 108 July draft PRs:** they were opened against upstream `openshift/*` and `ovn-kubernetes/*` repositories (bots such as CodeRabbit commented on them, one reported its
   review limit was reached) and closed. This is a factual note, not a judgement; consider whether future qualification runs should target the fork instead.
 * **CORENET automation** warns about original story points before In Progress/Code Review and a sprint before In Progress/Code Review/Closed (see the payload file for field ids).
@@ -315,7 +312,7 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.
 5. Transition K1–K5 to In Progress only if included in the approved group, after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
-6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic CORENET-7155") and read it back.
+6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic: Create agents to automate the bump") and read it back.
 
 ### B7. Verification and rollback
 
