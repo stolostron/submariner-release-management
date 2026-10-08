@@ -93,9 +93,9 @@ The October 8 check of snapshot submariner-0-22-20261002-125823-000-lz found pas
 Production images remain unverified: seven related-image digests differ from the snapshot images, and the referenced operator returns manifest unknown. Different digests alone do not prove incorrect content. Confirm this candidate belongs to the release before using it.
 ```
 
-## Group 6 — independent epic descriptions
+## Group 6 — independent epic descriptions (partial)
 
-Use [Submariner Sustenance Automation edits](submariner-sustenance/epic-description-edits.md) in order 4, 3, 5, then optional 1/2; review the [Create agents to automate the bump description](k8s-rebase/epic-and-stories.md#epic-create-agents-to-automate-the-bump-description-is-empty) separately. Neither needs new story keys.
+The [Create agents to automate the bump description](k8s-rebase/epic-and-stories.md#epic-create-agents-to-automate-the-bump-applied) was applied and verified October 8 at 11:23 UTC; do not repeat it. [Submariner Sustenance Automation edits](submariner-sustenance/epic-description-edits.md) remain pending in order 4, 3, 5, then optional 1/2. These edits need no new story keys.
 
 ## Group 7 — scope and conditional corrections
 

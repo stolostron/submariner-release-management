@@ -4,7 +4,7 @@
 
 **Release priority:** [recover the failing FBC integration tests](fbc-failure-recovery.md). Planning and independent deadline work can proceed while recovery prerequisites are resolved.
 
-Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC; release recovery-map comment posted and verified at 10:43 UTC. Epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt, release-evidence and independent epic-description batches refreshed 2026-10-08.
+Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC; release recovery-map comment posted and verified at 10:43 UTC. The Kubernetes epic description was applied and verified at 11:23 UTC. Submariner epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt, release-evidence and independent epic-description batches refreshed 2026-10-08.
 The [current work map](current-work.md) records the latest Jira, PR and local-work checks, corrections and next actions.
 In particular, the eight FIND-006 drafts are now closed without merging, and real local Kubernetes 1.37 qualification work exists.
 
@@ -24,7 +24,7 @@ done without the other.
 
 Rules that apply to both parts:
 
-* The first four existing-story comments, group 1 CI correction, lifecycle status comment and release recovery-map comment are posted, with verified ids in A5. Other payloads remain pending; post only newly approved missing deltas.
+* The first four existing-story comments, group 1 CI correction, lifecycle status comment and release recovery-map comment are posted, with verified ids in A5. The Kubernetes epic description is also applied and verified. Other payloads remain pending; post only newly approved missing deltas.
 * An existing-issue comment must add a missing delivery, blocker/evidence, specific correction or answer to an explicit request. Keep audit instructions and repeated criteria in the plan; omit parent rollups that only repeat children. New-story comments establish their evidence baseline. Creating child tracking does not itself warrant an epic comment; propose one only for a separate missing decision, delivery or blocker.
 * Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes and verify rendered text and links on read-back; PR-field edits remain a separate action. Append only missing approved links to PR fields, preserving existing text and links.
 * The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
@@ -53,7 +53,7 @@ Exact text to post, all under [agentic-sdlc-jira-updates-payloads/](agentic-sdlc
 | A | [shipyard-audit-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/shipyard-audit-prs.md) | 113 PRs of the Glasswing shipyard-audit remediation, state read 2026-09-30 |
 | A | [cve-fix-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/cve-fix-prs.md) | 43 CVE-related PRs since 2026-09-13 |
 | A | [ec-tekton-prs.md](agentic-sdlc-jira-updates-payloads/submariner-sustenance/ec-tekton-prs.md) | 33 Enterprise Contract and Tekton task PRs since 2026-09-13 |
-| B | [epic-and-stories.md](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) | The epic description (currently empty) and five child stories with fields and progress comments |
+| B | [epic-and-stories.md](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) | The fixed applied epic description and five pending child stories with fields and progress comments |
 
 ## Part A: Submariner Sustenance Automation (ACM-39728)
 
@@ -146,7 +146,7 @@ Completed first approved chunk: one comment on each existing story, using the [f
 
 All four comments were created on October 7 at 18:23 UTC with restricted visibility set in the initial request; exact ADF text, clickable links, group visibility and unchanged issue statuses were verified after each write. No issue fields or statuses were changed, and no new issues were created. The CVE comment uses refreshed Shipyard head 3b67af1a and its current changes-requested review. For later updates, re-read complete comments and refresh mutable evidence; if a write has an uncertain result, inspect Jira before retrying.
 
-The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Group 1 is complete: CORENET-7171 comment `18824859`, created October 7 at 22:59 UTC with initial restricted visibility; approved text, rendered links and unchanged In Progress status were verified. OPGM-364 lifecycle comment `18829498` was created October 8 at 09:37 UTC with initial restricted visibility; exact ADF/rendered text, both PR links, unchanged In Progress status and earlier comments were verified. Group 4 is partial; do not repost its lifecycle record. The Release Submariner 0.23.4 recovery-map comment `18830594` was created October 8 at 10:43 UTC with initial restricted visibility; exact ADF/rendered text, its link, unchanged In Progress status and all 90 prior comments were verified. Group 5 is partial; do not repost the recovery map.
+The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Group 1 is complete: CORENET-7171 comment `18824859`, created October 7 at 22:59 UTC with initial restricted visibility; approved text, rendered links and unchanged In Progress status were verified. OPGM-364 lifecycle comment `18829498` was created October 8 at 09:37 UTC with initial restricted visibility; exact ADF/rendered text, both PR links, unchanged In Progress status and earlier comments were verified. Group 4 is partial; do not repost its lifecycle record. The Release Submariner 0.23.4 recovery-map comment `18830594` was created October 8 at 10:43 UTC with initial restricted visibility; exact ADF/rendered text, its link, unchanged In Progress status and all 90 prior comments were verified. Group 5 is partial; do not repost the recovery map. The Create agents to automate the bump description was applied October 8 at 11:23:37 UTC (changelog `92306194`); exact ADF/rendered text and structure, all six comments, other issue fields, In Progress status and no-child membership were verified. Group 6 is partial: Submariner edits remain pending; do not repeat the Kubernetes description edit.
 
 Start the remaining sequence with group 2, the two CVE contribution children, then the group 4 builder comment. Group 5’s recovery map is posted; its 0.22.2 candidate comment remains on hold until release relevance is confirmed. Group 3 EVPN is deferred to the end at the maintainer’s request: another planning PR iteration is WIP and CI PRs will start soon. Parent rollups and the older CVE progress comment remain deferred pending a distinct decision or delivery. Engineering priorities proceed in parallel.
 
@@ -243,20 +243,20 @@ The epic is CORENET-7155, "Create agents to automate the bump". It covers the k8
 the epic, related CORENET issues, the GitHub pull request, the maintainer's downstream PRs and the local clone of the plugin. Payloads are in
 [agentic-sdlc-jira-updates-payloads/k8s-rebase/](agentic-sdlc-jira-updates-payloads/k8s-rebase/).
 
-### B1. What the epic looks like today (rechecked 2026-10-07)
+### B1. What the epic looks like today (verified after the 2026-10-08 edit)
 
-* CORENET-7155, Epic, In Progress, assigned to the maintainer, reporter a CoreNet teammate. Created 2026-05-19, updated 2026-09-29. Priority Normal, Activity Type
+* CORENET-7155, Epic, In Progress, assigned to the maintainer, reporter a CoreNet teammate. Created 2026-05-19, updated 2026-10-08. Priority Normal, Activity Type
   Product / Portfolio Work, no components.
-* **Description: empty. Child issues: none.** It is in the active sprint "CORENET Sprint 295" and earlier sprints 289 to 294.
+* **Description: applied and verified October 8 at 11:23 UTC, changelog `92306194`. Child issues: none.** It is in the active sprint "CORENET Sprint 295" and earlier sprints 289 to 294.
 * Six comments, all between 2026-06-04 and 2026-06-12: a link to the work-in-progress branch and its results, progress on other repos, links to the first automated PRs, and a
   discussion of one dependency issue with a teammate.
 * Git Pull Request field: openshift-eng/ai-helpers#617.
 * Linked (link type "Account") to CORENET-6983, the Kubernetes 1.36 rebase epic for the CoreNet repos (Release Pending), most of whose stories are assigned to CoreNet teammates. CORENET-7062
   under it, the ovn-kubernetes-mcp bump, was assigned to the maintainer and closed on 2026-07-24 because the agent's PR merged.
 
-### B2. What has happened since, and is not recorded
+### B2. Development evidence and remaining acceptance
 
-The October 8 maintainer clarification credits the entire design to the maintainer: the original epic supplied only a title, with no specification. The plugin is reported fully working across all six CoreNet repositories on Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37. That functional progress belongs in the epic; retained qualification evidence, measurement and upstream merge remain separate acceptance work.
+The October 8 maintainer clarification credits the entire design to the maintainer: the original epic supplied only a title, with no specification. The plugin is reported fully working across all six CoreNet repositories on Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37. That functional progress and original design credit are now recorded in the approved epic description; retained qualification evidence, measurement and upstream merge remain separate acceptance work.
 
 The [payload evidence](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) and [verification record](agentic-sdlc-jira-updates-verification.md#kubernetes-rebase-evidence)
 retain the pinned bak42 development counts and historical PR inventory. The October 8 PR head is `1a33dafe`, matching October 7 committed plugin source except two court-test files; source publication supersedes the old unpublished-work conclusion. Fresh source/runtime qualification remains required.
@@ -292,7 +292,7 @@ retain the pinned bak42 development counts and historical PR inventory. The Octo
 
 ### B5. Preflight for approved actions (stop on any surprise)
 
-1. Re-read CORENET-7155 and its children. Reconcile any description or stories with recorded approved writes; omit completed actions and stop on unexplained differences. The empty-description/no-child audit baseline may have changed through an earlier approved group.
+1. Re-read CORENET-7155 and its children. Reconcile any description or stories with recorded approved writes; omit completed actions and stop on unexplained differences. The description is already applied, and the verified child list is empty; preserve the completed edit.
 2. Refresh current PR/run claims used by the approved payload. Section B8 records the historical counting method; retain the verified bak42 snapshot and its dates. Refresh dates and counts together when reporting current work; do not expect mutable HEAD or review totals to equal the historical snapshot.
 3. Confirm the maintainer's answers to section B4. Refresh local source/backup observations used by the approved payload and record unfinished qualification or backup gaps as blockers.
 4. Confirm the story-point scale and the sprint id with the team.
@@ -303,7 +303,7 @@ Before authorized plugin changes or publication, preserve and verify committed a
 
 ### B6. Execution order
 
-The epic description is an independent group-6 edit after its own scope/ADF review; it needs no new story keys. The sequence below handles approved K-story creation. Omit an already-applied description delta.
+The epic description was applied and verified independently in group 6. The sequence below handles separately approved K-story creation; preserve the completed description edit.
 
 1. Create K1 as a canary with writable create fields: `parent` CORENET-7155, its own Activity Type/priority, approved Story Points and sprint, assignee and description. Verify the default/approved reporter on read-back. CORENET create metadata does not expose legacy Epic Link, Original story points or Git Pull Request; do not send those fields in the create request. Read back membership and rendered content.
    Fetch K1 edit metadata, then set approved Original story points and read it back. Existing Story edit metadata supports that field, but the new canary must confirm it. Do not transition to In Progress until it is set and verified; do not silently omit the automation prerequisite.
@@ -314,13 +314,13 @@ The epic description is an independent group-6 edit after its own scope/ADF revi
 4. Add the related-issue link from K2 to CORENET-7062 using the link type confirmed in preflight, and read it back.
 5. Transition K1–K5 to In Progress only if included in the approved group, after the approved field setup. A separate K2 closeout requires its own qualification/failure-disposition evidence and the appropriate resolution.
    Read each issue's available transitions, verify points and sprint first, and read each transition back; do not reuse ACM transition ids.
-6. Set the approved epic description if still missing (payload: epic-and-stories.md, "Epic: Create agents to automate the bump") and read it back.
+6. Preserve the recorded approved epic description; omit its completed group-6 edit. Reconcile any later live change before proposing another edit.
 
 ### B7. Verification and rollback
 
 * Read each issue back after writing and compare with the payload before continuing.
 * Comments can be edited by id with a supported client/UI; issue deletion is outside this plan, which is why one story is created first as a canary.
-* Save the current description value (empty at this audit). Apply the shared baseline/rollback rule before restoring it, then read it back.
+* The description was empty before the approved October 8 edit. Its full pre-write baseline and read-back are retained privately. Apply the shared baseline/rollback rule before any restoration; restore only if the live field still equals the recorded approved result, preserve later edits, then read it back.
 
 ### B8. How the numbers were produced
 
