@@ -2,7 +2,7 @@
 
 # ART builder migration: source inventory and implementation handoff
 
-Checked October 7, 2026. ACM-45318 remains New and requests migration by October 15.
+Rechecked October 8, 2026: 33 branch/ref reads across six repositories and 31 immutable source trees. ACM-45318 remains New with no comments and requests migration by October 15.
 This plan turns the [current work map](current-work.md)'s deadline into a source-backed change inventory.
 No Dockerfile, dependency, pipeline, branch or external issue was changed by this audit.
 
@@ -10,7 +10,7 @@ No Dockerfile, dependency, pipeline, branch or external issue was changed by thi
 
 The three ticket-listed independent-product repositories have downstream builders in `release-0.22`, `release-0.23` and `release-0.24`.
 Their devel Dockerfiles use the shared Shipyard Dapper builder and Fedora/scratch output; these are separate upstream build paths.
-The ticket targets Brew/OSBS consumers of ART Go builders. Its parent lists `registry.redhat.io/openshift/golang-builder:golang-builder-vX.YY-rhelZ` replacements, including Go 1.25/1.26 on RHEL9, and requires internal registry entitlement. Tag selection and CI access still need verification.
+The ticket targets Brew/OSBS consumers of ART Go builders. Its parent lists `registry.redhat.io/openshift/golang-builder:golang-builder-vX.YY-rhelZ` replacements, including Go 1.25/1.26 on RHEL9, and requires internal registry entitlement. Local manifest/config reads now confirm the documented RHEL9 Go 1.23–1.26 tags and four platforms. Supported build-source selection, CI access and build qualification remain pending.
 The downstream component Dockerfiles use UBI Go Toolset, not the named ART builder; no replacement is justified by the deadline alone. Inspect shared/transitive build inputs before identifying an affected component path.
 The rows below read an immutable branch head's Go directive and sample Konflux Dockerfile; that directive is a module floor, not the observed build compiler.
 
@@ -44,6 +44,10 @@ Addon belongs to the ACM artifact path and has its own release branches. Source 
 
 | Branch | Root Go floor | Ordinary Dockerfile | Konflux Dockerfile | Pinned source |
 | --- | --- | --- | --- | --- |
+| release-2.10 | 1.24.0 | CI `stolostron/builder:go1.23-linux` | Brew `rhel_9_1.23` | [e1d3198b](https://github.com/stolostron/submariner-addon/tree/e1d3198b81b8b44d9881898caa2a4200e35229cc) |
+| release-2.11 | 1.24.0 | Brew `v1.24.6` | Brew `v1.24.6` | [7299448b](https://github.com/stolostron/submariner-addon/tree/7299448bfed1df125955bef08e8bc21d267ce1f1) |
+| release-2.12 | 1.24.0 | Brew `v1.24.6` | Brew `v1.24.6` | [35ede4a6](https://github.com/stolostron/submariner-addon/tree/35ede4a6fb8a346db26c2a47144e798a6f741de2) |
+| release-2.13 | 1.25.0 | Brew `v1.25` | Brew `v1.25` | [95ba831f](https://github.com/stolostron/submariner-addon/tree/95ba831f529d8dd824f84e3e95d1d56cd4a08b4a) |
 | release-2.14 | 1.25.8 | CI `stolostron/builder:go1.24-linux` | Brew `openshift-golang-builder:v1.25` | [546eaf0c](https://github.com/stolostron/submariner-addon/tree/546eaf0cb95c1433e27d00fa8d4b1bb84e00610f) |
 | release-2.15 | 1.25.8 | Brew `v1.25` | Brew `v1.25` | [77383385](https://github.com/stolostron/submariner-addon/tree/77383385f14254be6db8264b38393fdc0400e6fe) |
 | release-2.16 | 1.25.8 | Brew `v1.25` | Brew `v1.25` | [19532bd7](https://github.com/stolostron/submariner-addon/tree/19532bd70d7014013ca9490bc1d52ca4b51a41c6) |
@@ -52,15 +56,30 @@ Addon belongs to the ACM artifact path and has its own release branches. Source 
 | release-5.0 | 1.26.0 | Brew `v1.26` | Brew `v1.26`; PQC-minimal runtime base | [cd2fbb77](https://github.com/stolostron/submariner-addon/tree/cd2fbb7714ca8be7052dc239569449e33d7a1598) |
 | release-5.1 / release-5.2 / main | 1.26.0 | Brew `v1.26` | Brew `v1.26`; ordinary UBI-minimal runtime base | [1805dcb1](https://github.com/stolostron/submariner-addon/tree/1805dcb1166ad331097f0379c1a1d3b27f0ae12e) |
 
-At the inspected heads, the 2.14 ordinary builder's tag advertises an older Go minor than the root directive. Actual toolchain auto-download or compiler behavior
+At the inspected heads, both 2.10 builder tags and the 2.14 ordinary builder tag advertise an older Go minor than the root directive. Actual toolchain auto-download or compiler behavior
 was not measured; do not infer either a working build or a universal failure solely from the tag. Verify the actual compiler and required patch level.
-Additional reads of release-2.10–2.13 also find Brew builders; branches older than 2.10 remain outside this audit. This inventory does not choose the supported stream set.
+Branches older than 2.10 remain outside this audit. A branch or Dockerfile’s existence does not choose the supported stream set.
 The separate [appstudio 2.14 source](https://github.com/stolostron/submariner-addon/tree/8270d50dd684a3936b9693a52220130e75d1d902) has a 1.23.0 root floor and Brew `rhel_9_1.23` Konflux builder. Task-ref PR #2792 targets that branch, not release-2.14, and does not implement the builder migration. Include that build source in the owner’s scope decision.
 
-Inspected addon pipelines select `Dockerfile.konflux`. On release-2.11–2.17 and 5.0–5.2, push pipelines request four architectures while PR pipelines request only x86_64; the appstudio 2.14 pair requests only x86_64. Confirm PaC branch filters and component source mapping before choosing which files to edit. A successful PR build alone does not qualify all push platforms.
+Inspected addon pipelines select `Dockerfile.konflux`; push definitions request four architectures while PR definitions request only x86_64, except the appstudio 2.14 pair, which requests only x86_64 for both. Release-2.10 has no returned `.tekton` pipeline files. A successful PR build alone does not qualify all push platforms.
+
+PaC filters match `release-2.11`–`release-2.17` and `release-5.0` on those branches. The 5.1/5.2 branch copies filter for `main`; the 4.23 copies also filter for `main`. The separate appstudio 2.14 branch’s pair filters for `release-2.14`, although #2792 targets the appstudio branch. Editing a branch copy does not prove that its pipeline will run on that branch. Resolve deployed component revision and PaC source/target selection before choosing the migration files or claiming CI coverage. Cached release-data at `8c18efee` selects `Dockerfile.konflux` and release branches for the inspected 2.14/5.0 overlays; it is configuration evidence, not a fresh deployed-state read.
 
 The PQC runtime base on release-5.0 is existing configuration evidence relevant to ACM-41119, not proof of the released image's crypto policy.
 Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all streams are covered" claim forward.
+
+## ART replacement metadata checked October 8
+
+Local registry reads succeeded for these parent-documented floating RHEL9 tags. Each index and all four architecture-specific configs were read by digest; each has Linux amd64, arm64, ppc64le and s390x. Tekton calls amd64 `x86_64`. Config `GO_VERSION` and the image version label agree across those four architectures:
+
+| Tag in `registry.redhat.io/openshift/golang-builder` | Declared Go version | Source floor to assess |
+| --- | --- | --- |
+| `golang-builder-v1.23-rhel9` | `1.23.10` | Separate appstudio 2.14 source (`1.23.0`); not sufficient for release-2.10’s `1.24.0` floor |
+| `golang-builder-v1.24-rhel9` | `1.24.13` | 2.10–2.12 roots (`1.24.0`) |
+| `golang-builder-v1.25-rhel9` | `1.25.14` | 2.13–2.17 and 4.23 roots (up to `1.25.13`) |
+| `golang-builder-v1.26-rhel9` | `1.26.7` | 5.0–5.2/main roots and tools (`1.26.0`) |
+
+These are metadata observations and candidate families, not measured compiler execution or approved stream/tag selections. Preserve all compiled-module floors and existing toolchain requirements. Local index/config access does not establish CI entitlement, layer pulls, builds or crypto behavior; verify those in the actual build context. Tags float by policy, so retain resolved image digests and compiler evidence for each qualification run. Runtime-base selection remains independent.
 
 ## Prepare a reviewable change
 
@@ -80,6 +99,6 @@ Main/5.1 differs; avoid carrying a generic "PQC is absent everywhere" or "all st
 
 ## Validation boundary and immediate next action
 
-This audit read GitHub source at pinned heads, not private registry manifests or running build containers. No target ART image or build was qualified.
-The concrete next handoff is supported-addon-branch/tag confirmation followed by isolated changes to verified Brew consumers and applicable compiler/crypto/architecture verification. Retain a no-change disposition for unaffected paths.
-Konflux authentication succeeds in the October 7 reads; that does not prove access to the entitlement-gated ART builder repository. No migration build was submitted or qualified; supported build-source selection, target-image access and change review remain the next handoff.
+This audit read GitHub source at pinned heads and four ART registry indexes with all sixteen platform configs. It did not run builder containers or migration builds; no execution or CI qualification is established.
+The concrete next handoff is supported-addon-build-source and CI-access confirmation, then isolated changes to verified Brew consumers with applicable compiler/crypto/architecture qualification. Retain a no-change disposition for unaffected paths.
+Local ART metadata access succeeds on October 8; CI registry access remains unverified. Konflux authentication expired at the October 8 recovery preflight, so cached tenant configuration does not establish the current deployed build source. No migration build was submitted or qualified; supported source/tag selection, CI access and change review remain the next handoff.
