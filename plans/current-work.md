@@ -2,7 +2,7 @@
 
 # Current work and planning handoffs
 
-Broad review October 7, 2026; lifecycle target and posting verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
+Broad review October 7, 2026; lifecycle target/posting and release-evidence batch verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
@@ -26,6 +26,7 @@ Four approved existing-story comments were posted and verified October 7 at 18:2
 
 The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
 The latest namespace read returns zero PipelineRuns and 741 retained snapshots (the earlier read returned 746); all six documented FBC failure associations remain present.
+The recorded 0.23.4 component-stage Release is now NotFound; its archived October 7 success remains evidence.
 This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. GitLab fresh-base access remains unverified since the earlier DNS failure.
 
 0.24.1 artifact read: `registry.redhat.io/rhacm2/submariner-operator-bundle:v0.24.1` resolves to
@@ -35,12 +36,15 @@ index membership remains unknown. All three recorded September component product
 Their repository YAMLs are retained intent, not a current success verdict. No install, QE or release execution was repeated.
 
 The inspected 0.22.2 candidate is `submariner-0-22-20261002-125823-000-lz`, with nine components and aggregate TestSucceeded=True.
-Its completed EC/standard scenarios report warnings, despite retained `BuildPLRInProgress` labels. The bundle digest
+Its completed combined EC/standard scenario reports warnings, despite retained `BuildPLRInProgress` labels. The bundle digest
 `sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3` has version label v0.22.2 and CSV version 0.22.2;
 the bundle source is `da81d438c0456f367bc5e83e671362181a47ab63`. All seven CSV related-image digests differ from their mapped snapshot operands.
-Registry copying can change manifest digests, so this comparison is not proof of invalid content. The snapshot operator inspects as v0.22.2;
-inspection of the embedded production operator failed. Reconcile source/content and registry identity before treating this candidate as release-ready.
-No tracker step or artifact is advanced from this partial evidence.
+Registry copying can change manifest digests, so this comparison is not proof of invalid content. The snapshot operator inspects as v0.22.2 at source
+`b416904aa589f54ff8ba0b270e80968cd5872218`, distinct from the bundle source. The freshly extracted CSV matches both source trees.
+The embedded production operator returns
+`manifest unknown` at the October 8 registry read. These checks do not establish all-platform operand identity. Reconcile production operand identity before treating this candidate as release-ready.
+The candidate is absent from the complete release-target histories; it is not selected by this inspection.
+Snapshot `AutoReleased=True` records a skipped automatic release. No tracker step or artifact is advanced from this partial evidence.
 
 ## Prepared release-data and OCP 5 work
 

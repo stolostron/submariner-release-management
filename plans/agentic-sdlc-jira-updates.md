@@ -4,7 +4,7 @@
 
 **Release priority:** [recover the failing FBC integration tests](fbc-failure-recovery.md). Planning and independent deadline work can proceed while recovery prerequisites are resolved.
 
-Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC. Epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt refreshed 2026-10-08.
+Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC. Epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt and release-evidence batch refreshed 2026-10-08.
 The [current work map](current-work.md) records the latest Jira, PR and local-work checks, corrections and next actions.
 In particular, the eight FIND-006 drafts are now closed without merging, and real local Kubernetes 1.37 qualification work exists.
 
@@ -235,7 +235,7 @@ Current release blockers and separate local configuration drafts are in [current
 with registry repair in [fbc-failure-recovery.md](fbc-failure-recovery.md).
 The earlier successful tenant read confirms an unlinked registry Secret and missing OCP 5 Application/Component/build account;
 no retained PipelineRuns were returned. It does not establish credential validity, installation, QE or publishing.
-The latest read recovered all six failed FBC [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) and confirmed the recorded component-stage release succeeded. Verify intended catalog content/credentials before any authorized rerun; component-stage success does not complete FBC. GitLab fresh-base access remains unverified after the earlier DNS failure.
+The October 8 read retains all six failed FBC [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities). The recorded component-stage Release is now NotFound; its archived October 7 successful verdict remains evidence. Verify intended catalog content/credentials before any authorized rerun; component-stage success does not complete FBC. GitLab fresh-base access remains unverified after the earlier DNS failure.
 
 ## Part B: k8s-rebase automation (CORENET-7155)
 
