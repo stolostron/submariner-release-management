@@ -256,15 +256,17 @@ the epic, related CORENET issues, the GitHub pull request, the maintainer's down
 
 ### B2. What has happened since, and is not recorded
 
+The October 8 maintainer clarification credits the entire design to the maintainer: the original epic supplied only a title, with no specification. The plugin is reported fully working across all six CoreNet repositories on Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37. That functional progress belongs in the epic; retained qualification evidence, measurement and upstream merge remain separate acceptance work.
+
 The [payload evidence](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) and [verification record](agentic-sdlc-jira-updates-verification.md#kubernetes-rebase-evidence)
 retain the pinned bak42 development counts and historical PR inventory. The October 8 PR head is `1a33dafe`, matching October 7 committed plugin source except two court-test files; source publication supersedes the old unpublished-work conclusion. Fresh source/runtime qualification remains required.
 
 | Destination | Evidence and remaining acceptance |
 | --- | --- |
-| K1 | Five-step plugin with gates, hooks and retained-evidence contracts; published source at 1a33dafe requires fresh qualification |
-| K2 | Six June 1.36.2 PRs and 108 July draft PRs; legacy matrix summaries exist, but current per-run archives are missing. Review failure dispositions before closure |
+| K1 | Maintainer-originated architecture and implemented five-step plugin; reported working coverage is recorded above. Published source at 1a33dafe needs its own retained qualification evidence |
+| K2 | Maintainer reports working coverage of all six repositories across the three earlier versions. Six June 1.36.2 PRs and 108 July draft PRs are historical evidence; retained per-run archives/failure dispositions remain separate closure work |
 | K3 | Sixteen eval cases and a metrics runner; valid measurements, judge outcomes and an answer to the reviewer's measurement/shared-harness question remain |
-| K4 | Real CNCC/Multus/MCP 1.37.1 trials with explicit limits; repaired source and installed runtime need fresh qualification |
+| K4 | Maintainer reports the plugin now working for 1.37. Recorded CNCC/Multus/MCP 1.37.1 trials retain their dated limits; qualify the exact current source/runtime separately |
 | K5 | #617 remains draft with invalid-OWNERS/needs-ok-to-test labels; review the full delta, resolve blockers, obtain approval and merge |
 
 ### B3. Things to know before touching Jira
