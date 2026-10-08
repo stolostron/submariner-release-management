@@ -15,7 +15,7 @@ Table rows set approval priority; group identifiers stay fixed. Use this order f
 | --- | --- | --- | --- |
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 (complete) | CVE contributions | ACM-39740 → ACM-39739 | Posted and verified comments 18831845 and 18831852; both remain New; parent rollup deferred |
-| 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft rechecked October 8; supported build-source selection, CI access and qualification remain; posting needs separate approval |
+| 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft rechecked October 8 across both Dockerfiles and shared inputs; source selection, both CI contexts and build qualification remain; posting needs separate approval |
 | 5 (partial) | Release evidence | Release Submariner 0.22.2 (ACM-45070), on hold | Recovery-map comment 18830594 posted on Release Submariner 0.23.4 (ACM-44527). Confirm candidate relevance before proposing its comment for posting; no selection or step transitions |
 | 6 (partial) | Independent epic descriptions | Submariner Sustenance Automation (ACM-39728) edits 4 → 3 → 5; optional metrics cleanup 1/2 | Create agents to automate the bump description applied and verified, changelog 92306194. Submariner edits need separate approval; preserve unaffected ADF. Qualification remains required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
@@ -77,7 +77,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 
 | Issue | Proposed update | Gate or reason to defer |
 | --- | --- | --- |
-| ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); local ART indexes/configs confirm four platforms, while addon source/PaC selection and CI access remain. Migrate verified Brew consumers on approved streams and qualify builds; UBI Go Toolset alone does not establish ART consumption |
+| ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); local ART metadata confirms four platforms. Confirm active sources; cached 5.1/5.2 builds select main, matching their filters. Migrate both used Brew Dockerfiles; verify OpenShift CI/Konflux pulls, compiler patch/CGO/FIPS/platform contracts and addon propagation; UBI Go Toolset alone does not establish ART consumption |
 | ACM-41119 | Defer completion; reconcile image coverage with builder work | Addon 5.0 PQC base selection is partial source evidence; main/5.1 differ and shipped-image policy remains unverified |
 | ACM-37426 | Coordinated title/description timeline correction using the prepared draft after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
 | OPGM-364 | Status answer posted and verified as comment 18829498; add only a missing new delta | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |
