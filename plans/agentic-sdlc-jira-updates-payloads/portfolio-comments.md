@@ -2,7 +2,7 @@
 
 # Additional existing-issue updates
 
-Group 1 posted and verified October 7, 2026 at 22:59 UTC; other groups remain pending. These updates are independent of creating S/K stories.
+Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted and verified October 8 at 09:37 UTC. Other updates remain pending. These updates are independent of creating S/K stories.
 Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
 Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
 The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
@@ -47,7 +47,7 @@ ACM-39738: no parent rollup proposed. Post the two child updates only; the broad
 
 ## Group 4 — deadline and requested status
 
-Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The lifecycle draft reports factual progress and blockers; the request does not define “In / At Risk / Out,” so no program label is assigned. These comments propose no workflow transition. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
+Partially complete: the lifecycle comment is posted; ACM-45318 remains a reviewed, unposted October 7 draft. Refresh the builder target and source evidence before separately approved posting. Future lifecycle comments must add a missing delta; the posted record below must not be reposted. No workflow transition or program label was assigned.
 
 ### ACM-45318 — builder migration inventory
 
@@ -58,6 +58,8 @@ Remaining work: confirm supported addon build sources, select documented ART rep
 ```
 
 ### OPGM-364 — requested lifecycle status
+
+Completed: comment `18829498`, created October 8 at 09:37 UTC with initial `Red Hat Employee` visibility. Exact ADF, rendered text/links, unchanged In Progress status and prior comments were verified. The block below is a fixed posted record; do not repost it.
 
 ```text
 Lifecycle publication is pending. Tenant configuration blocks the build.

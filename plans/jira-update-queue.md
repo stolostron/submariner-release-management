@@ -5,17 +5,17 @@
 Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
 The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
 Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
+Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; group 4 is partial and its builder comment remains pending. Remaining actions begin with group 2. Re-read each target and omit anything already recorded before posting.
 
 ## Approval order
 
-Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments and group 1 remain completed.
+Table rows set approval priority; group identifiers stay fixed. Use this order for the remaining Jira work. Start with small comments supported by established records, then handle mutable release evidence, description changes, new tracking and acceptance reviews. Each group is a separate approval chunk; approval of one does not authorize the others. The four earlier ACM comments, group 1 and the lifecycle comment in group 4 remain completed.
 
 | Group | Work | Targets, in order | Why here / boundary |
 | --- | --- | --- | --- |
 | 1 (complete) | CI research correction | CORENET-7171 | Posted and verified comment 18824859; parent comment remains deferred |
 | 2 | CVE contributions | ACM-39740 → ACM-39739 | Merged source first, mutable PR second; defer a duplicate parent rollup |
-| 4 | Deadline and requested status | ACM-45318 → OPGM-364 | Refresh branch/build scope and live blockers; no completion claim |
+| 4 (partial) | Deadline and requested status | ACM-45318 | Lifecycle comment 18829498 posted and verified on OPGM-364; builder draft still needs separate approval and refreshed source scope |
 | 5 | Release evidence | ACM-44527 → ACM-45070, if the candidate is relevant | Mutable artifact evidence needs refresh; no candidate selection or step transitions |
 | 6 | Independent epic descriptions | ACM-39728 edits 4 → 3 → 5; optional stale-count cleanup 1/2. CORENET-7155 description separately | Substantive corrections before optional stale-count cleanup; preserve ADF; no new keys required |
 | 7 | Scope and conditional corrections | ACM-25779; ACM-37426; optional ACM-39732 | Owner decisions gate descriptions; fork-only progress is optional. Older CVE scope remains deferred |
@@ -80,7 +80,7 @@ Do not use broad closeout to resolve them as release deliverables. A tracker clo
 | ACM-45318 | Brief inventory/progress comment; retain October 15 deadline | Use [builder inventory](art-builder-migration.md); migrate verified Brew/OSBS consumers on approved streams and prove the applicable builds; UBI Go Toolset alone is not evidence of an affected ART builder |
 | ACM-41119 | Defer completion; reconcile image coverage with builder work | Addon 5.0 PQC base selection is partial source evidence; main/5.1 differ and shipped-image policy remains unverified |
 | ACM-37426 | Coordinated title/description timeline correction using the prepared draft after owner confirmation | Description says ACM 5.0; July comment says 5.1. Prototype manifests exist, with incomplete least-privilege RBAC; preserve that preparation without claiming implementation |
-| OPGM-364 | Answer the existing status request with blockers and remaining proof | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |
+| OPGM-364 | Status answer posted and verified as comment 18829498; add only a missing new delta | Lifecycle injection and publication are existing scope. It explicitly forbids adding OCP 5 compatibility statements; a valid catalog/IIB proof is an allowed alternative to public-index membership |
 | ACM-25779 | Replace the stale console-specific description with the actual Submariner pipeline scope | Existing May comment already explains ownership-dependent deferral. Do not repost it or treat inline pipelines as an unrecorded failure |
 | ACM-26999 | Defer another progress comment; reconcile older CVE scope with ACM-39729/39739/39740 | The May comment already records production tooling and remaining contribution. Closure/supersession needs a scope decision |
 | ACM-34592 | Closure review with existing five PRs | All five directly read PRs merged May 28. Parent ACM-34591 is Closed and the comment asks for closure; review issue criteria and current transition/resolution before resolving |
