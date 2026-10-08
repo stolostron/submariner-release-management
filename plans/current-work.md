@@ -132,6 +132,8 @@ now requires finished verdicts and exact snapshot-name comparisons alongside ver
 
 ## Kubernetes plugin qualification and publication
 
+October 8 maintainer clarification: the original epic supplied no specification or design. The maintainer originated and implemented the architecture and workflow, and reports it fully working across all six CoreNet repositories for Kubernetes 1.34.1, 1.35.3 and 1.36.2, and now working for 1.37. This functional-coverage report is distinct from the retained per-run audit and upstream acceptance records below.
+
 October 8: [PR #617](https://github.com/openshift-eng/ai-helpers/pull/617) is draft at
 `1a33dafe05981ceebfaf8fe780b0c448a6310b2d`, with 143 changed files and WIP, invalid-OWNERS and needs-ok-to-test labels.
 No returned review is on this head. Direct plugin blob comparisons show 99 differences from the old PR head,
