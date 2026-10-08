@@ -73,24 +73,26 @@ Blockers observed October 7: the published build fails at init for a missing bui
 
 ## Group 5 — release evidence
 
-Reviewed October 8, 2026 against both parents, all 32 children and their complete histories. One recovery-map comment is ready for review; the candidate comment remains conditional on release relevance. Preserve fields/statuses and refresh mutable evidence before any approved post.
+Reviewed October 8, 2026 against both parents, all 32 children and their complete histories. The recovery-map comment is ready for review. Hold the candidate comment until its relevance to the intended release is confirmed. Preserve fields/statuses and refresh mutable evidence before any approved post.
 
-### ACM-44527 — exact recovery map
+### Release Submariner 0.23.4 — recovery map
 
-The parent already records component-stage success, the failed FBC tests and registry diagnosis. Add only the missing exact recovery map, once on the parent.
+Target: ACM-44527. The parent already records component-stage success, the failed FBC tests and registry diagnosis. Add only the missing exact recovery map, once on the parent.
 
 ```text
-The six 0.23.4 FBC recovery snapshots/scenarios for OCP 4.16–4.21 are identified at source 2e6b489e65620738d68504d9158418fe463e2073: [exact recovery map](https://github.com/stolostron/submariner-release-management/blob/0d23d60a992aeb432a0cd72ad868d256427ce35f/plans/fbc-failure-recovery.md#retained-snapshot-and-scenario-identities).
+The [0.23.4 FBC recovery map](https://github.com/stolostron/submariner-release-management/blob/0d23d60a992aeb432a0cd72ad868d256427ce35f/plans/fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) now records the snapshot, operator-test scenario and failed run for each OCP version 4.16–4.21, all at catalog source 2e6b489e65620738d68504d9158418fe463e2073.
 ```
 
-### ACM-45070 — conditional candidate evidence
+### Release Submariner 0.22.2 — candidate inspection, on hold
 
-The October 2 candidate is absent from the full release-target histories. Use only after confirming its relevance to the intended release; inspection does not select or approve it. Production operand identity remains a prerequisite to advancing EC/bundle steps or parent artifacts.
+Target: ACM-45070. The October 2 candidate is absent from the full release-target histories. Confirm its relevance before proposing this comment for posting; approval of the recovery-map comment does not include this held draft. Inspection does not select or approve a release snapshot. Verify production image identity before advancing EC/bundle steps or parent artifacts.
 
 ```text
-The October 8 inspection of candidate submariner-0-22-20261002-125823-000-lz confirms completed aggregate integration with warnings. Its bundle digest is sha256:cdbc25da3eb5bea32ee537a2fee2a943f7cd8a16507fb9dbfdc9d7f4e0d2a9d3, with image label v0.22.2 and CSV version 0.22.2. Bundle source da81d438c0456f367bc5e83e671362181a47ab63 and snapshot operator source b416904aa589f54ff8ba0b270e80968cd5872218 contain the same CSV.
+The October 8 inspection of candidate snapshot submariner-0-22-20261002-125823-000-lz confirms that snapshot integration finished and passed with warnings. The bundle has image label v0.22.2 and ClusterServiceVersion (CSV) version 0.22.2. The [candidate evidence](https://github.com/stolostron/submariner-release-management/blob/e2a38ecd219a6c2593431b848ecda30d69aa967b/plans/current-work.md#release-recovery-and-time-sensitive-work) records its bundle digest and source commits.
 
-Production operand identity remains unverified: all seven embedded related-image digests differ from the mapped snapshot operands, and the embedded production operator returns manifest unknown. Registry copying can change manifest digests, so these results do not establish invalid content or release readiness.
+The extracted CSV matches both the bundle and snapshot operator source trees. Production image identity remains unverified: all seven related-image digests in the CSV differ from the corresponding snapshot images, and inspection of the CSV's production operator image returns manifest unknown. Registry copying can change manifest digests, so different digests alone do not prove incorrect content.
+
+The candidate's relevance to this release still needs confirmation; this inspection does not establish release readiness.
 ```
 
 ## Group 6 — independent epic descriptions
