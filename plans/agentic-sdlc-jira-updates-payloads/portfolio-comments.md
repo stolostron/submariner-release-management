@@ -47,7 +47,7 @@ ACM-39738: no parent rollup proposed. Post the two child updates only; the broad
 
 ## Group 4 — deadline and requested status
 
-Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The requested “At Risk” assessment is comment text, not a workflow transition. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
+Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The proposed “In” assessment is comment text, not a workflow transition or a completion claim. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
 
 ### ACM-45318 — builder migration inventory
 
@@ -60,11 +60,13 @@ Remaining work: confirm supported addon build sources, select documented ART rep
 ### OPGM-364 — requested lifecycle status
 
 ```text
-Status: At Risk.
+Status: In.
 
-Remaining work: merge lifecycle injection (open PR https://github.com/stolostron/submariner-operator-fbc/pull/82), release existing valid PLCC data without new OpenShift 5 / 5.0 compatibility statements, and attach an advisory/snapshot/IIB reference plus redhat-operator-index:v5.0 membership or the allowed team IIB/catalog proof. Catalog/tooling preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81.
+Catalog/tooling preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81.
 
-Blockers: #82’s published build fails at init for a missing build account; the October 7 tenant read also finds the Application and Component absent. Prepared tenant resources need reconciliation; refreshing GitLab main fails DNS. Registry access and publication proof remain unverified.
+Remaining work: reconcile tenant resources, merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, and release existing valid PLCC data without new OpenShift 5 / 5.0 compatibility statements. Record the release advisory/snapshot/IIB and redhat-operator-index:v5.0 membership or team IIB/catalog proof.
+
+Blockers: the published build fails at init for a missing build account. The October 7 tenant read also finds the Application and Component absent, and the GitLab main read fails DNS. Registry access remains unverified.
 ```
 
 ## Group 5 — release evidence
