@@ -95,7 +95,7 @@ Production images remain unverified: seven related-image digests differ from the
 
 ## Group 6 — independent epic descriptions
 
-Use [ACM epic edits](submariner-sustenance/epic-description-edits.md) in order 4, 3, 5, then optional 1/2; review the [Kubernetes epic description](k8s-rebase/epic-and-stories.md#epic-corenet-7155-add-a-description-it-is-currently-empty) separately. Neither needs new story keys.
+Use [Submariner Sustenance Automation edits](submariner-sustenance/epic-description-edits.md) in order 4, 3, 5, then optional 1/2; review the [Create agents to automate the bump description](k8s-rebase/epic-and-stories.md#epic-create-agents-to-automate-the-bump-description-is-empty) separately. Neither needs new story keys.
 
 ## Group 7 — scope and conditional corrections
 
