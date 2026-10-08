@@ -2,7 +2,7 @@
 
 # Current work and planning handoffs
 
-Refreshed October 7, 2026. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
+Broad review October 7, 2026; lifecycle target and posting verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
 Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
 The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
 with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
@@ -21,6 +21,7 @@ Four approved existing-story comments were posted and verified October 7 at 18:2
 | ART Go builder migration, ACM-45318 | New; description requests migration by October 15 and lists addon, lighthouse, submariner and operator source repos | Use the [pinned source inventory](art-builder-migration.md): downstream component streams use UBI Go Toolset, addon branches use older Brew builders, and branch Go floors differ. Prepare reviewed changes for verified Brew/OSBS consumers with applicable compiler/crypto/build evidence; UBI Go Toolset alone is not an affected ART builder. This deadline can proceed independently of FBC credentials and Jira story creation |
 | 0.24.1, ACM-40644 | Parent In Progress; all 15 subtasks terminal. Exact production bundle tag resolves with version v0.24.1; seven index probes time out and recorded component Release CRs are NotFound | Bundle publication is confirmed. Recover catalog/QE/release evidence for actual 4.16–4.22 scope before authorized closeout; missing retained CRs and timed-out probes are not proof of absence |
 | 0.22.2, ACM-45070 | Retained candidate snapshot passes aggregate integration with warnings; its bundle CSV/version is 0.22.2, but embedded operand identity remains unreconciled. EC and bundle SHAs remain In Progress; stage onward New | Verify source/operand mapping before accepting this candidate or updating parent artifacts. Give the two additional test items their own disposition |
+| Lifecycle publication, OPGM-364 | In Progress at the October 8 read; status answer posted as comment 18829498, publication still pending | Reconcile tenant resources, merge lifecycle injection and record release/catalog proof under the rollout plan’s existing lifecycle-only scope. The posted answer does not complete the release work |
 | Task trust maintenance | October 7 current data retains three #82 pins expiring October 30 and lifecycle injection October 31; deprecated-image-check now expires November 6 | Re-read current allowlist and deny rules; keep any repo-wide refresh separate. Expiry is not the demonstrated cause of today's FBC failures |
 
 The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
