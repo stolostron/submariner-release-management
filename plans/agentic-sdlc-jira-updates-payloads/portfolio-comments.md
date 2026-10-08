@@ -47,7 +47,7 @@ ACM-39738: no parent rollup proposed. Post the two child updates only; the broad
 
 ## Group 4 — deadline and requested status
 
-Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The proposed “In” assessment is comment text, not a workflow transition or a completion claim. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
+Reviewed October 7, 2026; two comments only, in the order below. ACM-45318 remains New and OPGM-364 In Progress. The lifecycle draft reports factual progress and blockers; the request does not define “In / At Risk / Out,” so no program label is assigned. These comments propose no workflow transition. Refresh targets, source heads and live blockers before a separately approved post; verify each restricted comment and its rendered text/links before the next write.
 
 ### ACM-45318 — builder migration inventory
 
@@ -60,13 +60,13 @@ Remaining work: confirm supported addon build sources, select documented ART rep
 ### OPGM-364 — requested lifecycle status
 
 ```text
-Status: In.
+Lifecycle publication is pending. Tenant configuration blocks the build.
 
 Catalog/tooling preparation merged in https://github.com/stolostron/submariner-operator-fbc/pull/81.
 
 Remaining work: reconcile tenant resources, merge lifecycle injection in https://github.com/stolostron/submariner-operator-fbc/pull/82, and release existing valid PLCC data without new OpenShift 5 / 5.0 compatibility statements. Record the release advisory/snapshot/IIB and redhat-operator-index:v5.0 membership or team IIB/catalog proof.
 
-Blockers: the published build fails at init for a missing build account. The October 7 tenant read also finds the Application and Component absent, and the GitLab main read fails DNS. Registry access remains unverified.
+Blockers observed October 7: the published build fails at init for a missing build account; the tenant also lacks the Application and Component. Refreshing GitLab main fails DNS. Registry access remains unverified.
 ```
 
 ## Group 5 — release evidence
