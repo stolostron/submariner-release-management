@@ -12,12 +12,31 @@ This is the engineering evidence entry point for the [Jira update plan](agentic-
 Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
 Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC and the recovery-map comment at 10:43 UTC; ids are recorded in the Jira update plan. The Kubernetes epic description was also applied and verified at 11:23 UTC, followed by the two contribution comments at 11:48 UTC and builder planning comment 18839276 at 15:37 UTC. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
 
+## October 12 FBC recovery update
+
+Konflux access was restored, the existing registry credential was validated and
+linked to the integration runner, and all six original operator checks completed
+successfully. The first 4.19 stage attempt then exposed a missing required lifecycle
+task. Fresh signed builds with that task and unchanged bundle/operand pins passed
+completed snapshot tests and managed release policy; all six applicable 0.23.4
+stage Releases for OCP 4.16–4.21 succeeded. The last, 4.16, completed at 20:02 UTC.
+QE handoff uses channel `stable-0.23` and CSV `submariner.v0.23.4`; installation
+remains unqualified because the integration runs skipped it. Production is pending QE.
+
+[FBC #85](https://github.com/stolostron/submariner-operator-fbc/pull/85) and
+[release-management #115](https://github.com/stolostron/submariner-release-management/pull/115)
+carry the corrected workflows. Durable lifecycle/credential, exact-snapshot
+verification and release-record follow-ups are separately reviewable. GitLab
+remains unreachable; the declarative tenant draft still needs a fresh base.
+The October 7/8 Jira statuses below are historical observations, not claims that
+the tracker has been updated to match the October 12 cluster results.
+
 ## Release recovery and time-sensitive work
 
 | Work | Observed reality | Next action and completion evidence |
 | --- | --- | --- |
-| 0.23.4, ACM-44527 | Parent In Progress; component stage and all prerequisites through release notes Resolved; FBC catalog In Progress; FBC stage, QE and production steps New | Renew Konflux authentication; verify registry credential usability/field ownership, then carry out the separately authorized recovery. Require successful intended-snapshot tests and release verification before stage/QE |
-| FBC 4.16–4.21 | Each retained snapshot matches `2e6b489e65620738d68504d9158418fe463e2073`; aggregate tests Failed and operator scenarios TestFail, finished September 30/October 1 | Exact [snapshot/scenario map](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities) is recovered. Verify catalog content/credential usability before an authorized rerun; no fresh task logs exist in the returned PipelineRun list |
+| 0.23.4, ACM-44527 | Parent In Progress; component stage and all prerequisites through release notes Resolved; FBC catalog In Progress; FBC stage, QE and production steps New | October 12 cluster recovery and all six stage Releases are complete. Hand off the verified artifacts to QE; reconcile tracker status separately and wait for actual installation/QE evidence |
+| FBC 4.16–4.21 | Each retained snapshot matches `2e6b489e65620738d68504d9158418fe463e2073`; aggregate tests Failed and operator scenarios TestFail, finished September 30/October 1 | Historical failure is superseded by the October 12 verified replacements and successful stage Releases; retain both attempt identities under the [recovery record](fbc-failure-recovery.md) |
 | ART Go builder migration, ACM-45318 | New, unchanged; planning comment 18839276 posted and verified October 8 at 15:37 UTC; migration remains due October 15 | Use the [pinned source inventory](art-builder-migration.md): all 36 ticket-listed component Dockerfiles on 0.19–0.24 use UBI Go Toolset; addon Brew consumers and the CVE builder-selection guidance need migration. Confirm supported/deployed sources; cached 5.1/5.2 builds select main, matching their filters. Preserve builder OS family: current Brew Go 1.25 declares RHEL8 and has a matching ART candidate. Verify both CI credential paths, ordinary Prow images checks and required Konflux platforms. Verify the output binary’s compiler/build settings, runtime compatibility and existing CGO/FIPS behavior in the required deployment mode; bind each platform’s evidence to its published image digest. Carry both Dockerfile changes through the addon branch process. Require a disposition for every repo/active build source, including libraries, shared tools, FBC and generated inputs. This deadline can proceed independently of FBC credentials and Jira story creation |
 | 0.24.1, ACM-40644 | Parent In Progress; all 15 subtasks terminal. Exact production bundle tag resolves with version v0.24.1; seven index probes time out and recorded component Release CRs are NotFound | Bundle publication is confirmed. Recover catalog/QE/release evidence for actual 4.16–4.22 scope before authorized closeout; missing retained CRs and timed-out probes are not proof of absence |
 | 0.22.2, ACM-45070 | Retained candidate snapshot passes aggregate integration with warnings; its bundle CSV/version is 0.22.2, but embedded operand identity remains unreconciled. EC and bundle SHAs remain In Progress; stage onward New | Verify source/operand mapping before accepting this candidate or updating parent artifacts. Give the two additional test items their own disposition |
