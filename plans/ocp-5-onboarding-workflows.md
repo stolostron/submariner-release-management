@@ -2,7 +2,7 @@
 
 # OCP onboarding: implemented workflow and remaining handoffs
 
-The September 24 workflow investigation is complete. Its [full original design and reproductions](https://github.com/stolostron/submariner-release-management/blob/7437cc579a4878448c09a7758b07ff406836391d/plans/ocp-5-onboarding-workflows.md)
+The September 24 workflow investigation is complete. Its [full original design and reproductions](https://github.com/stolostron/submariner-release-management/blob/96e1d91bdb4e3082e21036d60ba0805f38d1f931/plans/ocp-5-onboarding-workflows.md)
 remain in Git. The preparation helper, full-version plumbing and skill/workflow changes have since shipped.
 Do not treat the old “components to build” or proposed flags as a second implementation contract.
 

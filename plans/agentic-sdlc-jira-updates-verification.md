@@ -574,3 +574,17 @@ The earlier temporary raw-export directories are unavailable in this checkout. T
 
 The grouping, final review and second review pass full `make test` and commit lint. Current validation covers full repository checks, 153 relative links/anchors across all 25 Markdown files changed by the PR, all 58 unique queue keys, historical inventory totals, posted text/links/visibility and whitespace. Pending payloads are revised independently of the ten fixed posted comments and the applied Kubernetes epic description; original acceptance criteria and dated evidence limits are retained. Dated Jira/PR/permission evidence still requires target-specific refresh before a write.
 No release/test implementation changed. Raw Jira exports remain outside this checkout; local validation logs are untracked.
+
+## Retained source after the DCO history repair
+
+October 13: the old and repaired commits below have identical Git tree objects; the repaired commits remain ancestors of PR #111.
+Posted/prepared payloads retain their original permalink text and criteria. These alternative references preserve access to the same source.
+The five operational historical-design links now use retained commit `96e1d91b`; no payload or Jira write was changed.
+
+| Original commit | Retained source | Purpose |
+| --- | --- | --- |
+| `123ebeba` | [74ab84e0](https://github.com/stolostron/submariner-release-management/blob/74ab84e039d7ed47960b187b5a7c7ecacb1a34f5/plans/art-builder-migration.md) | Builder inventory |
+| `0d23d60a` | [d4761e69](https://github.com/stolostron/submariner-release-management/blob/d4761e69aded8e06030f6410feb634f15d58b82c/plans/fbc-failure-recovery.md) | Original FBC recovery map |
+| `e2a38ecd` | [d01a14fd](https://github.com/stolostron/submariner-release-management/blob/d01a14fdea6315c69fd46c3a435b4ab79a675e60/plans/current-work.md) | October 8 candidate evidence |
+| `d094bf36` | [886ec4d8](https://github.com/stolostron/submariner-release-management/tree/886ec4d81ebe1d0eddeaa45d257467b8b1daed56/plans/agentic-sdlc-jira-updates-payloads/submariner-sustenance/) | PR inventories |
+| `ecb3f1be` | [3dd46260](https://github.com/stolostron/submariner-release-management/blob/3dd4626065d2f1036606e20692ef7784288c28ce/plans/ocp-5-0-fbc-rollout.md) | OCP 5 rollout gates |
