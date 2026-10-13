@@ -2,10 +2,11 @@
 
 # Assigned Jira work: update queue
 
-Read-only sweep, October 7, 2026. This is the disposition of the maintainer's assigned issues, not a bulk-posting list.
-The [work map](current-work.md) owns current engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns story creation and execution.
-Exact additional text is in [portfolio-comments.md](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Four approved comments were posted and verified on ACM-39731/39730/39736/39729 on October 7 at 18:23 UTC; their ids are in the epic plan. Group 1 is also complete: CORENET-7171 comment `18824859`, created at 22:59 UTC with verified restricted visibility and unchanged status. OPGM-364 comment `18829498` was also posted and verified October 8 at 09:37 UTC; builder planning comment `18839276` posted and verified October 8 at 15:37 UTC completes group 4. The Release Submariner 0.23.4 recovery-map comment `18830594` posted and verified October 8 at 10:43 UTC; group 5 is partial and the 0.22.2 candidate remains on hold. The Create agents to automate the bump description was applied and verified October 8 at 11:23 UTC (changelog `92306194`); group 6 is partial, with Submariner edits pending. Group 2 is complete: contribution comments `18831845` on ACM-39740 and `18831852` on ACM-39739 posted and verified October 8 at 11:48 UTC. The release candidate remains on hold; the next eligible review is the group 6 Submariner description edits. Re-read each target and omit anything already recorded before posting.
+Verified October 8, 2026. This queue accounts for all 76 active assigned non-Vulnerability issues; private security follow-up remains separate.
+
+Next review: **Submariner description edits 4 → 3 → 5**, then optional 1/2. Ten comments and the Kubernetes description are complete; [verified ids](agentic-sdlc-jira-updates.md#a5-execution-order). The 0.22.2 candidate note remains on hold; EVPN is last. Re-read each approved target and omit completed deltas.
+
+[Current work](current-work.md) owns engineering evidence; the [epic plan](agentic-sdlc-jira-updates.md) owns creation and field procedures; [portfolio payloads](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) contain exact existing-issue drafts.
 
 ## Approval order
 

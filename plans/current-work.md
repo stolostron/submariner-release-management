@@ -2,15 +2,11 @@
 
 # Current work and planning handoffs
 
-Broad review October 7, 2026; lifecycle target/posting, release-evidence batch, recovery-map posting, Kubernetes epic description, contribution comments and builder inventory/registry refresh and planning post verified October 8. The comprehensive sweep covered all 220 assigned non-Vulnerability full views, four active private vulnerabilities and related dependencies; the preceding broad follow-up rechecked the unrestricted inventory, active/payload targets and tenant state.
-Current tenant/snapshot reads are distinguished below from earlier registry/index probes and reported validation.
-The [assigned-issue queue](jira-update-queue.md) accounts for all 76 active non-Vulnerability issues and private security follow-up,
-with [additional comment drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md).
-Use the [grouped approval order](jira-update-queue.md#approval-order) for Jira updates. The group 1 CI correction, both group 2 contribution comments and both group 4 comments are posted. The candidate remains on hold; the next eligible review is the group 6 Submariner description edits. The EVPN comment is deferred to the end of the queue. FBC recovery, private CVE triage and deadline work retain their engineering priority.
-This is the engineering evidence entry point for the [Jira update plan](agentic-sdlc-jira-updates.md),
-[FBC recovery](fbc-failure-recovery.md) and [OCP 5 rollout](ocp-5-0-fbc-rollout.md).
-Historical counts retain their stated cutoff. Planning changes are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111).
-Four approved existing-story comments were posted and verified October 7 at 18:23 UTC, followed by the group 1 CI correction at 22:59 UTC and the lifecycle status comment October 8 at 09:37 UTC and the recovery-map comment at 10:43 UTC; ids are recorded in the Jira update plan. The Kubernetes epic description was also applied and verified at 11:23 UTC, followed by the two contribution comments at 11:48 UTC and builder planning comment 18839276 at 15:37 UTC. Other payloads remain pending; no PR comment, cluster mutation or release was performed.
+Jira planning reverified October 8, 2026: all 703 assigned keys/statuses, 234 non-Vulnerability/related full views and 88 complete comment/changelog histories. The [queue](jira-update-queue.md) covers all 76 active non-Vulnerability issues; private security follow-up stays separate. Cluster, registry, source and runtime observations below retain their own cutoffs.
+
+Next review is [Submariner description edits 4 → 3 → 5](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-description-edits.md), then optional 1/2. Ten comments and the Kubernetes description are complete; [verified ids](agentic-sdlc-jira-updates.md#a5-execution-order). The 0.22.2 note remains on hold and EVPN is deferred. QE validation of the completed FBC stage candidates, private CVE triage and the October 15 builder deadline retain engineering priority.
+
+[PR #111](https://github.com/stolostron/submariner-release-management/pull/111) publishes this planning work. The October 12 history repair added sign-offs to all 60 same-author commits while preserving their file tree; the published DCO check passes. The October 8 review edits are retained here as dated records, with current release evidence kept separate. The [verification log](agentic-sdlc-jira-updates-verification.md) retains dated audits and receipts.
 
 ## October 12 FBC recovery update
 
@@ -25,8 +21,7 @@ remains unqualified because the integration runs skipped it. Production is pendi
 
 [FBC #85](https://github.com/stolostron/submariner-operator-fbc/pull/85) and
 [release-management #115](https://github.com/stolostron/submariner-release-management/pull/115)
-carry the corrected workflows. Durable lifecycle/credential, exact-snapshot
-verification and release-record follow-ups are separately reviewable. GitLab
+carry the corrected workflows. [FBC #86](https://github.com/stolostron/submariner-operator-fbc/pull/86) supplies the required lifecycle task; all seven PR builds and completed snapshot tests pass. Release-management [#117](https://github.com/stolostron/submariner-release-management/pull/117) adds exact completion/publication gates, [#116](https://github.com/stolostron/submariner-release-management/pull/116) records the six successful stage candidates, and [#118](https://github.com/stolostron/submariner-release-management/pull/118) fixes reproduced validation races. All six release-management proposals passed a combined full suite. Durable credentials remain separately prepared. GitLab
 remains unreachable; the declarative tenant draft still needs a fresh base.
 The October 7/8 Jira statuses below are historical observations, not claims that
 the tracker has been updated to match the October 12 cluster results.
@@ -43,13 +38,13 @@ the tracker has been updated to match the October 12 cluster results.
 | Lifecycle publication, OPGM-364 | In Progress at the October 8 read; status answer posted as comment 18829498, publication still pending | Reconcile tenant resources, merge lifecycle injection and record release/catalog proof under the rollout plan’s existing lifecycle-only scope. The posted answer does not complete the release work |
 | Task trust maintenance | October 7 current data retains three #82 pins expiring October 30 and lifecycle injection October 31; deprecated-image-check now expires November 6 | Re-read current allowlist and deny rules; keep any repo-wide refresh separate. Expiry is not the demonstrated cause of today's FBC failures |
 
-The latest authenticated `submariner-tenant` read again finds the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
-The latest namespace read returns zero PipelineRuns and 741 retained snapshots (the earlier read returned 746); all six documented FBC failure associations remain present.
+The October 7/8 authenticated `submariner-tenant` reads found the registry secret unlinked from both runner credential lists and OCP 5 Application, Component and build account absent.
+The October 7/8 namespace read returned zero PipelineRuns and 741 retained snapshots (the earlier read returned 746); all six documented FBC failure associations remain present.
 The recorded 0.23.4 component-stage Release is now NotFound; its archived October 7 success remains evidence.
 The October 8 posting preflight finds Konflux authentication expired; live snapshot re-verification is unavailable.
 Release Submariner 0.23.4 now has verified restricted recovery-map comment 18830594. It links recorded identities and makes no fresh test or release claim.
 Release Submariner 0.22.2’s candidate comment remains unposted and on hold.
-This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. GitLab fresh-base access remains unverified since the earlier DNS failure.
+This establishes snapshot verdicts/identities, not fresh task diagnosis or credential usability. Those historical credential/test failures are superseded by the October 12 recovery above; GitLab fresh-base access remains unavailable.
 
 0.24.1 artifact read: `registry.redhat.io/rhacm2/submariner-operator-bundle:v0.24.1` resolves to
 `sha256:a8bb318b8afa37daf2ce9394d80c46224e872b593934fbb68fd89e20e6665f84` with label `version=v0.24.1`.
@@ -100,9 +95,9 @@ Reopening or replacing the drafts is a separate external action. Preserve their 
 | Work | Current evidence | Required sequence |
 | --- | --- | --- |
 | [shipyard #2654](https://github.com/submariner-io/shipyard/pull/2654) | Open at `557bb9977cd4e2dcb9f8526620423faa20c4c1fb`; all returned checks pass or skip. Selects/verifies branch-appropriate upgrade baselines | Review/merge, then verify publication of the updated Shipyard Dapper runtime before enabling the consumer |
-| [subctl #1944](https://github.com/submariner-io/subctl/pull/1944) | Draft at `9a7cec7d82d341d7159b512bce564c2f040c2f73`; dependency, upgrade-command, Go and vulnerability checks fail | Preserve dependency ordering; repair formatting and triage the scan now. Verify the baseline executable after runtime publication, then consumer CLI/image coverage and applicable backports; see [CI handoff](upgrade-ci-recovery.md) |
+| [subctl #1944](https://github.com/submariner-io/subctl/pull/1944) | October 12 draft at `f6a97c7a`: formatting and local prerequisite checks pass; dependency/runtime and hosted upgrade gates still block | Merge/publish the approved Shipyard runtime first, then qualify the consumer. The focused scan fix is separate [#1946](https://github.com/submariner-io/subctl/pull/1946); do not bypass the guard |
 | [shipyard #2635](https://github.com/submariner-io/shipyard/issues/2635) | Still open; #2633 is closed | Keep open until coordinated fixes, runtime publication, consumer CI and applicable backports satisfy its criteria |
-| [shipyard #2618](https://github.com/submariner-io/shipyard/pull/2618) | Open at `682127c8424d8f6a1614e0bf789bb7d17ea10af9`; current-head approval, passing/skipped checks, zero current unresolved threads. Aggregate changes requested comes from an older review | Confirm merge readiness and current-head OCP admission evidence. The body still claims `hostUsers:false`, but all three current manifests omit it; correct the body when authorized |
+| [shipyard #2618](https://github.com/submariner-io/shipyard/pull/2618) | October 12 at `98b5416c`: exactly three UID removals; deployment/E2E/unit checks pass, old-base scan fails | Integrate the separately tested dependency remedy [#2656](https://github.com/submariner-io/shipyard/pull/2656), refresh this branch and retain fresh OCP SCC admission as a distinct gate |
 
 Upgrade PR descriptions report local kind validation and cached-image limitations. This planning audit did not repeat those runs.
 Do not treat upgrade-test repair as proof that FIND-006 download-integrity fixes shipped.
@@ -116,10 +111,10 @@ Both projects' create metadata and existing targets' edit/transition metadata we
 
 * [Upstream release PR #1444](https://github.com/submariner-io/releases/pull/1444) remains open at `7f67ec02b571d1cb46189814a74b5996a2cc07f8`. Keep ACM-39733 with its existing owner; no progress or comment is attributed to the maintainer by this refresh.
 * October 7 maintainer report: another team member has begun using the CVE and autorelease tooling. This is initial adoption evidence for ACM-39729/39731/39736; completed full releases and feedback are not established by that report.
-* [Release-management #114](https://github.com/stolostron/submariner-release-management/pull/114) remains open at `a1bfe041b626ed39c42e703afc3b735b1bbd04c0`, with completed checks passing and Tide pending. Its skip-completed-step changes are not on main; describe them as pending work on ACM-39731.
+* October 12: [release-management #114](https://github.com/stolostron/submariner-release-management/pull/114) is open at `31ae1e50`, with hosted validation passing. It now requires completed EC evidence and exact tags across all five component repos while preserving downstream scan checks; the proposal is not on main.
 * `make test-skills` passes 19 checks while retaining five overlapping compatibility debt entries in `konflux-ci-fix`. The proposed S3 now names the delivered discovery/contract scope. The [compatibility plan](claude-codex-skill-compatibility.md) retains remaining execution and host-matrix work.
-* [shipyard #2582](https://github.com/submariner-io/shipyard/pull/2582) remains open at `b347a44d43b7386eef1a26e6d7114670324344bd`. Direct comparison with the October 7 `453dbbb4` source finds six changed files: workspace sync/tidy/vendor timeout and rollback handling, binary-to-module dispatch fallback, scoped partial-review classification, docs and tests. Compare file blobs directly across rewritten history.
-* The October 8 read returns 45 review threads: zero unresolved/current and six unresolved/outdated. All 43 reviews are paginated; latest changes requested is on `edae89bb`, with no current-head review or approval. Complete checks at the October 8, 11:31 UTC read: 19 check runs (13 successful, three skipped, three running), plus one successful commit status. Six configuration/detection probes and 26 selected existing-source checks pass, including scoped policy findings and real offline workspace build/vendor rollback. These bounded checks do not repeat the PR’s full regression/live qualification or establish installed-runtime compatibility.
+* [shipyard #2582](https://github.com/submariner-io/shipyard/pull/2582) is open at `603ac03b63b5e985deaa4f984d127323cdddedcd` in the latest October 8 read. All 46 returned check runs pass or skip, plus one successful commit status. Complete pagination finds 47 reviews and 50 threads: two unresolved/current, seven unresolved/outdated, and no current-head review or approval. The latest changes-requested review is on `8bdf850e`. Rewritten history makes the earlier comparison/probes unsuitable for qualifying this new head.
+* The earlier six configuration/detection probes and 26 selected existing-source checks remain dated evidence for the inspected earlier source, including offline workspace build/vendor rollback. No CVE-fix test or installed-runtime qualification is repeated on `603ac03b` by this planning review.
 * Project-level `.cve-fix.yaml` overrides and configurable repository registries are implemented in the open PR. The builder-image fallback for unconfigured Shipyard consumers still uses a hardcoded Submariner value; project configuration and environment overrides take precedence. Resolve the fallback for the general contribution against its original criterion. The merged CVE agent still binds component/image mappings, version rules, Jira scope and triage helpers to Submariner/RHACM. Both ai-helpers contributions and the agent’s non-Submariner CVE validation remain pending.
 
 Before writes, settle the story split/status and CORENET points/sprint, refresh descriptions and PR evidence, then read back one canary at a time.
@@ -161,7 +156,7 @@ The old unpublished-source conclusion is superseded; commit counts across these 
 The current local checkout and dirty state were not re-read. Keep those October 7 observations in the historical evidence.
 
 Fresh qualification must use the exact published/installed source and runtime. No plugin test, model call or rebase trial was run here.
-The [K-story payload](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) retains detailed trial evidence:
+The [verification log](agentic-sdlc-jira-updates-verification.md#kubernetes-rebase-evidence) and preceding trial records retain detailed evidence:
 K2's legacy 1.36.2 PASS summaries lack the current per-run archive; K3 needs valid measured outcomes and the shared-harness decision;
 K4's CNCC/Multus/MCP trials retain their dependency, coverage and security limits. Publication does not resolve those acceptance gates.
 
@@ -179,7 +174,7 @@ K4's CNCC/Multus/MCP trials retain their dependency, coverage and security limit
 | MCN CI tooling, CORENET-7171 and implementation stories | Research In Progress with two May comments and verified October 7 correction 18824859; all 27 implementation subtasks To Do, no comments | Linked proposal contains recommendations/rationale and post-merge AI scope. Research acceptance is separate from implementation; planned GHA/Prow responsibilities need reconciliation with CORENET-7083/7087 |
 
 EVPN main is `306b8fe8a68cd878a9b8272b5329e5a6b8ac1e92` (October 5). Its current `make verify` runs the planning/public-safety checks, not appliance build or AWS qualification.
-[Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) has a passing verify check at the October 7 head `629d9e671a94e6303ff46c2e97c78b310c672c63`; tide is pending and the PR remains open. Its draft index labels the RHEL 10 host-FRR package path settled, but that differs from #2’s recorded image choice and CORENET-7621’s unchanged image criterion; reconcile it with the decision owners. The committed plan amendments are published on a fork branch and absent from public main; they do not establish an approved replacement payload.
+[Appliance #6](https://github.com/openshift/evpn-gateway-appliance/pull/6) remains open at `d5fb9fdad3d4bc486ba5f4c145806d64d09a39cb` in the latest October 8 read; verify passes and Tide is pending. Its pinned draft index still calls RHEL 10 host-FRR packaging settled, differing from #2's recorded image choice and CORENET-7621's unchanged image criterion. Reconcile that choice with the owners. Earlier fork amendments and this open PR remain proposals, not accepted replacements for the merged plan.
 [Ansible #7](https://github.com/openshift/evpn-gateway-appliance/pull/7) fails verify at `55d471e0336fa3c6812fdf88a4ce38732bb7533b`.
 [Earlier Ansible #3](https://github.com/openshift/evpn-gateway-appliance/pull/3) is also open; reconcile the overlapping import scope with its owners rather than assuming supersession.
 Keep these other-contributor handoffs outside assigned-issue totals and the Kubernetes plugin epic.

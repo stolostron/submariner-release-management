@@ -2,20 +2,13 @@
 
 # Plan: bring the agentic-SDLC Jira epics up to date
 
-**Release priority:** [recover the failing FBC integration tests](fbc-failure-recovery.md). Planning and independent deadline work can proceed while recovery prerequisites are resolved.
+**Release priority:** [the six 0.23.4 FBC stage candidates are recovered](fbc-failure-recovery.md); actual QE installation is next. Independent deadline work and planning can proceed with their own evidence and approvals.
 
-Status: first four approved existing-story comments posted and verified October 7 at 18:23 UTC; group 1 CI correction posted and verified at 22:59 UTC; lifecycle status comment posted and verified October 8 at 09:37 UTC; release recovery-map comment posted and verified at 10:43 UTC. The Kubernetes epic description was applied and verified at 11:23 UTC; both group 2 contribution comments posted and verified at 11:48 UTC; builder planning comment posted and verified at 15:37 UTC. Submariner epic edits, new stories and remaining comments are pending. Prepared 2026-09-30; broad evidence refreshed 2026-10-07, lifecycle target/receipt, release-evidence and independent epic-description, contribution and builder batches refreshed 2026-10-08.
-The [current work map](current-work.md) records the latest Jira, PR and local-work checks, corrections and next actions.
-In particular, the eight FIND-006 drafts are now closed without merging, and real local Kubernetes 1.37 qualification work exists.
+Next review: [Submariner epic edits 4 → 3 → 5](agentic-sdlc-jira-updates-payloads/submariner-sustenance/epic-description-edits.md), then optional 1/2. Ten comments and the Kubernetes epic description are verified complete; [A5](#a5-execution-order) records their ids. New stories remain uncreated. The 0.22.2 candidate note is on hold; EVPN is deferred to the end.
 
-The tables, counts, sprint choices and local-work observations are dated snapshots, not a live release-status report. Jira was re-read on
-2026-10-07. October 7 tenant reads succeeded during the earlier audit; they confirm missing prerequisites but not credential usability or release success. Re-read state before executing the plan. The release-tracker changes described
-in A11 were a separate operation; they did not apply these payloads.
+Verified October 8, 2026. The [queue](jira-update-queue.md#approval-order) owns approval order, [current work](current-work.md) owns engineering state, and the [verification log](agentic-sdlc-jira-updates-verification.md) retains dated evidence. Refresh each approved action before writing. Historical counts and earlier cluster/registry observations retain their cutoffs.
 
-The [verification record](agentic-sdlc-jira-updates-verification.md) lists the source checks, corrected claims and remaining execution gates.
-
-The [assigned-issue update queue](jira-update-queue.md) covers all assigned work and identifies which issues need comments, edits, closure review or no action. This execution plan covers two epics of the agentic-SDLC effort. The parts are independent: each has its own preflight, execution order and verification, and either can be
-done without the other.
+The two epic updates are independent:
 
 | Part | Epic | Project | What it tracks |
 | --- | --- | --- | --- |
@@ -24,24 +17,14 @@ done without the other.
 
 Rules that apply to both parts:
 
-* The first four existing-story comments, group 1 CI correction, lifecycle status comment, release recovery-map comment and both contribution comments are posted, with verified ids in A5. The Kubernetes epic description is also applied and verified. Other payloads remain pending; post only newly approved missing deltas.
-* An existing-issue comment must add a missing delivery, blocker/evidence, specific correction or answer to an explicit request. Keep audit instructions and repeated criteria in the plan; omit parent rollups that only repeat children. New-story comments establish their evidence baseline. Creating child tracking does not itself warrant an epic comment; propose one only for a separate missing decision, delivery or blocker.
-* Link each relevant delivery or blocker PR directly in the comment, with its merged/open/draft state. Use a linked PR inventory for large batches. Convert URLs to clickable ADF link nodes, keeping sentence punctuation outside the link marks; verify exact hrefs, rendered text and links on read-back; PR-field edits remain a separate action. Append only missing approved links to PR fields, preserving existing text and links.
-* The proposed ACM and CORENET stories use different Activity Type values. CORENET automation warns about original story points before In Progress/Code Review
-  and a sprint before In Progress/Code Review/Closed; each part lists its own field ids.
-* These are proposed text payloads, not raw Jira REST requests. Jira Cloud descriptions, comments and the Git Pull Request field use Atlassian Document Format (ADF).
-  Use a client that converts Markdown to ADF, or construct valid ADF explicitly; never send a bare Markdown string where an ADF document is required.
-* Read [project/Story create metadata](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/) with `GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` (paginate), and target transitions with `GET /rest/api/3/issue/{issueIdOrKey}/transitions?expand=transitions.fields`. Confirm writable fields, allowed values and required resolution fields. The October 7 action audit read both projects' complete Story create metadata, permissions and 21 existing targets' edit/transition metadata. Re-read new canaries after creation; existing issue metadata does not establish a new issue's workflow. See the [field verification](agentic-sdlc-jira-updates-verification.md#field-and-infrastructure-evidence).
-* This is a public repository: no teammate names, no Product Security tracker details, no internal links. Jira keys appear in these files only; they must not appear in the
-  titles, bodies or commit messages of pull requests (project rule). Jira comments may link to GitHub, not the reverse.
-* Read complete comment histories with pagination; an issue view can contain only the first 100 comments. Preserve exact ADF and link targets alongside rendered text.
-* Run the preflight checks relevant to the approved group, refreshing its targets, mutable claims and field prerequisites. Preserve pinned historical evidence at its recorded cutoff.
-* Approval covers only the named actions in the approved group. Story creation, field edits and status transitions need their own explicit scope; creation does not authorize later resolution.
-* If a write times out or its result is uncertain, stop and reconcile Jira before retrying. Check returned ids, complete comments, or matching stories under the intended parent; do not assume a failed response means no write occurred.
-* Before each field edit, save its current value and compare it again immediately before writing. Stop on a changed baseline. Roll back only if the field still equals this operation’s written value; otherwise reconcile later edits before restoring anything.
-* Before creating the rest, read back one canary story per project, including its approved field setup and restricted progress comment. Confirm PR-field support before writing; if unsupported, retain its PR links in the comment and omit that field edit. A failed or mismatched write stops the batch for reconciliation. Existing-issue comments and independent description edits need their own target preflight, not a new story. Issue deletion is outside this plan.
-* Set comment visibility to group `Red Hat Employee` in the create request and verify it on read-back. Current `acli jira workitem comment create` exposes only project-default visibility and no restriction flag; use REST or a supported UI that sets the group in the initial request. If the client cannot set that visibility at creation,
-  stop and use a supported client/UI; do not publish an unrestricted comment and restrict it afterward.
+* Approval covers named actions only. Story creation, field edits, comments and transitions require explicit scope; acceptance and resolution remain separate from progress updates. Skip completed deltas.
+* Refresh the target, complete paginated comments, mutable evidence and relevant metadata. Before creating stories, search for existing scope beyond the epic. Run one story canary per project and read back every write before continuing.
+* Comments add a missing delivery, blocker, correction or requested answer. Link relevant PRs with their merged/open/draft state; use a dated inventory for large batches. Omit repeated criteria and duplicate parent summaries.
+* Descriptions, comments and Git Pull Request fields require ADF or a converting client. Preserve unrelated nodes and links; verify text, formatting and exact hrefs after writing. Keep punctuation outside link marks. Append only missing approved PR links.
+* Set comment visibility to `Red Hat Employee` in the initial request and verify it. The current comment CLI cannot set that restriction; use REST or a supported UI. Confirm group membership and permissions in preflight.
+* Read complete [Story create metadata](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/), target edit metadata and transitions with required fields. The payloads specify project-specific Activity Types, points and sprint rules; verify a new canary's workflow rather than reusing existing transition ids.
+* Save each field's live baseline and compare it immediately before writing. Stop on drift or an uncertain response; reconcile Jira before retrying. Restore only while the live field still equals this operation's result, preserving later edits. Issue deletion is outside this plan.
+* Keep private security details, internal links and teammate names outside this public repository. Project rules prohibit Jira keys in public PR titles, bodies and commit messages; Jira comments may link to GitHub.
 
 Exact text to post, all under [agentic-sdlc-jira-updates-payloads/](agentic-sdlc-jira-updates-payloads/):
 
@@ -61,7 +44,7 @@ The epic is ACM-39728, the Submariner part of the company-wide agentic SDLC effo
 shipped since is not recorded on it. Part A covers this epic and its children; the [assigned-issue queue](jira-update-queue.md)
 covers release-tracker hygiene and other assigned work.
 
-### A1. Current state of the epic and its children (rechecked 2026-10-07)
+### A1. Current state of the epic and its children (rechecked 2026-10-08)
 
 | Key | Summary | Status | Activity Type | Priority | Has PR links |
 | --- | --- | --- | --- | --- | --- |
@@ -119,7 +102,7 @@ no new umbrella story is proposed for them. Full OCP rollout evidence remains in
 
 ### A4. Preflight for approved actions (stop on any surprise)
 
-Use the October 7 [work map](current-work.md) when refreshing payloads: distinguish the closed FIND-006 drafts, open upgrade-test PRs,
+Use the [work map](current-work.md) when refreshing payloads: distinguish the closed FIND-006 drafts, open upgrade-test PRs,
 known portability debt and time-sensitive builder migration from the September historical counts.
 
 1. Re-read ACM-39728 and its ten children. Compare the table in section A1, especially statuses, child membership, comments and PR links;
@@ -135,24 +118,25 @@ known portability debt and time-sensitive builder migration from the September h
 
 ### A5. Execution order
 
-Completed first approved chunk: one comment on each existing story, using the [four recorded comments](agentic-sdlc-jira-updates-payloads/submariner-sustenance/comments-existing.md). October 7 full reads found these deltas absent before posting.
+Completed writes, reverified October 8. These are fixed records; do not repost or reapply them. Exact payloads remain in the linked payload files, and the [verification log](agentic-sdlc-jira-updates-verification.md) retains receipts and side-effect checks.
 
-| Order | Target | Posted update | Verified status / comment id |
-| --- | --- | --- | --- |
-| 1 | ACM-39731 | Merged conductor/status hardening, initial teammate adoption and the separate open #114 proposal | In Progress / 18820423 |
-| 2 | ACM-39730 | Tracker Activity Type fix, current releases, and the observed retarget/artifact gap | In Progress / 18820431 |
-| 3 | ACM-39736 | Teammate adoption of CVE/autorelease tooling and shared prerequisites; full releases and feedback still required | New / 18820438 |
-| 4 | ACM-39729 | Verified September counts, initial teammate adoption, merged CVE-agent improvements and open CVE-fix work | In Progress / 18820449 |
+| Target | Completed action | Comment id / description changelog |
+| --- | --- | --- |
+| ACM-39731 | Conductor hardening and initial adoption | 18820423 |
+| ACM-39730 | Tracker correction and artifact gap | 18820431 |
+| ACM-39736 | Initial adoption and shared prerequisites | 18820438 |
+| ACM-39729 | September remediation and CVE tooling | 18820449 |
+| CORENET-7171 | CI handoff correction | 18824859 |
+| ACM-39740 | CVE-agent contribution evidence | 18831845 |
+| ACM-39739 | CVE-fix contribution evidence | 18831852 |
+| OPGM-364 | Lifecycle status answer | 18829498 |
+| ACM-45318 | Builder migration planning | 18839276 |
+| ACM-44527 | 0.23.4 recovery map | 18830594 |
+| CORENET-7155 | Epic description | 92306194 |
 
-All four comments were created on October 7 at 18:23 UTC with restricted visibility set in the initial request; exact ADF text, clickable links, group visibility and unchanged issue statuses were verified after each write. No issue fields or statuses were changed, and no new issues were created. The CVE comment uses refreshed Shipyard head 3b67af1a and its current changes-requested review. For later updates, re-read complete comments and refresh mutable evidence; if a write has an uncertain result, inspect Jira before retrying.
+The [grouped queue](jira-update-queue.md#approval-order) controls remaining approvals. Next are Submariner description edits 4 → 3 → 5, then optional 1/2; no new story keys are needed. The 0.22.2 note remains on hold and EVPN remains deferred. Scope corrections, new tracking and acceptance reviews are separate groups.
 
-The remaining approval sequence is owned by the [grouped queue](jira-update-queue.md#approval-order); [portfolio drafts](agentic-sdlc-jira-updates-payloads/portfolio-comments.md) follow it. Group 1 is complete: CORENET-7171 comment `18824859`, created October 7 at 22:59 UTC with initial restricted visibility; approved text, rendered links and unchanged In Progress status were verified. OPGM-364 lifecycle comment `18829498` was created October 8 at 09:37 UTC with initial restricted visibility; exact ADF/rendered text, both PR links, unchanged In Progress status and earlier comments were verified. Group 4 is complete: builder planning comment `18839276` posted October 8 at 15:37:20 UTC with initial employee visibility and verified exact ADF/rendered text/inventory link. New status, criteria, hierarchy and history are preserved; read-back also reports a first-response timestamp and the posting account watching, without separate field/watcher writes. Do not repost either record. The Release Submariner 0.23.4 recovery-map comment `18830594` was created October 8 at 10:43 UTC with initial restricted visibility; exact ADF/rendered text, its link, unchanged In Progress status and all 90 prior comments were verified. Group 5 is partial; do not repost the recovery map. The Create agents to automate the bump description was applied October 8 at 11:23:37 UTC (changelog `92306194`); exact ADF/rendered text and structure, all six comments, other issue fields, In Progress status and no-child membership were verified. Group 6 is partial: Submariner edits remain pending; do not repeat the Kubernetes description edit.
-
-Group 2 is complete: the approved contribution comments were posted October 8 at 11:48:24 UTC on ACM-39740 (`18831845`), then 11:48:51 UTC on ACM-39739 (`18831852`). Initial employee visibility, exact ADF/rendered text and PR links were verified after each write; all prior comments, other fields, hierarchy, changelog events, watch metadata and both New statuses are preserved. Do not repost them. The builder planning comment is posted; retain its payload as a fixed record. The release candidate remains on hold; the next eligible review is the group 6 Submariner description edits. The extended audit covers both addon Dockerfiles, 137 canonical refs across nine source repos, OpenShift CI and shared pipeline/task sources. All 36 ticket-listed component Dockerfiles on 0.19–0.24 use UBI Go Toolset; 0.25 currently lacks Konflux Dockerfiles. Update the Brew-selecting release-management CVE guidance and require a disposition for every repo/active source, including libraries, FBC and generated inputs. Cached 5.1/5.2 components select main; matching filters are not established defects. Active source selection, both CI pull paths and image checks, compiler/CPU/runtime/CGO/FIPS/platform qualification and addon branch propagation remain unfinished. Preserve builder OS family: current Brew Go 1.25 declares RHEL8 and has a matching ART candidate. Existing source integration tests do not qualify the rebuilt addon image; require output-binary compiler evidence and applicable FIPS runtime checks tied to each published platform digest. The October 8 contribution review confirms unchanged child criteria/histories, the preparatory agent merge and implemented CVE-fix project configuration. Its unconfigured Shipyard builder fallback remains contribution work; current-head review and running checks are dated evidence, not fixed comment text. Group 5’s recovery map is posted; its 0.22.2 candidate comment remains on hold until release relevance is confirmed. Group 3 EVPN is deferred to the end at the maintainer’s request: another planning PR iteration is WIP and CI PRs will start soon. Parent rollups and the older CVE progress comment remain deferred pending a distinct decision or delivery. Engineering priorities proceed in parallel.
-
-Each group requires its own approval and fresh target/evidence read; set restricted visibility at creation and verify text/links/visibility before the next write. Earlier audits and preparation do not authorize posting.
-
-Independent epic descriptions come before new tracking. Ownership/adoption and release-evidence corrections precede optional stale-count cleanup. Preserve original ADF and all links; scope-dependent pipeline/OLMv1 corrections remain gated. When approved, the S-story creation sequence is S4 → S2 → S3 → S1 → S5, keeping the canary first and delivered scopes ahead of unfinished work. K-story creation remains separate. No automatic epic summary is proposed; closure reviews remain separate from progress reporting.
+After story split and fields are approved, create S4 → S2 → S3 → S1 → S5. CORENET creation is separate. No duplicate epic summary is proposed.
 
 Each creation or field write is read back before the next. Skip completed deltas.
 
@@ -230,12 +214,9 @@ step records, subtask statuses and artifact descriptions against cluster/GitHub 
 Merged release-management#112/#113 and FBC#83/#84 are evidence for the existing ACM-39731 comment;
 release-management#114 remains an open proposal and is absent from main.
 
-The October 7 issue sweep still finds the two epics In Progress, ten direct ACM children and no CORENET children/description.
-Current release blockers and separate local configuration drafts are in [current work](current-work.md),
-with registry repair in [fbc-failure-recovery.md](fbc-failure-recovery.md).
-The earlier successful tenant read confirms an unlinked registry Secret and missing OCP 5 Application/Component/build account;
-no retained PipelineRuns were returned. It does not establish credential validity, installation, QE or publishing.
-The October 8 read retains all six failed FBC [snapshot/scenario associations](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities). The recorded component-stage Release is now NotFound; its archived October 7 successful verdict remains evidence. Verify intended catalog content/credentials before any authorized rerun; component-stage success does not complete FBC. GitLab fresh-base access remains unverified after the earlier DNS failure.
+Both epics remain In Progress; ACM has ten direct children and CORENET has none. The Kubernetes description is applied; Submariner edits remain pending.
+
+[Current work](current-work.md) owns release state and configuration drafts. [FBC recovery](fbc-failure-recovery.md) owns the six failed snapshot/scenario associations and credential/content prerequisites. Its archived component-stage success does not complete FBC; later NotFound reads do not erase that evidence. No fresh cluster or registry qualification is supplied by this Jira review.
 
 ## Part B: k8s-rebase automation (CORENET-7155)
 
@@ -271,12 +252,7 @@ retain the pinned bak42 development counts and historical PR inventory. The Octo
 
 ### B3. Things to know before touching Jira
 
-* **Historical local work:** October 7 source was `a477bced`, 82 commits beyond the old PR head and 13 beyond bak42, with two dirty court-test files. The October 8 published plugin matches that committed tree except those two test files; this audit did not re-read local state.
-* **Current PR source:** #617 is draft at `1a33dafe05981ceebfaf8fe780b0c448a6310b2d`. Direct blob comparisons, not commit ancestry across the squashed history, establish source coverage. Preserve and qualify the exact source selected for review; no plugin files were changed or executed by this audit.
-* **The 108 July draft PRs:** they were opened against upstream `openshift/*` and `ovn-kubernetes/*` repositories (bots such as CodeRabbit commented on them, one reported its
-  review limit was reached) and closed. This is a factual note, not a judgement; consider whether future qualification runs should target the fork instead.
-* **CORENET automation** warns about original story points before In Progress/Code Review and a sprint before In Progress/Code Review/Closed (see the payload file for field ids).
-* **Project rule:** no Jira keys in the titles, bodies or commit messages of PRs in the public repositories. Jira comments may link to GitHub, not the reverse.
+Preserve and qualify the exact published source selected for review. October 7 local source and backup counts remain historical; this review does not inspect or execute the plugin checkout. Follow the [CORENET payload conventions](agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md) for original points, sprint and post-create PR-field edits.
 
 ### B4. Decisions to make first
 
@@ -285,10 +261,7 @@ retain the pinned bak42 development counts and historical PR inventory. The Octo
 3. **Sprint:** add the stories to the active "CORENET Sprint 295" (recommended, the epic is already in it), or another.
 4. **Status of K2:** In Progress pending its own 1.36.2 acceptance review. Recover per-target qualification and failure dispositions, or agree explicit limits; the July PR inventory and legacy PASS summaries do not justify closure. K4's 1.37 work has separate criteria.
 5. **July inventory:** report 108 closed draft PRs. Do not equate one PR with one independently qualified run; source/gate/result evidence is separate.
-6. **K4 acceptance boundary.** Real local CNCC, Multus and initial MCP 1.37.1 candidates now have recorded workflow evidence, with explicit limits.
-   CNCC needs fresh qualification after a helper attribution correction; Multus has two inconclusive gates and unchanged vulnerability findings.
-   MCP records three FAIL/two INCONCLUSIVE gates, incomplete lint and live CI selecting 1.36.4; its lessons commit needs separate fresh qualification.
-   Keep K4 In Progress until its agreed acceptance criteria pass; the September assertion that no real rebase exists is superseded.
+6. **K4 acceptance boundary.** Retained CNCC, Multus and MCP 1.37.1 trials exist, with the [recorded limits](current-work.md#kubernetes-plugin-qualification-and-publication). Keep K4 In Progress until its own criteria pass on the selected source/runtime.
 
 ### B5. Preflight for approved actions (stop on any surprise)
 
@@ -324,28 +297,8 @@ The epic description was applied and verified independently in group 6. The sequ
 
 ### B8. How the numbers were produced
 
-```bash
-# in the plugin clone (openshift-eng/ai-helpers, branch k8s-rebase-skill)
-git rev-list --count 7e1aa060..k8s-rebase-skill-bak42     # 69 commits after the PR head
-git diff --shortstat 7e1aa060 k8s-rebase-skill-bak42      # 90 files, +7,799/-2,641
-git for-each-ref 'refs/heads/k8s-rebase-skill-bak*' | wc -l          # 43
-git branch -r | grep -c 'dfarrell_ai/k8s-rebase-skill-bak'           # 29 on the fork
-git ls-tree -r --name-only k8s-rebase-skill-bak42 plugins/k8s-rebase | wc -l  # 134 tracked files
-git status --porcelain | wc -l                              # current dirty files; 2 at the latest October 7 read
-
-# the upstream PR
-gh pr view 617 --repo openshift-eng/ai-helpers --json additions,deletions,changedFiles,reviews,labels
-gh api --paginate repos/openshift-eng/ai-helpers/pulls/617/reviews --jq '.[].user.login' | sort | uniq -c
-
-# Discover the maintainer's downstream PRs; include both owners and avoid the default 30-result limit.
-gh search prs --owner openshift --owner ovn-kubernetes --author dfarrell07 --created '2026-06-09..2026-07-23' --limit 1000 --json repository,number,title,state,createdAt,url
-```
-
-For the 108-PR count, filter the discovery results to July 16–23 and the five repositories in the K2 payload; check each PR's draft and merge history
-before calling it a closed qualification draft. Local counts require the original plugin clone and its refs. The October 7 clone HEAD is at `a477bced`; current and historical source must be reported separately. API reads give current PR state,
-so the September 30 review count is a dated observation rather than a value guaranteed by a later run.
+The [verification log](agentic-sdlc-jira-updates-verification.md#kubernetes-rebase-evidence) records the pinned bak42 source/counts, six June PRs and 108 July drafts. Counts describe their dated populations. Current PR state and source comparisons belong to [current work](current-work.md#kubernetes-plugin-qualification-and-publication); rewritten history requires file comparisons rather than ancestry counts.
 
 ### B9. Corrections made while preparing this plan
 
-* An early reading suggested the 69 bak42 commits were unpushed. The fork's bak42 ref was verified on October 6. More recent local commits and dirty files require their own backup check.
-* The epic was expected to have child issues and a description; it has neither, so the plan creates the children and writes the description.
+Bak42 was already backed up on the fork. The October 8 publication supersedes the earlier unpublished-source gap. The epic description is now applied; the child stories remain uncreated. Earlier findings and their cutoffs remain in the verification log.
