@@ -23,6 +23,7 @@ remains unqualified because the integration runs skipped it. Production is pendi
 [release-management #115](https://github.com/stolostron/submariner-release-management/pull/115)
 carry the corrected workflows. [FBC #86](https://github.com/stolostron/submariner-operator-fbc/pull/86) supplies the required lifecycle task; all seven PR builds and completed snapshot tests pass. Release-management [#117](https://github.com/stolostron/submariner-release-management/pull/117) adds exact completion/publication gates, [#116](https://github.com/stolostron/submariner-release-management/pull/116) records the six successful stage candidates, and [#118](https://github.com/stolostron/submariner-release-management/pull/118) fixes reproduced validation races. All six release-management proposals passed a combined full suite. Durable credentials remain separately prepared. GitLab
 remains unreachable; the declarative tenant draft still needs a fresh base.
+The retained release-0.22 upgrade patch is prepared as draft [Shipyard #2657](https://github.com/submariner-io/shipyard/pull/2657) and [subctl #1947](https://github.com/submariner-io/subctl/pull/1947). Their focused regressions pass; merge/runtime ordering and current baseline vulnerability failures remain gates. No maintenance runtime or Release is published by these proposals.
 The October 7/8 Jira statuses below are historical observations, not claims that
 the tracker has been updated to match the October 12 cluster results.
 

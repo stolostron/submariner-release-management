@@ -165,7 +165,7 @@ _Acceptance criteria:_
 Progress comment (post after creation):
 
 ```text
-October 7 retained 1.37.1 trials cover CNCC, Multus and MCP, with [source pins and limits](https://github.com/stolostron/submariner-release-management/blob/ab2e40779b5c29b7770cd5edfc5b3932e94420f9/plans/agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md#story-k4-kubernetes-137). CNCC needs requalification; Multus has two inconclusive gates; MCP has three failed and two inconclusive gates, incomplete lint/security coverage and CI selecting 1.36.4.
+October 7 retained 1.37.1 trials cover CNCC, Multus and MCP, with [source pins and limits](https://github.com/stolostron/submariner-release-management/blob/49a9f0f9d1c290bec3062af5670ec2fcaf6493fd/plans/agentic-sdlc-jira-updates-payloads/k8s-rebase/epic-and-stories.md#story-k4-kubernetes-137). CNCC needs requalification; Multus has two inconclusive gates; MCP has three failed and two inconclusive gates, incomplete lint/security coverage and CI selecting 1.36.4.
 
 The published plugin at 1a33dafe still needs fresh source/runtime qualification. Further repository runs remain deferred while MCP is corrected and qualified.
 ```
