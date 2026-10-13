@@ -55,6 +55,8 @@ The old claims that scripts and verifiers never coexist, component fan-out is un
 * PR-merge verifiers exist for task, RPM, version-label and CVE work; EC additionally checks its snapshot. They distinguish not done, failed preconditions and open PRs.
   `try_auto_verify` records evidence and deduplicates progress output. This does not prove a failed Jira write was persisted.
 * Snapshot/time staleness warnings and tracker-vs-reality drift reporting exist. Warnings do not themselves invalidate a completed step.
+* October 13: merged [#114](https://github.com/stolostron/submariner-release-management/pull/114) and [#117](https://github.com/stolostron/submariner-release-management/pull/117) require completed EC/FBC evidence, exact component tags and stage identities.
+  Preserve provenance and the [manual recovery boundary](../.agents/workflows/create-fbc-stage-release.md#recover-a-policy-rejected-image); reuse these helpers instead of creating another checker.
 * `bundleShas` and `componentStage` are review level. `assert_bundle_rebuilt` compares selected versus recorded bundle digests and stops on equality;
   missing bookkeeping remains a disclosed limitation, not proof of freshness. Bundle snapshot selection also warns when it predates the release tag.
 * Prod paths reuse a stage snapshot; they do not prove that a lexically selected YAML is the one actually approved by QE.
@@ -71,25 +73,20 @@ The old claims that scripts and verifiers never coexist, component fan-out is un
 
 | Work | Concrete next action | Acceptance boundary |
 | --- | --- | --- |
-| Existing FBC failures | Use the recovered [snapshot/scenario map](fbc-failure-recovery.md#retained-snapshot-and-scenario-identities); re-read identities and verify intended catalog content | Registry access plus complete intended-snapshot checks; installation/QE/publishing remain distinct |
-| Pending skip-completed-upstream proposal | Review release-management#114 against current main and release retry/retarget behavior | Merge and required checks, not the existence of its open branch |
+| QE installation of the staged 0.23.4 catalogs | Use the [verified handoff](../releases/fbc/qe-0.23.4-stage-20261012.md) for all six applicable targets | Select the intended channel/CSV and approved stage mirrors; installation/QE remains separate from successful publication |
 | Retarget and parent artifacts | Reconcile ACM-44527/ACM-45070 observations before designing an explicit retarget operation | Preserve version/snapshot identity, invalidate only affected evidence, refresh parent artifacts and read back tracker state |
 | Prod URL conversion, existing ACM-39732 | Reconcile fork candidate `3cabf0e` in an isolated worktree | Actual OCP scope and QE-approved snapshot/index evidence; conversion distinct from selecting a new bundle; original/untracked work preserved. See [candidate review](current-work.md#unpublished-tooling-and-stale-roadmap-entries) |
 | Skill execution portability | Finish konflux-ci-fix normalization and installed-host matrix in [compatibility plan](claude-codex-skill-compatibility.md) | Five overlapping known debt entries removed and meaningful Claude/Codex execution evidence, beyond discovery tests |
 | Addon setup proposal | Resolve current ART/addon ownership and supported branch/version inputs before using [addon proposal](addon-tekton-setup.md) | No `tektonAddon` exists today; do not blindly derive ACM 5.x from the old arithmetic mapping |
 
-These are existing scopes, not a request to create another set of Jira stories. The first two do not depend on the proposed S/K children.
+These are existing scopes, not a request to create another set of Jira stories. QE validation does not depend on the proposed S/K children.
 Historical roadmap items 1–9 describe delivered work; they are removed from the active backlog rather than renumbered into new work.
 
 ## Source risks requiring a focused follow-up
 
-These observations preserve useful review questions from the older roadmap. Only the FBC helper's marker acceptance below was reproduced here;
-no complete release verifier or conductor failure was reproduced. Check current source and establish meaningful failure cases before changing behavior.
+These observations preserve review questions from the October 7 roadmap. The reproduced FBC marker/identity issue is fixed in main;
+recheck the remaining observations and establish meaningful failure cases before changing behavior.
 
-* **FBC completion and identity.** The October 7 baseline accepted unfinished markers and selected latest matching snapshots.
-  [PR #117](https://github.com/stolostron/submariner-release-management/pull/117) now prepares completed snapshot/publication gates and exact name selection;
-  merge and use that reviewed implementation rather than creating another checker. Preserve normal provenance and the explicit
-  [manual recovery boundary](https://github.com/stolostron/submariner-release-management/pull/115).
 * **Jira write acknowledgement.** `update_step` deliberately returns success on tracking failures. `try_auto_verify` can return verified success after that call,
   and its caller advances in memory. Preserve best-effort behavior for standalone scripts while considering explicit write/read-back acknowledgement at conductor boundaries.
   Its open-PR comment cache is also written after a best-effort comment attempt; ensure a failed post can be retried.

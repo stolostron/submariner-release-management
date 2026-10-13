@@ -577,7 +577,8 @@ No release/test implementation changed. Raw Jira exports remain outside this che
 
 ## Retained source after the DCO history repair
 
-October 13: the old and repaired commits below have identical Git tree objects; the repaired commits remain ancestors of PR #111.
+October 13: the old and repaired commits below have identical Git tree objects. The repaired source commits are retained on
+[archive/pr111-audit-sources-20261013](https://github.com/stolostron/submariner-release-management/tree/archive/pr111-audit-sources-20261013) so rebase and squash merge preserve these source links.
 Posted/prepared payloads retain their original permalink text and criteria. These alternative references preserve access to the same source.
 The five operational historical-design links now use retained commit `96e1d91b`; no payload or Jira write was changed.
 
