@@ -86,10 +86,10 @@ Historical roadmap items 1–9 describe delivered work; they are removed from th
 These observations preserve useful review questions from the older roadmap. Only the FBC helper's marker acceptance below was reproduced here;
 no complete release verifier or conductor failure was reproduced. Check current source and establish meaningful failure cases before changing behavior.
 
-* **FBC test completion and selection.** A synthetic array containing only the required standard/operator `BuildPLRInProgress` markers passes
-  `fbc_tests_passed`, without completion or aggregate success evidence. Preserve support for completed warning results while requiring finished intended-snapshot tests.
-  The verifier and stage generator select the latest matching snapshots; a source pin does not pin names. Compare returned/generated identities with the approved map,
-  following the [recovery gate](fbc-failure-recovery.md#rerun-the-same-release-snapshots), and retain completion evidence before release preparation.
+* **FBC completion and identity.** The October 7 baseline accepted unfinished markers and selected latest matching snapshots.
+  [PR #117](https://github.com/stolostron/submariner-release-management/pull/117) now prepares completed snapshot/publication gates and exact name selection;
+  merge and use that reviewed implementation rather than creating another checker. Preserve normal provenance and the explicit
+  [manual recovery boundary](https://github.com/stolostron/submariner-release-management/pull/115).
 * **Jira write acknowledgement.** `update_step` deliberately returns success on tracking failures. `try_auto_verify` can return verified success after that call,
   and its caller advances in memory. Preserve best-effort behavior for standalone scripts while considering explicit write/read-back acknowledgement at conductor boundaries.
   Its open-PR comment cache is also written after a best-effort comment attempt; ensure a failed post can be retried.
