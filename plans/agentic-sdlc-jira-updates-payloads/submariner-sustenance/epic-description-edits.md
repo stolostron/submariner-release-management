@@ -2,11 +2,9 @@
 
 # Epic description edits: Submariner Sustenance Automation
 
-Target: ACM-39728. Nothing here has been applied. The full ADF, complete history and edit metadata were rechecked on 2026-10-08. Reconcile recorded completed edits and skip them. For each approved pending edit, its "old" snippet or insertion heading must match the live rendered description exactly once; re-read immediately before editing and stop on an unexplained difference. All seven replacement paragraphs and the insertion heading match once at the October 8 read. Match visible text and ADF structure; Markdown bullet/bold markers below are presentation, not literal ADF characters. Jira Cloud stores the description as ADF: save the full original document, update
-the relevant nodes with a supported client/UI and preserve everything else. The Markdown below is text for that client, not a raw REST field value.
-Save a fresh baseline before each independent edit and rebuild its request from that ADF; do not replay an earlier full-description request after another edit. Before writing, confirm it is unchanged; restore it only while the field still equals that edit’s written result. If later edits exist, reconcile them first. Issue history is not an automatic restore operation.
+Target: ACM-39728. All five edits remain pending. The October 8 full ADF/history/metadata read confirms all seven old paragraphs and the insertion heading match exactly once. Review in order **4 → 3 → 5**, then optional 1/2; no new story keys are needed.
 
-Each edit is independent. Review in order 4 (adoption), 3 (release evidence), 5 (deliverables), then optional stale-count cleanup 1/2. Keep these edit numbers stable; no new story keys are needed.
+Each edit is independent. Use visible text and ADF structure; Markdown markers below are presentation. Before each approved write, save and recheck the live ADF, then rebuild the request preserving unrelated nodes and earlier edits. Stop on drift; restore only while the live field equals that edit's result, preserving later changes. Issue history is not an automatic restore operation. Follow the [shared write rules](../../agentic-sdlc-jira-updates.md).
 
 ## Edit 4: release ownership transfer
 

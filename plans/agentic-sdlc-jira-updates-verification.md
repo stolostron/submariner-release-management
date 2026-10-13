@@ -2,10 +2,9 @@
 
 # Jira planning verification
 
-Evidence audit: October 6–7, 2026; includes the complete assignment population, issue documents, public work and retained tenant artifacts.
-[current-work.md](current-work.md) owns current engineering observations, [jira-update-queue.md](jira-update-queue.md) owns issue dispositions,
-and [agentic-sdlc-jira-updates.md](agentic-sdlc-jira-updates.md) owns epic execution. Planning commits are published through [WIP PR #111](https://github.com/stolostron/submariner-release-management/pull/111), as requested. Four approved existing-story comments were posted and verified October 7 at 18:23 UTC. No Jira field edit, transition, PR comment, cluster change or release was performed.
-Private raw exports and pre-edit plan copies are retained outside this public checkout.
+Dated audit log, October 6–8, 2026. Each section records state at its own cutoff; earlier empty-description, PR-head and cluster observations are historical. [Current work](current-work.md) owns engineering state, the [queue](jira-update-queue.md) owns dispositions, and the [epic plan](agentic-sdlc-jira-updates.md#a5-execution-order) owns execution and completed-write ids.
+
+Private raw exports, prepared requests and pre-edit copies stay outside this public checkout. This review authorizes no external writes.
 
 ## Complete assigned-issue sweep
 
@@ -101,6 +100,8 @@ reported onboarding E2E and live RPM lockfile run; those runs were not independe
 ## Kubernetes rebase evidence
 
 The inventory is pinned to fork branch bak42 at `febb7974696e870f933e8ad3741605d31ead0b5c`; a remote-ref read confirms that backup exists.
+Historical source discovery also found 43 local backup branches (May 31–September 25), 29 published fork backups including bak41/bak42, and an October 7 PR snapshot with 127 files, +15,774/-17 and 175 reviews. These are dated development counts, not today's source coverage.
+
 At that committed snapshot: 134 files, 20,792 lines, 32 gate documents, four design/compatibility documents,
 13 shell/Python scripts, 238 Python test functions and 16 pattern-retention cases. Hooks/gate scripts are outside the script count.
 Bak42 adds 69 commits beyond PR `7e1aa060`; current HEAD adds another 13, plus two dirty test files.
@@ -542,6 +543,32 @@ After the maintainer approved posting, a fresh full target/parent/ART/PQC prefli
 One POST creates ACM-45318 comment `18839276` at **15:37:20 UTC**. Read-back verifies exact ADF, rendered paragraphs, the inventory href and `Red Hat Employee` visibility. The full comment history increments from zero to one, with all previous records and all 132 changelog events preserved. Parent/ART/PQC full fields are semantically unchanged. Target differences are comment, updated, watches and customfield_10024: field metadata identifies the latter as `[CHART] Date of First Response`, now matching the first comment's timestamp; the posting account is now watching and watchCount increases by one. No separate field or watcher operation is performed. All other fields, original criteria, hierarchy and New status are unchanged. No migration/source/CI/runtime completion is claimed.
 
 The comment becomes the tenth fixed posted record, alongside the already-applied Kubernetes description. Group 4 is complete; the held release candidate remains on hold and group 6 Submariner description edits are the next eligible review. All payload code blocks and other criteria remain unchanged; no other Jira write, implementation edit, cluster operation, image execution, build or release occurs. Raw Jira responses and the posting receipt stay outside this checkout.
+
+## Crash-resume verification October 8
+
+The checkout resumes clean at `ab2e40779b5c29b7770cd5edfc5b3932e94420f9`, matching PR #111's published head. Git connectivity and branch whitespace checks pass. Fresh read-only Jira exports cover 13 targets: both epics, all ten posted-comment targets and the held 0.22.2 parent. Complete paginated histories confirm each posted comment's exact ADF and employee visibility, with all ten comment histories unchanged from their archived post-verification records. Both epic descriptions remain unchanged; ACM-39728 retains ten direct children and CORENET-7155 has none. Statuses remain as recorded. The 0.22.2 candidate draft remains on hold; this check does not renew its mutable artifact evidence.
+
+All seven replacement paragraphs and the insertion heading still match the live Submariner epic exactly once. Five independent description requests are rebuilt from that fresh ADF and validate against the retained published schema, preserving unrelated nodes, emphasis, nested lists and links. All 120 edit-order simulations converge on the same final document. Browse/Edit permission and employee-group membership remain available. Review order stays 4 → 3 → 5, then optional 1/2. Requests are review artifacts; each approved write must use a fresh baseline incorporating any earlier edit.
+
+Direct PR reads confirm release-management #109/#110 and FBC #81 remain merged; #114, FBC #82, Shipyard #2654/#2618 and subctl #1944 retain their recorded open heads. The FBC build and subctl CI failures remain. PR #111's DCO check reports three older commits without sign-offs: `7437cc579a4878448c09a7758b07ff406836391d`, `c0cc38efd924f27f033cf557650565b98412d93d` and `73b253f05441c0701b4ccbb40311a88c56402093`. The latest commit is signed; passing commit-message lint does not clear this DCO blocker. No published history is rewritten.
+
+Full `make test` passes on the first run. All 153 relative links/anchors across the branch's 25 Markdown files resolve; the queue still accounts for the historical 76 active assigned non-Vulnerability issues without duplicates. This is a targeted recovery check, not a new unrestricted Jira inventory or cluster/registry qualification. No Jira write, branch push, PR edit, cluster mutation, build or release is performed. Raw reads and prepared ADF remain outside the checkout in `/tmp/jira-resume-20261008`.
+
+## Full planning review and simplification October 8
+
+A fresh unrestricted inventory confirms all 703 assigned keys/statuses, including 76 active non-Vulnerability issues and four private active vulnerabilities, are unchanged. Full views cover all 220 assigned non-Vulnerability issues plus 14 related/scope candidates. All 88 relevant comment/changelog histories are paginated; 80 comment histories have complete archived baselines and match. All ten posted ADF bodies/employee restrictions and both epic descriptions remain unchanged. Semantic field comparisons exclude transport-only API URLs. Duplicate searches add only existing contribution/adoption matches, unrelated automation issues and a separately tracked Kubernetes delivery subtask; no duplicate of the proposed story scopes is established.
+
+Both projects' complete Story create metadata, permissions, 22 targets' edit/transition metadata, link type, active sprints and employee membership are rechecked. Proposed field ids and create-versus-edit constraints still match. Thirty-seven direct PR reads, current check/review pagination and the two upgrade-issue reads retain the recorded merge/closure boundaries. Shipyard #2582 advances to `603ac03b`: 46 checks pass/skip, two current unresolved threads, seven outdated unresolved threads and no current-head review/approval. Its pinned source still contains the unconfigured Shipyard builder fallback; earlier probes do not qualify the new source. EVPN #6 advances to `d5fb9fda`, remains open with verify passing, and retains the host-FRR draft choice needing owner reconciliation. Posted comments stay fixed; these new observations belong to the work map. PR #111's DCO blocker remains.
+
+The execution plan now has one completed-write table, shorter shared rules and corrected Kubernetes description state. Operational headers link to that table; historical counts remain in this log. All fixed payload blocks, ten story descriptions/acceptance criteria and five epic edits are preserved. Only the pending K4 progress comment is shortened, with an immutable link to its detailed trial record. The next review remains edits 4 → 3 → 5, then optional 1/2; creation and terminal reviews remain separate, the candidate stays on hold and EVPN stays last.
+
+Preservation, queue coverage, historical inventory, privacy and relative-link checks pass. Five description requests validate, and all 120 edit orders converge; twenty pending story descriptions/comments validate as ADF. Full `make test` passes. No Jira write, history rewrite, push, PR edit, cluster/registry operation or implementation/runtime qualification occurs. Raw evidence and review artifacts remain outside the checkout in `/tmp/jira-minimal-review-20261008`.
+
+## Publication reconciliation October 12
+
+The seven retained October 8 review edits were reconciled with the completed FBC stage recovery and published DCO repair. They simplify planning headers/rules, preserve completed-write records and original acceptance criteria, and move historical Kubernetes counts into this dated log. The pending K4 progress comment is shortened with its immutable detail link retained.
+
+The earlier temporary raw-export directories are unavailable in this checkout. This publication does not independently repeat the historical Jira reads, ADF simulations or permission checks, and does not treat those dated claims as current qualification. Fresh target-specific evidence remains required before any external write. No Jira write is performed by this reconciliation.
 
 ## Documentation validation
 

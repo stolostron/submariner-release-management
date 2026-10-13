@@ -2,10 +2,7 @@
 
 # Additional existing-issue updates
 
-Group 1 posted and verified October 7, 2026 at 22:59 UTC; the group 4 lifecycle comment posted October 8 at 09:37 UTC and the group 5 recovery-map comment at 10:43 UTC, both verified. The builder planning comment posted and verified October 8 at 15:37 UTC completes group 4. Other updates remain pending. These updates are independent of creating S/K stories.
-Use the [assigned-issue queue](../jira-update-queue.md) for priority, evidence and status gates.
-Refresh each target, omit already-recorded facts, convert rich text as needed, and set `Red Hat Employee` visibility at comment creation.
-The [approval order](../jira-update-queue.md#approval-order) is authoritative; groups below follow it. Groups 6 and 8 link to their separate payloads. These comments propose no transitions. Private security details and internal research are excluded.
+The [queue](../jira-update-queue.md#approval-order) owns approval order; the [completed-write table](../agentic-sdlc-jira-updates.md#a5-execution-order) records all verified ids. Posted blocks below are fixed records. Other drafts require separate approval and fresh target/evidence checks; they propose no transitions. Set `Red Hat Employee` visibility at comment creation. S/K story creation is separate.
 
 ## Group 1 — CI research handoff
 
