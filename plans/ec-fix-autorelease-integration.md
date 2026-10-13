@@ -3,7 +3,7 @@
 # EC remediation: delivered integration and remaining scope
 
 Checked October 7, 2026. Task-version remediation, log parsing and conductor `ecFixes` wiring are implemented.
-The [original integration design](https://github.com/stolostron/submariner-release-management/blob/7437cc579a4878448c09a7758b07ff406836391d/plans/ec-fix-autorelease-integration.md) is retained in Git; its proposed components and example commands are historical.
+The [original integration design](https://github.com/stolostron/submariner-release-management/blob/96e1d91bdb4e3082e21036d60ba0805f38d1f931/plans/ec-fix-autorelease-integration.md) is retained in Git; its proposed components and example commands are historical.
 Current source and tests define behavior.
 
 | Contract | Source |

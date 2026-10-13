@@ -3,7 +3,7 @@
 # OCP 5.0 FBC support: investigation handoff
 
 The September 24 pre-implementation investigation is complete. Its full reproductions, immutable source inputs and proposed changes are
-[retained in Git](https://github.com/stolostron/submariner-release-management/blob/7437cc579a4878448c09a7758b07ff406836391d/plans/ocp-5-fbc-support.md); they are not the current implementation backlog.
+[retained in Git](https://github.com/stolostron/submariner-release-management/blob/96e1d91bdb4e3082e21036d60ba0805f38d1f931/plans/ocp-5-fbc-support.md); they are not the current implementation backlog.
 
 Use these current documents:
 

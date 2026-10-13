@@ -16,6 +16,6 @@ Focused tests: `make test-deny-rules test-version-bump test-tekton test-parse-ec
 The current [Jira payload](agentic-sdlc-jira-updates-payloads/submariner-sustenance/new-stories.md#story-2-detect-enterprise-contract-deny-rules-during-tekton-task-updates)
 records the delivered scope. Current task trust and release readiness still require the selected immutable inputs and hosted results.
 
-The [original incident/design](https://github.com/stolostron/submariner-release-management/blob/7437cc579a4878448c09a7758b07ff406836391d/plans/pipeline-patcher-deny-rule-gap.md) remains in Git.
+The [original incident/design](https://github.com/stolostron/submariner-release-management/blob/96e1d91bdb4e3082e21036d60ba0805f38d1f931/plans/pipeline-patcher-deny-rule-gap.md) remains in Git.
 Its single-group scan, warn-only failure policy and proposed automatic rewrites are superseded by the implementation above;
 its old PR closure suggestions are historical observations, not current actions.

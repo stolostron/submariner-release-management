@@ -3,7 +3,7 @@
 # Addon Tekton setup: deferred implementation proposal
 
 Checked October 7, 2026. No `tektonAddon` step or backing setup script exists in the current release graph.
-The [original design](https://github.com/stolostron/submariner-release-management/blob/7437cc579a4878448c09a7758b07ff406836391d/plans/addon-tekton-setup.md) remains in Git. Its old Submariner-to-ACM arithmetic and copy/edit walkthrough are unsuitable as a current 5.x execution recipe.
+The [original design](https://github.com/stolostron/submariner-release-management/blob/96e1d91bdb4e3082e21036d60ba0805f38d1f931/plans/addon-tekton-setup.md) remains in Git. Its old Submariner-to-ACM arithmetic and copy/edit walkthrough are unsuitable as a current 5.x execution recipe.
 
 The ACM-integrated addon has a separate artifact/release path from independently released Submariner components.
 Confirm current ownership and whether an additional setup command is needed before adding conductor wiring.
