@@ -34,15 +34,34 @@ This updates lockfiles in submariner (3 components) and shipyard (1 component) r
 
 ### Addon Go Toolchain
 
-Fix Go toolchain CVEs by updating `Dockerfile.konflux` builder image.
-
 **Repo:** <https://github.com/stolostron/submariner-addon>
 **Local:** `~/go/src/stolostron/submariner-addon`
 
+Identify the affected build paths: Konflux uses `Dockerfile.konflux`, OpenShift CI uses ordinary
+`Dockerfile`, and ART may override source, builder and runtime through its image/stream configuration.
+Confirm the selected source before editing.
+
 ```bash
-skopeo list-tags docker://brew.registry.redhat.io/rh-osbs/openshift-golang-builder | \
-  jq -r '.Tags[] | select(contains("el9"))' | sort -Vr | head -10
+skopeo list-tags docker://registry.redhat.io/openshift/golang-builder
 ```
+
+Use the floating `golang-builder-v<Go-minor>-rhel<major>` family documented in
+[ACM-45149](https://redhat.atlassian.net/browse/ACM-45149). Select a compiler satisfying the compiled
+modules and required security fixes while preserving the build path's compiler lineage, OS/CPU and
+crypto requirements. Preserve runtime bases, CGO/strict-FIPS settings and hermetic prefetch/build flags.
+Explicit `-mod=mod` overrides the builder's `GOFLAGS=-mod=vendor` default.
+
+Verify internal registry entitlement in the actual OpenShift build or Konflux remote worker. Run the ordinary **images**
+check for changed ordinary Dockerfiles and the required Konflux checks for changed Konflux paths;
+source/unit tests alone do not exercise those image builds. Use normal review/merge gates and verify
+merged-source push results for the required platforms against the output index's child digests.
+
+Reuse CI/artifact records for source SHA, builder/runtime/output digests and pipeline/task revisions.
+[Go can select another toolchain](https://go.dev/doc/toolchain); verify the compiler using `GOTOOLCHAIN`
+and the extracted binary's `go version -m` output. Apply existing runtime/FIPS checks to changed paths:
+`--version` checks executable loading. Run required deployment/crypto checks against the output digests,
+using a FIPS-enabled environment where required. Record unavailable checks and hold release use until
+required qualification passes. Keep receipts with the relevant CVE or migration tracker.
 
 ## Done When
 
