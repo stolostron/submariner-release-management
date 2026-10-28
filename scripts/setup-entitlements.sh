@@ -28,8 +28,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/entitlement-bundle.sh
 source "$SCRIPT_DIR/lib/entitlement-bundle.sh"
 
-readonly ENTITLEMENT_DIR="${ENTITLEMENT_DIR:-/etc/pki/entitlement}"
-readonly CONSUMER_DIR="${CONSUMER_DIR:-/etc/pki/consumer}"
+# On macOS, use local entitlements directory instead of /etc/pki/entitlement
+if [ "$(uname -s)" != "Linux" ] && [ -z "${ENTITLEMENT_DIR:-}" ]; then
+  readonly ENTITLEMENT_DIR="${HOME}/.config/submariner/entitlements"
+  readonly CONSUMER_DIR="${HOME}/.config/submariner/consumer"
+else
+  readonly ENTITLEMENT_DIR="${ENTITLEMENT_DIR:-/etc/pki/entitlement}"
+  readonly CONSUMER_DIR="${CONSUMER_DIR:-/etc/pki/consumer}"
+fi
 FORCE=false
 readonly REGISTRY="registry.redhat.io"
 readonly AUTHFILE="${HOME}/.docker/config.json" # the file rpm-lockfile-update checks
@@ -47,11 +53,24 @@ die() {
 }
 
 has_entitlements() {
-  local f
-  for f in "$ENTITLEMENT_DIR"/*.pem; do
-    [ -e "$f" ] && [[ "$f" != *-key.pem ]] && return 0
-  done
-  return 1
+  # On Linux: check for .pem certificate files
+  # On macOS: check for Podman secrets (secure storage)
+  if [ "$(uname -s)" = "Linux" ]; then
+    local f
+    for f in "$ENTITLEMENT_DIR"/*.pem; do
+      [ -e "$f" ] && [[ "$f" != *-key.pem ]] && return 0
+    done
+    return 1
+  else
+    # Check for Podman secrets (new secure method)
+    if command -v podman &>/dev/null; then
+      podman secret exists rh-org 2>/dev/null && \
+      podman secret exists rh-activation-key 2>/dev/null
+    else
+      # Fallback: check for old credentials file (legacy)
+      [ -s "$ENTITLEMENT_DIR/credentials" ]
+    fi
+  fi
 }
 
 has_registry_auth() {
@@ -235,7 +254,14 @@ main() {
     esac
   done
 
-  [ "$(uname -s)" = "Linux" ] || die "Linux only" "See: $DOCS_URL"
+  # Create directories on macOS if needed
+  if [ "$(uname -s)" != "Linux" ]; then
+    mkdir -p "$ENTITLEMENT_DIR" "$CONSUMER_DIR"
+    echo "ℹ️  Running on macOS - credentials stored securely:"
+    echo "    • Bundle password: macOS Keychain"
+    echo "    • Org/activation key: Podman secrets"
+    echo "    • Metadata: $ENTITLEMENT_DIR"
+  fi
   command -v podman &>/dev/null || die "podman not found"
 
   if $check; then
@@ -243,12 +269,15 @@ main() {
     local rc=0 denied=false
     report "Red Hat entitlements in $ENTITLEMENT_DIR" has_entitlements || rc=1
     report "$REGISTRY login in $AUTHFILE" has_registry_auth || rc=1
-    if has_entitlements; then
+    if has_entitlements && [ "$(uname -s)" = "Linux" ]; then
       case "$(repo_access)" in
         ok) echo "  ✓ Entitlement grants access to RHEL repositories" ;;
         denied) echo "  ✗ Entitlement grants no RHEL repository access"; denied_hint "    "; rc=1; denied=true ;;
         *) echo "  ? Could not verify RHEL repository access (cdn.redhat.com unreachable: network or VPN?)" ;;
       esac
+    elif has_entitlements; then
+      echo "  ℹ️  Credentials stored securely - pass to containers via Podman secrets"
+      echo "      Example: podman run --secret rh-org,type=env --secret rh-activation-key,type=env ..."
     fi
     if [ "$rc" -ne 0 ] && ! $denied; then echo "Fix with: make setup-entitlements"; fi
     exit "$rc"
@@ -257,10 +286,17 @@ main() {
   if ! $force && has_entitlements; then
     echo "✓ Entitlements already present (use --force to re-register)"
   else
-    command -v subscription-manager &>/dev/null || die "subscription-manager not found" \
-      "Install it (Fedora/RHEL: sudo dnf install subscription-manager)"
-    register
-    echo "✓ Registered"
+    if [ "$(uname -s)" = "Linux" ]; then
+      command -v subscription-manager &>/dev/null || die "subscription-manager not found" \
+        "Install it (Fedora/RHEL: sudo dnf install subscription-manager)"
+      register
+      echo "✓ Registered"
+    else
+      # On macOS, extract entitlements from the sealed bundle
+      echo "Setting up entitlements from sealed bundle..."
+      extract_bundle_to_podman_secrets "$ENTITLEMENT_DIR"
+      echo "✓ Credentials stored securely (Keychain + Podman secrets)"
+    fi
   fi
 
   if has_registry_auth; then
@@ -271,12 +307,21 @@ main() {
     echo "✓ Logged in to $REGISTRY"
   fi
 
-  case "$(repo_access)" in
-    ok) echo "✓ Entitlement grants access to RHEL repositories" ;;
-    denied) die "The entitlement grants no RHEL repository access" "$(denied_hint "")" ;;
-    *) echo "? Could not verify RHEL repository access (network or VPN?); continuing" ;;
-  esac
+  if [ "$(uname -s)" = "Linux" ]; then
+    case "$(repo_access)" in
+      ok) echo "✓ Entitlement grants access to RHEL repositories" ;;
+      denied) die "The entitlement grants no RHEL repository access" "$(denied_hint "")" ;;
+      *) echo "? Could not verify RHEL repository access (network or VPN?); continuing" ;;
+    esac
+  else
+    echo "ℹ️  Credentials ready for container use via Podman secrets"
+    echo ""
+    echo "⚠️  Note: RPM lockfile updates on macOS require Podman to inject secrets."
+    echo "    Upstream scripts may need updates to use --secret flags."
+    echo "    For now, consider running lockfile updates in a Linux VM."
+  fi
 
+  echo ""
   echo "Ready: make rpm-lockfile-update"
 }
 

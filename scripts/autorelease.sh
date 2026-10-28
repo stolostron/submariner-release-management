@@ -1700,12 +1700,14 @@ run_conductor() {
 
         _log_before=$(wc -c < "$AUTORELEASE_PUSH_LOG" 2>/dev/null || echo 0)
         local_exit=0
+        # Use BASH if set (for macOS compatibility), otherwise let shebang decide
+        local bash_exec="${BASH:-bash}"
         if [ -n "$GIT_ROOT" ]; then
           # shellcheck disable=SC2086  # Intentional word splitting on local_args
-          (cd "$GIT_ROOT" && AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$GIT_ROOT/$local_script" "$VERSION" $local_args) >&2 || local_exit=$?
+          (cd "$GIT_ROOT" && AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$bash_exec" "$GIT_ROOT/$local_script" "$VERSION" $local_args) >&2 || local_exit=$?
         else
           # shellcheck disable=SC2086
-          AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$local_script" "$VERSION" $local_args >&2 || local_exit=$?
+          AUTORELEASE_TRACKER_STEP="$NEXT_STEP" "$bash_exec" "$local_script" "$VERSION" $local_args >&2 || local_exit=$?
         fi
 
         # Classify any push-log growth this step produced. Both kinds can occur

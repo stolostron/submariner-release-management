@@ -61,3 +61,142 @@ parse_bundle() {
     esac
   done
 }
+
+# store_password_keychain: Store password in macOS Keychain
+# Args: $1=password
+store_password_keychain() {
+  local pw="$1"
+  local service="submariner-release-management"
+  local account="entitlement-bundle"
+
+  # Delete any existing entry first
+  security delete-generic-password -s "$service" -a "$account" 2>/dev/null || true
+
+  # Add new password to keychain
+  security add-generic-password -s "$service" -a "$account" -w "$pw" -U
+}
+
+# get_password_keychain: Retrieve password from macOS Keychain
+# Returns: password on stdout, exit 1 if not found
+get_password_keychain() {
+  local service="submariner-release-management"
+  local account="entitlement-bundle"
+
+  security find-generic-password -s "$service" -a "$account" -w 2>/dev/null
+}
+
+# extract_bundle_to_podman_secrets: Extract and store credentials securely on macOS
+# Uses macOS Keychain for the bundle password and Podman secrets for credentials
+# Args: $1=entitlement_dir (created but stores only metadata, not plaintext)
+extract_bundle_to_podman_secrets() {
+  local ent_dir="$1"
+  local password plaintext
+
+  [ -s "$BUNDLE_FILE" ] || return 1
+
+  # Try macOS Keychain first, then cached file, then prompt
+  if command -v security &>/dev/null; then
+    password=$(get_password_keychain 2>/dev/null) || password=""
+  fi
+
+  if [ -z "$password" ]; then
+    password=$(cached_password)
+  fi
+
+  if [ -z "$password" ]; then
+    read -rsp "Enter team entitlement password: " password
+    echo >&2
+    [ ${#password} -lt "$MIN_PASSWORD_LEN" ] && return 1
+  fi
+
+  plaintext=$(bundle_decrypt "$password" "$BUNDLE_FILE") || {
+    echo "Failed to decrypt bundle - wrong password?" >&2
+    return 1
+  }
+
+  # Store password in Keychain for next time (more secure than plaintext file)
+  if command -v security &>/dev/null; then
+    store_password_keychain "$password" || {
+      echo "Warning: Could not store password in Keychain, falling back to file" >&2
+      save_password "$password"
+    }
+  else
+    save_password "$password"
+  fi
+
+  # Parse bundle to get credentials
+  parse_bundle <<<"$plaintext"
+  eval "$(declare -p $(printf 'BUNDLE_%s ' $BUNDLE_KEYS) 2>/dev/null)"
+
+  # Store credentials as Podman secrets (if podman available)
+  if command -v podman &>/dev/null; then
+    # Remove old secrets if they exist
+    podman secret rm rh-org 2>/dev/null || true
+    podman secret rm rh-activation-key 2>/dev/null || true
+    podman secret rm rh-registry-user 2>/dev/null || true
+    podman secret rm rh-registry-password 2>/dev/null || true
+
+    # Create new secrets
+    printf '%s' "${BUNDLE_RH_ORG}" | podman secret create rh-org - >/dev/null
+    printf '%s' "${BUNDLE_RH_ACTIVATION_KEY}" | podman secret create rh-activation-key - >/dev/null
+    [ -n "${BUNDLE_RH_REGISTRY_USER:-}" ] && printf '%s' "${BUNDLE_RH_REGISTRY_USER}" | podman secret create rh-registry-user - >/dev/null || true
+    [ -n "${BUNDLE_RH_REGISTRY_PASSWORD:-}" ] && printf '%s' "${BUNDLE_RH_REGISTRY_PASSWORD}" | podman secret create rh-registry-password - >/dev/null || true
+  fi
+
+  # Create entitlement directory with metadata only (no plaintext secrets)
+  mkdir -p "$ent_dir"
+  cat > "$ent_dir/README.txt" <<'EOF'
+Red Hat entitlements for macOS
+
+Credentials are stored securely:
+- Bundle password: macOS Keychain (service: submariner-release-management)
+- Org ID & activation key: Podman secrets (rh-org, rh-activation-key)
+- Registry credentials: Podman secrets (rh-registry-user, rh-registry-password)
+
+To use in containers, inject secrets as environment variables:
+  podman run --secret rh-org,type=env,target=RH_ORG \
+             --secret rh-activation-key,type=env,target=RH_ACTIVATION_KEY \
+             ...
+
+To view secrets:
+  podman secret inspect rh-org
+
+To rotate (after changing activation key):
+  make setup-entitlements FORCE=1
+EOF
+
+  return 0
+}
+
+# get_credentials_from_bundle: Decrypt bundle and export credentials as env vars
+# For scripts that need credentials (prints export commands to eval)
+get_credentials_from_bundle() {
+  local password plaintext
+
+  [ -s "$BUNDLE_FILE" ] || return 1
+
+  # Try Keychain first
+  if command -v security &>/dev/null; then
+    password=$(get_password_keychain 2>/dev/null) || password=""
+  fi
+
+  if [ -z "$password" ]; then
+    password=$(cached_password)
+  fi
+
+  [ -n "$password" ] || return 1
+
+  plaintext=$(bundle_decrypt "$password" "$BUNDLE_FILE") || return 1
+  parse_bundle <<<"$plaintext"
+
+  # Print export commands for caller to eval
+  printf 'export RH_ORG="%s"\n' "${BUNDLE_RH_ORG}"
+  printf 'export RH_ACTIVATION_KEY="%s"\n' "${BUNDLE_RH_ACTIVATION_KEY}"
+  [ -n "${BUNDLE_RH_REGISTRY_USER:-}" ] && printf 'export RH_REGISTRY_USER="%s"\n' "${BUNDLE_RH_REGISTRY_USER}"
+  [ -n "${BUNDLE_RH_REGISTRY_PASSWORD:-}" ] && printf 'export RH_REGISTRY_PASSWORD="%s"\n' "${BUNDLE_RH_REGISTRY_PASSWORD}"
+}
+
+# Legacy function - kept for compatibility, now uses secure implementation
+extract_bundle_to_dir() {
+  extract_bundle_to_podman_secrets "$@"
+}

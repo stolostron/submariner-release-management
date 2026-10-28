@@ -9,6 +9,8 @@ password opens it. It is committed to this **public** repo on purpose; see
 [Why it exists](#why-it-exists) and [Security position](#security-position).
 
 - Use: `make setup-entitlements` (asks for the team password once, can remember it).
+  - **Linux**: Registers with `subscription-manager`, stores certs in `/etc/pki/entitlement/`
+  - **macOS**: Stores password in Keychain, credentials in Podman secrets (see [macOS guide](../docs/macos-entitlements.md))
 - Check: `make check-entitlements`.
 - Create or rotate (key holder only): `make seal-entitlements`.
 - The team password is shared out of band and never committed.

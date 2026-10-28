@@ -1,4 +1,4 @@
-.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream add-fbc-ocp-version create-fbc-releases create-component-release update-version-labels rpm-lockfile-update setup-entitlements check-entitlements seal-entitlements test-setup-entitlements tekton-task-refs-update cve-fixes-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls create-release-tracker test-tracker test-autorelease test-conductor test-component test-tekton test-cve test-bundle test-drift test-prod-bundle test-fbc-scope test-fbc-snapshot test-parallel test-parse-ec-log test-deny-rules test-version-bump test-skills test-release-root test-add-team-member test-release-note-review
+.PHONY: help test test-remote validate-yaml validate-fields validate-data validate-references validate-bundle-images validate-cve-fixes validate-markdown gitlint shellcheck apply watch configure-downstream add-fbc-ocp-version create-fbc-releases create-component-release update-version-labels rpm-lockfile-update setup-entitlements check-entitlements setup-entitlements-podman-machine check-entitlements-podman-machine seal-entitlements test-setup-entitlements tekton-task-refs-update cve-fixes-update add-release-notes review-release-notes verify-cve-fixes konflux-component-setup konflux-bundle-setup bundle-image-update get-fbc-urls create-release-tracker test-tracker test-autorelease test-conductor test-component test-tekton test-cve test-bundle test-drift test-prod-bundle test-fbc-scope test-fbc-snapshot test-parallel test-parse-ec-log test-deny-rules test-version-bump test-skills test-release-root test-add-team-member test-release-note-review
 
 .DEFAULT_GOAL := help
 
@@ -41,7 +41,13 @@ help:
 	@echo "                           Example: make rpm-lockfile-update COMPONENT=gateway"
 	@echo "                           Example: make rpm-lockfile-update BRANCH=0.21 COMPONENT=gateway"
 	@echo "  make setup-entitlements - Guided one-time setup for RPM entitlements + registry login (FORCE=1 to re-register)"
+	@echo "                           Linux: Registers with subscription-manager on host"
+	@echo "                           macOS: Stores credentials in Keychain + Podman secrets"
 	@echo "  make check-entitlements - Check that setup is done (no changes made)"
+	@echo "  make setup-entitlements-podman-machine - (macOS only) Register entitlements inside podman machine VM"
+	@echo "                           Required for RPM lockfile updates on macOS"
+	@echo "                           Run AFTER setup-entitlements (which extracts credentials)"
+	@echo "  make check-entitlements-podman-machine - (macOS only) Check podman machine registration"
 	@echo "  make seal-entitlements  - (key holder) Seal the shared credentials into secrets/entitlements.asc"
 	@echo "  make tekton-task-refs-update VERSION=... [REPO=...]"
 	@echo "                         - Bump .tekton task references across component + FBC repos"
@@ -153,6 +159,12 @@ check-entitlements:
 
 seal-entitlements:
 	./scripts/seal-entitlements.sh $(if $(NEW_PASSWORD),--new-password,)
+
+setup-entitlements-podman-machine:
+	./scripts/setup-entitlements-podman-machine.sh
+
+check-entitlements-podman-machine:
+	./scripts/setup-entitlements-podman-machine.sh --check
 
 tekton-task-refs-update:
 	@test -n "$(VERSION)" || (echo "ERROR: VERSION required. Usage: make tekton-task-refs-update VERSION=0.23.1 [REPO=fbc]" && exit 1)
