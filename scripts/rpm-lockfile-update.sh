@@ -225,12 +225,12 @@ update_lockfiles() {
       LOCKFILE_PATTERN=".rpm-lockfiles/$COMPONENT_FILTER/rpms.lock.yaml"
       echo "Running: .rpm-lockfiles/update-lockfile.sh $FIX_BRANCH $COMPONENT_FILTER"
       echo ""
-      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" "$COMPONENT_FILTER" > "$_lockfile_log" 2>&1
+      bash .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" "$COMPONENT_FILTER" > "$_lockfile_log" 2>&1
     else
       LOCKFILE_PATTERN=".rpm-lockfiles/*/rpms.lock.yaml"
       echo "Running: .rpm-lockfiles/update-lockfile.sh $FIX_BRANCH"
       echo ""
-      .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" > "$_lockfile_log" 2>&1
+      bash .rpm-lockfiles/update-lockfile.sh "$FIX_BRANCH" > "$_lockfile_log" 2>&1
     fi
     local LOCKFILE_EXIT=$?
     # Show status lines and "No sources" warnings; suppress dnf/pip/skopeo setup noise
@@ -241,6 +241,9 @@ update_lockfiles() {
     rm -f "$_lockfile_log"
     set -e
     rm -f .rpm-lockfiles/update-lockfile.sh
+    # If update-lockfile.sh was tracked in this branch, restore it (discard the deletion)
+    # so restore_clean_ref doesn't see an uncommitted change blocking the checkout
+    git restore .rpm-lockfiles/update-lockfile.sh 2>/dev/null || true
 
     if [ $LOCKFILE_EXIT -ne 0 ]; then
       REPOS_FAILED+=("$DISPLAY_NAME:update-script-failed")
