@@ -63,10 +63,19 @@ set_component_version() {
     return 1
   fi
 
-  sed -E -i "s#$label#\1version=\"v$version\"#g" "$file" || return 1
+  # sed -i.bak is portable across BSD (macOS) and GNU sed; plain -i is not.
+  sed -E -i.bak "s#$label#\1version=\"v$version\"#g" "$file" || {
+    rm -f "${file}.bak"
+    return 1
+  }
+  rm -f "${file}.bak"
   if [ "$has_binary" = true ]; then
     # Literal versions cannot be overridden by a pipeline's BASE_BRANCH argument.
-    sed -E -i "s#($assignment)[^[:space:]\"\\\\]+#\1v$version#g" "$file" || return 1
+    sed -E -i.bak "s#($assignment)[^[:space:]\"\\\\]+#\1v$version#g" "$file" || {
+      rm -f "${file}.bak"
+      return 1
+    }
+    rm -f "${file}.bak"
   fi
   component_version_matches "$file" "$version"
 }

@@ -728,7 +728,7 @@ create_release_tracker() {
 
   local desc_text create_json_file
   desc_text=$(_generate_parent_description "$version" "$release_type" "$ACM_VERSION")
-  create_json_file=$(mktemp --suffix=.json)
+  create_json_file=$(mktemp "${TMPDIR:-/tmp}/jira-create-XXXXXX.json")
 
   # Build create payloads as JSON so we can include components. Jira does not
   # copy a parent's component to its subtasks, so every issue sets it.
@@ -806,7 +806,7 @@ create_release_tracker() {
       sub_assignee="@me"
     fi
 
-    sub_json_file=$(mktemp --suffix=.json)
+    sub_json_file=$(mktemp "${TMPDIR:-/tmp}/jira-subtask-XXXXXX.json")
     jq -n \
       --arg projectKey "ACM" \
       --arg type "Sub-task" \

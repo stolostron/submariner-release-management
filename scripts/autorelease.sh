@@ -1119,7 +1119,8 @@ _try_auto_push() {
 
   # Write the executable portion to a temp script and run it
   local tmp_script
-  tmp_script=$(mktemp --suffix=.sh) || return 1
+  # Portable: BSD mktemp has no --suffix (macOS); use a template instead.
+  tmp_script=$(mktemp "${TMPDIR:-/tmp}/autorelease-push-XXXXXX.sh") || return 1
   { printf '#!/usr/bin/env bash\nset -euo pipefail\n'; printf '%s\n' "$exec_script"; } > "$tmp_script"
   chmod +x "$tmp_script"
 

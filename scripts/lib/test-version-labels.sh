@@ -67,8 +67,8 @@ run_case() (
     missing-later*) git rm -q -- "$second" ;;
     malformed-first) printf 'LABEL version="vlatest"\n' > "$first" ;;
     malformed-later) printf 'LABEL version="vlatest"\n' > "$second" ;;
-    missing-flags-first) sed -i 's/main.version=/main.buildTag=/' "$first" ;;
-    missing-flags-later) sed -i 's/main.version=/main.buildTag=/' "$second" ;;
+    missing-flags-first) sed -i.bak 's/main.version=/main.buildTag=/' "$first"; rm -f "${first}.bak" ;;
+    missing-flags-later) sed -i.bak 's/main.version=/main.buildTag=/' "$second"; rm -f "${second}.bak" ;;
     bundle-malformed) printf 'LABEL csv-version="invalid"\n' > bundle.Dockerfile.konflux ;;
   esac
   git add -A
@@ -378,8 +378,9 @@ DOCKERFILE
   go() { printf '%s\n' "$@" > "$VERSION_FLAGS_LOG"; }
   export -f go
   BASE_BRANCH=devel bash -c "$(sed -n 's/^RUN //p' "$file")"
+  # macOS wc -l pads the count with spaces; strip so the assert is portable.
   assert_eq 'all binary/default-image versions ignore pipeline branch overrides' \
-    "$(grep -oE '[vV]ersion=v0.25.1' "$VERSION_FLAGS_LOG" | wc -l)" 3
+    "$(grep -oE '[vV]ersion=v0.25.1' "$VERSION_FLAGS_LOG" | wc -l | tr -d '[:space:]')" 3
   grep -qF 'main.gitCommitHash=preserved' "$VERSION_FLAGS_LOG"
   grep -qF 'example.org/dependency.Version=v9.0.0' "$VERSION_FLAGS_LOG"
   grep -qF 'ARG BASE_BRANCH=release-0.25' "$file"
@@ -468,7 +469,8 @@ DOCKERFILE
   assert_eq 'label updated' "$(grep -c '^LABEL version="v0.25.1"$' "$file")" 1
   grep -qF 'DefaultRepo=registry.redhat.io/rhacm2' "$file"
   grep -qF 'gitCommitHash=$(git rev-parse HEAD)' "$file"
-  sed -i 's/DefaultSubmarinerVersion=v0.25.1/DefaultSubmarinerVersion=v0.24.2/' "$file"
+  sed -i.bak 's/DefaultSubmarinerVersion=v0.25.1/DefaultSubmarinerVersion=v0.24.2/' "$file"
+  rm -f "${file}.bak"
   rc=0
   component_version_matches "$file" 0.25.1 || rc=$?
   assert_eq 'any stale assignment is a mismatch' "$rc" 1
